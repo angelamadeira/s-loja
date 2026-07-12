@@ -98,14 +98,15 @@ section{padding:52px 0}
 .sec-head .more{font-size:.8rem;color:var(--gold-text);white-space:nowrap;flex:0 0 auto}
 
 /* CARROSSEL HORIZONTAL — home */
-.hcar{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin:0 -24px;padding:2px 24px 12px;scroll-padding-left:24px}
+.hcar{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:10px}
 .hcar::-webkit-scrollbar{display:none}
 .hcar.grabbing{scroll-snap-type:none;scroll-behavior:auto;user-select:none}
 .hcar a,.hcar img,.hcar svg,.hcar .mold,.hcar .rimg{-webkit-user-drag:none;user-drag:none}
 .hcar>*{scroll-snap-align:start;flex:0 0 auto}
-.hcar .pcard,.hcar .rcard{width:calc((100% - 14px)/2 - 12px)}
-.hcar .rev{width:82%}
-@media (min-width:560px){.hcar .pcard,.hcar .rcard{width:206px}.hcar .rev{width:340px}}
+/* larguras em fração exata: sempre um nº inteiro de cards, sem pontinha cortada */
+.hcar .pcard,.hcar .rcard{width:calc((100% - 14px)/2)}
+.hcar .rev{width:100%}
+@media (min-width:560px){.hcar .pcard,.hcar .rcard{width:calc((100% - 28px)/3)}.hcar .rev{width:calc((100% - 14px)/2)}}
 @media (min-width:860px){.hcar .pcard,.hcar .rcard{width:calc((100% - 42px)/4)}.hcar .rev{width:calc((100% - 28px)/3)}}
 /* dots de paginação da trilha (uma bolinha por página) */
 .cdots{display:flex;justify-content:center;gap:9px;margin-top:16px}
@@ -176,15 +177,20 @@ section{padding:52px 0}
 .wzdone .btn{margin-top:16px}
 .crosssell{margin-top:6px}
 .csgrid{display:grid;gap:14px;grid-template-columns:1fr;margin-top:16px}
-@media(min-width:560px){.csgrid{grid-template-columns:1fr 1fr}}
-.csitem{display:flex;gap:13px;align-items:stretch;border:1px solid var(--line-soft);border-radius:16px;padding:12px 14px;overflow:hidden}
-.csimg{width:84px;align-self:stretch;min-height:64px;flex:0 0 auto;border-radius:0;overflow:hidden;display:block;margin:-12px 0 -12px -14px}
+/* card "Leve junto" = igual ao box "A forma desta receita" (.formacta) */
+.csitem{display:flex;gap:18px;align-items:stretch;flex-wrap:wrap;border:1px solid var(--line-soft);border-radius:20px;padding:18px;background:var(--warm);overflow:hidden}
+@media(min-width:560px){.csitem{padding:22px 24px;gap:22px;flex-wrap:nowrap}}
+.csimg{align-self:stretch;width:96px;min-height:96px;flex:0 0 auto;border-radius:0;overflow:hidden;display:block;margin:-18px 0 -18px -18px}
+@media(min-width:560px){.csimg{width:158px;min-height:128px;margin:-22px 0 -22px -24px}}
 .csimg svg{width:100%;height:100%;object-fit:cover;display:block}
-.cstxt{flex:1;min-width:0;align-self:center}
-.cstxt b{font-weight:500;font-size:.9rem;display:block}
+.cstxt{display:flex;flex-direction:column;gap:2px;flex:1 1 160px;min-width:0;align-self:center}
+.cstxt b{font-weight:500;font-size:1.08rem;display:block;margin-top:2px}
 .cstxt a{color:inherit}
-.cstxt span{font-size:.8rem;color:var(--muted)}
-.csitem .qadd{flex:0 0 auto;align-self:center;padding:9px 14px;font-size:.72rem}
+.cstxt span{font-size:.84rem;color:var(--muted);font-weight:300}
+.csbuy{display:flex;flex-direction:column;gap:10px;flex:0 0 auto;margin-left:auto;align-items:flex-end;align-self:center}
+.csprice{font-weight:500;font-size:1.05rem;text-align:right;white-space:nowrap}
+.csitem .qadd{flex:0 0 auto;align-self:stretch;padding:12px 22px;font-size:.74rem;text-align:center}
+@media(max-width:559px){.csbuy{width:100%;margin-left:0;align-items:stretch}.csprice{text-align:left}}
 .pcard .pr .avail{display:block;font-size:.66rem;color:var(--gold-text);margin-top:2px}
 .pcard .b{padding:12px 3px 4px}
 .pcard .use{font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;color:var(--label);font-weight:400}
@@ -969,9 +975,6 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
       if(dots){dots.hidden=!overflow;if(overflow){buildDots(m);var cp=curPage(m);[].forEach.call(dots.children,function(d,i){d.classList.toggle('on',i===cp);});}}
       if(!track.classList.contains('grabbing'))track.style.cursor=overflow?'grab':'';
       track.tabIndex=overflow?0:-1;
-      var lf=(overflow&&track.scrollLeft>2)?'28px':'0',rf=(overflow&&track.scrollLeft<maxScroll()-2)?'28px':'0';
-      var mk=(lf==='0'&&rf==='0')?'':'linear-gradient(90deg,transparent 0,#000 '+lf+',#000 calc(100% - '+rf+'),transparent 100%)';
-      track.style.webkitMaskImage=mk;track.style.maskImage=mk;
     }
     var down=false,sx=0,sy=0,dss=0,armed=false,dragging=false;
     track.addEventListener('pointerdown',function(e){if(e.pointerType==='touch'||maxScroll()<=0){armed=false;return;}if(raf){cancelAnimationFrame(raf);raf=0;}if(settle){clearTimeout(settle);settle=0;}track.style.scrollSnapType='';down=true;armed=true;dragging=false;sx=e.clientX;sy=e.clientY;dss=track.scrollLeft;});
@@ -1113,7 +1116,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
     if(comp.length<2) comp=PRODUCTS.filter(function(x){return x.id!==p.id && x.status!=='soldout';});
     comp=comp.slice(0,2);
     if(!comp.length) return '';
-    var items=comp.map(function(x){var d=x.sizes.indexOf('M')>-1?'M':x.sizes[0],pre=x.status==='presale';return '<div class="csitem"><a class="csimg" href="#/p/'+x.id+'" style="background:var(--'+(TINTS[x.id]||'mizu')+'-wash)">'+mold(x)+'</a><div class="cstxt"><a href="#/p/'+x.id+'"><b>'+x.name+'</b></a><span>a partir de '+BRL(fromPrice(x))+'</span></div><button class="btn ghost qadd" data-id="'+x.id+'" data-size="'+d+'" data-pre="'+(pre?'1':'')+'">'+(pre?'Reservar':'+ Sacola')+'</button></div>';}).join('');
+    var items=comp.map(function(x){var d=x.sizes.indexOf('M')>-1?'M':x.sizes[0],pre=x.status==='presale';return '<div class="csitem"><a class="csimg" href="#/p/'+x.id+'" style="background:var(--'+(TINTS[x.id]||'mizu')+'-wash)">'+mold(x)+'</a><div class="cstxt"><a href="#/p/'+x.id+'"><b>'+x.name+'</b></a><span>'+x.use+' · silicone platinum</span></div><div class="csbuy"><span class="csprice">a partir de '+BRL(fromPrice(x))+'</span><button class="btn ghost qadd" data-id="'+x.id+'" data-size="'+d+'" data-pre="'+(pre?'1':'')+'">'+(pre?'Reservar':'+ Sacola')+'</button></div></div>';}).join('');
     return '<section class="crosssell"><div class="sec-head"><div class="lead"><h2>Leve junto</h2></div></div><div class="csgrid">'+items+'</div></section>';
   }
   function suggestionsHTML(p){
