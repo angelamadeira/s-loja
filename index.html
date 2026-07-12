@@ -51,7 +51,6 @@ nav.main{display:none}
 nav.main a{position:relative;font-size:.82rem;color:var(--text-2);padding:6px 2px;transition:color .16s}
 nav.main a:hover{color:var(--ink)}
 nav.main a.active{color:var(--ink);font-weight:500}
-nav.main a.active::after{content:"";position:absolute;left:2px;right:2px;bottom:-3px;height:1.5px;background:var(--gold);border-radius:2px}
 .ibtn{width:42px;height:42px;display:grid;place-items:center;border:none;background:transparent;border-radius:50%}
 .ibtn:hover{background:var(--raised)}
 .ibtn svg{width:21px;height:21px;stroke:var(--ink);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
@@ -117,6 +116,18 @@ section{padding:52px 0}
 .cdot{width:7px;height:7px;border-radius:50%;background:var(--line);border:0;padding:0;cursor:pointer;transition:background .16s ease,transform .16s ease}
 .cdot:hover{background:var(--stone)}
 .cdot.on{background:var(--ink);transform:scale(1.18)}
+/* setas laterais — só na web maior; ficam AO LADO dos cards, nunca por cima. No responsivo ficam as bolinhas */
+.carrow{display:none}
+@media (min-width:1024px){
+  .cdots{display:none}
+  .carwrap{padding-left:46px;padding-right:46px}
+  .carrow{display:grid;position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;background:var(--white);border:1px solid var(--line);place-items:center;cursor:pointer;color:var(--ink);padding:0;z-index:3;transition:border-color .16s ease,background .16s ease,opacity .16s ease}
+  .carrow:hover{border-color:var(--ink);background:var(--warm)}
+  .carrow:disabled{opacity:.22;cursor:default;pointer-events:none}
+  .carrow svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .carrow.prev{left:0}
+  .carrow.next{right:0}
+}
 
 /* CARD */
 .pcard{display:flex;flex-direction:column;border-radius:16px;overflow:hidden;transition:transform .18s ease}
@@ -163,37 +174,19 @@ section{padding:52px 0}
 .fileitem .fileic svg{width:28px;height:28px;stroke:var(--stone);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
 .fileitem .filenm{display:block;font-size:.66rem;color:var(--muted);margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:76px}
 .fileitem .filerm{position:absolute;top:-7px;right:-7px;width:22px;height:22px;border-radius:50%;background:var(--ink);color:#fff;border:none;font-size:.95rem;line-height:1;cursor:pointer;display:grid;place-items:center}
-.qform.wizard{max-width:none;width:100%;border:1px solid var(--line-soft);border-radius:24px;padding:38px 40px 32px;background:var(--white);box-shadow:0 28px 60px -34px rgba(70,60,52,.32)}
-@media(min-width:900px){.qform.wizard{padding:46px 56px 40px}}
-.wztitle{font-weight:500;font-size:1.28rem;letter-spacing:-.015em;margin:0 0 6px;color:var(--ink)}
-.wzsub{margin:0 0 22px;color:var(--muted);font-weight:300;font-size:.9rem;line-height:1.55}
-/* progress stepper */
-.wzhead{margin:2px 0 30px}
-.wzsteps{display:flex;align-items:flex-start;justify-content:space-between;position:relative}
-.wzsteps::before{content:"";position:absolute;top:16px;left:6%;right:6%;height:1.5px;background:var(--line);z-index:0}
-.wzfill{position:absolute;top:16px;left:6%;height:1.5px;background:var(--gold);z-index:0;width:0;transition:width .42s cubic-bezier(.32,.72,0,1)}
-.wznode{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:10px;flex:1;background:none;border:none;padding:0;font-family:inherit}
-.wzdot{position:relative;width:26px;height:26px;border-radius:50%;background:var(--white);border:1.5px solid var(--line-strong);display:grid;place-items:center;transition:background .3s ease,border-color .3s ease,box-shadow .3s ease}
-.wzdot::after{content:"";position:absolute;width:9px;height:9px;border-radius:50%;background:var(--gold);opacity:0;transform:scale(.4);transition:opacity .25s ease,transform .25s cubic-bezier(.32,1.4,.5,1)}
-.wzdot svg{position:absolute;width:13px;height:13px;stroke:#fff;fill:none;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;opacity:0;transform:scale(.5);transition:opacity .25s ease,transform .25s cubic-bezier(.32,1.4,.5,1)}
-.wzlbl{font-size:.66rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);transition:color .3s ease}
-.wznode.active .wzdot{border-color:var(--gold);box-shadow:0 0 0 5px var(--warm)}
-.wznode.active .wzdot::after{opacity:1;transform:scale(1)}
-.wznode.done .wzdot{background:var(--ink);border-color:var(--ink)}
-.wznode.done .wzdot::after{opacity:0}
-.wznode.done .wzdot svg{opacity:1;transform:scale(1)}
-.wznode.active .wzlbl,.wznode.done .wzlbl{color:var(--ink)}
-.wznode.done{cursor:pointer}
-/* one step at a time + directional transition */
-.wzstep{display:none;flex-direction:column}
-.wzstep.is-active{display:flex;animation:wzIn .44s cubic-bezier(.22,.68,0,1)}
-.wzstep.is-active.back{animation-name:wzInBack}
-@keyframes wzIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:none}}
-@keyframes wzInBack{from{opacity:0;transform:translateX(-20px)}to{opacity:1;transform:none}}
+.qform{max-width:none;width:100%;border:1px solid var(--line-soft);border-radius:22px;padding:34px 32px 30px;background:var(--white)}
+@media(min-width:900px){.qform{padding:44px 52px 36px}}
+.qtop{margin-bottom:26px}
+.qtop .label{display:block;margin-bottom:11px}
+.qtitle{font-weight:500;font-size:1.6rem;line-height:1.16;letter-spacing:-.02em;margin:0;color:var(--ink)}
+.qtitle em{font-family:var(--serif);font-style:italic;font-weight:500;color:var(--stone-text)}
+.qintro{margin:12px 0 0;color:var(--muted);font-weight:300;font-size:.95rem;line-height:1.6;max-width:52ch}
+.qsec{padding:26px 0 2px;border-top:1px solid var(--line-soft)}
+.qsec:first-of-type{border-top:none;padding-top:4px}
+.wztitle{font-weight:500;font-size:1.2rem;letter-spacing:-.01em;margin:0 0 18px;color:var(--ink)}
 .wzfld{margin-bottom:22px}
+.wzfld:last-child{margin-bottom:0}
 .wzfld>.label{display:block;margin-bottom:12px}
-.wzhint{margin:12px 2px 0;font-size:.8rem;color:#b4553f;font-weight:400;opacity:0;max-height:0;overflow:hidden;transition:opacity .2s ease,max-height .2s ease}
-.wzhint.on{opacity:1;max-height:40px}
 /* tactile option cards (replace native selects) */
 .optgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .optseg{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
@@ -211,16 +204,13 @@ section{padding:52px 0}
 .optcard:focus-within{border-color:var(--gold)}
 .optseg .optcard{justify-content:center;text-align:center;padding:15px 6px}
 .optseg .optcard .ock{top:7px;right:7px}
-.wznav{display:flex;gap:12px;margin-top:26px}
-.wznav .btn{flex:1;padding:15px}
-.wznav #wzBack{flex:0 0 auto;min-width:120px}
-.wzwa{display:inline-flex;align-items:center;justify-content:center;gap:9px;margin:18px auto 0;color:#3f8552;font-weight:500;font-size:.85rem}
-.wzwa svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.wzwa:hover{text-decoration:underline}
+.qsubmit{margin-top:30px}
+.qsubmit .btn{display:block;width:100%;padding:15px 28px;text-align:center}
+@media(min-width:560px){.qsubmit .btn{max-width:340px}}
 .wzdone{text-align:center;padding:18px 0;display:flex;flex-direction:column;align-items:center;gap:8px}
 .wzdone .btn{margin-top:16px}
-@media(max-width:560px){.qform.wizard{padding:26px 20px 24px}.optcard{padding:14px 12px;gap:10px}.wzlbl{font-size:.6rem;letter-spacing:.1em}.wznav{flex-direction:column-reverse}.wznav #wzBack{min-width:0}}
-@media(prefers-reduced-motion:reduce){.wzstep.is-active{animation:none}.wzfill,.wzdot,.wzdot svg,.optcard,.optcard .ock{transition:none}}
+@media(max-width:560px){.qform{padding:26px 20px 24px}.optcard{padding:14px 13px;gap:11px}.optgrid{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){.optcard,.optcard .ock{transition:none}}
 .crosssell{margin-top:6px}
 .csgrid{display:grid;gap:14px;grid-template-columns:1fr;margin-top:16px}
 /* card "Leve junto" = igual ao box "A forma desta receita" (.formacta) */
@@ -994,6 +984,14 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
   function initCarousel(w){
     var track=w.querySelector('.hcar');if(!track)return;
     var dots=w.querySelector('.cdots');
+    var prev=document.createElement('button'),next=document.createElement('button');
+    prev.type=next.type='button';prev.className='carrow prev';next.className='carrow next';
+    prev.setAttribute('aria-label','Anterior');next.setAttribute('aria-label','Próximo');
+    prev.innerHTML='<svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>';
+    next.innerHTML='<svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>';
+    w.appendChild(prev);w.appendChild(next);
+    prev.onclick=function(){var m=metrics();animateTo(targetFor(Math.max(0,nearestPage(m)-1),m));};
+    next.onclick=function(){var m=metrics();animateTo(targetFor(Math.min(m.pages-1,nearestPage(m)+1),m));};
     function maxScroll(){return Math.max(0,track.scrollWidth-track.clientWidth);}
     function metrics(){
       var c=track.children[0];var g=parseInt(getComputedStyle(track).gap)||14;
@@ -1026,6 +1024,11 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
     function upd(){
       var m=metrics(),overflow=maxScroll()>2;
       if(dots){dots.hidden=!overflow;if(overflow){buildDots(m);var cp=curPage(m);[].forEach.call(dots.children,function(d,i){d.classList.toggle('on',i===cp);});}}
+      if(overflow){
+        prev.style.display=next.style.display='';                 /* '' => CSS decide (some no desktop) */
+        prev.disabled=track.scrollLeft<=2; next.disabled=track.scrollLeft>=maxScroll()-2;
+        var c0=track.children[0];if(c0){var vis=c0.querySelector('.m,.rimg')||c0;var cr=vis.getBoundingClientRect(),wr=w.getBoundingClientRect();var yc=(cr.top-wr.top)+cr.height/2;prev.style.top=next.style.top=yc+'px';}
+      }else{prev.style.display=next.style.display='none';}
       if(!track.classList.contains('grabbing'))track.style.cursor=overflow?'grab':'';
       track.tabIndex=overflow?0:-1;
     }
@@ -1217,9 +1220,9 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
   function exclusivoView(){
     return backHome()+'<div class="listing"><div class="exhero" style="--st:var(--sakura-wash)"><div class="exbg">'+mold(byId('coracao'))+'</div><div class="excopy"><span class="label">Sob encomenda</span><h1>Seu projeto. <em>Sua cara.</em></h1><p>Uma forma que só existe para você: desenhamos, do sketch ao molde, a sua assinatura — impossível de copiar. Sob análise de orçamento.</p></div></div>'+
       '<div class="exsteps">'+[['Briefing','Você conta a ideia, o uso e o volume — sem formalidade.','<path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>'],['Orçamento','Analisamos a viabilidade e enviamos uma proposta transparente.','<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>'],['Modelagem 3D','Desenhamos e validamos o protótipo com você, do sketch ao molde.','<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/>'],['Produção','Silicone platinum, numa tiragem que é só sua — impossível de copiar.','<line x1="16.5" y1="9.4" x2="7.5" y2="4.21"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/>']].map(function(t,i){return '<div class="exstep"><div class="exsthead"><span class="exsn">'+(i+1)+'</span><svg class="exsic" viewBox="0 0 24 24">'+t[2]+'</svg></div><b>'+t[0]+'</b><p>'+t[1]+'</p></div>';}).join('')+'</div>'+
-      '<form id="quoteForm" class="qform wizard" novalidate>'+
-      '<div class="wzhead"><div class="wzsteps"><i class="wzfill"></i><button type="button" class="wznode active" data-go="0"><span class="wzdot"><span>1</span><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><span class="wzlbl">Peça</span></button><button type="button" class="wznode" data-go="1"><span class="wzdot"><span>2</span><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><span class="wzlbl">Projeto</span></button><button type="button" class="wznode" data-go="2"><span class="wzdot"><span>3</span><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><span class="wzlbl">Contato</span></button></div></div>'+
-      '<div class="wzstep is-active" data-s="1"><h3 class="wztitle">O que você quer criar?</h3><p class="wzsub">Comece pelo essencial — o resto a gente desenha junto com você.</p>'+
+      '<form id="quoteForm" class="qform" novalidate>'+
+      '<div class="qtop"><span class="label">Briefing</span><h2 class="qtitle">Conte-nos sobre a sua peça</h2><p class="qintro">Sem formalidade — o que você já tem em mente basta para começarmos.</p></div>'+
+      '<div class="qsec"><h3 class="wztitle">O que você quer criar?</h3>'+
       '<div class="wzfld"><span class="label">Tipo de peça</span><div class="optgrid">'+
       '<label class="optcard"><input type="radio" name="tipo" value="Bombom / trufa"><svg class="oi" viewBox="0 0 24 24"><circle cx="12" cy="13" r="7"/><path d="M9 7.5c1.4-2 4.6-2 6 0"/></svg><span class="ot">Bombom / trufa</span><span class="ock"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span></label>'+
       '<label class="optcard"><input type="radio" name="tipo" value="Tablete / barra"><svg class="oi" viewBox="0 0 24 24"><rect x="4" y="6" width="16" height="12" rx="2"/><path d="M10 6v12M14 6v12M4 12h16"/></svg><span class="ot">Tablete / barra</span><span class="ock"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span></label>'+
@@ -1227,15 +1230,15 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
       '<label class="optcard"><input type="radio" name="tipo" value="Peça temática (festa, marca)"><svg class="oi" viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="10" rx="1.5"/><path d="M3 7h18v3H3zM12 7v13"/><path d="M12 7C10.5 4 7 4.6 7.6 6.7 7.9 8 10.2 7.5 12 7zM12 7c1.5-3 5-2.4 4.4-.3C16.1 8 13.8 7.5 12 7z"/></svg><span class="ot">Peça temática</span><span class="ock"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span></label>'+
       '<label class="optcard"><input type="radio" name="tipo" value="Logo ou símbolo da marca"><svg class="oi" viewBox="0 0 24 24"><path d="M12 3l2 6.2 6.2.3-4.9 3.8 1.7 6-5-3.5-5 3.5 1.7-6L3.8 9.5 10 9.2z"/></svg><span class="ot">Logo ou símbolo</span><span class="ock"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span></label>'+
       '<label class="optcard"><input type="radio" name="tipo" value="Ainda não sei — me ajudem"><svg class="oi" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.3 9.3a2.9 2.9 0 0 1 5.4 1c0 1.9-2.7 2.3-2.7 4"/><circle cx="12" cy="17.2" r=".6"/></svg><span class="ot">Ainda não sei — me ajudem</span><span class="ock"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span></label>'+
-      '</div><p class="wzhint" id="tipoHint">Escolha um tipo de peça para continuar.</p></div>'+
+      '</div></div>'+
       '<div class="wzfld"><span class="label">Quantidade estimada</span><div class="optseg">'+
       '<label class="optcard"><input type="radio" name="qtd" value="Até 10 formas" checked><span class="ot">Até 10 formas</span><span class="ock"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span></label>'+
       '<label class="optcard"><input type="radio" name="qtd" value="10 a 50 formas"><span class="ot">10 a 50 formas</span><span class="ock"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span></label>'+
       '<label class="optcard"><input type="radio" name="qtd" value="Mais de 50 formas"><span class="ot">Mais de 50 formas</span><span class="ock"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span></label>'+
       '</div></div></div>'+
-      '<div class="wzstep" data-s="2"><h3 class="wztitle">Conte o seu projeto</h3><p class="wzsub">Quanto mais detalhe, mais fiel fica a proposta. Anexe referências, se tiver.</p><label class="cofield"><span>Detalhes</span><textarea name="brief" placeholder="Formato, tamanho, referência de estilo, prazo…" style="min-height:110px;resize:vertical"></textarea></label><div class="cofield"><span>Referências — imagens ou PDF</span><label class="filedrop" id="fileDrop"><input type="file" id="fileInput" multiple accept="image/*,application/pdf" hidden><svg viewBox="0 0 24 24"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/><polyline points="16 16 12 12 8 16"/></svg><b>Arraste aqui ou clique para anexar</b><small>JPG, PNG ou PDF · quantas quiser</small></label><div class="filelist" id="fileList"></div></div></div>'+
-      '<div class="wzstep" data-s="3"><h3 class="wztitle">Como falamos com você</h3><p class="wzsub">Enviamos a proposta por aqui, sem compromisso.</p><div class="tworow"><label class="cofield"><span>Nome</span><input name="nome"></label><label class="cofield"><span>E-mail ou WhatsApp</span><input name="contato"></label></div></div>'+
-      '<div class="wznav"><button type="button" class="btn ghost" id="wzBack" hidden>Voltar</button><button type="button" class="btn" id="wzNext">Continuar</button><button type="submit" class="btn" id="wzSend" hidden>Enviar pedido</button></div>'+
+      '<div class="qsec"><h3 class="wztitle">Conte o seu projeto</h3><label class="cofield"><span>Detalhes</span><textarea name="brief" placeholder="Formato, tamanho, referência de estilo, prazo…" style="min-height:120px;resize:vertical"></textarea></label><div class="cofield"><span>Referências — imagens ou PDF</span><label class="filedrop" id="fileDrop"><input type="file" id="fileInput" multiple accept="image/*,application/pdf" hidden><svg viewBox="0 0 24 24"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/><polyline points="16 16 12 12 8 16"/></svg><b>Arraste aqui ou clique para anexar</b><small>JPG, PNG ou PDF · quantas quiser</small></label><div class="filelist" id="fileList"></div></div></div>'+
+      '<div class="qsec"><h3 class="wztitle">Como falamos com você</h3><div class="tworow"><label class="cofield"><span>Nome</span><input name="nome"></label><label class="cofield"><span>E-mail ou WhatsApp</span><input name="contato"></label></div></div>'+
+      '<div class="qsubmit"><button type="submit" class="btn" id="quoteSend">Enviar pedido</button></div>'+
       '<p class="dnote" style="text-align:center">Sem compromisso · resposta em até 3 dias úteis</p></form></div>';
   }
 
@@ -1288,26 +1291,8 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
         ['dragleave','dragend'].forEach(function(ev){fd.addEventListener(ev,function(){fd.classList.remove('over');});});
         fd.addEventListener('drop',function(e){e.preventDefault();fd.classList.remove('over');if(e.dataTransfer&&e.dataTransfer.files)add(e.dataTransfer.files);});}
     })();
-    (function(){var wf=document.getElementById('quoteForm');if(!wf||!wf.classList.contains('wizard'))return;
-      var steps=[].slice.call(wf.querySelectorAll('.wzstep')),cur=0,total=steps.length,seen=0;
-      var back=document.getElementById('wzBack'),next=document.getElementById('wzNext'),send=document.getElementById('wzSend');
-      var fill=wf.querySelector('.wzfill'),nodes=[].slice.call(wf.querySelectorAll('.wznode')),hint=document.getElementById('tipoHint');
-      function valid(i){return i!==0||!!wf.querySelector('[name=tipo]:checked');}
-      function show(dir,fc){
-        steps.forEach(function(s,i){s.classList.remove('is-active','back');if(i===cur){if(dir<0)s.classList.add('back');s.classList.add('is-active');}});
-        if(cur>seen)seen=cur;
-        nodes.forEach(function(nd,i){nd.classList.remove('active','done');if(i<cur)nd.classList.add('done');else if(i===cur)nd.classList.add('active');nd.style.cursor=(i<=seen&&i!==cur)?'pointer':'default';});
-        if(fill)fill.style.width=((cur+0.5)/total*100-6)+'%';
-        back.style.display=cur===0?'none':'';next.style.display=cur===total-1?'none':'';send.style.display=cur===total-1?'':'none';
-        if(fc){var el=steps[cur].querySelector('textarea,input:not([type=radio]),select');if(el)try{el.focus({preventScroll:true});}catch(e){}}
-      }
-      function go(to,dir){to=Math.max(0,Math.min(total-1,to));if(to>cur&&!valid(cur)){if(hint)hint.classList.add('on');return;}if(hint)hint.classList.remove('on');cur=to;show(dir,true);}
-      next.onclick=function(){go(cur+1,1);};
-      back.onclick=function(){go(cur-1,-1);};
-      nodes.forEach(function(nd,i){nd.onclick=function(){if(i<cur)go(i,-1);else if(i>cur&&i<=seen)go(i,1);};});
-      wf.addEventListener('change',function(e){if(e.target&&e.target.name==='tipo'&&hint)hint.classList.remove('on');});
-      wf.addEventListener('submit',function(e){e.preventDefault();var n=wf.querySelector('[name=nome]'),c=wf.querySelector('[name=contato]');if(n&&!n.value.trim()){go(total-1,1);n.focus();n.style.borderColor='#b4553f';return;}if(c&&!c.value.trim()){go(total-1,1);c.focus();c.style.borderColor='#b4553f';return;}var nf=document.getElementById('fileList')?document.getElementById('fileList').children.length:0;wf.innerHTML='<div class="wzdone"><div class="okseal"><svg class="okcheck" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><span class="sig oksig">Recebemos o seu projeto.</span><p class="oktext">Vamos analisar a viabilidade com carinho e voltamos com o orçamento em até 3 dias úteis'+(nf?', junto com '+(nf>1?'as '+nf+' referências':'a referência')+' que você anexou':'')+'. Enquanto isso, dá uma espiada nas nossas peças. ✿</p><a class="btn" href="#/produtos">Ver produtos</a></div>';});
-      show(1,false);
+    (function(){var wf=document.getElementById('quoteForm');if(!wf)return;
+      wf.addEventListener('submit',function(e){e.preventDefault();var n=wf.querySelector('[name=nome]'),c=wf.querySelector('[name=contato]');if(n&&!n.value.trim()){n.focus();n.style.borderColor='#b4553f';n.scrollIntoView({block:'center',behavior:'smooth'});return;}if(c&&!c.value.trim()){c.focus();c.style.borderColor='#b4553f';c.scrollIntoView({block:'center',behavior:'smooth'});return;}var nf=document.getElementById('fileList')?document.getElementById('fileList').children.length:0;wf.innerHTML='<div class="wzdone"><div class="okseal"><svg class="okcheck" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><span class="sig oksig">Recebemos o seu projeto.</span><p class="oktext">Vamos analisar a viabilidade com carinho e voltamos com o orçamento em até 3 dias úteis'+(nf?', junto com '+(nf>1?'as '+nf+' referências':'a referência')+' que você anexou':'')+'. Enquanto isso, dá uma espiada nas nossas peças. ✿</p><a class="btn" href="#/produtos">Ver produtos</a></div>';});
     })();
     document.querySelectorAll('.qadd').forEach(function(b){b.onclick=function(e){e.preventDefault();addProduct(b.dataset.id,b.dataset.size,b.dataset.pre==='1');};});
     var _fcs=document.getElementById('fcsizes');
