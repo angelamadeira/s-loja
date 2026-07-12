@@ -755,7 +755,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
       <svg class="seal" viewBox="0 0 1600 1600" aria-hidden="true"><circle cx="800" cy="800" r="774" fill="none" stroke="var(--ink)" stroke-width="52"/><g fill="var(--ink)" transform="translate(800 800) scale(.74) translate(-800 -800)"><use href="#p-su" transform="translate(277.4 734.6) scale(1 -1)"/><use href="#p-zu" transform="translate(264.5 1324.6) scale(1 -1)"/></g></svg>
       <span class="word"><span>Studio Suzu</span><b>formas autorais</b></span>
     </a>
-    <nav class="main"><a href="#/produtos">Produtos</a><a href="#/prevenda">Pré-venda</a><a href="#/exclusivo">Exclusivo</a><a href="#/receitas">Receitas</a></nav>
+    <nav class="main"><a href="#/produtos">Produtos</a><a href="#/prevenda" data-prevenda>Pré-venda</a><a href="#/exclusivo">Exclusivo</a><a href="#/receitas">Receitas</a></nav>
     <button class="ibtn" aria-label="Buscar" id="openSearch"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
     <button class="ibtn cart-btn" aria-label="Abrir sacola" id="openCart"><svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg><span class="badge" id="badge">0</span></button>
     <button class="ibtn ham" aria-label="Menu" id="openMenu"><svg viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
@@ -766,7 +766,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
   <div class="mh"><span class="label">Menu</span><button class="ibtn" aria-label="Fechar" id="closeMenu"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
   <nav>
     <a href="#/produtos">Produtos</a>
-    <a href="#/prevenda">Pré-venda</a>
+    <a href="#/prevenda" data-prevenda>Pré-venda</a>
     <a href="#/exclusivo">Projeto exclusivo</a>
     <a href="#/receitas">Receitas</a>
     <a href="#/sobre" class="sub">Sobre o estúdio</a>
@@ -796,7 +796,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
   </div>
 </section>
 
-<section style="padding-top:0">
+<section style="padding-top:0" data-prevenda>
   <div class="wrap">
     <div class="sec-head"><div class="lead"><h2>Reserve antes de esgotar</h2><p>Os próximos lançamentos, abertos para reserva — primeiro lote a partir de 15/03.</p></div><div class="sec-tools"><a class="more" href="#/prevenda">Ver pré-venda</a></div></div>
     <div class="carwrap"><div class="hcar" id="preCar"></div><div class="cdots" hidden></div></div>
@@ -844,7 +844,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
       </div>
     </div>
     <div class="foot-cols">
-      <div class="fcol"><h4 class="label">Loja</h4><a href="#/produtos">Produtos</a><a href="#/prevenda">Pré-venda</a><a href="#/exclusivo">Projeto exclusivo</a><a href="#/receitas">Receitas</a></div>
+      <div class="fcol"><h4 class="label">Loja</h4><a href="#/produtos">Produtos</a><a href="#/prevenda" data-prevenda>Pré-venda</a><a href="#/exclusivo">Projeto exclusivo</a><a href="#/receitas">Receitas</a></div>
       <div class="fcol"><h4 class="label">Studio</h4><a href="#/sobre">Sobre o estúdio</a><a href="#/faq">Perguntas frequentes</a></div>
       <div class="fcol"><h4 class="label">Ajuda</h4><a href="#/faq">Cuidados</a><a href="#/faq">Entrega</a><a href="#/faq">Trocas</a><a href="https://wa.me/5511912345678?text=Ol%C3%A1!%20Vim%20pela%20loja%20Studio%20Suzu%20e%20queria%20falar%20sobre%20um%20projeto%20exclusivo." target="_blank" rel="noopener">Contato</a></div>
     </div>
@@ -880,6 +880,10 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
     {id:'esfera', name:'Bombom Esfera', shape:'circle',cols:5,rows:3,base:74,rating:4.8,rev:96,use:'Bombom · esfera',coll:'Bombons',sizes:['P','M','G'],launch:2,edition:60,left:33,status:'live',ig:IG,desc:'Esferas de fecho perfeito para bombons recheados. Desenforma limpa, brilho de vitrine.'},
     {id:'macaron',name:'Macaron Anel',  shape:'ring',  cols:4,rows:3,base:79,rating:4.7,rev:141,use:'Macaron',coll:'Essenciais',sizes:['P','M'],launch:1,edition:40,left:0,status:'soldout',ig:IG,desc:'Anéis de borda impecável: macarons de altura uniforme, fileira após fileira.'}
   ];
+  /* PRÉ-VENDA desligada por ora (guardada p/ voltar depois) — flipar p/ true reativa tudo.
+     Off: normaliza produtos 'presale' -> 'live' em runtime; o literal acima mantém 'presale'. */
+  var PREVENDA=false;
+  if(!PREVENDA)PRODUCTS.forEach(function(p){if(p.status==='presale')p.status='live';});
   var byId=id=>PRODUCTS.find(p=>p.id===id);
   var priceOf=(p,s)=>p.base+SIZES[s].add;
   var fromPrice=p=>p.base+Math.min.apply(null,p.sizes.map(s=>SIZES[s].add));
@@ -891,7 +895,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
   }
   var COLLS=['Essenciais','Bombons','Bento & Festa'];
   var SIZEF=[['P','Pequeno','≈ 3 cm'],['M','Médio','≈ 7 cm'],['G','Grande','≈ 12 cm']];
-  var STATUSF=[['live','À venda'],['presale','Pré-venda']];
+  var STATUSF=PREVENDA?[['live','À venda'],['presale','Pré-venda']]:[['live','À venda']];
   var PRICEF=[['a','Até R$ 80'],['b','R$ 80 – R$ 120'],['c','Acima de R$ 120']];
   function inBucket(p,k){var v=fromPrice(p);return k==='a'?v<80:k==='b'?(v>=80&&v<=120):v>120;}
   var SORTS=[['novo','Últimos lançados'],['antigo','Menos recentes'],['preco-asc','Preço: menor primeiro'],['preco-desc','Preço: maior primeiro']];
@@ -915,6 +919,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
     ['Vocês fazem forma exclusiva?','Sim — um projeto só seu, do sketch ao molde, sob análise de orçamento. Peça pelo Projeto exclusivo.'],
     ['Qual o prazo de entrega e trocas?','Enviamos para todo o Brasil; frete grátis acima de R$ 150. Lotes esgotados podem ter espera. Trocas por defeito em até 7 dias.']
   ];
+  if(!PREVENDA)FAQ=FAQ.filter(function(q){return !/pr[eé]-?venda/i.test(q[0]);});
   var RECIPES=[
     {id:'pistache',name:'Bombom seigaiha de pistache',tag:'Chocolate',time:'40 min',level:'Médio',mold:'tablete',tint:'mizu',video:'',ing:['200 g de chocolate ao leite temperado','80 g de pasta de pistache','40 g de creme de leite','pistaches picados para finalizar'],steps:['Tempere o chocolate e forre a forma Tablete Seigaiha, formando a casca. Leve à geladeira por 10 minutos.','Misture a pasta de pistache com o creme de leite até ficar liso e recheie cada gomo, sem encostar na borda.','Feche com mais chocolate temperado, alise e leve para firmar. Desenforme e finalize com pistache picado.']},
     {id:'morango',name:'Coração de morango & lichia',tag:'Frutas',time:'50 min',level:'Fácil',mold:'coracao',tint:'sakura',video:'',ing:['250 g de chocolate branco','100 g de purê de morango','30 g de lichia em calda picada','raspas de limão-siciliano'],steps:['Forre a forma Coração Selado com chocolate branco e leve para firmar.','Combine o purê de morango, a lichia e as raspas; recheie os corações.','Feche com chocolate branco, firme e desenforme com o relevo do selo à mostra.']},
@@ -1018,7 +1023,8 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
 
   /* HOME */
   document.getElementById('lancCar').innerHTML=PRODUCTS.filter(p=>p.status!=='presale').sort((a,b)=>b.launch-a.launch).map(cardHTML).join('');
-  document.getElementById('preCar').innerHTML=PRODUCTS.filter(p=>p.status==='presale').map(cardHTML).join('');
+  if(!PREVENDA)document.querySelectorAll('[data-prevenda]').forEach(function(e){e.remove();});
+  var _preCar=document.getElementById('preCar'); if(_preCar)_preCar.innerHTML=PRODUCTS.filter(p=>p.status==='presale').map(cardHTML).join('');
   document.getElementById('recCar').innerHTML=RECIPES.slice(0,6).map(recCard).join('');
   document.getElementById('reviews').innerHTML=REVIEWS.map(r=>'<div class="rev"><div class="st">'+star().repeat(5)+'</div><q>'+r.q+'</q><div class="who"><b>'+r.who+'</b> · '+r.role+'</div></div>').join('');
   document.getElementById('customPiece').innerHTML=mold(byId('coracao'));
@@ -1134,7 +1140,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
     if(p.status==='soldout') buy='<div class="buyrow"><span class="price so">Esgotado nesta tiragem</span><button class="btn ghost" id="notifyBtn">Avise-me quando voltar</button></div>';
     else if(p.status==='presale'){var dep=Math.round(priceOf(p,def)*0.3); buy='<div class="buyrow"><span class="price" id="pdpPrice">'+BRL(dep)+'<small>sinal de reserva · '+SIZES[def].name+' de '+BRL(priceOf(p,def))+'</small></span><button class="btn addbtn" id="pdpAdd">Reservar com sinal</button></div><p class="prenote">O sinal garante a sua peça e a prioridade — e é descontado do valor final quando ela lança, em '+p.avail+'.</p>';}
     else buy='<div class="buyrow"><span class="price" id="pdpPrice">'+BRL(priceOf(p,def))+'<small>em até 6× · '+SIZES[def].name+'</small></span><button class="btn addbtn" id="pdpAdd">Adicionar à sacola</button></div>';
-    return backHome()+'<div class="pdp"><div class="media"><div class="mimg"><span class="pbadge '+st.k+'">'+st.label+'</span><div class="m">'+mold(p)+'</div></div><button class="vidthumb reeltrigger" aria-label="Ver o vídeo desta peça"><span class="vtp" style="background:'+tint+'">'+mold(p)+'<span class="vtplay"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></span></span><span class="vtlabel">Ver o processo em vídeo</span></button></div>'+
+    return backHome()+'<div class="pdp"><div class="media"><div class="mimg"><span class="pbadge '+st.k+'">'+st.label+'</span><div class="m">'+mold(p)+'</div></div><button class="vidthumb reeltrigger" aria-label="Ver o vídeo desta peça"><span class="vtp" style="background:'+tint+'">'+mold(p)+'<span class="vtplay"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></span></span><span class="vtlabel">Ver o vídeo desse produto</span></button></div>'+
       '<div class="info"><span class="use">'+p.use+'</span><h1>'+p.name+'</h1>'+
       '<p class="lead">'+p.desc+'</p>'+scarceBlock(p)+
       '<p class="szlabel">Escolha o tamanho</p><div class="szgrid" id="szgrid">'+szs+'</div>'+buy+
@@ -1342,7 +1348,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
     var h=location.hash,v=null;
     if(h.indexOf('#/p/')===0)v=productView(h.slice(4));
     else if(h==='#/produtos')v=produtosView();
-    else if(h==='#/prevenda')v=prevendaView();
+    else if(h==='#/prevenda'){if(PREVENDA){v=prevendaView();}else{location.replace('#/produtos');return;}}
     else if(h==='#/exclusivo')v=exclusivoView();
     else if(h==='#/sobre')v=sobreView();
     else if(h.indexOf('#/receita/')===0)v=receitaView(h.slice(10));
