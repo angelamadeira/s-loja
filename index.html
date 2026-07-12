@@ -120,9 +120,9 @@ section{padding:52px 0}
 .carrow{display:none}
 @media (min-width:1200px){
   .cdots{display:none}
-  .carrow{display:grid;position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;background:var(--white);border:1px solid var(--line);place-items:center;cursor:pointer;color:var(--ink);padding:0;z-index:3;transition:border-color .16s ease,background .16s ease,opacity .16s ease}
-  .carrow:hover{border-color:var(--ink);background:var(--warm)}
-  .carrow:disabled{opacity:.22;cursor:default;pointer-events:none}
+  .carrow{display:grid;position:absolute;top:50%;transform:translateY(-50%);width:40px;height:44px;background:transparent;border:0;place-items:center;cursor:pointer;color:var(--stone);padding:0;z-index:3;transition:color .16s ease,opacity .16s ease}
+  .carrow:hover{color:var(--ink)}
+  .carrow:disabled{opacity:.25;cursor:default;pointer-events:none}
   .carrow svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
   .carrow.prev{left:-48px}   /* fora da fileira: cards ficam no tamanho normal */
   .carrow.next{right:-48px}
@@ -460,13 +460,6 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
 .rcard .rmeta{margin-top:3px;font-size:.72rem;color:var(--gold-text)}
 .rcard .rtag{position:absolute;top:10px;left:10px;font-size:.55rem;letter-spacing:.12em;text-transform:uppercase;font-weight:600;background:var(--white);color:var(--text-2);padding:5px 9px;border-radius:999px;z-index:2}
 .carwrap{position:relative}
-.carrow{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;background:var(--white);border:1px solid var(--line-soft);box-shadow:0 8px 24px rgba(70,60,52,.15);display:none;place-items:center;z-index:4;transition:opacity .18s ease,border-color .16s ease,box-shadow .16s ease}
-.carrow.cprev{left:-6px}.carrow.cnext{right:-6px}
-.carrow:hover{border-color:var(--ink);box-shadow:0 10px 30px rgba(70,60,52,.24)}
-.carrow:disabled{opacity:0;pointer-events:none}
-.carrow[disabled]{opacity:0;pointer-events:none}
-.carrow svg{width:20px;height:20px;stroke:var(--ink);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-@media (min-width:860px){.carrow{display:grid}}
 .recipe{padding:22px 0 60px}
 .recvid{border-radius:20px;overflow:hidden;aspect-ratio:16/10;display:grid;place-items:center;margin-top:8px}
 .recvid video{width:100%;height:100%;object-fit:cover}
@@ -655,13 +648,6 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
 .rcard .rmeta{margin-top:3px;font-size:.72rem;color:var(--gold-text)}
 .rcard .rtag{position:absolute;top:10px;left:10px;font-size:.55rem;letter-spacing:.12em;text-transform:uppercase;font-weight:600;background:var(--white);color:var(--text-2);padding:5px 9px;border-radius:999px;z-index:2}
 .carwrap{position:relative}
-.carrow{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;background:var(--white);border:1px solid var(--line-soft);box-shadow:0 8px 24px rgba(70,60,52,.15);display:none;place-items:center;z-index:4;transition:opacity .18s ease,border-color .16s ease,box-shadow .16s ease}
-.carrow.cprev{left:-6px}.carrow.cnext{right:-6px}
-.carrow:hover{border-color:var(--ink);box-shadow:0 10px 30px rgba(70,60,52,.24)}
-.carrow:disabled{opacity:0;pointer-events:none}
-.carrow[disabled]{opacity:0;pointer-events:none}
-.carrow svg{width:20px;height:20px;stroke:var(--ink);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-@media (min-width:860px){.carrow{display:grid}}
 .recipe{padding:22px 0 60px}
 .recvid{border-radius:20px;overflow:hidden;aspect-ratio:16/10;display:grid;place-items:center;margin-top:8px}
 .recvid video{width:100%;height:100%;object-fit:cover}
@@ -1277,7 +1263,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
         fd.addEventListener('drop',function(e){e.preventDefault();fd.classList.remove('over');if(e.dataTransfer&&e.dataTransfer.files)add(e.dataTransfer.files);});}
     })();
     (function(){var wf=document.getElementById('quoteForm');if(!wf)return;
-      wf.addEventListener('submit',function(e){e.preventDefault();var n=wf.querySelector('[name=nome]'),c=wf.querySelector('[name=contato]');if(n&&!n.value.trim()){n.focus();n.style.borderColor='#b4553f';n.scrollIntoView({block:'center',behavior:'smooth'});return;}if(c&&!c.value.trim()){c.focus();c.style.borderColor='#b4553f';c.scrollIntoView({block:'center',behavior:'smooth'});return;}var nf=document.getElementById('fileList')?document.getElementById('fileList').children.length:0;wf.innerHTML='<div class="wzdone"><div class="okseal"><svg class="okcheck" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><span class="sig oksig">Recebemos o seu projeto.</span><p class="oktext">Vamos analisar a viabilidade com carinho e voltamos com o orçamento em até 3 dias úteis'+(nf?', junto com '+(nf>1?'as '+nf+' referências':'a referência')+' que você anexou':'')+'. Enquanto isso, dá uma espiada nas nossas peças. ✿</p><a class="btn" href="#/produtos">Ver produtos</a></div>';});
+      wf.addEventListener('submit',function(e){e.preventDefault();var b=wf.querySelector('[name=brief]'),n=wf.querySelector('[name=nome]'),c=wf.querySelector('[name=contato]');if(b&&!b.value.trim()){b.focus();b.style.borderColor='#b4553f';b.scrollIntoView({block:'center',behavior:'smooth'});return;}if(n&&!n.value.trim()){n.focus();n.style.borderColor='#b4553f';n.scrollIntoView({block:'center',behavior:'smooth'});return;}if(c&&!c.value.trim()){c.focus();c.style.borderColor='#b4553f';c.scrollIntoView({block:'center',behavior:'smooth'});return;}var nf=document.getElementById('fileList')?document.getElementById('fileList').children.length:0;wf.innerHTML='<div class="wzdone"><div class="okseal"><svg class="okcheck" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><span class="sig oksig">Recebemos o seu projeto.</span><p class="oktext">Vamos analisar a viabilidade com carinho e voltamos com o orçamento em até 3 dias úteis'+(nf?', junto com '+(nf>1?'as '+nf+' referências':'a referência')+' que você anexou':'')+'. Enquanto isso, dá uma espiada nas nossas peças. ✿</p><a class="btn" href="#/produtos">Ver produtos</a></div>';});
     })();
     document.querySelectorAll('.qadd').forEach(function(b){b.onclick=function(e){e.preventDefault();addProduct(b.dataset.id,b.dataset.size,b.dataset.pre==='1');};});
     var _fcs=document.getElementById('fcsizes');
