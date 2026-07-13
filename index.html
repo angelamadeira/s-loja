@@ -734,11 +734,24 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
 .formacta .fcimg svg{width:100%;height:100%;object-fit:cover;display:block}
 @media(min-width:560px){.formacta .fcimg{width:158px;min-height:128px;margin:-22px 22px -22px -24px}}
 @media(max-width:559px){.formacta .fcimg{width:96px;min-height:96px}}
-/* ===== HOVER PADRÃO DOS CARDS (todo o site): leve elevação, sem sombra (brandbook flat) ===== */
-.pcard,.rcard,.rev,.csitem,.formacta,.exstep{transition:transform .2s ease,border-color .2s ease}
-.pcard:hover,.rcard:hover,.rev:hover,.csitem:hover,.formacta:hover,.exstep:hover{transform:translateY(-4px)}
-.rev:hover,.csitem:hover,.formacta:hover,.exstep:hover{border-color:var(--line)}
+/* ===== HOVER PADRÃO DOS CARDS: leve elevação, sem sombra. Cards de compra (formacta) NÃO têm hover ===== */
+.pcard,.rcard,.rev,.exstep{transition:transform .2s ease,border-color .2s ease}
+.pcard:hover,.rcard:hover,.rev:hover,.exstep:hover{transform:translateY(-4px)}
+.rev:hover,.exstep:hover{border-color:var(--line)}
 .exstep:hover{box-shadow:none}
+/* card de compra único em grade (Leve junto / forma da receita): sem margem extra entre eles */
+.csgrid .formacta{margin-top:0}
+/* ===== card de compra no MOBILE: imagem+texto em cima, linha de compra (preço + botão) embaixo ===== */
+@media(max-width:559px){
+  .formacta{align-items:center}
+  .formacta .fcimg{width:82px;min-height:82px}
+  .formacta .fctxt{flex:1 1 130px}
+  .formacta .fcsizes{margin-top:9px}
+  .formacta .fcbuy{width:100%;flex-direction:row;align-items:center;justify-content:space-between;gap:12px;margin-top:2px;padding-top:12px;border-top:1px solid var(--line-soft)}
+  .formacta .fcprice{text-align:left}
+  .formacta .fcprice small{display:block}
+  .formacta .fcbtn{align-self:auto;flex:0 0 auto;white-space:nowrap;padding:11px 16px;font-size:.7rem}
+}
 </style>
 
 <svg width=0 height=0 style="position:absolute"><defs>
@@ -1146,13 +1159,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
     var r=RECIPES.find(function(x){return x.id===id;}); if(!r)return '';
     var mp=byId(r.mold);
     var vid=r.video?'<video src="'+r.video+'" controls playsinline></video>':'<div class="recph"><span class="reelplay"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></span><b>Vídeo do processo em breve</b><small>o mesmo das nossas redes</small></div>';
-    var mdef=mp.sizes.indexOf('M')>-1?'M':mp.sizes[0],mstat=mp.status;
-    var msizes=mp.sizes.length>1?'<div class="fcsizes" id="fcsizes">'+mp.sizes.map(function(s){return '<button type="button" class="fcsz" data-s="'+s+'" aria-pressed="'+(s===mdef)+'">'+SIZES[s].name+' · '+SIZES[s].dim+'</button>';}).join('')+'</div>':'';
-    var mprice,mbtn;
-    if(mstat==='soldout'){mprice='';mbtn='<button type="button" class="btn ghost" disabled>Esgotado</button>';msizes='';}
-    else if(mstat==='presale'){var mdep=Math.round(priceOf(mp,mdef)*0.3);mprice='<span class="fcprice" id="fcprice">'+BRL(mdep)+'<small>sinal · '+SIZES[mdef].name+' de '+BRL(priceOf(mp,mdef))+'</small></span>';mbtn='<button type="button" class="btn qadd fcbtn" data-id="'+mp.id+'" data-size="'+mdef+'" data-pre="1">Reservar com sinal</button>';}
-    else{mprice='<span class="fcprice" id="fcprice">'+BRL(priceOf(mp,mdef))+'<small>em até 6× · '+SIZES[mdef].name+'</small></span>';mbtn='<button type="button" class="btn qadd fcbtn" data-id="'+mp.id+'" data-size="'+mdef+'" data-pre="">Adicionar à sacola</button>';}
-    var moldbox='<div class="formacta"><a class="fcimg" href="#/p/'+mp.id+'" style="background:var(--'+r.tint+'-wash)"><span class="pbadge '+statusMeta(mp).k+'">'+statusMeta(mp).label+'</span>'+mold(mp)+'</a><div class="fctxt"><span class="label">A forma desta receita</span><a class="fcname" href="#/p/'+mp.id+'"><b>'+mp.name+'</b></a><p>'+mp.use+' · silicone platinum</p>'+msizes+'</div><div class="fcbuy">'+mprice+mbtn+'</div></div>';
+    var moldbox='<section class="crosssell"><div class="sec-head"><div class="lead"><h2>A forma desta receita</h2></div></div><div class="csgrid">'+buyCard(mp)+'</div></section>';
     var wa='https://wa.me/?text='+encodeURIComponent(r.name+' — receita do Studio Suzu');
     var share='<div class="share"><span class="label">Compartilhar</span><a class="shb" href="'+wa+'" target="_blank" rel="noopener" aria-label="WhatsApp"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></a><button class="shb" id="copyLink" aria-label="Copiar link"><svg viewBox="0 0 24 24"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"/><line x1="8" y1="12" x2="16" y2="12"/></svg></button><button class="shb" onclick="window.print()" aria-label="Imprimir"><svg viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button></div>';
     var recsug='<section class="suggest"><div class="sec-head"><div class="lead"><h2>Outras receitas</h2></div><div class="sec-tools"><a class="more" href="#/receitas">Ver todas</a></div></div><div class="carwrap"><div class="hcar">'+RECIPES.filter(function(x){return x.id!==r.id;}).slice(0,6).map(recCard).join('')+'</div><div class="cdots" hidden></div></div></section>';
@@ -1164,13 +1171,21 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
     sc.sort(function(a,b){return b.s-a.s;});
     return sc.slice(0,3).map(function(o){return o.x;});
   }
+  /* card de produto ÚNICO: imagem + nome + descrição + escolha de tamanho + preço + Adicionar à sacola.
+     Usado no "Leve junto" e na forma da receita (sem hover). */
+  function buyCard(p){
+    var def=p.sizes.indexOf('M')>-1?'M':p.sizes[0], tint=TINTS[p.id]||'mizu', st=statusMeta(p), so=p.status==='soldout';
+    var sizes=p.sizes.length>1?'<div class="fcsizes">'+p.sizes.map(function(s){return '<button type="button" class="fcsz" data-s="'+s+'" aria-pressed="'+(s===def)+'">'+SIZES[s].name+' · '+SIZES[s].dim+'</button>';}).join('')+'</div>':'';
+    var price=so?'<span class="fcprice">Esgotado</span>':'<span class="fcprice">'+BRL(priceOf(p,def))+'<small>em até 6× · '+SIZES[def].name+'</small></span>';
+    var btn=so?'<button type="button" class="btn ghost fcbtn" disabled>Esgotado</button>':'<button type="button" class="btn ghost qadd fcbtn" data-id="'+p.id+'" data-size="'+def+'">Adicionar à sacola</button>';
+    return '<div class="formacta buycard"><a class="fcimg" href="#/p/'+p.id+'" style="background:var(--'+tint+'-wash)"><span class="pbadge '+st.k+'">'+st.label+'</span>'+mold(p)+'</a><div class="fctxt"><a class="fcname" href="#/p/'+p.id+'"><b>'+p.name+'</b></a><p>'+p.use+' · silicone platinum</p>'+sizes+'</div><div class="fcbuy">'+price+btn+'</div></div>';
+  }
   function crossSell(p){
     var comp=PRODUCTS.filter(function(x){return x.id!==p.id && x.coll!==p.coll && x.status!=='soldout';});
     if(comp.length<2) comp=PRODUCTS.filter(function(x){return x.id!==p.id && x.status!=='soldout';});
     comp=comp.slice(0,2);
     if(!comp.length) return '';
-    var items=comp.map(function(x){var d=x.sizes.indexOf('M')>-1?'M':x.sizes[0],pre=x.status==='presale';return '<div class="csitem"><a class="csimg" href="#/p/'+x.id+'" style="background:var(--'+(TINTS[x.id]||'mizu')+'-wash)">'+mold(x)+'</a><div class="cstxt"><a href="#/p/'+x.id+'"><b>'+x.name+'</b></a><span>'+x.use+' · silicone platinum</span></div><div class="csbuy"><span class="csprice">a partir de '+BRL(fromPrice(x))+'</span><button class="btn ghost qadd" data-id="'+x.id+'" data-size="'+d+'" data-pre="'+(pre?'1':'')+'">'+(pre?'Reservar':'+ Sacola')+'</button></div></div>';}).join('');
-    return '<section class="crosssell"><div class="sec-head"><div class="lead"><h2>Leve junto</h2></div></div><div class="csgrid">'+items+'</div></section>';
+    return '<section class="crosssell"><div class="sec-head"><div class="lead"><h2>Leve junto</h2></div></div><div class="csgrid">'+comp.map(buyCard).join('')+'</div></section>';
   }
   function suggestionsHTML(p){
     var recs=recommend(p); if(!recs.length)return '';
@@ -1276,9 +1291,8 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
       wf.addEventListener('submit',function(e){e.preventDefault();var b=wf.querySelector('[name=brief]'),n=wf.querySelector('[name=nome]'),c=wf.querySelector('[name=contato]');if(b&&!b.value.trim()){b.focus();b.style.borderColor='#b4553f';b.scrollIntoView({block:'center',behavior:'smooth'});return;}if(n&&!n.value.trim()){n.focus();n.style.borderColor='#b4553f';n.scrollIntoView({block:'center',behavior:'smooth'});return;}if(c&&!c.value.trim()){c.focus();c.style.borderColor='#b4553f';c.scrollIntoView({block:'center',behavior:'smooth'});return;}var nf=document.getElementById('fileList')?document.getElementById('fileList').children.length:0;wf.innerHTML='<div class="wzdone"><div class="okseal"><svg class="okcheck" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><span class="sig oksig">Recebemos o seu projeto.</span><p class="oktext">Vamos analisar a viabilidade com carinho e voltamos com o orçamento em até 3 dias úteis'+(nf?', junto com '+(nf>1?'as '+nf+' referências':'a referência')+' que você anexou':'')+'. Enquanto isso, dá uma espiada nas nossas peças. ✿</p><a class="btn" href="#/produtos">Ver produtos</a></div>';});
     })();
     document.querySelectorAll('.qadd').forEach(function(b){b.onclick=function(e){e.preventDefault();addProduct(b.dataset.id,b.dataset.size,b.dataset.pre==='1');};});
-    var _fcs=document.getElementById('fcsizes');
-    if(_fcs){var _fb=document.querySelector('.formacta .fcbtn');var _fp=_fb?byId(_fb.dataset.id):null,_fpre=_fb?_fb.dataset.pre==='1':false;
-      if(_fp)_fcs.querySelectorAll('.fcsz').forEach(function(b){b.onclick=function(){var s=b.dataset.s;_fcs.querySelectorAll('.fcsz').forEach(function(x){x.setAttribute('aria-pressed',x===b);});_fb.dataset.size=s;var pr=document.getElementById('fcprice');var full=priceOf(_fp,s);if(_fpre){var dep=Math.round(full*0.3);pr.innerHTML=BRL(dep)+'<small>sinal · '+SIZES[s].name+' de '+BRL(full)+'</small>';}else{pr.innerHTML=BRL(full)+'<small>em até 6× · '+SIZES[s].name+'</small>';}};});}
+    document.querySelectorAll('.fcsizes').forEach(function(grp){var card=grp.closest('.formacta');if(!card)return;var btn=card.querySelector('.qadd');if(!btn)return;var pr=card.querySelector('.fcprice'),p=byId(btn.dataset.id);
+      grp.querySelectorAll('.fcsz').forEach(function(b){b.onclick=function(){var s=b.dataset.s;grp.querySelectorAll('.fcsz').forEach(function(x){x.setAttribute('aria-pressed',x===b);});btn.dataset.size=s;if(pr)pr.innerHTML=BRL(priceOf(p,s))+'<small>em até 6× · '+SIZES[s].name+'</small>';};});});
     wireCheckout();
   }
   function wireCheckout(){
