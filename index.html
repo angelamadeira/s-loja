@@ -1021,9 +1021,10 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
     }
     var down=false,sx=0,sy=0,dss=0,armed=false,dragging=false;
     track.addEventListener('pointerdown',function(e){if(e.pointerType==='touch'||maxScroll()<=0){armed=false;return;}if(raf){cancelAnimationFrame(raf);raf=0;}if(settle){clearTimeout(settle);settle=0;}track.style.scrollSnapType='';down=true;armed=true;dragging=false;sx=e.clientX;sy=e.clientY;dss=track.scrollLeft;});
-    track.addEventListener('pointermove',function(e){if(!down)return;var dx=e.clientX-sx;if(!dragging&&Math.abs(dx)>10){dragging=true;track.classList.add('grabbing');track.style.cursor='grabbing';}if(dragging)track.scrollLeft=dss-dx;});
+    window.addEventListener('pointermove',function(e){if(!down)return;var dx=e.clientX-sx;if(!dragging&&Math.abs(dx)>10){dragging=true;track.classList.add('grabbing');track.style.cursor='grabbing';}if(dragging)track.scrollLeft=dss-dx;});
     function endDrag(){if(down){down=false;dragging=false;track.classList.remove('grabbing');track.style.cursor=maxScroll()>0?'grab':'';var m=metrics();animateTo(targetFor(nearestPage(m),m));}}
-    track.addEventListener('pointerup',endDrag);track.addEventListener('pointercancel',endDrag);
+    /* encerra o arraste em QUALQUER lugar (não só sobre a trilha) — evita cursor "preso" clicado */
+    window.addEventListener('pointerup',endDrag);window.addEventListener('pointercancel',endDrag);window.addEventListener('blur',endDrag);
     track.addEventListener('dragstart',function(e){e.preventDefault();});   /* mata o drag nativo do link/imagem */
     /* bloqueia navegação só se o clique terminou longe de onde começou (=arraste); clique limpo passa */
     track.addEventListener('click',function(e){if(armed){var dist=Math.abs(e.clientX-sx)+Math.abs(e.clientY-sy);if(dist>10){e.preventDefault();e.stopPropagation();}}armed=false;},true);
