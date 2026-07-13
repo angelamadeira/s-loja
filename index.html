@@ -104,6 +104,9 @@ section{padding:52px 0}
 .hcar{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:none;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:10px}
 .hcar::-webkit-scrollbar{display:none}
 .hcar.grabbing{scroll-snap-type:none;scroll-behavior:auto;user-select:none}
+/* cursor consistente: mãozinha de agarrar em toda a trilha, mesmo sobre os cards-link (que teriam pointer) */
+.hcar.grab-on,.hcar.grab-on a,.hcar.grab-on *{cursor:grab}
+.hcar.grabbing,.hcar.grabbing a,.hcar.grabbing *{cursor:grabbing}
 .hcar a,.hcar img,.hcar svg,.hcar .mold,.hcar .rimg{-webkit-user-drag:none;user-drag:none}
 .hcar>*{scroll-snap-align:start;flex:0 0 auto}
 /* larguras em fração exata: sempre um nº inteiro de cards, sem pontinha cortada */
@@ -1016,6 +1019,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
         prev.disabled=track.scrollLeft<=2; next.disabled=track.scrollLeft>=maxScroll()-2;
         var c0=track.children[0];if(c0){var vis=c0.querySelector('.m,.rimg')||c0;var cr=vis.getBoundingClientRect(),wr=w.getBoundingClientRect();var yc=(cr.top-wr.top)+cr.height/2;prev.style.top=next.style.top=yc+'px';}
       }else{prev.style.display=next.style.display='none';}
+      track.classList.toggle('grab-on',overflow);
       if(!track.classList.contains('grabbing'))track.style.cursor=overflow?'grab':'';
       track.tabIndex=overflow?0:-1;
     }
