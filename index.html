@@ -734,6 +734,11 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
 .formacta .fcimg svg{width:100%;height:100%;object-fit:cover;display:block}
 @media(min-width:560px){.formacta .fcimg{width:158px;min-height:128px;margin:-22px 22px -22px -24px}}
 @media(max-width:559px){.formacta .fcimg{width:96px;min-height:96px}}
+/* ===== HOVER PADRÃO DOS CARDS (todo o site): leve elevação, sem sombra (brandbook flat) ===== */
+.pcard,.rcard,.rev,.csitem,.formacta,.exstep{transition:transform .2s ease,border-color .2s ease}
+.pcard:hover,.rcard:hover,.rev:hover,.csitem:hover,.formacta:hover,.exstep:hover{transform:translateY(-4px)}
+.rev:hover,.csitem:hover,.formacta:hover,.exstep:hover{border-color:var(--line)}
+.exstep:hover{box-shadow:none}
 </style>
 
 <svg width=0 height=0 style="position:absolute"><defs>
