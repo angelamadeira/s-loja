@@ -116,9 +116,10 @@ section{padding:52px 0}
 .cdot{width:7px;height:7px;border-radius:50%;background:var(--line);border:0;padding:0;cursor:pointer;transition:background .16s ease,transform .16s ease}
 .cdot:hover{background:var(--stone)}
 .cdot.on{background:var(--ink);transform:scale(1.18)}
-/* setas laterais — só na web maior; ficam AO LADO dos cards, nunca por cima. No responsivo ficam as bolinhas */
+/* setas: só em dispositivo de MOUSE (web) e com largura suficiente p/ caber na margem.
+   No TOQUE (mobile) ficam sempre as bolinhas + swipe, independente da largura. */
 .carrow{display:none}
-@media (min-width:1200px){
+@media (min-width:1200px) and (hover:hover) and (pointer:fine){
   .cdots{display:none}
   .carrow{display:grid;position:absolute;top:50%;transform:translateY(-50%);width:40px;height:44px;background:transparent;border:0;place-items:center;cursor:pointer;color:var(--stone);padding:0;z-index:3;transition:color .16s ease,opacity .16s ease}
   .carrow:hover{color:var(--ink)}
