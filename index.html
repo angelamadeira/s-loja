@@ -17,6 +17,7 @@
   --label:#8A7A63; --gold-text:#907234; --stone-text:#84745E;
   --bg:var(--white); --surface:var(--white); --raised:var(--warm);
   --line:rgba(70,60,52,.12); --line-soft:rgba(70,60,52,.07); --line-strong:rgba(70,60,52,.18);
+  --alert:#B4553F;
   --cav:#EBE3D3; --cav-line:rgba(70,60,52,.10);
   --sans:'Jost',system-ui,-apple-system,sans-serif; --serif:'Cormorant',Georgia,serif;
 }
@@ -213,6 +214,17 @@ section{padding:52px 0}
 @media(min-width:560px){.qsubmit .btn{max-width:340px}}
 .wzdone{text-align:center;padding:18px 0;display:flex;flex-direction:column;align-items:center;gap:8px}
 .wzdone .btn{margin-top:16px}
+.qwa{display:inline-flex;align-items:center;gap:8px;margin-top:16px;font-size:.82rem;font-weight:400;color:var(--gold-text);text-decoration:none;transition:color .16s}
+.qwa svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.qwa:hover{color:var(--ink)}
+.qchips{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 16px}
+.qchip{font-family:inherit;font-size:.8rem;font-weight:400;color:var(--text-2);background:var(--warm);border:1px solid var(--line);border-radius:999px;padding:7px 14px;cursor:pointer;transition:border-color .16s,background .16s,color .16s}
+.qchip:hover{border-color:var(--gold)}
+.qchip.on{background:var(--ink);color:var(--white);border-color:var(--ink)}
+.cofield .opt{font-family:inherit;font-style:normal;text-transform:none;letter-spacing:normal;font-size:.66rem;color:var(--wood);margin-left:5px}
+.cofield input.bad,.cofield textarea.bad,.cofield input.bad:focus{border-color:var(--alert)}
+.fielderr{display:none;color:var(--alert);font-size:.74rem;font-weight:400;margin-top:2px;text-transform:none;letter-spacing:normal}
+.fielderr.show{display:block}
 @media(max-width:560px){.qform{padding:26px 20px 24px}.optcard{padding:14px 13px;gap:11px}.optgrid{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){.optcard,.optcard .ock{transition:none}}
 .crosssell{margin-top:6px}
@@ -288,8 +300,8 @@ footer{background:var(--warm);border-top:1px solid var(--line-soft);padding:48px
 .foot-brand .sig{font-size:1.05rem;color:var(--stone-text)}
 .fslock{display:flex;flex-direction:column;align-items:flex-start;gap:11px;margin-bottom:18px}
 .fsword{font-weight:300;font-size:1.55rem;letter-spacing:.4em;text-transform:lowercase;color:var(--ink);line-height:1}
-.fsdots{display:flex;gap:6px}
-.fsdots i{width:8px;height:8px;border-radius:50%;display:block}
+.fsdots{display:flex;gap:5px}
+.fsdots i{width:6px;height:6px;border-radius:50%;display:block}
 .pal{margin-top:18px}
 .pal .label{margin-bottom:8px}
 .pal .dots{display:flex;gap:8px;position:static}
@@ -598,6 +610,18 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
 .btn.ghost{background:var(--warm);color:var(--stone-text);border:1px solid var(--line);white-space:nowrap;padding:12px 16px}
 .cephint{font-size:.76rem;color:var(--muted);font-weight:300;margin-top:9px;min-height:1em}
 .cephint.err{color:#b4553f}
+.cepmini{display:flex;gap:8px;margin-bottom:6px}
+.cepmini input{flex:1;min-width:0;border:1px solid var(--line);border-radius:11px;padding:11px 12px;font-size:.9rem;font-family:inherit;color:var(--text);background:var(--white);outline:none}
+.cepmini input:focus{border-color:var(--stone)}
+.cepmini .btn.ghost{padding:11px 14px}
+.dfoot .cephint{margin-top:0;margin-bottom:10px}
+.pdpship{margin-top:8px}
+.pdpship .cepmini{margin-bottom:6px}
+.optlabel{text-transform:none;letter-spacing:0;font-style:normal;color:var(--muted);opacity:.65}
+.cotrust{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 14px;font-size:.72rem;color:var(--muted);font-weight:300;margin-top:-2px}
+.cotrust span{position:relative;padding-left:16px}
+.cotrust span:first-child{padding-left:0}
+.cotrust span:not(:first-child)::before{content:'·';position:absolute;left:5px;opacity:.7}
 .shipopts,.addr{margin-top:14px;display:flex;flex-direction:column;gap:10px}
 .shipopt,.payopt{display:flex;align-items:center;gap:12px;border:1px solid var(--line);border-radius:12px;padding:13px 15px;cursor:pointer}
 .shipopt.sel,.payopt.sel{border-color:var(--stone);background:var(--warm)}
@@ -842,7 +866,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
 
 <section id="lancamentos">
   <div class="wrap">
-    <div class="sec-head"><div class="lead"><h2>Conheça nossos últimos lançamentos</h2><p>As peças mais recentes do ateliê, em tiragem limitada.</p></div><div class="sec-tools"><a class="more" href="#/produtos">Ver todos</a></div></div>
+    <div class="sec-head"><div class="lead"><h2>Últimos lançamentos</h2><p>As peças mais recentes do ateliê, em tiragem limitada.</p></div><div class="sec-tools"><a class="more" href="#/produtos">Ver todos</a></div></div>
     <div class="carwrap"><div class="hcar" id="lancCar"></div><div class="cdots" hidden></div></div>
   </div>
 </section>
@@ -909,6 +933,8 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
   <div class="dh"><b>Sua sacola</b><button class="ibtn" id="closeCart" aria-label="Fechar"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
   <div class="items" id="items"><p class="empty"><span class="sig">Ainda vazia.</span>Escolha uma forma para começar.</p></div>
   <div class="dfoot">
+    <div class="cepmini"><input type="text" id="drCep" inputmode="numeric" placeholder="Seu CEP" maxlength="9" autocomplete="postal-code"><button type="button" class="btn ghost" id="drCepBtn">Calcular frete</button></div>
+    <p class="cephint" id="drCepHint"></p>
     <div class="drow"><span>Subtotal</span><span id="sub">R$ 0,00</span></div>
     <div class="drow"><span>Frete</span><span id="ship">—</span></div>
     <div class="drow tot"><span>Total</span><b id="tot">R$ 0,00</b></div>
@@ -1171,7 +1197,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
     var vid=r.video?'<video src="'+r.video+'" controls playsinline></video>':'<div class="recph"><span class="reelplay"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></span><b>Vídeo do processo em breve</b><small>o mesmo das nossas redes</small></div>';
     var moldbox='<section class="crosssell"><div class="sec-head"><div class="lead"><h2>A forma desta receita</h2></div></div><div class="csgrid">'+buyCard(mp)+'</div></section>';
     var wa='https://wa.me/?text='+encodeURIComponent(r.name+' — receita do Studio Suzu');
-    var share='<div class="share"><span class="label">Compartilhar</span><a class="shb" href="'+wa+'" target="_blank" rel="noopener" aria-label="WhatsApp"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></a><button class="shb" id="copyLink" aria-label="Copiar link"><svg viewBox="0 0 24 24"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"/><line x1="8" y1="12" x2="16" y2="12"/></svg></button><button class="shb" onclick="window.print()" aria-label="Imprimir"><svg viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button></div>';
+    var share='<div class="share"><span class="label">Compartilhar</span><a class="shb" href="'+wa+'" target="_blank" rel="noopener" aria-label="WhatsApp"><svg viewBox="0 0 24 24" style="fill:currentColor;stroke:none"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.86 9.86 0 0 0 4.79 1.22h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2zm0 18.13h-.01c-1.53 0-3.03-.41-4.34-1.19l-.31-.18-3.22.84.86-3.14-.2-.32a8.19 8.19 0 0 1-1.26-4.37c0-4.54 3.7-8.23 8.24-8.23 2.2 0 4.27.86 5.82 2.42a8.18 8.18 0 0 1 2.41 5.83c0 4.54-3.7 8.24-8.23 8.24zm4.52-6.16c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.12-.16.25-.64.81-.78.97-.14.17-.29.19-.54.06-.25-.12-1.05-.39-1.99-1.23-.74-.66-1.23-1.47-1.38-1.72-.14-.25-.02-.38.11-.51.11-.11.25-.29.37-.43.12-.14.16-.25.25-.41.08-.17.04-.31-.02-.43-.06-.12-.56-1.35-.77-1.84-.2-.48-.41-.42-.56-.42h-.48c-.17 0-.43.06-.66.31-.23.25-.87.85-.87 2.07 0 1.22.89 2.4 1.02 2.56.12.17 1.75 2.67 4.23 3.74.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.68-1.18.21-.58.21-1.07.14-1.18-.06-.11-.22-.17-.47-.29z"/></svg></a><button class="shb" id="copyLink" aria-label="Copiar link"><svg viewBox="0 0 24 24"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"/><line x1="8" y1="12" x2="16" y2="12"/></svg></button><button class="shb" onclick="window.print()" aria-label="Imprimir"><svg viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button></div>';
     var recsug='<section class="suggest"><div class="sec-head"><div class="lead"><h2>Outras receitas</h2></div><div class="sec-tools"><a class="more" href="#/receitas">Ver todas</a></div></div><div class="carwrap"><div class="hcar">'+RECIPES.filter(function(x){return x.id!==r.id;}).slice(0,6).map(recCard).join('')+'</div><div class="cdots" hidden></div></div></section>';
     return '<a class="back" href="#/receitas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>Voltar às receitas</a><article class="recipe"><div class="recvid" style="background:var(--'+r.tint+'-wash)">'+vid+'</div><div class="rechead"><span class="label">'+r.time+' · '+r.level+'</span><h1>'+r.name+'</h1>'+share+'</div><div class="recbody"><div class="recside"><h2>Ingredientes</h2><ul class="ing">'+r.ing.map(function(i){return '<li>'+i+'</li>';}).join('')+'</ul></div><div class="recmain"><h2>Passo a passo</h2><ol class="steps">'+r.steps.map(function(s,i){return '<li><span class="sn">'+(i+1)+'</span><p>'+s+'</p></li>';}).join('')+'</ol></div></div>'+moldbox+recsug+'</article>';
   }
@@ -1240,13 +1266,17 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
     return backHome()+'<div class="pdp"><div class="media"><div class="mimg"><span class="pbadge '+st.k+'">'+st.label+'</span><div class="m">'+mold(p)+'</div></div><button class="vidthumb reeltrigger" aria-label="Ver o vídeo desta peça"><span class="vtp" style="background:'+tint+'">'+mold(p)+'<span class="vtplay"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></span></span><span class="vtlabel">Ver o vídeo desse produto</span></button></div>'+
       '<div class="info"><span class="use">'+p.use+'</span><h1>'+p.name+'</h1>'+
       '<p class="lead">'+p.desc+'</p>'+scarceBlock(p)+
-      '<p class="szlabel">Escolha o tamanho</p><div class="szgrid" id="szgrid">'+szs+'</div>'+buy+
+      '<p class="szlabel">Escolha o tamanho</p><div class="szgrid" id="szgrid">'+szs+'</div>'+buy+pdpShipBlock(p)+
       '<div class="acc pdpacc"><details><summary>Cuidados</summary><div class="ac">Lave à mão, com água morna e sabão neutro; seca ao natural. Vai do congelador (−40 °C) ao forno (230 °C) sem perder o desenho.</div></details>'+
       '<details><summary>Ficha técnica</summary><div class="ac">Silicone platinum grau alimentício, atóxico e antiaderente. Medidas: Pequeno ≈ 3 cm · Médio ≈ 7 cm · Grande ≈ 12 cm. '+pat+'</div></details>'+
       '<details><summary>Entrega</summary><div class="ac">Enviamos para todo o Brasil; frete grátis acima de R$ 150. Tiragem limitada — alguns lotes podem ter espera.</div></details></div>'+
       '</div></div>'+crossSell(p)+suggestionsHTML(p)+
       '<button class="igfab reeltrigger" id="reelFab" aria-label="Ver o vídeo desta peça"><span class="fabframe" style="background:'+tint+'">'+(p.video?'<video class="fabvid" src="'+p.video+'" muted loop autoplay playsinline></video>':mold(p))+'<span class="fabplay"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></span></span></button>'+
       '<div class="reelov" id="reelov"></div><div class="reelbox" id="reelbox"><button class="reelclose" id="reelclose" aria-label="Fechar"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button><div class="reelframe" style="background:'+tint+'">'+(p.video?'<video src="'+p.video+'" controls autoplay loop playsinline></video>':'<div class="reelph">'+mold(p)+'<span class="reelplay"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></span><b>Vídeo em breve</b></div>')+'</div><p class="reelcap">'+p.name+' · @studio.suzu</p></div>';
+  }
+  function pdpShipBlock(p){
+    if(p.status==='soldout')return '';
+    return '<div class="pdpship"><div class="cepmini"><input type="text" id="pdpCep" inputmode="numeric" placeholder="Calcular entrega — seu CEP" maxlength="9" autocomplete="postal-code"><button type="button" class="btn ghost" id="pdpCepBtn">Ver prazo</button></div><p class="cephint" id="pdpCepHint"></p></div>';
   }
   function scarceBlock(p){
     if(p.status==='soldout')return '<div class="scarce so"><span class="ed">Edição esgotada</span><p class="sl" style="margin:8px 0 0">Esta tiragem acabou. Deixe seu e-mail e avisamos se voltar.</p></div>';
@@ -1266,11 +1296,11 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
     return backHome()+'<div class="listing"><div class="exhero" style="--st:var(--sakura-wash)"><div class="exbg">'+mold(byId('coracao'))+'</div><div class="excopy"><span class="label">Sob encomenda</span><h1>Seu projeto. <em>Sua cara.</em></h1><p>Uma forma que só existe para você: desenhamos, do sketch ao molde, a sua assinatura — impossível de copiar. Sob análise de orçamento.</p></div></div>'+
       '<div class="exsteps">'+[['Briefing','Você conta a ideia, o uso e o volume — sem formalidade.','<path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>'],['Orçamento','Analisamos a viabilidade e enviamos uma proposta transparente.','<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>'],['Modelagem 3D','Desenhamos e validamos o protótipo com você, do sketch ao molde.','<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/>'],['Produção','Silicone platinum, numa tiragem que é só sua — impossível de copiar.','<line x1="16.5" y1="9.4" x2="7.5" y2="4.21"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/>']].map(function(t,i){return '<div class="exstep"><div class="exsthead"><span class="exsn">'+(i+1)+'</span><svg class="exsic" viewBox="0 0 24 24">'+t[2]+'</svg></div><b>'+t[0]+'</b><p>'+t[1]+'</p></div>';}).join('')+'</div>'+
       '<form id="quoteForm" class="qform" novalidate>'+
-      '<div class="qtop"><span class="label">Briefing</span><h2 class="qtitle">Conte-nos sobre a sua peça</h2><p class="qintro">Sem formalidade — o que você já tem em mente basta para começarmos.</p></div>'+
-      '<div class="qsec"><h3 class="wztitle">Conte o seu projeto</h3><label class="cofield"><span>Detalhes</span><textarea name="brief" placeholder="Formato, tamanho, referência de estilo, prazo…" style="min-height:120px;resize:vertical"></textarea></label><div class="cofield"><span>Referências — imagens ou PDF</span><label class="filedrop" id="fileDrop"><input type="file" id="fileInput" multiple accept="image/*,application/pdf" hidden><svg viewBox="0 0 24 24"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/><polyline points="16 16 12 12 8 16"/></svg><b>Arraste aqui ou clique para anexar</b><small>JPG, PNG ou PDF · quantas quiser</small></label><div class="filelist" id="fileList"></div></div></div>'+
-      '<div class="qsec"><h3 class="wztitle">Como falamos com você</h3><div class="tworow"><label class="cofield"><span>Nome</span><input name="nome"></label><label class="cofield"><span>E-mail ou WhatsApp</span><input name="contato"></label></div></div>'+
-      '<div class="qsubmit"><button type="submit" class="btn" id="quoteSend">Enviar pedido</button></div>'+
-      '<p class="dnote" style="text-align:center">Sem compromisso · resposta em até 3 dias úteis</p></form></div>';
+      '<div class="qtop"><span class="label">Briefing</span><h2 class="qtitle">Conte-nos sobre a sua peça</h2><p class="qintro">Sem formalidade — o que você já tem em mente basta para começarmos.</p><a class="qwa" href="https://wa.me/5511912345678?text=Ol%C3%A1!%20Vim%20pela%20loja%20Studio%20Suzu%20e%20queria%20falar%20sobre%20um%20projeto%20exclusivo." target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>Prefere conversar? Chama no WhatsApp</a></div>'+
+      '<div class="qsec"><h3 class="wztitle">Conte o seu projeto</h3><div class="qchips" id="briefChips"><button type="button" class="qchip" data-fill="É para um casamento — ">Casamento</button><button type="button" class="qchip" data-fill="É para uma data comemorativa — ">Data comemorativa</button><button type="button" class="qchip" data-fill="Quero a logo da minha marca em relevo — ">Logo da marca</button><button type="button" class="qchip" data-fill="É um presente — ">Presente</button><button type="button" class="qchip" data-fill="">Outro</button></div><label class="cofield"><span>Detalhes <em class="opt">opcional</em></span><textarea name="brief" placeholder="Formato, tamanho, referência de estilo, prazo…" style="min-height:120px;resize:vertical"></textarea></label><div class="cofield"><span>Referências — imagens ou PDF <em class="opt">opcional</em></span><label class="filedrop" id="fileDrop"><input type="file" id="fileInput" multiple accept="image/*,application/pdf" hidden><svg viewBox="0 0 24 24"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/><polyline points="16 16 12 12 8 16"/></svg><b>Arraste aqui ou clique para anexar</b><small>JPG, PNG ou PDF · quantas quiser</small></label><div class="filelist" id="fileList"></div></div></div>'+
+      '<div class="qsec"><h3 class="wztitle">Como falamos com você</h3><div class="tworow"><label class="cofield"><span>Nome <em class="opt">opcional</em></span><input name="nome" autocomplete="name" autocapitalize="words"></label><label class="cofield"><span>E-mail ou WhatsApp</span><input name="contato" inputmode="email" autocomplete="email" autocapitalize="off" autocorrect="off" spellcheck="false" aria-describedby="contatoErr"><small class="fielderr" id="contatoErr" data-err></small></label></div></div>'+
+      '<div class="qsubmit"><button type="submit" class="btn" id="quoteSend">Enviar pedido</button><p class="dnote">~30 segundos · sem custo para orçar · resposta em até 3 dias úteis</p></div>'+
+      '</form></div>';
   }
 
   function wireDetail(){
@@ -1312,6 +1342,19 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
       var add=document.getElementById('pdpAdd'); if(add)add.onclick=function(){if(sizeOut(p,sel)){this.outerHTML='<span class="prenote" style="margin:0">Avisaremos você assim que voltar. ✿</span>';}else{addProduct(p.id,sel,presale);}};
       var nb=document.getElementById('notifyBtn'); if(nb)nb.onclick=function(){this.outerHTML='<span class="prenote" style="margin:0">Avisaremos você assim que voltar. ✿</span>';};
     }
+    var pdpCep=document.getElementById('pdpCep');
+    if(pdpCep){pdpCep.value=SHIP.cep;
+      pdpCep.oninput=function(){this.value=fmtCep(this.value);};
+      var pch=document.getElementById('pdpCepHint');
+      var runPdp=function(){var q=shipQuote(pdpCep.value,0);
+        if(!q){pch.textContent='Digite um CEP válido (8 dígitos).';pch.className='cephint err';return;}
+        saveCep(pdpCep.value);pdpCep.value=SHIP.cep;
+        pch.textContent='Econômico '+BRL(q[0].price)+' · '+q[0].days+'  ·  Expresso '+BRL(q[1].price)+' · '+q[1].days+'. Frete grátis acima de R$ 150.';
+        pch.className='cephint';};
+      document.getElementById('pdpCepBtn').onclick=runPdp;
+      pdpCep.onkeydown=function(e){if(e.key==='Enter'){e.preventDefault();runPdp();}};
+      if(SHIP.cep&&SHIP.cep.replace(/\D/g,'').length===8)runPdp();
+    }
     var rbx0=document.getElementById('reelbox');
     if(rbx0){var rov=document.getElementById('reelov'),rbx=rbx0;var ro=function(){rov.classList.add('open');rbx.classList.add('open');},rc=function(){rov.classList.remove('open');rbx.classList.remove('open');var vv=rbx.querySelector('video');if(vv){try{vv.pause();}catch(e){}}};document.querySelectorAll('.reeltrigger').forEach(function(t){t.onclick=ro;});document.getElementById('reelclose').onclick=rc;rov.onclick=rc;}
     document.querySelectorAll('#detail .carwrap').forEach(initCarousel);
@@ -1338,20 +1381,23 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
     var cep=document.getElementById('coCep');
     if(cep)cep.oninput=function(){var d=this.value.replace(/\D/g,'').slice(0,8);this.value=d.length>5?d.slice(0,5)+'-'+d.slice(5):d;};
     var cepBtn=document.getElementById('cepBtn');
-    if(cepBtn)cepBtn.onclick=function(){
-      var d=(cep.value||'').replace(/\D/g,''),hint=document.getElementById('cepHint');
-      if(d.length!==8){hint.textContent='Digite um CEP válido (8 dígitos).';hint.className='cephint err';return;}
+    function runCoCep(){
+      var hint=document.getElementById('cepHint');
+      var data=shipQuote(cep.value,cartSplit().subNow);
+      if(!data){hint.textContent='Digite um CEP válido (8 dígitos).';hint.className='cephint err';return;}
+      saveCep(cep.value);cep.value=SHIP.cep;
       hint.textContent='Em produção, o endereço é preenchido automaticamente pelo CEP.';hint.className='cephint';
       document.getElementById('addrFields').hidden=false;
-      var s=cartSplit(),region=parseInt(d[0],10)||0,base=Math.round((12.9+region*1.6)*100)/100;
-      var data=[{label:'Econômico',days:'5 a 8 dias úteis',price:base,free:s.subNow>=150},{label:'Expresso',days:'2 a 3 dias úteis',price:Math.round((base+16)*100)/100,free:false}];
       var box=document.getElementById('shipOpts');box.hidden=false;
       box.innerHTML=data.map(function(o,i){return '<label class="shipopt'+(i===0?' sel':'')+'"><input type="radio" name="ship" '+(i===0?'checked':'')+'><span class="shb"><b>'+o.label+'</b><small>'+o.days+'</small></span><span class="shp">'+(o.free?'Grátis':BRL(o.price))+'</span></label>';}).join('');
       CO.ship=data[0];renderCoSummary();
       var opts=box.querySelectorAll('.shipopt');
       opts.forEach(function(l,i){l.onclick=function(){opts.forEach(function(x){x.classList.remove('sel');});l.classList.add('sel');l.querySelector('input').checked=true;CO.ship=data[i];renderCoSummary();};});
-      if(s.subNow>=150){hint.textContent='Frete Econômico grátis nesta compra (acima de R$ 150).';}
-    };
+      if(data[0].free){hint.textContent='Frete Econômico grátis nesta compra (acima de R$ 150).';}
+    }
+    if(cepBtn)cepBtn.onclick=runCoCep;
+    if(cep){cep.onkeydown=function(e){if(e.key==='Enter'){e.preventDefault();runCoCep();}};
+      if(SHIP.cep&&SHIP.cep.replace(/\D/g,'').length===8)runCoCep();}
     cof.querySelectorAll('.payopt').forEach(function(l){l.onclick=function(){cof.querySelectorAll('.payopt').forEach(function(x){x.classList.remove('sel');});l.classList.add('sel');l.querySelector('input').checked=true;CO.pay=l.dataset.pay;document.getElementById('parcBox').hidden=(CO.pay!=='cartao');renderCoSummary();};});
     var parc=document.getElementById('coParc');
     if(parc){var o='';for(var n=1;n<=6;n++)o+='<option value="'+n+'">'+n+'×</option>';parc.innerHTML=o;parc.onchange=function(){CO.parc=parseInt(this.value,10)||1;renderCoSummary();};}
@@ -1360,6 +1406,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
       if(!email.value||email.value.indexOf('@')<1){email.focus();email.style.borderColor='#b4553f';return;}
       var s=cartSplit();
       if(s.now.length && !CO.ship){var hint=document.getElementById('cepHint');if(hint){hint.textContent='Calcule o frete para continuar.';hint.className='cephint err';}if(cep)cep.focus();return;}
+      var _w=document.getElementById('coWhats');CO.whats=_w?_w.value.trim():'';
       CO.hadPre=s.pre.length>0;CO.email=email.value;CO.order='SUZU-'+Math.floor(100000+Math.random()*900000);
       Object.keys(cart).forEach(function(k){delete cart[k];});render();
       location.hash='#/pedido';
@@ -1372,6 +1419,26 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
     return {now:now,pre:pre,subNow:subNow,subPre:subPre};
   }
   function coEmptyView(){return backHome()+'<div class="wrap cowrap"><div class="coempty"><span class="sig">Sua sacola está vazia.</span><p>Escolha uma forma para começar a sua coleção.</p><a class="btn" href="#/produtos">Ver produtos</a></div></div>';}
+  /* ============================================================================
+     CHECKOUT — PENDÊNCIAS DE BACK-END (o front já está pronto; falta integração real)
+     Anotado em 2026-07-14 · ver também a memória "suzu-loja-integracoes-pendente".
+     ----------------------------------------------------------------------------
+     1. CEP -> endereço automático (ViaCEP): hoje shipQuote() estima o frete pela
+        região (1o digito do CEP) e os campos de endereço são preenchidos à mão.
+        Trocar por https://viacep.com.br/ws/CEP/json/ e preencher rua/bairro/cidade/UF.
+     2. Frete real (Correios / Melhor Envio): substituir a fórmula de shipQuote()
+        por cotação real por CEP + peso/dimensão da peça.
+     3. CPF: adicionar campo obrigatório no passo Contato — necessário para Pix,
+        boleto e emissão de nota fiscal.
+     4. Pix de verdade: após "Concluir pedido", gerar QR Code + copia-e-cola e
+        confirmar via webhook do PSP (Mercado Pago / Pagar.me / etc.). Hoje o submit
+        só limpa o carrinho e vai para #/pedido.
+     5. Persistir o pedido e disparar o e-mail de confirmação de verdade (o texto já
+        existe em pedidoView).
+     6. Recuperação de carrinho: usar o e-mail/WhatsApp capturados para a sequência
+        1h / 24h / 48h (recupera ~8–15% das vendas perdidas).
+     7. Anexos do briefing (projeto exclusivo) e vídeos das receitas: upload real.
+     ============================================================================ */
   function checkoutView(){
     var s=cartSplit();
     if(!s.now.length && !s.pre.length) return coEmptyView();
@@ -1380,7 +1447,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
     var entrega = onlyPre
       ? '<section class="costep"><div class="cohd"><span class="conum">2</span><h2>Entrega</h2></div><div class="coinfo">Seus itens são <b>reserva de pré-venda</b>. O endereço e o frete são confirmados no envio, quando a peça é lançada — você não paga frete agora.</div></section>'
       : '<section class="costep"><div class="cohd"><span class="conum">2</span><h2>Entrega</h2></div>'
-        +'<div class="ceprow"><label class="cofield"><span>CEP</span><input type="text" id="coCep" inputmode="numeric" placeholder="00000-000" maxlength="9" autocomplete="postal-code"></label><button type="button" class="btn ghost" id="cepBtn">Calcular frete</button></div>'
+        +'<div class="ceprow"><label class="cofield"><span>CEP</span><input type="text" id="coCep" inputmode="numeric" placeholder="00000-000" maxlength="9" autocomplete="postal-code" value="'+SHIP.cep+'"></label><button type="button" class="btn ghost" id="cepBtn">Calcular frete</button></div>'
         +'<p class="cephint" id="cepHint"></p>'
         +'<div id="shipOpts" class="shipopts" hidden></div>'
         +'<div id="addrFields" class="addr" hidden>'
@@ -1393,8 +1460,9 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
       +'<form class="coform" id="coForm" novalidate>'
       +'<section class="costep"><div class="cohd"><span class="conum">1</span><h2>Contato</h2></div>'
       +'<label class="cofield"><span>E-mail</span><input type="email" id="coEmail" placeholder="voce@email.com" autocomplete="email"></label>'
-      +'<label class="cocheck"><input type="checkbox" id="coNews" checked> Quero receber avisos de lançamentos e pré-vendas.</label>'
-      +'<p class="coguest">Compra como convidado — sem precisar criar conta.</p></section>'
+      +'<label class="cofield"><span>WhatsApp <em class="optlabel">opcional</em></span><input type="tel" id="coWhats" placeholder="(11) 90000-0000" autocomplete="tel"></label>'
+      +'<label class="cocheck"><input type="checkbox" id="coNews"> Quero receber avisos de lançamentos e pré-vendas.</label>'
+      +'<p class="coguest">Compra como convidado — sem precisar criar conta. Avisamos cada etapa por e-mail; se você deixar o WhatsApp, falamos por lá também.</p></section>'
       +entrega
       +'<section class="costep"><div class="cohd"><span class="conum">3</span><h2>Pagamento</h2></div><div class="paylist">'
       +'<label class="payopt sel" data-pay="pix"><input type="radio" name="pay" value="pix" checked><span class="payb"><b>Pix</b><small>5% de desconto · aprovação na hora</small></span><span class="paytag">-5%</span></label>'
@@ -1403,6 +1471,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
       +'<label class="payopt" data-pay="boleto"><input type="radio" name="pay" value="boleto"><span class="payb"><b>Boleto bancário</b><small>à vista · compensa em até 2 dias úteis</small></span></label>'
       +'</div></section>'
       +'<button type="submit" class="btn cofinish" id="coFinish">Concluir pedido</button>'
+      +'<div class="cotrust"><span>Compra protegida</span><span><a href="#/faq">Trocas em até 7 dias</a></span><span>Enviamos para todo o Brasil</span></div>'
       +'<p class="cosafe">Ambiente seguro · protótipo de demonstração</p>'
       +'</form><aside class="cosummary" id="coSummary"></aside></div></div>';
   }
@@ -1429,7 +1498,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
     return '<div class="wrap cowrap"><div class="okwrap"><div class="okseal"><svg class="okcheck" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>'
       +'<span class="sig oksig">Pedido confirmado.</span>'
       +'<p class="oknum">Nº '+CO.order+'</p>'
-      +'<p class="oktext">Enviamos a confirmação para <b>'+(CO.email||'seu e-mail')+'</b>. Você acompanha cada etapa por lá — do preparo ao envio.</p>'
+      +'<p class="oktext">Enviamos a confirmação para <b>'+(CO.email||'seu e-mail')+'</b>. Você acompanha cada etapa por lá — do preparo ao envio.'+(CO.whats?' Se precisarmos, falamos no seu WhatsApp.':'')+'</p>'
       +(CO.hadPre?'<p class="oktext pre">Os itens de reserva ficam guardados com o seu nome; avisamos e cobramos o restante quando a peça é lançada.</p>':'')
       +'<a class="btn" href="#/produtos">Continuar comprando</a></div></div>';
   }
@@ -1469,17 +1538,46 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
   mm.querySelectorAll('a').forEach(a=>a.addEventListener('click',closeMenu));
 
   /* CARRINHO */
+  /* ── Frete compartilhado — carrinho, página de produto e checkout usam a mesma conta e o mesmo CEP ── */
+  var SHIP={cep:''};
+  try{SHIP.cep=localStorage.getItem('suzu_cep')||'';}catch(e){}
+  function fmtCep(v){var d=(v||'').replace(/\D/g,'').slice(0,8);return d.length>5?d.slice(0,5)+'-'+d.slice(5):d;}
+  function saveCep(c){SHIP.cep=fmtCep(c);try{localStorage.setItem('suzu_cep',SHIP.cep);}catch(e){}}
+  function shipQuote(cep,subNow){
+    var d=(cep||'').replace(/\D/g,'');
+    if(d.length!==8)return null;
+    var region=parseInt(d[0],10)||0,base=Math.round((12.9+region*1.6)*100)/100;
+    return [
+      {label:'Econômico',days:'5 a 8 dias úteis',price:base,free:subNow>=150},
+      {label:'Expresso',days:'2 a 3 dias úteis',price:Math.round((base+16)*100)/100,free:false}
+    ];
+  }
+  function syncDrawerCep(s,q){
+    var dc=document.getElementById('drCep');if(!dc)return;
+    if(document.activeElement!==dc)dc.value=SHIP.cep;
+    var dh=document.getElementById('drCepHint');if(!dh)return;
+    if(!s.now.length||!q){dh.textContent='';dh.className='cephint';return;}
+    var e=q[0];
+    dh.textContent=(e.free?'Frete Econômico grátis nesta compra · ':(e.label+' '+BRL(e.price)+' · '))+e.days;
+    dh.className='cephint';
+  }
   var cart={};
   function addProduct(id,size,presale){var p=byId(id);var full=priceOf(p,size);var price=presale?Math.round(full*0.3):full;var k=id+'-'+size+(presale?'-pre':'');if(cart[k])cart[k].qty++;else cart[k]={p:p,name:p.name+(presale?' — reserva':''),price:price,sub:presale?('Sinal de reserva · '+SIZES[size].name):(SIZES[size].name+' · '+SIZES[size].dim),qty:1};render();open();}
   function render(){
     var count=0,sub=0;Object.keys(cart).forEach(k=>{count+=cart[k].qty;sub+=cart[k].qty*cart[k].price;});
     var b=document.getElementById('badge');b.textContent=count;b.classList.toggle('on',count>0);
-    var ship=sub===0?0:(sub>=150?0:19.9);
+    var s=cartSplit(),hasNow=s.now.length>0,q=shipQuote(SHIP.cep,s.subNow);
+    var ship=!hasNow?0:(q?(q[0].free?0:q[0].price):null); /* null = ainda sem CEP calculado */
     document.getElementById('dockTotal').textContent=BRL(sub);
     document.getElementById('dockCount').textContent=count?(count+(count>1?' itens':' item')+' na sacola'):'sua sacola está vazia';
     document.getElementById('sub').textContent=BRL(sub);
-    document.getElementById('ship').textContent=sub===0?'—':(ship===0?'Grátis':BRL(ship));
-    document.getElementById('tot').textContent=BRL(sub+ship);
+    var _sh=document.getElementById('ship');
+    if(sub===0)_sh.textContent='—';
+    else if(!hasNow)_sh.textContent='no lançamento';
+    else if(ship===null)_sh.textContent='calcule o CEP';
+    else _sh.textContent=ship===0?'Grátis':BRL(ship);
+    document.getElementById('tot').textContent=BRL(sub+(ship||0));
+    syncDrawerCep(s,q);
     var box=document.getElementById('items'),keys=Object.keys(cart);
     if(!keys.length){box.innerHTML='<p class="empty"><span class="sig">Ainda vazia.</span>Escolha uma forma para começar.</p>';return;}
     box.innerHTML=keys.map(function(k){var it=cart[k];return '<div class="li"><div class="mini">'+mold(it.p)+'</div><div class="info"><b>'+it.name+'</b><small>'+BRL(it.price)+' · '+it.sub+'</small></div><div class="qty"><button data-m="'+k+'" aria-label="menos">−</button><span>'+it.qty+'</span><button data-p="'+k+'" aria-label="mais">+</button></div></div>';}).join('');
@@ -1492,6 +1590,14 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
   document.getElementById('openCart').onclick=open;document.getElementById('openCart2').onclick=open;
   document.getElementById('closeCart').onclick=close;ov.onclick=close;
   var _cob=document.querySelector('.dfoot .checkout');if(_cob)_cob.onclick=function(){if(!Object.keys(cart).length)return;close();location.hash='#/checkout';};addEventListener('keydown',e=>{if(e.key==='Escape'){close();closeMenu();}});
+  (function(){var dc=document.getElementById('drCep'),db=document.getElementById('drCepBtn'),dh=document.getElementById('drCepHint');
+    if(!dc||!db)return;dc.value=SHIP.cep;
+    dc.oninput=function(){this.value=fmtCep(this.value);};
+    dc.onkeydown=function(e){if(e.key==='Enter'){e.preventDefault();db.click();}};
+    db.onclick=function(){var q=shipQuote(dc.value,cartSplit().subNow);
+      if(!q){dh.textContent='Digite um CEP válido (8 dígitos).';dh.className='cephint err';return;}
+      saveCep(dc.value);render();};
+  })();
 
   (function(){
     var sb=document.getElementById('searchbar'),sov=document.getElementById('searchov'),gq=document.getElementById('gq'),res=document.getElementById('sresults');
