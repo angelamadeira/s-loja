@@ -110,6 +110,7 @@ section{padding:52px 0}
 .hcar.grabbing,.hcar.grabbing a,.hcar.grabbing *{cursor:grabbing}
 .hcar a,.hcar img,.hcar svg,.hcar .mold,.hcar .rimg{-webkit-user-drag:none;user-drag:none}
 .hcar>*{scroll-snap-align:start;flex:0 0 auto}
+@media(pointer:coarse){.hcar{scroll-snap-type:x mandatory}.hcar>*{scroll-snap-stop:always}}
 /* larguras em fração exata: sempre um nº inteiro de cards, sem pontinha cortada */
 .hcar .pcard,.hcar .rcard{width:calc((100% - 14px)/2)}
 .hcar .rev{width:100%}
@@ -410,6 +411,16 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
 .pdp{padding:22px 0 60px;display:flex;flex-direction:column;gap:34px}
 .pdp .mimg{position:relative;border:1px solid var(--line-soft);border-radius:22px;overflow:hidden;background:var(--warm)}
 .pdp .mimg .m{aspect-ratio:1/1}
+.mstage{position:relative}
+.mstage .mphoto{width:100%;aspect-ratio:1/1;object-fit:cover;display:block}
+.mthumbs{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
+.mthumb{width:62px;height:62px;border-radius:12px;overflow:hidden;border:1px solid var(--line-soft);background:var(--warm);padding:0;cursor:pointer;flex:0 0 auto;transition:border-color .16s}
+.mthumb:hover{border-color:var(--stone)}
+.mthumb.on{border-color:var(--ink)}
+.mthumb>*{width:100%;height:100%;display:grid;place-items:center;overflow:hidden}
+.mthumb img{object-fit:cover}
+.mthumb .mtv{position:relative}
+.mthumb .mtv svg{width:15px;height:15px;fill:var(--ink)}
 .pdp .use{font-size:.62rem;letter-spacing:.16em;text-transform:uppercase;color:var(--label);font-weight:500}
 .pdp h1{font-weight:500;font-size:1.8rem;margin:8px 0 0;letter-spacing:-.01em}
 .pdp .rate{display:flex;align-items:center;gap:6px;font-size:.8rem;color:var(--text-3);margin-top:8px}
@@ -432,7 +443,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
 .sz .d{font-size:.68rem;color:var(--stone-text);margin-top:4px}
 .sz .p{font-weight:500;font-size:.92rem;margin-top:8px;font-variant-numeric:tabular-nums}
 .pdp .buyrow{display:flex;align-items:center;gap:16px;margin-top:24px;flex-wrap:wrap}
-.pdp .buyrow .price{font-size:1.3rem;font-weight:500;font-variant-numeric:tabular-nums}
+.pdp .buyrow .price{font-size:1.3rem;font-weight:500;font-variant-numeric:tabular-nums;flex:0 0 auto;min-width:152px}
 .pdp .buyrow .price small{display:block;font-size:.66rem;color:var(--stone-text);font-weight:400}
 .pdp .buyrow .price.so{font-size:1rem;color:var(--muted)}
 .pdp .addbtn{flex:1;min-width:200px;text-align:center}
@@ -746,7 +757,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
   .slide .cta{display:inline-block;width:auto;padding:12px 22px}
   .duo{grid-template-columns:1fr 1fr}
   .pdp{flex-direction:row;align-items:flex-start;gap:52px}
-  .pdp .media{flex:1;position:sticky;top:88px}
+  .pdp .media{flex:1}
   .pdp .info{flex:1;padding-top:4px}
   .foot-grid{flex-direction:row;justify-content:space-between}
   .foot-cols{grid-template-columns:repeat(3,auto);gap:56px}
@@ -960,7 +971,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
     {id:'coracao',name:'Coração Selado',shape:'heart', cols:4,rows:2,base:68,rating:5.0,rev:64,use:'Bombom · coração',coll:'Bombons',sizes:['P','M'],launch:5,edition:50,left:50,status:'presale',avail:'15/03',ig:IG,desc:'Corações com o relevo do selo, para as datas que pedem afeto — sem cair no óbvio.'},
     {id:'concha', name:'Bombom Concha', shape:'circle',cols:6,rows:4,base:71,rating:4.8,rev:203,use:'Bombom · mini',coll:'Bombons',sizes:['P','M'],launch:4,edition:80,left:44,status:'presale',avail:'02/04',ig:IG,desc:'Vinte e quatro mini bombons por fornada — para caixas e mimos que se vendem no olhar.'},
     {id:'cubo',   name:'Pão de Mel Cubo',shape:'square',cols:3,rows:3,base:82,rating:4.9,rev:52,use:'Pão de mel · cubo',coll:'Bento & Festa',sizes:['M','G'],launch:3,edition:45,left:21,status:'live',ig:IG,desc:'Cubos de faces retas e vivas — pães de mel, brownies e entremets com acabamento de galeria.'},
-    {id:'esfera', name:'Bombom Esfera', shape:'circle',cols:5,rows:3,base:74,rating:4.8,rev:96,use:'Bombom · esfera',coll:'Bombons',sizes:['P','M','G'],launch:2,edition:60,left:33,status:'live',ig:IG,desc:'Esferas de fecho perfeito para bombons recheados. Desenforma limpa, brilho de vitrine.'},
+    {id:'esfera', name:'Bombom Esfera', shape:'circle',cols:5,rows:3,base:74,rating:4.8,rev:96,use:'Bombom · esfera',coll:'Bombons',sizes:['P','M','G'],launch:2,edition:60,left:33,status:'live',ig:IG,desc:'Esferas de fecho perfeito para bombons recheados. Desenforma limpa, brilho de vitrine.',media:[{type:'mold',tint:'sakura'},{type:'mold',tint:'sango'}]},
     {id:'macaron',name:'Macaron Anel',  shape:'ring',  cols:4,rows:3,base:79,rating:4.7,rev:141,use:'Macaron',coll:'Essenciais',sizes:['P','M'],launch:1,edition:40,left:0,status:'soldout',ig:IG,desc:'Anéis de borda impecável: macarons de altura uniforme, fileira após fileira.'}
   ];
   /* PRÉ-VENDA desligada por ora (guardada p/ voltar depois) — flipar p/ true reativa tudo.
@@ -1269,7 +1280,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
     if(allOut(p)) buy='<div class="buyrow"><span class="price so">Esgotado nesta tiragem</span><button class="btn ghost" id="notifyBtn">Avise-me quando voltar</button></div>';
     else if(p.status==='presale'){var dep=Math.round(priceOf(p,def)*0.3); buy='<div class="buyrow"><span class="price" id="pdpPrice">'+BRL(dep)+'<small>sinal de reserva · '+SIZES[def].name+' de '+BRL(priceOf(p,def))+'</small></span><button class="btn addbtn" id="pdpAdd">Reservar com sinal</button></div><p class="prenote">O sinal garante a sua peça e a prioridade — e é descontado do valor final quando ela lança, em '+p.avail+'.</p>';}
     else buy='<div class="buyrow"><span class="price" id="pdpPrice">'+BRL(priceOf(p,def))+'<small>em até 6× · '+SIZES[def].name+'</small></span><button class="btn addbtn" id="pdpAdd">Adicionar à sacola</button></div>';
-    return backHome()+'<div class="pdp"><div class="media"><div class="mimg"><span class="pbadge '+st.k+'">'+st.label+'</span><div class="m">'+mold(p)+'</div></div><button class="vidthumb reeltrigger" aria-label="Ver o vídeo desta peça"><span class="vtp" style="background:'+tint+'">'+mold(p)+'<span class="vtplay"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></span></span><span class="vtlabel">Ver o vídeo desse produto</span></button></div>'+
+    return backHome()+'<div class="pdp"><div class="media">'+mediaGallery(p)+'<button class="vidthumb reeltrigger" aria-label="Ver o vídeo desta peça"><span class="vtp" style="background:'+tint+'">'+mold(p)+'<span class="vtplay"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></span></span><span class="vtlabel">Ver o vídeo desse produto</span></button></div>'+
       '<div class="info"><span class="use">'+p.use+'</span><h1>'+p.name+'</h1>'+
       '<p class="lead">'+p.desc+'</p>'+scarceBlock(p)+
       '<p class="szlabel">Escolha o tamanho</p><div class="szgrid" id="szgrid">'+szs+'</div>'+buy+pdpShipBlock(p)+
@@ -1283,6 +1294,31 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
   function pdpShipBlock(p){
     if(p.status==='soldout')return '';
     return '<div class="pdpship"><div class="cepmini"><input type="text" id="pdpCep" inputmode="numeric" placeholder="Calcular entrega — seu CEP" maxlength="9" autocomplete="postal-code"><button type="button" class="btn ghost" id="pdpCepBtn">Ver prazo</button></div><p class="cephint" id="pdpCepHint"></p></div>';
+  }
+  /* GALERIA DE MÍDIA DO PRODUTO
+     Para dar mais fotos/vídeos a um produto, adicione um campo `media` no PRODUCTS:
+       media:[{type:'image',src:'foto-lado.jpg',alt:'descrição'},
+              {type:'video',src:'video.mp4',poster:'capa.jpg'}]
+     O 1º slide é sempre a forma (mold); os itens de `media` viram miniaturas ao lado.
+     (type:'mold' com tint é só um placeholder de demonstração — troque por fotos reais.) */
+  function pmediaAll(p){var items=[{type:'mold',tint:TINTS[p.id]||'mizu'}];(p.media||[]).forEach(function(m){items.push(m);});return items;}
+  function pmediaMain(p,it){
+    if(it.type==='image')return '<img class="m mphoto" src="'+it.src+'" alt="'+(it.alt||p.name)+'">';
+    if(it.type==='video')return '<video class="m mphoto" src="'+it.src+'"'+(it.poster?' poster="'+it.poster+'"':'')+' controls playsinline preload="metadata"></video>';
+    return '<div class="m" style="background:var(--'+(it.tint||TINTS[p.id]||'mizu')+'-wash)">'+mold(p)+'</div>';
+  }
+  function pmediaThumb(p,it,i){
+    var inner;
+    if(it.type==='image')inner='<img src="'+it.src+'" alt="">';
+    else if(it.type==='video')inner='<span class="mtv" style="background:var(--'+(TINTS[p.id]||'mizu')+'-wash)"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></span>';
+    else inner='<span class="mtmold" style="background:var(--'+(it.tint||TINTS[p.id]||'mizu')+'-wash)">'+mold(p)+'</span>';
+    return '<button type="button" class="mthumb'+(i===0?' on':'')+'" data-i="'+i+'" aria-label="Ver mídia '+(i+1)+'">'+inner+'</button>';
+  }
+  function mediaGallery(p){
+    var st=statusMeta(p),items=pmediaAll(p);
+    var stage='<div class="mimg"><span class="pbadge '+st.k+'">'+st.label+'</span><div class="mstage" id="mstage">'+pmediaMain(p,items[0])+'</div></div>';
+    if(items.length<2)return stage;
+    return stage+'<div class="mthumbs" id="mthumbs">'+items.map(function(it,i){return pmediaThumb(p,it,i);}).join('')+'</div>';
   }
   function scarceBlock(p){
     if(p.status==='soldout')return '<div class="scarce so"><span class="ed">Edição esgotada</span><p class="sl" style="margin:8px 0 0">Esta tiragem acabou. Deixe seu e-mail e avisamos se voltar.</p></div>';
@@ -1336,6 +1372,11 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
       pageShown=9;var lmb=document.getElementById('loadMore');if(lmb)lmb.onclick=function(){pageShown+=9;renderProducts();};
       renderProducts();
     }
+    /* PDP galeria de mídia */
+    (function(){var thumbs=document.getElementById('mthumbs'),stage=document.getElementById('mstage');if(!thumbs||!stage)return;
+      var gp=byId(location.hash.slice(4));if(!gp)return;var items=pmediaAll(gp);
+      thumbs.querySelectorAll('.mthumb').forEach(function(b){b.onclick=function(){var i=+b.dataset.i;thumbs.querySelectorAll('.mthumb').forEach(function(x){x.classList.remove('on');});b.classList.add('on');stage.innerHTML=pmediaMain(gp,items[i]);};});
+    })();
     /* PDP tamanho */
     var szgrid=document.getElementById('szgrid');
     if(szgrid){
