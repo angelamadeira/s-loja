@@ -181,11 +181,11 @@ section{padding:52px 0}
 .fileitem .filerm{position:absolute;top:-7px;right:-7px;width:22px;height:22px;border-radius:50%;background:var(--ink);color:#fff;border:none;font-size:.95rem;line-height:1;cursor:pointer;display:grid;place-items:center}
 .qform{max-width:none;width:100%;border:1px solid var(--line-soft);border-radius:22px;padding:34px 32px 30px;background:var(--white)}
 @media(min-width:900px){.qform{padding:44px 52px 36px}}
-.qtop{margin-bottom:26px}
+.qtop{margin-bottom:26px;text-align:center}
 .qtop .label{display:block;margin-bottom:11px}
 .qtitle{font-weight:500;font-size:1.6rem;line-height:1.16;letter-spacing:-.02em;margin:0;color:var(--ink)}
 .qtitle em{font-family:var(--serif);font-style:italic;font-weight:500;color:var(--stone-text)}
-.qintro{margin:12px 0 0;color:var(--muted);font-weight:300;font-size:.95rem;line-height:1.6;max-width:52ch}
+.qintro{margin:12px auto 0;color:var(--muted);font-weight:300;font-size:.95rem;line-height:1.6;max-width:52ch}
 .qsec{padding:8px 0 2px}
 .qsec+.qsec{padding-top:30px}
 .wztitle{font-weight:500;font-size:1.2rem;letter-spacing:-.01em;margin:0 0 18px;color:var(--ink)}
@@ -654,6 +654,14 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
 .okwrap{display:flex;flex-direction:column;align-items:center;gap:7px}
 .okseal{width:64px;height:64px;border-radius:50%;background:var(--mizu);display:flex;align-items:center;justify-content:center;margin-bottom:12px}
 .okcheck{width:30px;height:30px;fill:none;stroke:#233f3d;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+@media(prefers-reduced-motion:no-preference){
+  .okseal{position:relative;transform-origin:center;animation:okpop .52s cubic-bezier(.34,1.56,.64,1) both}
+  .okseal::after{content:'';position:absolute;inset:0;border-radius:50%;border:2px solid var(--mizu);animation:okring .9s ease-out .12s both;pointer-events:none}
+  .okcheck{stroke-dasharray:26;stroke-dashoffset:26;animation:okdraw .42s ease .34s forwards}
+}
+@keyframes okpop{0%{transform:scale(.2);opacity:0}60%{transform:scale(1.08);opacity:1}100%{transform:scale(1)}}
+@keyframes okring{0%{transform:scale(1);opacity:.55}100%{transform:scale(1.75);opacity:0}}
+@keyframes okdraw{to{stroke-dashoffset:0}}
 .oksig{font-size:1.5rem}
 .oknum{font-family:var(--serif);font-style:italic;font-size:1.15rem;color:var(--stone-text)}
 .oktext{color:var(--muted);font-weight:300;line-height:1.6;max-width:400px}
@@ -1224,7 +1232,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
     var defOut=full||sizeOut(p,def);
     var sizes=(!full && p.sizes.length>1)?'<div class="fcsizes">'+p.sizes.map(function(s){var o=sizeOut(p,s);return '<button type="button" class="fcsz'+(o?' out':'')+'" data-s="'+s+'" aria-pressed="'+(s===def)+'">'+SIZES[s].name+' · '+SIZES[s].dim+'</button>';}).join('')+'</div>':'';
     var price=defOut?'<span class="fcprice so">Esgotado nesta tiragem</span>':'<span class="fcprice">'+BRL(priceOf(p,def))+'<small>em até 6× · '+SIZES[def].name+'</small></span>';
-    var btn='<button type="button" class="btn ghost buybtn fcbtn">'+(defOut?'Avise-me quando voltar':'Adicionar à sacola')+'</button>';
+    var btn='<button type="button" class="btn '+(defOut?'ghost ':'')+'buybtn fcbtn">'+(defOut?'Avise-me quando voltar':'Adicionar à sacola')+'</button>';
     return '<div class="formacta buycard" data-id="'+p.id+'" data-size="'+def+'"><a class="fcimg" href="#/p/'+p.id+'" style="background:var(--'+tint+'-wash)"><span class="pbadge '+st.k+'">'+st.label+'</span>'+mold(p)+'</a><div class="fctxt"><a class="fcname" href="#/p/'+p.id+'"><b>'+p.name+'</b></a><p>'+p.use+' · silicone platinum</p>'+sizes+'</div><div class="fcbuy">'+price+btn+'</div></div>';
   }
   /* liga os cards de compra: escolha de tamanho atualiza preço + botão; botão adapta ao tamanho (comprar ou avisar) */
@@ -1279,7 +1287,6 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
   function scarceBlock(p){
     if(p.status==='soldout')return '<div class="scarce so"><span class="ed">Edição esgotada</span><p class="sl" style="margin:8px 0 0">Esta tiragem acabou. Deixe seu e-mail e avisamos se voltar.</p></div>';
     if(p.status==='presale')return '<div class="scarce pre"><span class="ed">Pré-venda · disponível em '+p.avail+'</span><p class="sl" style="margin:8px 0 0">Garanta com um sinal de reserva; o restante você paga quando a peça lança. Tiragem limitada.</p></div>';
-    if(p.left<=8)return '<div class="scarce"><span class="ed">Últimas unidades</span><p class="sl" style="margin:8px 0 0">Restam <b>'+p.left+'</b> unidades desta tiragem — sem reposição garantida.</p></div>';
     return '';
   }
   function sobreView(){
