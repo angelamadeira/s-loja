@@ -741,11 +741,11 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
 .exstep:hover{box-shadow:none}
 /* card de compra único em grade (Leve junto / forma da receita): sem margem extra entre eles */
 .csgrid .formacta{margin-top:0}
-/* ===== card de compra no MOBILE: imagem+texto em cima, linha de compra (preço + botão) embaixo ===== */
+/* ===== card de compra no MOBILE: imagem no TOPO (banner full-width), conteúdo empilhado abaixo ===== */
 @media(max-width:559px){
-  .formacta{align-items:center}
-  .formacta .fcimg{width:82px;min-height:82px}
-  .formacta .fctxt{flex:1 1 130px}
+  .formacta{flex-direction:column;align-items:stretch;gap:12px}
+  .formacta .fcimg{width:auto;height:150px;min-height:150px;margin:-18px -18px 0;border-radius:0}
+  .formacta .fctxt{flex:0 0 auto}
   .formacta .fcsizes{margin-top:9px}
   .formacta .fcbuy{width:100%;flex-direction:row;align-items:center;justify-content:space-between;gap:12px;margin-top:2px;padding-top:12px;border-top:1px solid var(--line-soft)}
   .formacta .fcprice{text-align:left}
