@@ -1754,7 +1754,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
     else if(h==='#/receitas')v=receitasView();
     else if(h==='#/faq')v=faqView();
     else if(h==='#/checkout')v=checkoutView();
-    else if(h==='#/pedido')v=pedidoView();
+    else if(h==='#/pedido'){if(!CO.order){location.replace('#/');return;}v=pedidoView();}
     closeMenu(); setActiveNav(h);
     if(v!==null){detail.innerHTML=v;home.style.display='none';detail.style.display='block';window.scrollTo(0,0);wireDetail();}
     else{home.style.display='';detail.style.display='none';detail.innerHTML='';}
