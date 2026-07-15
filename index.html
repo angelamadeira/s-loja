@@ -424,18 +424,16 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
 .mstage{position:relative}
 .mstage .mphoto{width:100%;aspect-ratio:1/1;object-fit:cover;display:block}
 .mthumbs{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;justify-content:center}
-.mdots{display:flex;justify-content:center;align-items:center;gap:8px;margin-top:14px}
-.mdot{width:8px;height:8px;padding:0;border:0;border-radius:50%;background:var(--line-strong);cursor:pointer;transition:background .2s,width .2s}
-.mdot.on{background:var(--ink);width:22px;border-radius:5px}
-.marrow{display:none}
-@media (min-width:1000px) and (hover:hover) and (pointer:fine){
-  .marrow{display:grid;position:absolute;top:50%;transform:translateY(-50%);width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.82);border:1px solid var(--line-soft);place-items:center;cursor:pointer;color:var(--ink);padding:0;z-index:4;opacity:0;transition:opacity .18s ease,background .18s ease}
-  .mimg:hover .marrow{opacity:1}
-  .marrow:hover{background:#fff}
-  .marrow.prev{left:12px}
-  .marrow.next{right:12px}
-  .marrow svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-}
+/* Galeria PDP = carrossel (mesma mecânica arraste+dots+setas dos outros carrosséis, via initCarousel) */
+.mgal .hcar{padding:0;margin:0}   /* mantém gap:14 da base p/ o metrics do initCarousel bater (parseInt('0px')||14 = 14) */
+.mgframe{position:relative;border:1px solid var(--line-soft);border-radius:22px;overflow:hidden;background:var(--warm)}
+.hcar .mgslide{width:100%}
+.mgslide .m{border-radius:0}
+.mgal .cdots{margin-top:14px}
+.mgal .carrow{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.86);border:1px solid var(--line-soft)}
+.mgal .carrow.prev{left:12px}
+.mgal .carrow.next{right:12px}
+.mgal .carrow:hover{background:#fff;color:var(--ink)}
 .mthumb{width:70px;height:70px;border-radius:12px;overflow:hidden;border:1px solid var(--line-soft);background:var(--warm);padding:0;cursor:pointer;flex:0 0 auto;transition:border-color .16s}
 .mthumb:hover{border-color:var(--stone)}
 .mthumb.on{border-color:var(--ink)}
@@ -1514,11 +1512,8 @@ button.cohd{width:100%;border:0;background:none;font:inherit;color:inherit;text-
   }
   function mediaGallery(p){
     var items=pmediaAll(p);
-    if(items.length<2)return '<div class="mimg"><div class="mstage" id="mstage">'+pmediaMain(p,items[0])+'</div></div>';
-    var arrows='<button type="button" class="marrow prev" id="mprev" aria-label="Mídia anterior"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button><button type="button" class="marrow next" id="mnext" aria-label="Próxima mídia"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>';
-    var stage='<div class="mimg"><div class="mstage" id="mstage">'+pmediaMain(p,items[0])+'</div>'+arrows+'</div>';
-    var dots=items.map(function(it,i){return '<button type="button" class="mdot'+(i===0?' on':'')+'" data-i="'+i+'" aria-label="Ver mídia '+(i+1)+'"></button>';}).join('');
-    return stage+'<div class="mdots" id="mdots">'+dots+'</div>';
+    var slides=items.map(function(it){return '<div class="mgslide">'+pmediaMain(p,it)+'</div>';}).join('');
+    return '<div class="mgal carwrap"><div class="mgframe"><div class="hcar mghcar">'+slides+'</div></div><div class="cdots" hidden></div></div>';
   }
   /* Capa do card: imagem OU vídeo se o produto tiver `cover`, senão a forma (mold).
      Ex.: cover:{type:'image',src:'foto.jpg'}  ou  cover:{type:'video',src:'v.mp4',poster:'capa.jpg'} */
@@ -1582,15 +1577,7 @@ button.cohd{width:100%;border:0;background:none;font:inherit;color:inherit;text-
       renderProducts();
     }
     /* PDP galeria de mídia */
-    (function(){var stage=document.getElementById('mstage'),dotsWrap=document.getElementById('mdots');if(!stage||!dotsWrap)return;
-      var gp=byId(location.hash.slice(4));if(!gp)return;var items=pmediaAll(gp);
-      var dots=[].slice.call(dotsWrap.querySelectorAll('.mdot')),cur=0;
-      function show(i){cur=(i+items.length)%items.length;stage.innerHTML=pmediaMain(gp,items[cur]);dots.forEach(function(x,k){x.classList.toggle('on',k===cur);});}
-      dots.forEach(function(d,i){d.onclick=function(){show(i);};});
-      var pv=document.getElementById('mprev'),nx=document.getElementById('mnext');
-      if(pv)pv.onclick=function(){show(cur-1);};
-      if(nx)nx.onclick=function(){show(cur+1);};
-    })();
+    /* galeria: agora é um .carwrap — o initCarousel abaixo (em '#detail .carwrap') dá arraste+dots+setas */
     /* PDP tamanho */
     var szgrid=document.getElementById('szgrid');
     if(szgrid){
