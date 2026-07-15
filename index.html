@@ -424,6 +424,9 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
 .mstage{position:relative}
 .mstage .mphoto{width:100%;aspect-ratio:1/1;object-fit:cover;display:block}
 .mthumbs{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;justify-content:center}
+.mdots{display:flex;justify-content:center;align-items:center;gap:8px;margin-top:14px}
+.mdot{width:8px;height:8px;padding:0;border:0;border-radius:50%;background:var(--line-strong);cursor:pointer;transition:background .2s,width .2s}
+.mdot.on{background:var(--ink);width:22px;border-radius:5px}
 .mthumb{width:70px;height:70px;border-radius:12px;overflow:hidden;border:1px solid var(--line-soft);background:var(--warm);padding:0;cursor:pointer;flex:0 0 auto;transition:border-color .16s}
 .mthumb:hover{border-color:var(--stone)}
 .mthumb.on{border-color:var(--ink)}
@@ -1501,10 +1504,11 @@ button.cohd{width:100%;border:0;background:none;font:inherit;color:inherit;text-
     return '<button type="button" class="mthumb'+(i===0?' on':'')+'" data-i="'+i+'" aria-label="Ver mídia '+(i+1)+'">'+inner+'</button>';
   }
   function mediaGallery(p){
-    var st=statusMeta(p),items=pmediaAll(p);
+    var items=pmediaAll(p);
     var stage='<div class="mimg"><div class="mstage" id="mstage">'+pmediaMain(p,items[0])+'</div></div>';
     if(items.length<2)return stage;
-    return stage+'<div class="mthumbs" id="mthumbs">'+items.map(function(it,i){return pmediaThumb(p,it,i);}).join('')+'</div>';
+    var dots=items.map(function(it,i){return '<button type="button" class="mdot'+(i===0?' on':'')+'" data-i="'+i+'" aria-label="Ver mídia '+(i+1)+'"></button>';}).join('');
+    return stage+'<div class="mdots" id="mdots">'+dots+'</div>';
   }
   /* Capa do card: imagem OU vídeo se o produto tiver `cover`, senão a forma (mold).
      Ex.: cover:{type:'image',src:'foto.jpg'}  ou  cover:{type:'video',src:'v.mp4',poster:'capa.jpg'} */
@@ -1568,9 +1572,10 @@ button.cohd{width:100%;border:0;background:none;font:inherit;color:inherit;text-
       renderProducts();
     }
     /* PDP galeria de mídia */
-    (function(){var thumbs=document.getElementById('mthumbs'),stage=document.getElementById('mstage');if(!thumbs||!stage)return;
+    (function(){var stage=document.getElementById('mstage'),dotsWrap=document.getElementById('mdots');if(!stage||!dotsWrap)return;
       var gp=byId(location.hash.slice(4));if(!gp)return;var items=pmediaAll(gp);
-      thumbs.querySelectorAll('.mthumb').forEach(function(b){b.onclick=function(){var i=+b.dataset.i;thumbs.querySelectorAll('.mthumb').forEach(function(x){x.classList.remove('on');});b.classList.add('on');stage.innerHTML=pmediaMain(gp,items[i]);};});
+      var dots=[].slice.call(dotsWrap.querySelectorAll('.mdot'));
+      dots.forEach(function(d,i){d.onclick=function(){stage.innerHTML=pmediaMain(gp,items[i]);dots.forEach(function(x,k){x.classList.toggle('on',k===i);});};});
     })();
     /* PDP tamanho */
     var szgrid=document.getElementById('szgrid');
