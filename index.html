@@ -1026,9 +1026,11 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
 <div class="nfov" id="nfov"></div>
 <div class="nfmodal" id="nfmodal" role="dialog" aria-modal="true" aria-labelledby="nftitle" aria-hidden="true">
   <button class="ibtn nfx" id="nfx" aria-label="Fechar"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-  <span class="nfkick">avise-me</span>
-  <h3 class="nftitle" id="nftitle">Te aviso quando voltar</h3>
-  <p class="nfsub">Deixe seu contato e a gente te avisa assim que <b id="nfprod">esta peça</b> voltar ao estoque. Sem spam — só o aviso.</p>
+  <div id="nfhead">
+    <span class="nfkick">avise-me</span>
+    <h3 class="nftitle" id="nftitle">Te aviso quando voltar</h3>
+    <p class="nfsub">Deixe seu contato e a gente te avisa assim que <b id="nfprod">esta peça</b> voltar ao estoque. Sem spam — só o aviso.</p>
+  </div>
   <form id="nfform" novalidate>
     <input type="text" id="nfin" class="nfin" placeholder="E-mail ou WhatsApp" aria-label="Seu e-mail ou WhatsApp" autocomplete="email">
     <label class="nfopt"><input type="checkbox" id="nfnews"><span>Quero receber lançamentos e novidades do Studio Suzu também.</span></label>
@@ -1375,6 +1377,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
     var np=document.getElementById('nfprod');if(np)np.textContent=name||'esta peça';
     var form=document.getElementById('nfform'),done=document.getElementById('nfdone'),
         inp=document.getElementById('nfin'),hint=document.getElementById('nfhint'),news=document.getElementById('nfnews');
+    var head=document.getElementById('nfhead');if(head)head.hidden=false;
     if(form)form.hidden=false;if(done)done.hidden=true;
     if(inp)inp.value='';if(news)news.checked=false;
     if(hint){hint.textContent='';hint.className='nfhint';}
@@ -1401,6 +1404,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
       var msg=document.getElementById('nfdonemsg');
       if(msg)msg.textContent=news.checked?'Avisaremos você assim que voltar ao estoque — e você já entrou na lista de novidades.':'Avisaremos você assim que voltar ao estoque.';
       document.getElementById('nfform').hidden=true;
+      var head=document.getElementById('nfhead');if(head)head.hidden=true;
       var done=document.getElementById('nfdone');done.hidden=false;
       var seal=done.querySelector('.okseal');if(seal)seal.parentNode.replaceChild(seal.cloneNode(true),seal); // recria o nó p/ rearmar a animação a cada envio
     };
