@@ -1083,7 +1083,7 @@ button.cohd{width:100%;border:0;background:none;font:inherit;color:inherit;text-
 </div>
 <aside class="drawer" id="drawer" aria-label="Sacola" aria-hidden="true">
   <div class="dh"><b>Sua sacola</b><button class="ibtn" id="closeCart" aria-label="Fechar"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
-  <div class="items" id="items"><p class="empty"><span class="sig">Sua sacola está vazia por enquanto.</span>Dê uma volta pelas peças do ateliê e comece a sua coleção, no seu tempo.</p></div>
+  <div class="items" id="items"><p class="empty"><span class="sig">Sua sacola está vazia.</span>Escolha uma peça pra começar a sua coleção.</p></div>
   <div class="dfoot">
     <div class="cepmini"><input type="text" id="drCep" inputmode="numeric" placeholder="Seu CEP" maxlength="9" autocomplete="postal-code"><button type="button" class="btn ghost" id="drCepBtn">Calcular frete</button></div>
     <p class="cephint" id="drCepHint"></p>
@@ -1902,7 +1902,7 @@ button.cohd{width:100%;border:0;background:none;font:inherit;color:inherit;text-
     document.getElementById('tot').textContent=BRL(sub+(ship||0));
     syncDrawerCep(s,q);
     var box=document.getElementById('items'),keys=Object.keys(cart);
-    if(!keys.length){box.innerHTML='<p class="empty"><span class="sig">Sua sacola está vazia por enquanto.</span>Dê uma volta pelas peças do ateliê e comece a sua coleção, no seu tempo.</p>';return;}
+    if(!keys.length){box.innerHTML='<p class="empty"><span class="sig">Sua sacola está vazia.</span>Escolha uma peça pra começar a sua coleção.</p>';return;}
     box.innerHTML=keys.map(function(k){var it=cart[k];return '<div class="li"><div class="mini">'+mold(it.p)+'</div><div class="info"><b>'+it.name+'</b><small>'+BRL(it.price)+' · '+it.sub+'</small></div><div class="qty"><button data-m="'+k+'" aria-label="menos"><svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/></svg></button><span>'+it.qty+'</span><button data-p="'+k+'" aria-label="mais"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></div></div>';}).join('');
     box.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{cart[b.dataset.p].qty++;render();});
     box.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{var k=b.dataset.m;if(--cart[k].qty<=0)delete cart[k];render();});
