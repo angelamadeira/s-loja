@@ -1000,6 +1000,48 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
 
 <div class="dock"><div class="dock-in"><div class="sum"><b id="dockTotal">R$ 0,00</b><small id="dockCount">sua sacola está vazia</small></div><button class="btn" id="openCart2">Ver sacola</button></div></div>
 <div class="overlay" id="overlay"></div>
+<style>
+.nfov{position:fixed;inset:0;z-index:70;background:rgba(70,60,52,.34);opacity:0;visibility:hidden;transition:opacity .25s,visibility .25s}
+.nfov.open{opacity:1;visibility:visible}
+.nfmodal{position:fixed;left:50%;top:50%;transform:translate(-50%,-46%);width:min(430px,calc(100vw - 34px));max-height:calc(100vh - 40px);overflow:auto;background:var(--white);border-radius:22px;padding:32px 30px 28px;box-shadow:0 26px 64px rgba(70,60,52,.24);opacity:0;visibility:hidden;z-index:71;transition:opacity .28s,transform .28s,visibility .28s}
+.nfmodal.open{opacity:1;visibility:visible;transform:translate(-50%,-50%)}
+.nfmodal .nfx{position:absolute;top:14px;right:14px;color:var(--stone)}
+.nfmodal .nfx svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.nfkick{display:block;font-size:.6rem;letter-spacing:.28em;text-transform:uppercase;color:var(--wood);margin-bottom:10px}
+.nfmodal .nftitle{font-family:var(--sans);font-weight:400;font-size:1.3rem;line-height:1.25;color:var(--ink);margin:0 0 9px}
+.nfmodal .nfsub{font-size:.86rem;line-height:1.55;color:var(--stone);margin:0 0 18px}
+.nfmodal .nfsub b{font-weight:500;color:var(--ink)}
+.nfin{width:100%;box-sizing:border-box;border:1px solid var(--line);border-radius:12px;padding:13px 15px;font-family:inherit;font-size:.92rem;color:var(--ink);background:var(--white)}
+.nfin:focus{outline:none;border-color:var(--wood)}
+.nfopt{display:flex;align-items:flex-start;gap:9px;margin:14px 2px 2px;font-size:.78rem;line-height:1.45;color:var(--stone);cursor:pointer;user-select:none}
+.nfopt input{margin:2px 0 0;flex:0 0 auto;accent-color:var(--ink);width:15px;height:15px}
+.nfmodal .nfgo{width:100%;margin-top:16px;padding:14px}
+.nfmodal .nfhint{font-size:.76rem;color:var(--muted);font-weight:300;margin:11px 2px 0;min-height:1em}
+.nfmodal .nfhint.err{color:var(--alert)}
+.nfdone{text-align:center;padding:6px 2px 2px}
+.nfdone .nfdico{width:46px;height:46px;border-radius:50%;background:var(--matcha-wash);color:#5a6b3a;display:grid;place-items:center;margin:0 auto 14px}
+.nfdone .nfdico svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.nfdone .nfok{width:auto;margin-top:18px}
+</style>
+<div class="nfov" id="nfov"></div>
+<div class="nfmodal" id="nfmodal" role="dialog" aria-modal="true" aria-labelledby="nftitle" aria-hidden="true">
+  <button class="ibtn nfx" id="nfx" aria-label="Fechar"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+  <span class="nfkick">avise-me</span>
+  <h3 class="nftitle" id="nftitle">Te aviso quando voltar ✿</h3>
+  <p class="nfsub">Deixe seu contato e a gente te avisa assim que <b id="nfprod">esta peça</b> voltar ao estoque. Sem spam — só o aviso.</p>
+  <form id="nfform" novalidate>
+    <input type="text" id="nfin" class="nfin" placeholder="E-mail ou WhatsApp" aria-label="Seu e-mail ou WhatsApp" autocomplete="email">
+    <label class="nfopt"><input type="checkbox" id="nfnews"><span>Quero receber lançamentos e novidades do Studio Suzu também.</span></label>
+    <button type="submit" class="btn nfgo">Quero receber o aviso</button>
+    <p class="nfhint" id="nfhint" aria-live="polite"></p>
+  </form>
+  <div class="nfdone" id="nfdone" hidden>
+    <span class="nfdico" aria-hidden="true"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
+    <h3 class="nftitle">Prontinho! ✿</h3>
+    <p class="nfsub" id="nfdonemsg" style="margin:0">Avisaremos você assim que voltar ao estoque.</p>
+    <button type="button" class="btn ghost nfok" id="nfok">Fechar</button>
+  </div>
+</div>
 <aside class="drawer" id="drawer" aria-label="Sacola" aria-hidden="true">
   <div class="dh"><b>Sua sacola</b><button class="ibtn" id="closeCart" aria-label="Fechar"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
   <div class="items" id="items"><p class="empty"><span class="sig">Ainda vazia.</span>Escolha um produto pra começar.</p></div>
@@ -1328,18 +1370,40 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
   /* liga os cards de compra: escolha de tamanho atualiza preço + botão; botão adapta ao tamanho (comprar ou avisar) */
   /* "Avise-me quando voltar" — captura contato (e-mail ou WhatsApp) antes de confirmar.
      FRONT: só valida e confirma; falta o back-end guardar o contato + disparar o aviso de volta ao estoque. */
-  function notifyReveal(el){
-    var wrap=document.createElement('div');wrap.className='notifybox';
-    wrap.innerHTML='<form class="notifyform" novalidate><input type="text" class="notifyin" placeholder="E-mail ou WhatsApp" aria-label="Seu e-mail ou WhatsApp" autocomplete="email"><button type="submit" class="btn ghost notifygo">Avisar</button></form><p class="nfhint" aria-live="polite"></p>';
-    el.replaceWith(wrap);
-    var inp=wrap.querySelector('.notifyin'),hint=wrap.querySelector('.nfhint');
-    try{inp.focus();}catch(e){}
-    wrap.querySelector('form').onsubmit=function(e){e.preventDefault();
-      var v=inp.value.trim(),email=v.indexOf('@')>0,wpp=v.replace(/\D/g,'').length>=10;
-      if(!email&&!wpp){hint.textContent='Deixe um e-mail ou WhatsApp válido.';hint.className='nfhint err';inp.focus();return;}
-      wrap.innerHTML='<span class="prenote" style="margin:0">Avisaremos você assim que voltar. ✿</span>';
-    };
+  function notifyOpen(name){
+    var ov=document.getElementById('nfov'),md=document.getElementById('nfmodal');if(!ov||!md)return;
+    var np=document.getElementById('nfprod');if(np)np.textContent=name||'esta peça';
+    var form=document.getElementById('nfform'),done=document.getElementById('nfdone'),
+        inp=document.getElementById('nfin'),hint=document.getElementById('nfhint'),news=document.getElementById('nfnews');
+    if(form)form.hidden=false;if(done)done.hidden=true;
+    if(inp)inp.value='';if(news)news.checked=false;
+    if(hint){hint.textContent='';hint.className='nfhint';}
+    ov.classList.add('open');md.classList.add('open');md.setAttribute('aria-hidden','false');
+    document.body.style.overflow='hidden';
+    setTimeout(function(){try{inp.focus();}catch(e){}},60);
   }
+  function notifyClose(){
+    var ov=document.getElementById('nfov'),md=document.getElementById('nfmodal');
+    if(ov)ov.classList.remove('open');if(md){md.classList.remove('open');md.setAttribute('aria-hidden','true');}
+    document.body.style.overflow='';
+  }
+  (function(){
+    var md=document.getElementById('nfmodal');if(!md)return;
+    var ov=document.getElementById('nfov'),x=document.getElementById('nfx'),
+        form=document.getElementById('nfform'),ok=document.getElementById('nfok');
+    if(ov)ov.onclick=notifyClose;if(x)x.onclick=notifyClose;if(ok)ok.onclick=notifyClose;
+    document.addEventListener('keydown',function(e){if(e.key==='Escape'&&md.classList.contains('open'))notifyClose();});
+    if(form)form.onsubmit=function(e){e.preventDefault();
+      var inp=document.getElementById('nfin'),hint=document.getElementById('nfhint'),news=document.getElementById('nfnews'),
+          v=inp.value.trim(),email=v.indexOf('@')>0,wpp=v.replace(/\D/g,'').length>=10;
+      if(!email&&!wpp){hint.textContent='Deixe um e-mail ou WhatsApp válido pra gente te avisar.';hint.className='nfhint err';inp.focus();return;}
+      /* FRONT: falta o back-end guardar o lead (contato + opt-in de novidades) e disparar o aviso de volta ao estoque. */
+      var msg=document.getElementById('nfdonemsg');
+      if(msg)msg.textContent=news.checked?'Avisaremos você assim que voltar ao estoque — e você já entrou na lista de novidades. ✿':'Avisaremos você assim que voltar ao estoque. ✿';
+      document.getElementById('nfform').hidden=true;
+      document.getElementById('nfdone').hidden=false;
+    };
+  })();
   function initBuyCards(){
     document.querySelectorAll('.formacta.buycard').forEach(function(card){
       var p=byId(card.dataset.id); if(!p)return;
@@ -1349,7 +1413,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
         if(btn&&btn.tagName==='BUTTON')btn.textContent=o?'Avise-me quando voltar':'Adicionar à sacola';}
       chips.forEach(function(b){b.onclick=function(){chips.forEach(function(x){x.setAttribute('aria-pressed',x===b);});refresh(b.dataset.s);};});
       if(btn)btn.onclick=function(){var s=card.dataset.size;
-        if(sizeOut(p,s)){notifyReveal(this);}
+        if(sizeOut(p,s)){notifyOpen(p.name);}
         else{addProduct(p.id,s,false);}};
     });
   }
@@ -1487,8 +1551,8 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
         var o=sizeOut(p,sel),pp=document.getElementById('pdpPrice'),addb=document.getElementById('pdpAdd');
         if(o){if(pp){pp.className='price so';pp.innerHTML='Esgotado nesta tiragem';}if(addb)addb.textContent='Avise-me quando voltar';}
         else{var pv=presale?Math.round(priceNow(p,sel)*0.3):priceNow(p,sel);if(pp){pp.className='price';pp.innerHTML=(presale?'':wasPrice(p,priceOf(p,sel)))+BRL(pv)+(presale?'':offtag(p))+'<small>'+(presale?'sinal · '+SIZES[sel].name+' de '+BRL(priceNow(p,sel)):'em até 6× · '+SIZES[sel].name)+'</small>';}if(addb)addb.textContent=presale?'Reservar com sinal':'Adicionar à sacola';}};});
-      var add=document.getElementById('pdpAdd'); if(add)add.onclick=function(){if(sizeOut(p,sel)){this.outerHTML='<span class="prenote" style="margin:0">Avisaremos você assim que voltar. ✿</span>';}else{addProduct(p.id,sel,presale);}};
-      var nb=document.getElementById('notifyBtn'); if(nb)nb.onclick=function(){notifyReveal(this);};
+      var add=document.getElementById('pdpAdd'); if(add)add.onclick=function(){if(sizeOut(p,sel)){notifyOpen(p.name);}else{addProduct(p.id,sel,presale);}};
+      var nb=document.getElementById('notifyBtn'); if(nb)nb.onclick=function(){notifyOpen(p.name);};
     }
     var pdpCep=document.getElementById('pdpCep');
     if(pdpCep){pdpCep.value=SHIP.cep;
