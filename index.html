@@ -82,7 +82,7 @@ nav.main a.active{color:var(--ink);font-weight:500}
 @keyframes float{0%,100%{transform:translate(-50%,-50%)}50%{transform:translate(-50%,-55%)}}
 .slide .copy{position:absolute;left:0;right:0;bottom:34px;padding:0 22px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px}
 .slide .kick{font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;font-weight:600;padding:5px 11px;border-radius:999px;background:var(--torinoko);color:#6b551d;border:none}
-.slide .kick.last{background:var(--sango);color:#6e2f1e;border:none}
+.slide .kick.last{background:var(--torinoko);color:#6b551d;border:none}
 .slide .kick.presale{background:var(--mizu);color:#233f3d;border:none}
 .slide .kick.soldout{background:#efe9e0;color:var(--muted);border:none}
 .slide .kick.limited{display:none}   /* hero: oculta a tag redundante de edição limitada */
@@ -782,6 +782,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
   .stage{height:clamp(440px,64vh,560px);border-radius:24px}
   .slide .piece{left:50%;width:min(38%,360px)}
   .slide .copy{max-width:520px;left:44px;right:auto;bottom:48px;padding:0;align-items:flex-start;text-align:left}
+  .slide .kick{margin-left:-11px}
   .slide .cta{display:inline-block;width:auto;padding:12px 22px}
   .duo{grid-template-columns:1fr 1fr}
   .pdp{flex-direction:row;align-items:flex-start;gap:52px}
