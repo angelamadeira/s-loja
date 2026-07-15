@@ -46,7 +46,7 @@ header.hd{position:sticky;top:0;z-index:40;background:var(--white)}
 .hd-in{display:flex;align-items:center;gap:14px;height:64px}
 .brand{display:flex;align-items:center;gap:11px;margin-right:auto}
 .brand .word{display:flex;flex-direction:column;line-height:1}
-.brand .word b{font-family:var(--serif);font-style:italic;font-weight:500;font-size:1.08rem;letter-spacing:0;line-height:1;color:var(--ink);margin-top:1px}
+.brand .word b{font-family:var(--sans);font-style:normal;font-weight:300;font-size:.95rem;letter-spacing:.03em;line-height:1;color:var(--ink);margin-top:3px}
 .brand .word span{font-size:.55rem;letter-spacing:.26em;text-transform:uppercase;color:var(--label);font-weight:400}
 nav.main{display:none}
 nav.main a{position:relative;font-size:.82rem;color:var(--text-2);padding:6px 2px;transition:color .16s}
@@ -1321,7 +1321,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
     return stage+'<div class="mthumbs" id="mthumbs">'+items.map(function(it,i){return pmediaThumb(p,it,i);}).join('')+'</div>';
   }
   function scarceBlock(p){
-    if(p.status==='soldout')return '<div class="scarce so"><span class="ed">Edição esgotada</span><p class="sl" style="margin:8px 0 0">Esta tiragem acabou. Deixe seu e-mail e avisamos se voltar.</p></div>';
+    if(p.status==='soldout')return '';
     if(p.status==='presale')return '<div class="scarce pre"><span class="ed">Pré-venda · disponível em '+p.avail+'</span><p class="sl" style="margin:8px 0 0">Garanta com um sinal de reserva; o restante você paga quando a peça lança. Tiragem limitada.</p></div>';
     return '';
   }
@@ -1429,7 +1429,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
       wf.addEventListener('submit',function(e){e.preventDefault();
         if(!okC(c&&c.value)){err(c&&c.value.trim()?'Confere o e-mail ou o WhatsApp?':'Precisamos de um contato para te responder.');if(c){c.focus();c.scrollIntoView({block:'center',behavior:'smooth'});}return;}
         try{localStorage.removeItem(LS);}catch(e2){}
-        var nf=document.getElementById('fileList')?document.getElementById('fileList').children.length:0;wf.innerHTML='<div class="wzdone"><div class="okseal"><svg class="okcheck" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><span class="sig oksig">Recebemos o seu projeto.</span><p class="oktext">Vamos analisar a viabilidade com carinho e voltamos com o orçamento em até 3 dias úteis'+(nf?', junto com '+(nf>1?'as '+nf+' referências':'a referência')+' que você anexou':'')+'. Enquanto isso, dá uma espiada nas nossas peças. ✿</p><a class="btn" href="#/produtos">Ver produtos</a></div>';});
+        var nf=document.getElementById('fileList')?document.getElementById('fileList').children.length:0;wf.innerHTML='<div class="wzdone"><div class="okseal"><svg class="okcheck" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><span class="sig oksig">Recebemos o seu projeto.</span><p class="oktext">Vamos analisar a viabilidade com carinho e voltamos com o orçamento em até 3 dias úteis'+(nf?', junto com '+(nf>1?'as '+nf+' referências':'a referência')+' que você anexou':'')+'. Enquanto isso, dá uma espiada nas nossas peças. ✿</p><a class="btn" href="#/produtos">Ver produtos</a></div>';var ok=wf.querySelector('.wzdone');if(ok)requestAnimationFrame(function(){ok.scrollIntoView({block:'center'});});});
     })();
     initBuyCards();
     wireCheckout();
@@ -1614,16 +1614,26 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
   }
   function syncDrawerCep(s,q){
     var dc=document.getElementById('drCep');if(!dc)return;
+    var row=dc.closest('.cepmini'),dh=document.getElementById('drCepHint');
+    var show=s.now.length>0;                 /* só faz sentido calcular frete se há itens que enviam agora */
+    if(row)row.style.display=show?'':'none';
+    if(dh)dh.style.display=show?'':'none';
     if(document.activeElement!==dc)dc.value=SHIP.cep;
-    var dh=document.getElementById('drCepHint');if(!dh)return;
-    if(!s.now.length||!q){dh.textContent='';dh.className='cephint';return;}
+    if(!dh)return;
+    if(!show||!q){dh.textContent='';dh.className='cephint';return;}
     var e=q[0];
     dh.textContent=(e.free?'Frete Econômico grátis nesta compra · ':(e.label+' '+BRL(e.price)+' · '))+e.days;
     dh.className='cephint';
   }
   var cart={};
-  function addProduct(id,size,presale){var p=byId(id);var full=priceOf(p,size);var price=presale?Math.round(full*0.3):full;var k=id+'-'+size+(presale?'-pre':'');if(cart[k])cart[k].qty++;else cart[k]={p:p,name:p.name+(presale?' — reserva':''),price:price,sub:presale?('Sinal de reserva · '+SIZES[size].name):(SIZES[size].name+' · '+SIZES[size].dim),qty:1};render();open();}
+  function cartKey(id,size,presale){return id+'-'+size+(presale?'-pre':'');}
+  function cartItem(p,size,presale){var full=priceOf(p,size),price=presale?Math.round(full*0.3):full;return {p:p,size:size,presale:!!presale,name:p.name+(presale?' — reserva':''),price:price,sub:presale?('Sinal de reserva · '+SIZES[size].name):(SIZES[size].name+' · '+SIZES[size].dim),qty:1};}
+  /* Persiste a sacola — assim um refresh no meio do checkout não perde os itens (bug do fluxo de pagamento). */
+  function saveCart(){try{localStorage.setItem('suzu_cart',JSON.stringify(Object.keys(cart).map(function(k){var it=cart[k];return {id:it.p.id,size:it.size,presale:it.presale,qty:it.qty};})));}catch(e){}}
+  function restoreCart(){try{JSON.parse(localStorage.getItem('suzu_cart')||'[]').forEach(function(o){var p=byId(o.id);if(!p||!o.qty)return;var it=cartItem(p,o.size,o.presale);it.qty=o.qty;cart[cartKey(o.id,o.size,o.presale)]=it;});}catch(e){}}
+  function addProduct(id,size,presale){var p=byId(id);if(!p)return;var k=cartKey(id,size,presale);if(cart[k])cart[k].qty++;else cart[k]=cartItem(p,size,presale);render();open();}
   function render(){
+    saveCart();
     var count=0,sub=0;Object.keys(cart).forEach(k=>{count+=cart[k].qty;sub+=cart[k].qty*cart[k].price;});
     var b=document.getElementById('badge');b.textContent=count;b.classList.toggle('on',count>0);
     var s=cartSplit(),hasNow=s.now.length>0,q=shipQuote(SHIP.cep,s.subNow);
@@ -1678,6 +1688,6 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
     gq.onkeydown=function(e){if(e.key==='Enter' && gq.value.trim()){FS.q=gq.value;closeSb();location.hash='#/produtos';}};
     window.addEventListener('keydown',function(e){if(e.key==='Escape')closeSb();});
   })();
-  router();render();
+  restoreCart();router();render();
 })();
 </script>
