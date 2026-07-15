@@ -146,12 +146,12 @@ section{padding:52px 0}
 .pbadge.last{background:var(--sango);color:#6e2f1e}
 .pbadge.presale{background:var(--mizu);color:#233f3d}
 .pbadge.soldout{background:#efe9e0;color:var(--muted)}
-.exhero{position:relative;border-radius:20px;overflow:hidden;background:var(--st,var(--sakura-wash));margin-bottom:34px;margin-top:8px;min-height:clamp(420px,58vh,520px);display:flex;align-items:center}
+.exhero{position:relative;border-radius:20px;overflow:hidden;background:var(--st,var(--sakura-wash));margin-bottom:34px;margin-top:-8px;min-height:clamp(420px,58vh,520px);display:flex;align-items:center}
 .exhero .exbg{position:absolute;inset:0;overflow:hidden}
 .exhero .exbg svg{position:absolute;right:-9%;top:50%;transform:translateY(-50%);width:min(52%,340px);height:auto;opacity:.9}
 .excopy{position:relative;z-index:2;padding:38px 26px;max-width:100%}
 @media(min-width:640px){.excopy{padding:56px 48px;max-width:66%}}
-@media(min-width:860px){.exhero{min-height:clamp(440px,64vh,560px);border-radius:24px}}
+@media(min-width:860px){.exhero{min-height:clamp(440px,64vh,560px);border-radius:24px;margin-top:-2px}}
 .excopy .label{margin:0}
 .excopy h1{font-size:clamp(2rem,5.6vw,2.9rem);font-weight:300;line-height:1.06;letter-spacing:-.02em;margin:12px 0 0}
 .excopy h1 em{font-family:var(--serif);font-style:italic;font-weight:500}
@@ -448,6 +448,13 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
 .pdp .buyrow .price.so{font-size:1rem;color:var(--muted)}
 .pdp .addbtn{flex:1;min-width:200px;text-align:center}
 .prenote{margin-top:12px;font-size:.78rem;color:var(--muted);font-weight:300}
+.notifybox{margin-top:12px}
+.notifyform{display:flex;gap:8px}
+.notifyin{flex:1;min-width:0;border:1px solid var(--line);border-radius:11px;padding:11px 12px;font-size:.9rem;font-family:inherit;color:var(--text);background:var(--white);outline:none}
+.notifyin:focus{border-color:var(--stone)}
+.notifygo{white-space:nowrap;padding:11px 16px}
+.nfhint{font-size:.74rem;color:var(--muted);font-weight:300;margin:8px 0 0;min-height:1em}
+.nfhint.err{color:#b4553f}
 .acc.pdpacc{margin-top:26px}
 /* bolinha flutuante Instagram (estilo Wishin) */
 .igfab{position:fixed;right:18px;bottom:88px;z-index:50;width:60px;height:60px;border-radius:50%;overflow:hidden;border:2px solid var(--white);background:var(--warm);padding:0;animation:fabIn .3s ease}
@@ -799,6 +806,16 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
   .formacta .fcprice{text-align:left}
   .formacta .fcprice small{display:block}
   .formacta .fcbtn{align-self:auto;flex:1 1 auto;white-space:nowrap;padding:11px 16px;font-size:.7rem}
+}
+@media print{
+  .note,.hd,.dock,footer,.igfab,.reelov,.reelbox,.overlay,.drawer,.searchbar,.searchov,.mobmenu,.back,.share,.recvid,.vidthumb,.suggest,.crosssell{display:none!important}
+  body{background:#fff!important}
+  .recipe{padding:0!important}
+  .recipe h1,.recipe h2,.recipe p,.recipe li,.recipe .label,.recipe b{color:#000!important}
+  .recbody{display:block!important}
+  .recside{margin-bottom:18px}
+  .ing li,.steps li{break-inside:avoid;page-break-inside:avoid}
+  a[href]::after{content:''!important}
 }
 </style>
 
@@ -1248,6 +1265,20 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
     return '<div class="formacta buycard" data-id="'+p.id+'" data-size="'+def+'"><a class="fcimg" href="#/p/'+p.id+'" style="background:var(--'+tint+'-wash)"><span class="pbadge '+st.k+'">'+st.label+'</span>'+mold(p)+'</a><div class="fctxt"><a class="fcname" href="#/p/'+p.id+'"><b>'+p.name+'</b></a><p>'+p.use+' · silicone platinum</p>'+sizes+'</div><div class="fcbuy">'+price+btn+'</div></div>';
   }
   /* liga os cards de compra: escolha de tamanho atualiza preço + botão; botão adapta ao tamanho (comprar ou avisar) */
+  /* "Avise-me quando voltar" — captura contato (e-mail ou WhatsApp) antes de confirmar.
+     FRONT: só valida e confirma; falta o back-end guardar o contato + disparar o aviso de volta ao estoque. */
+  function notifyReveal(el){
+    var wrap=document.createElement('div');wrap.className='notifybox';
+    wrap.innerHTML='<form class="notifyform" novalidate><input type="text" class="notifyin" placeholder="E-mail ou WhatsApp" aria-label="Seu e-mail ou WhatsApp" autocomplete="email"><button type="submit" class="btn ghost notifygo">Avisar</button></form><p class="nfhint" aria-live="polite"></p>';
+    el.replaceWith(wrap);
+    var inp=wrap.querySelector('.notifyin'),hint=wrap.querySelector('.nfhint');
+    try{inp.focus();}catch(e){}
+    wrap.querySelector('form').onsubmit=function(e){e.preventDefault();
+      var v=inp.value.trim(),email=v.indexOf('@')>0,wpp=v.replace(/\D/g,'').length>=10;
+      if(!email&&!wpp){hint.textContent='Deixe um e-mail ou WhatsApp válido.';hint.className='nfhint err';inp.focus();return;}
+      wrap.innerHTML='<span class="prenote" style="margin:0">Avisaremos você assim que voltar. ✿</span>';
+    };
+  }
   function initBuyCards(){
     document.querySelectorAll('.formacta.buycard').forEach(function(card){
       var p=byId(card.dataset.id); if(!p)return;
@@ -1257,7 +1288,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
         if(btn&&btn.tagName==='BUTTON')btn.textContent=o?'Avise-me quando voltar':'Adicionar à sacola';}
       chips.forEach(function(b){b.onclick=function(){chips.forEach(function(x){x.setAttribute('aria-pressed',x===b);});refresh(b.dataset.s);};});
       if(btn)btn.onclick=function(){var s=card.dataset.size;
-        if(sizeOut(p,s)){this.outerHTML='<span class="prenote" style="margin:0">Avisaremos você assim que voltar. ✿</span>';}
+        if(sizeOut(p,s)){notifyReveal(this);}
         else{addProduct(p.id,s,false);}};
     });
   }
@@ -1387,7 +1418,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
         if(o){if(pp){pp.className='price so';pp.innerHTML='Esgotado nesta tiragem';}if(addb)addb.textContent='Avise-me quando voltar';}
         else{var pv=presale?Math.round(priceOf(p,sel)*0.3):priceOf(p,sel);if(pp){pp.className='price';pp.innerHTML=BRL(pv)+'<small>'+(presale?'sinal · '+SIZES[sel].name+' de '+BRL(priceOf(p,sel)):'em até 6× · '+SIZES[sel].name)+'</small>';}if(addb)addb.textContent=presale?'Reservar com sinal':'Adicionar à sacola';}};});
       var add=document.getElementById('pdpAdd'); if(add)add.onclick=function(){if(sizeOut(p,sel)){this.outerHTML='<span class="prenote" style="margin:0">Avisaremos você assim que voltar. ✿</span>';}else{addProduct(p.id,sel,presale);}};
-      var nb=document.getElementById('notifyBtn'); if(nb)nb.onclick=function(){this.outerHTML='<span class="prenote" style="margin:0">Avisaremos você assim que voltar. ✿</span>';};
+      var nb=document.getElementById('notifyBtn'); if(nb)nb.onclick=function(){notifyReveal(this);};
     }
     var pdpCep=document.getElementById('pdpCep');
     if(pdpCep){pdpCep.value=SHIP.cep;
