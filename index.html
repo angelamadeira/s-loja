@@ -429,7 +429,9 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
 .mgframe{position:relative;border:1px solid var(--line-soft);border-radius:22px;overflow:hidden;background:var(--warm)}
 .hcar .mgslide{width:100%}
 .mgslide .m{border-radius:0}
-.mgal .cdots{margin-top:14px}
+.mgal .cdots{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);margin:0;z-index:3;gap:7px;padding:7px 11px;border-radius:999px;background:rgba(255,255,255,.6);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);box-shadow:0 1px 5px rgba(70,60,52,.1)}
+.mgal .cdot{background:rgba(70,60,52,.3)}
+.mgal .cdot.on{background:var(--ink)}
 .mgal .carrow{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.86);border:1px solid var(--line-soft)}
 .mgal .carrow.prev{left:12px}
 .mgal .carrow.next{right:12px}
@@ -1080,7 +1082,7 @@ button.cohd{width:100%;border:0;background:none;font:inherit;color:inherit;text-
 </div>
 <aside class="drawer" id="drawer" aria-label="Sacola" aria-hidden="true">
   <div class="dh"><b>Sua sacola</b><button class="ibtn" id="closeCart" aria-label="Fechar"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
-  <div class="items" id="items"><p class="empty"><span class="sig">Ainda vazia.</span>Escolha um produto pra começar.</p></div>
+  <div class="items" id="items"><p class="empty"><span class="sig">Ainda vazinha ✿</span>Escolha a primeira peça e comece a sua coleção — a gente cuida do resto com carinho.</p></div>
   <div class="dfoot">
     <div class="cepmini"><input type="text" id="drCep" inputmode="numeric" placeholder="Seu CEP" maxlength="9" autocomplete="postal-code"><button type="button" class="btn ghost" id="drCepBtn">Calcular frete</button></div>
     <p class="cephint" id="drCepHint"></p>
@@ -1886,7 +1888,7 @@ button.cohd{width:100%;border:0;background:none;font:inherit;color:inherit;text-
     document.getElementById('tot').textContent=BRL(sub+(ship||0));
     syncDrawerCep(s,q);
     var box=document.getElementById('items'),keys=Object.keys(cart);
-    if(!keys.length){box.innerHTML='<p class="empty"><span class="sig">Ainda vazia.</span>Escolha um produto pra começar.</p>';return;}
+    if(!keys.length){box.innerHTML='<p class="empty"><span class="sig">Ainda vazinha ✿</span>Escolha a primeira peça e comece a sua coleção — a gente cuida do resto com carinho.</p>';return;}
     box.innerHTML=keys.map(function(k){var it=cart[k];return '<div class="li"><div class="mini">'+mold(it.p)+'</div><div class="info"><b>'+it.name+'</b><small>'+BRL(it.price)+' · '+it.sub+'</small></div><div class="qty"><button data-m="'+k+'" aria-label="menos"><svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/></svg></button><span>'+it.qty+'</span><button data-p="'+k+'" aria-label="mais"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></div></div>';}).join('');
     box.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{cart[b.dataset.p].qty++;render();});
     box.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{var k=b.dataset.m;if(--cart[k].qty<=0)delete cart[k];render();});
