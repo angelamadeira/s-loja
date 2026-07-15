@@ -316,6 +316,19 @@ footer{background:var(--warm);border-top:1px solid var(--line-soft);padding:48px
 .fcol a:hover{color:var(--gold-text)}
 .foot-bot{margin-top:22px;padding-top:16px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:10px}
 .foot-bot .label{font-size:.6rem}
+.foot-cnpj{font-size:.62rem;color:var(--muted);font-weight:300;line-height:1.6;margin:0;max-width:60ch}
+.foot-legal{display:flex;flex-wrap:wrap;align-items:center;gap:8px 18px}
+.foot-legal a{font-size:.7rem;color:var(--text-3);font-weight:300}
+.foot-legal a:hover{color:var(--gold-text)}
+.foot-legal .label{font-size:.6rem}
+/* páginas legais/políticas */
+.legaldoc .prose{max-width:64ch;margin-top:22px}
+.prose p{color:var(--text-3);font-weight:300;line-height:1.7;margin:0 0 14px}
+.prose h3{font-weight:500;font-size:1rem;margin:26px 0 8px;color:var(--ink)}
+.prose ul{margin:0 0 14px;padding-left:20px;color:var(--text-3);font-weight:300;line-height:1.7}
+.prose li{margin:0 0 6px}
+.prose .docnote{font-size:.78rem;background:var(--torinoko-wash);border-radius:12px;padding:11px 15px;color:#6b551d;font-weight:400;line-height:1.5}
+.prose .docmeta{font-size:.76rem;color:var(--muted);margin-top:24px}
 
 /* DETALHE / PÁGINAS */
 #detail{display:none}
@@ -1006,10 +1019,10 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
     <div class="foot-cols">
       <div class="fcol"><h4 class="label">Loja</h4><a href="#/produtos">Produtos</a><a href="#/prevenda" data-prevenda>Pré-venda</a><a href="#/exclusivo">Projeto exclusivo</a><a href="#/receitas">Receitas</a></div>
       <div class="fcol"><h4 class="label">Studio</h4><a href="#/sobre">Sobre o estúdio</a><a href="#/faq">Perguntas frequentes</a></div>
-      <div class="fcol"><h4 class="label">Ajuda</h4><a href="#/faq/cuidados">Cuidados</a><a href="#/faq/entrega">Entrega</a><a href="#/faq/trocas">Trocas</a><a href="https://wa.me/5511912345678?text=Ol%C3%A1!%20Vim%20pela%20loja%20Studio%20Suzu%20e%20queria%20tirar%20uma%20d%C3%BAvida." target="_blank" rel="noopener">Contato</a></div>
+      <div class="fcol"><h4 class="label">Ajuda</h4><a href="#/faq/cuidados">Cuidados</a><a href="#/entrega">Entrega</a><a href="#/trocas">Trocas</a><a href="https://wa.me/5511912345678?text=Ol%C3%A1!%20Vim%20pela%20loja%20Studio%20Suzu%20e%20queria%20tirar%20uma%20d%C3%BAvida." target="_blank" rel="noopener">Contato</a></div>
     </div>
   </div>
-  <div class="wrap foot-bot"><span class="label">Feito no Brasil</span><span class="label">© 2026 Studio Suzu</span></div>
+  <div class="wrap foot-bot"><p class="foot-cnpj">Studio Suzu · [Razão Social] · CNPJ [00.000.000/0001-00] · [Endereço completo] · [contato@studiosuzu.com]</p><nav class="foot-legal"><a href="#/privacidade">Privacidade</a><a href="#/termos">Termos de uso</a><span class="label">© 2026 · Feito no Brasil</span></nav></div>
 </footer>
 
 <div class="dock"><div class="dock-in"><div class="sum"><b id="dockTotal">R$ 0,00</b><small id="dockCount">sua sacola está vazia</small></div><button class="btn" id="openCart2">Ver sacola</button></div></div>
@@ -1536,6 +1549,44 @@ button.cohd{width:100%;border:0;background:none;font:inherit;color:inherit;text-
     if(p.status==='presale')return '<div class="scarce pre"><span class="ed">Pré-venda · disponível em '+p.avail+'</span><p class="sl" style="margin:8px 0 0">Garanta com um sinal de reserva; o restante você paga quando a peça lança. Tiragem limitada.</p></div>';
     return '';
   }
+  /* Páginas legais/políticas — RASCUNHO placeholder, revisar (ver pasta JURIDICO/). Campos [entre colchetes] a preencher. */
+  var POLICIES={
+    privacidade:['Privacidade','Política de Privacidade',
+      '<p class="docnote">Rascunho — revisar com apoio jurídico antes do lançamento. Campos entre [colchetes] a preencher.</p>'
+      +'<p>A sua privacidade importa. Esta política explica como o Studio Suzu ([Razão Social], CNPJ [00.000.000/0001-00]) coleta, usa e protege os seus dados, conforme a Lei Geral de Proteção de Dados (LGPD, Lei 13.709/2018).</p>'
+      +'<h3>O que coletamos</h3><ul><li>Dados que você informa: nome, e-mail, WhatsApp e endereço de entrega na compra.</li><li>Dados do pedido: itens, valores e histórico.</li><li>Cookies necessários ao funcionamento do site.</li></ul>'
+      +'<h3>Para que usamos</h3><ul><li>Processar e entregar o seu pedido.</li><li>Falar com você sobre a compra e dar suporte.</li><li>Enviar novidades — apenas se você autorizar (opt-in).</li></ul>'
+      +'<h3>Com quem compartilhamos</h3><p>Somente o necessário para concluir a compra: transportadora e provedor de pagamento. Não vendemos os seus dados.</p>'
+      +'<h3>Cookies</h3><p>Usamos cookies essenciais para o site funcionar. Se um dia usarmos cookies de análise ou publicidade, pediremos o seu consentimento por um aviso na página.</p>'
+      +'<h3>Seus direitos</h3><p>Você pode pedir acesso, correção ou exclusão dos seus dados e revogar consentimentos a qualquer momento pelo e-mail [contato@studiosuzu.com].</p>'
+      +'<h3>Segurança</h3><p>Adotamos medidas para proteger as suas informações e tratamos os seus dados com cuidado.</p>'
+      +'<p class="docmeta">Responsável pelo tratamento: [Nome / e-mail]. Última atualização: [data].</p>'],
+    termos:['Legal','Termos de Uso',
+      '<p class="docnote">Rascunho — revisar com apoio jurídico. Campos entre [colchetes] a preencher.</p>'
+      +'<p>Ao usar o site do Studio Suzu ([Razão Social], CNPJ [00.000.000/0001-00]) e realizar compras, você concorda com estes termos.</p>'
+      +'<h3>Produtos e disponibilidade</h3><p>Trabalhamos com tiragens pequenas; peças podem esgotar sem reposição. Preços e disponibilidade podem mudar sem aviso.</p>'
+      +'<h3>Pedidos e pagamento</h3><p>O pedido é confirmado após a aprovação do pagamento (Pix, cartão ou boleto). Você recebe a confirmação por e-mail.</p>'
+      +'<h3>Propriedade intelectual</h3><p>As formas, desenhos, textos e imagens são autorais do Studio Suzu. É proibida a cópia ou reprodução sem autorização.</p>'
+      +'<h3>Direito de arrependimento</h3><p>Compras online podem ser canceladas em até 7 dias corridos após o recebimento (CDC, art. 49). Veja a página de Trocas & Devoluções.</p>'
+      +'<h3>Contato e foro</h3><p>Dúvidas: [contato@studiosuzu.com]. Fica eleito o foro de [cidade/UF] para eventuais questões.</p>'
+      +'<p class="docmeta">Última atualização: [data].</p>'],
+    trocas:['Ajuda','Trocas & Devoluções',
+      '<p class="docnote">Rascunho — revisar. Campos entre [colchetes] a preencher.</p>'
+      +'<h3>Arrependimento (7 dias)</h3><p>Você tem até 7 dias corridos após receber para desistir da compra, sem precisar justificar (CDC, art. 49). A peça deve voltar sem uso e na embalagem; reembolsamos o valor pago, incluindo o frete.</p>'
+      +'<h3>Produto com defeito</h3><p>Se a peça chegar com defeito, a gente troca ou devolve sem custo. Garantia legal de [90] dias para vícios.</p>'
+      +'<h3>Como solicitar</h3><p>Fale com a gente pelo WhatsApp ou por [contato@studiosuzu.com] com o número do pedido. Combinamos a devolução e o reembolso.</p>'
+      +'<h3>Prazos de reembolso</h3><p>O estorno acontece em até [X] dias após recebermos a peça de volta, conforme o meio de pagamento.</p>'],
+    entrega:['Ajuda','Entrega & Frete',
+      '<p class="docnote">Rascunho — revisar. Campos entre [colchetes] a preencher.</p>'
+      +'<h3>Regiões e prazos</h3><p>Enviamos para todo o Brasil. O prazo e o valor aparecem no checkout assim que você informa o CEP.</p>'
+      +'<h3>Frete grátis</h3><p>Frete grátis nas compras acima de R$ 150.</p>'
+      +'<h3>Pré-venda</h3><p>Peças de pré-venda saem a partir da data indicada na página; o frete é confirmado no envio.</p>'
+      +'<h3>Extravio ou atraso</h3><p>Qualquer problema com a entrega, fale com a gente por [contato@studiosuzu.com] ou WhatsApp que a gente resolve.</p>']
+  };
+  function politicaView(slug){
+    var p=POLICIES[slug];if(!p)return '';
+    return backHome()+'<div class="listing legaldoc"><span class="label">'+p[0]+'</span><h1>'+p[1]+'</h1><div class="prose">'+p[2]+'</div></div>';
+  }
   function sobreView(){
     return backHome()+'<div class="sobre"><span class="label">Sobre o estúdio</span><h1>Dois ofícios, uma mesa de cozinha</h1>'+
       '<p class="lead">Precisão e afeto não são adjetivos que escolhemos. São duas pessoas. O Studio Suzu é tocado por um casal: um modela em 3D — superfícies, tolerâncias, o ângulo exato em que o molde solta. A outra cozinha, e sabe o que uma forma precisa prometer antes de alguém provar.</p>'+
@@ -1829,6 +1880,7 @@ button.cohd{width:100%;border:0;background:none;font:inherit;color:inherit;text-
     else if(h.indexOf('#/receita/')===0){v=receitaView(h.slice(10));if(!v){location.replace('#/receitas');return;}}
     else if(h==='#/receitas')v=receitasView();
     else if(h.indexOf('#/faq')===0){v=faqView(h.indexOf('#/faq/')===0?h.slice(6):'');}
+    else if(h==='#/privacidade'||h==='#/termos'||h==='#/trocas'||h==='#/entrega'){v=politicaView(h.slice(2));if(!v){location.replace('#/');return;}}
     else if(h==='#/checkout')v=checkoutView();
     else if(h==='#/pedido'){if(!CO.order){location.replace('#/');return;}v=pedidoView();}
     closeMenu(); setActiveNav(h);
