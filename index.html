@@ -524,7 +524,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
 @media(min-width:560px){.formacta{padding:22px 24px}.formacta .fcimg{width:118px;height:118px}}
 .formacta .fcsizes{display:flex;flex-wrap:wrap;gap:6px;margin-top:11px}
 .fcsz{border:1px solid var(--line);background:var(--white);border-radius:9px;padding:6px 11px;font-size:.74rem;color:var(--text-2);cursor:pointer;font-family:inherit;line-height:1.1}
-.fcsz[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.fcsz[aria-pressed="true"]{border-color:var(--ink);color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
 .formacta .fcbuy{display:flex;flex-direction:column;gap:10px;flex:0 0 auto;margin-left:auto;align-items:flex-end}
 .formacta .fcbuy .fcbtn{align-self:stretch;margin-left:0;text-align:center}
 .formacta .fcprice{font-weight:500;font-size:1.05rem;text-align:right;white-space:nowrap}
@@ -572,6 +572,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
 .dock .sum b{font-weight:500;font-size:1rem;font-variant-numeric:tabular-nums}
 .dock .sum small{display:block;font-size:.66rem;color:var(--muted)}
 .dock .btn{padding:12px 24px}
+.dock .btn.is-empty{background:transparent;color:var(--muted);border:1px solid var(--line)}
 .overlay{position:fixed;inset:0;z-index:60;background:rgba(70,60,52,.34);opacity:0;visibility:hidden;transition:opacity .25s,visibility .25s}
 .overlay.open{opacity:1;visibility:visible}
 .drawer{position:fixed;z-index:61;right:0;top:0;bottom:0;width:min(420px,100%);background:var(--bg);border-left:1px solid var(--line);transform:translateX(100%);transition:transform .3s cubic-bezier(.32,.72,0,1);display:flex;flex-direction:column}
@@ -733,7 +734,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
 @media(min-width:560px){.formacta{padding:22px 24px}.formacta .fcimg{width:118px;height:118px}}
 .formacta .fcsizes{display:flex;flex-wrap:wrap;gap:6px;margin-top:11px}
 .fcsz{border:1px solid var(--line);background:var(--white);border-radius:9px;padding:6px 11px;font-size:.74rem;color:var(--text-2);cursor:pointer;font-family:inherit;line-height:1.1}
-.fcsz[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.fcsz[aria-pressed="true"]{border-color:var(--ink);color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
 .formacta .fcbuy{display:flex;flex-direction:column;gap:10px;flex:0 0 auto;margin-left:auto;align-items:flex-end}
 .formacta .fcbuy .fcbtn{align-self:stretch;margin-left:0;text-align:center}
 .formacta .fcprice{font-weight:500;font-size:1.05rem;text-align:right;white-space:nowrap}
@@ -863,7 +864,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
     <a href="#/receitas">Receitas</a>
     <a href="#/sobre" class="sub">Sobre o estúdio</a>
   </nav>
-  <p class="mfoot">Studio Suzu · Made in Brazil</p>
+  <p class="mfoot">Studio Suzu · Feito no Brasil</p>
 </div>
 
 <div class="searchov" id="searchov"></div>
@@ -929,7 +930,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
 <footer>
   <div class="wrap foot-grid">
     <div class="foot-brand">
-      <div class="fslock"><div class="fsword">suzu</div><div class="fsdots"><i style="background:var(--sakura)"></i><i style="background:var(--fuji)"></i><i style="background:var(--torinoko)"></i><i style="background:var(--mizu)"></i><i style="background:var(--sango)"></i><i style="background:var(--matcha)"></i></div><p class="sig">small joys, beautifully molded.</p></div>
+      <div class="fslock"><div class="fsword">suzu</div><div class="fsdots"><i style="background:var(--sakura)"></i><i style="background:var(--fuji)"></i><i style="background:var(--torinoko)"></i><i style="background:var(--mizu)"></i><i style="background:var(--sango)"></i><i style="background:var(--matcha)"></i></div><p class="sig">pequenas alegrias, lindamente moldadas.</p></div>
       <div class="social">
         <a href="https://www.instagram.com/studio.suzu/" target="_blank" rel="noopener" aria-label="Instagram"><svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg></a>
         <a href="https://www.tiktok.com/@studio.suzu" target="_blank" rel="noopener" aria-label="TikTok"><svg viewBox="0 0 24 24" style="fill:currentColor;stroke:none"><path d="M12.53 2h3.12c.17 1.53.83 2.87 1.94 3.66.86.61 1.9.97 3.01 1.03v3.17a8.1 8.1 0 0 1-4.42-1.4v6.34a6.06 6.06 0 1 1-6.06-6.06c.32 0 .63.03.94.08v3.28a2.78 2.78 0 1 0 1.93 2.65V2z"/></svg></a>
@@ -941,7 +942,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
       <div class="fcol"><h4 class="label">Ajuda</h4><a href="#/faq">Cuidados</a><a href="#/faq">Entrega</a><a href="#/faq">Trocas</a><a href="https://wa.me/5511912345678?text=Ol%C3%A1!%20Vim%20pela%20loja%20Studio%20Suzu%20e%20queria%20falar%20sobre%20um%20projeto%20exclusivo." target="_blank" rel="noopener">Contato</a></div>
     </div>
   </div>
-  <div class="wrap foot-bot"><span class="label">Made in Brazil</span><span class="label">© 2026 Studio Suzu</span></div>
+  <div class="wrap foot-bot"><span class="label">Feito no Brasil</span><span class="label">© 2026 Studio Suzu</span></div>
 </footer>
 
 <div class="dock"><div class="dock-in"><div class="sum"><b id="dockTotal">R$ 0,00</b><small id="dockCount">sua sacola está vazia</small></div><button class="btn" id="openCart2">Ver sacola</button></div></div>
@@ -1328,10 +1329,10 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
   function sobreView(){
     return backHome()+'<div class="sobre"><span class="label">Sobre o estúdio</span><h1>Dois ofícios, uma mesa de cozinha</h1>'+
       '<p class="lead">Precisão e afeto não são adjetivos que escolhemos. São duas pessoas. O Studio Suzu é tocado por um casal: um modela em 3D — superfícies, tolerâncias, o ângulo exato em que o molde solta. A outra cozinha, e sabe o que uma forma precisa prometer antes de alguém provar.</p>'+
-      '<p class="q">This is the part no catalog can copy. Machines are for sale. A shared table is not.</p>'+
+      '<p class="q">Esta é a parte que nenhum catálogo copia. Máquinas estão à venda. Uma mesa compartilhada, não.</p>'+
       '<div class="duo"><div><b>Quem modela</b><p>Traz a disciplina: modelagem 3D, encaixe exato, uma forma que desenforma limpa mil vezes.</p></div><div><b>Quem cozinha</b><p>Traz a razão: o que a sobremesa precisa dizer ao chegar à mesa, e como deve sentir-se na mão.</p></div></div>'+
       '<div class="vals"><div><b>Autoria</b><p>Desenho exclusivo — o molde é da marca, não de um catálogo.</p></div><div><b>Refinamento</b><p>Excelência técnica em cada forma.</p></div><div><b>Afeto</b><p>Feito devagar, com cuidado — criar é um gesto de ternura.</p></div><div><b>Exclusividade</b><p>Tiragens pequenas, sem reposição garantida.</p></div></div>'+
-      '<p class="sig" style="font-size:1.4rem;margin-top:44px;color:var(--stone-text)">small joys, beautifully molded.</p></div>';
+      '<p class="sig" style="font-size:1.4rem;margin-top:44px;color:var(--stone-text)">pequenas alegrias, lindamente moldadas.</p></div>';
   }
   function exclusivoView(){
     return backHome()+'<div class="listing"><div class="exhero" style="--st:var(--sakura-wash)"><div class="exbg">'+mold(byId('coracao'))+'</div><div class="excopy"><span class="label">Sob encomenda</span><h1>Seu projeto. <em>Sua cara.</em></h1><p>Uma forma que só existe para você: desenhamos, do sketch ao molde, a sua assinatura — impossível de copiar. Sob análise de orçamento.</p></div></div>'+
@@ -1636,6 +1637,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
     saveCart();
     var count=0,sub=0;Object.keys(cart).forEach(k=>{count+=cart[k].qty;sub+=cart[k].qty*cart[k].price;});
     var b=document.getElementById('badge');b.textContent=count;b.classList.toggle('on',count>0);
+    var _vs=document.getElementById('openCart2');if(_vs)_vs.classList.toggle('is-empty',count===0);
     var s=cartSplit(),hasNow=s.now.length>0,q=shipQuote(SHIP.cep,s.subNow);
     var ship=!hasNow?0:(q?(q[0].free?0:q[0].price):null); /* null = ainda sem CEP calculado */
     document.getElementById('dockTotal').textContent=BRL(sub);
