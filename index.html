@@ -411,6 +411,8 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
 .pdp{padding:22px 0 60px;display:flex;flex-direction:column;gap:34px}
 .pdp .mimg{position:relative;border:1px solid var(--line-soft);border-radius:22px;overflow:hidden;background:var(--warm)}
 .pdp .mimg .m{aspect-ratio:1/1}
+.cover{width:100%;height:100%;object-fit:cover;display:block}
+.pcard .m .cover,.formacta .fcimg .cover{position:absolute;inset:0}
 .mstage{position:relative}
 .mstage .mphoto{width:100%;aspect-ratio:1/1;object-fit:cover;display:block}
 .mthumbs{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
@@ -602,7 +604,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
 .drow{display:flex;justify-content:space-between;font-size:.84rem;color:var(--text-3);margin-bottom:8px;font-weight:300}
 .drow.tot{font-size:1.05rem;color:var(--text);margin:12px 0 16px;font-weight:400}
 .drow.tot b{font-weight:500;font-variant-numeric:tabular-nums}
-.checkout{width:100%;background:var(--ink);color:var(--white);border:none;padding:15px;border-radius:14px;font-size:.76rem;font-weight:500;letter-spacing:.08em;text-transform:uppercase}
+.checkout{width:100%;background:var(--ink);color:var(--white);border:none;padding:15px;border-radius:999px;font-size:.76rem;font-weight:500;letter-spacing:.08em;text-transform:uppercase}
 .checkout:hover{background:#3a322b}
 .cowrap{max-width:1040px;margin:0 auto;padding:8px 0 64px}
 .cotitle{font-size:clamp(1.5rem,4vw,2rem);font-weight:300;letter-spacing:-.01em;margin:6px 0 26px}
@@ -624,7 +626,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
 .coinfo{background:var(--mizu-wash);border-radius:12px;padding:14px 15px;font-size:.86rem;font-weight:300;color:#2c4744;line-height:1.55}
 .ceprow{display:flex;gap:10px;align-items:flex-end}
 .ceprow .cofield{flex:1;margin-bottom:0}
-.btn.ghost{background:var(--warm);color:var(--stone-text);border:1px solid var(--line);white-space:nowrap;padding:12px 16px}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line-strong);white-space:nowrap;padding:12px 16px}
 .cephint{font-size:.76rem;color:var(--muted);font-weight:300;margin-top:9px;min-height:1em}
 .cephint.err{color:#b4553f}
 .cepmini{display:flex;gap:8px;margin-bottom:6px}
@@ -967,7 +969,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
 <div class="overlay" id="overlay"></div>
 <aside class="drawer" id="drawer" aria-label="Sacola" aria-hidden="true">
   <div class="dh"><b>Sua sacola</b><button class="ibtn" id="closeCart" aria-label="Fechar"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
-  <div class="items" id="items"><p class="empty"><span class="sig">Ainda vazia.</span>Escolha uma forma para começar.</p></div>
+  <div class="items" id="items"><p class="empty"><span class="sig">Ainda vazia.</span>Escolha um produto pra começar.</p></div>
   <div class="dfoot">
     <div class="cepmini"><input type="text" id="drCep" inputmode="numeric" placeholder="Seu CEP" maxlength="9" autocomplete="postal-code"><button type="button" class="btn ghost" id="drCepBtn">Calcular frete</button></div>
     <p class="cephint" id="drCepHint"></p>
@@ -1129,7 +1131,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
   function cardHTML(p){
     var st=statusMeta(p);
     var pr=p.status==='soldout'?'<div class="pr so">Esgotado</div>':(p.status==='presale'?'<div class="pr">reserva · a partir de <b>'+BRL(fromPrice(p))+'</b><small class="avail">disponível '+p.avail+'</small></div>':'<div class="pr">a partir de <b>'+BRL(fromPrice(p))+'</b></div>');
-    return '<a class="pcard'+(p.status==='soldout'?' out':'')+'" href="#/p/'+p.id+'" aria-label="'+p.name+'"><div class="m"><span class="pbadge '+st.k+'">'+st.label+'</span>'+mold(p)+'</div><div class="b"><span class="use">'+p.use+'</span><h3>'+p.name+'</h3>'+pr+'</div></a>';
+    return '<a class="pcard'+(p.status==='soldout'?' out':'')+'" href="#/p/'+p.id+'" aria-label="'+p.name+'"><div class="m"><span class="pbadge '+st.k+'">'+st.label+'</span>'+coverHTML(p)+'</div><div class="b"><span class="use">'+p.use+'</span><h3>'+p.name+'</h3>'+pr+'</div></a>';
   }
 
   /* HERO */
@@ -1263,7 +1265,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
     var sizes=(!full && p.sizes.length>1)?'<div class="fcsizes">'+p.sizes.map(function(s){var o=sizeOut(p,s);return '<button type="button" class="fcsz'+(o?' out':'')+'" data-s="'+s+'" aria-pressed="'+(s===def)+'">'+SIZES[s].name+' · '+SIZES[s].dim+'</button>';}).join('')+'</div>':'';
     var price=defOut?'<span class="fcprice so">Esgotado nesta tiragem</span>':'<span class="fcprice">'+BRL(priceOf(p,def))+'<small>em até 6× · '+SIZES[def].name+'</small></span>';
     var btn='<button type="button" class="btn '+(defOut?'ghost ':'')+'buybtn fcbtn">'+(defOut?'Avise-me quando voltar':'Adicionar à sacola')+'</button>';
-    return '<div class="formacta buycard" data-id="'+p.id+'" data-size="'+def+'"><a class="fcimg" href="#/p/'+p.id+'" style="background:var(--'+tint+'-wash)"><span class="pbadge '+st.k+'">'+st.label+'</span>'+mold(p)+'</a><div class="fctxt"><a class="fcname" href="#/p/'+p.id+'"><b>'+p.name+'</b></a><p>'+p.use+' · silicone platinum</p>'+sizes+'</div><div class="fcbuy">'+price+btn+'</div></div>';
+    return '<div class="formacta buycard" data-id="'+p.id+'" data-size="'+def+'"><a class="fcimg" href="#/p/'+p.id+'" style="background:var(--'+tint+'-wash)"><span class="pbadge '+st.k+'">'+st.label+'</span>'+coverHTML(p)+'</a><div class="fctxt"><a class="fcname" href="#/p/'+p.id+'"><b>'+p.name+'</b></a><p>'+p.use+' · silicone platinum</p>'+sizes+'</div><div class="fcbuy">'+price+btn+'</div></div>';
   }
   /* liga os cards de compra: escolha de tamanho atualiza preço + botão; botão adapta ao tamanho (comprar ou avisar) */
   /* "Avise-me quando voltar" — captura contato (e-mail ou WhatsApp) antes de confirmar.
@@ -1310,7 +1312,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
     var szs=p.sizes.map(function(s){var z=SIZES[s];var o=sizeOut(p,s);return '<button class="sz'+(o?' out':'')+'" data-s="'+s+'" aria-pressed="'+(s===def)+'"><div class="t">'+z.name+'</div><div class="d">'+z.dim+'</div><div class="p">'+(o?'esgotado':BRL(priceOf(p,s)))+'</div></button>';}).join('');
     var pat=p.seigaiha?'<span class="pat">O relevo desta peça é o padrão seigaiha (ondas) — a assinatura gráfica que também percorre as nossas embalagens.</span> ':'';
     var buy;
-    if(allOut(p)) buy='<div class="buyrow"><span class="price so">Esgotado nesta tiragem</span><button class="btn ghost" id="notifyBtn">Avise-me quando voltar</button></div>';
+    if(allOut(p)) buy='<div class="buyrow"><span class="price so">Esgotado nesta tiragem</span><button class="btn" id="notifyBtn">Avise-me quando voltar</button></div>';
     else if(p.status==='presale'){var dep=Math.round(priceOf(p,def)*0.3); buy='<div class="buyrow"><span class="price" id="pdpPrice">'+BRL(dep)+'<small>sinal de reserva · '+SIZES[def].name+' de '+BRL(priceOf(p,def))+'</small></span><button class="btn addbtn" id="pdpAdd">Reservar com sinal</button></div><p class="prenote">O sinal garante a sua peça e a prioridade — e é descontado do valor final quando ela lança, em '+p.avail+'.</p>';}
     else buy='<div class="buyrow"><span class="price" id="pdpPrice">'+BRL(priceOf(p,def))+'<small>em até 6× · '+SIZES[def].name+'</small></span><button class="btn addbtn" id="pdpAdd">Adicionar à sacola</button></div>';
     return backHome()+'<div class="pdp"><div class="media">'+mediaGallery(p)+'<button class="vidthumb reeltrigger" aria-label="Ver o vídeo desta peça"><span class="vtp" style="background:'+tint+'">'+mold(p)+'<span class="vtplay"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></span></span><span class="vtlabel">Ver o vídeo desse produto</span></button></div>'+
@@ -1352,6 +1354,14 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
     var stage='<div class="mimg"><span class="pbadge '+st.k+'">'+st.label+'</span><div class="mstage" id="mstage">'+pmediaMain(p,items[0])+'</div></div>';
     if(items.length<2)return stage;
     return stage+'<div class="mthumbs" id="mthumbs">'+items.map(function(it,i){return pmediaThumb(p,it,i);}).join('')+'</div>';
+  }
+  /* Capa do card: imagem OU vídeo se o produto tiver `cover`, senão a forma (mold).
+     Ex.: cover:{type:'image',src:'foto.jpg'}  ou  cover:{type:'video',src:'v.mp4',poster:'capa.jpg'} */
+  function coverHTML(p){
+    var c=p.cover;
+    if(c&&c.type==='image')return '<img class="cover" src="'+c.src+'" alt="'+p.name+'" loading="lazy">';
+    if(c&&c.type==='video')return '<video class="cover" src="'+c.src+'"'+(c.poster?' poster="'+c.poster+'"':'')+' muted loop autoplay playsinline></video>';
+    return mold(p);
   }
   function scarceBlock(p){
     if(p.status==='soldout')return '';
@@ -1511,7 +1521,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
     Object.keys(cart).forEach(function(k){var it=cart[k];if(it.p.status==='presale'){pre.push(it);subPre+=it.qty*it.price;}else{now.push(it);subNow+=it.qty*it.price;}});
     return {now:now,pre:pre,subNow:subNow,subPre:subPre};
   }
-  function coEmptyView(){return backHome()+'<div class="wrap cowrap"><div class="coempty"><span class="sig">Sua sacola está vazia.</span><p>Escolha uma forma para começar a sua coleção.</p><a class="btn" href="#/produtos">Ver produtos</a></div></div>';}
+  function coEmptyView(){return backHome()+'<div class="wrap cowrap"><div class="coempty"><span class="sig">Sua sacola está vazia.</span><p>Escolha um produto pra começar a sua coleção.</p><a class="btn" href="#/produtos">Ver produtos</a></div></div>';}
   /* ============================================================================
      CHECKOUT — PENDÊNCIAS DE BACK-END (o front já está pronto; falta integração real)
      Anotado em 2026-07-14 · ver também a memória "suzu-loja-integracoes-pendente".
@@ -1683,7 +1693,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
     document.getElementById('tot').textContent=BRL(sub+(ship||0));
     syncDrawerCep(s,q);
     var box=document.getElementById('items'),keys=Object.keys(cart);
-    if(!keys.length){box.innerHTML='<p class="empty"><span class="sig">Ainda vazia.</span>Escolha uma forma para começar.</p>';return;}
+    if(!keys.length){box.innerHTML='<p class="empty"><span class="sig">Ainda vazia.</span>Escolha um produto pra começar.</p>';return;}
     box.innerHTML=keys.map(function(k){var it=cart[k];return '<div class="li"><div class="mini">'+mold(it.p)+'</div><div class="info"><b>'+it.name+'</b><small>'+BRL(it.price)+' · '+it.sub+'</small></div><div class="qty"><button data-m="'+k+'" aria-label="menos"><svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/></svg></button><span>'+it.qty+'</span><button data-p="'+k+'" aria-label="mais"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></div></div>';}).join('');
     box.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{cart[b.dataset.p].qty++;render();});
     box.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{var k=b.dataset.m;if(--cart[k].qty<=0)delete cart[k];render();});
