@@ -294,11 +294,11 @@ section{padding:52px 0}
 
 /* RODAPÉ */
 footer{background:var(--warm);border-top:1px solid var(--line-soft);padding:48px 0 32px}
-.foot-grid{display:flex;flex-direction:column;gap:32px}
-.foot-brand .seal{width:46px;height:46px;margin-bottom:14px}
-.foot-brand .sig{font-size:1.05rem;color:var(--stone-text)}
-.fslock{display:flex;flex-direction:column;align-items:flex-start;gap:11px;margin-bottom:18px}
-.fsword{font-weight:300;font-size:1.55rem;letter-spacing:.4em;text-transform:lowercase;color:var(--ink);line-height:1}
+.foot-grid{display:flex;flex-direction:column;gap:22px}
+.foot-brand .seal{width:36px;height:36px;margin-bottom:9px}
+.foot-brand .sig{font-size:.85rem;color:var(--stone-text)}
+.fslock{display:flex;flex-direction:column;align-items:flex-start;gap:8px;margin-bottom:10px}
+.fsword{font-weight:300;font-size:1.1rem;letter-spacing:.28em;text-transform:lowercase;color:var(--ink);line-height:1}
 .fsdots{display:flex;gap:5px}
 .fsdots i{width:6px;height:6px;border-radius:50%;display:block}
 .pal{margin-top:18px}
@@ -309,7 +309,7 @@ footer{background:var(--warm);border-top:1px solid var(--line-soft);padding:48px
 .fcol h4{margin:0 0 12px;font-weight:400}
 .fcol a{display:block;font-size:.85rem;color:var(--text-3);padding:5px 0;font-weight:300}
 .fcol a:hover{color:var(--gold-text)}
-.foot-bot{margin-top:32px;padding-top:22px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:14px}
+.foot-bot{margin-top:22px;padding-top:16px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:10px}
 .foot-bot .label{font-size:.6rem}
 
 /* DETALHE / PÁGINAS */
@@ -490,7 +490,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
 .reelph b{font-weight:500;font-size:.8rem;color:var(--stone-text)}
 .reelcap{color:#fff;text-align:center;margin-top:14px;font-size:.85rem;font-weight:300}
 @keyframes fabIn{from{transform:scale(0)}to{transform:scale(1)}}
-.social{display:flex;gap:10px;margin-top:18px}
+.social{display:flex;gap:10px;margin-top:12px}
 .social a{width:38px;height:38px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;color:var(--ink)}
 .social a:hover{border-color:var(--ink);background:var(--white)}
 .social svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
@@ -701,7 +701,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
 .okwrap .btn{margin-top:18px}
 .dnote{font-size:.72rem;color:var(--muted);text-align:center;margin:12px 0 0;font-weight:300}
 
-.social{display:flex;gap:10px;margin-top:18px}
+.social{display:flex;gap:10px;margin-top:12px}
 .social a{width:38px;height:38px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;color:var(--ink)}
 .social a:hover{border-color:var(--ink);background:var(--white)}
 .social svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
@@ -820,6 +820,14 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
   .formacta .fcprice small{display:block}
   .formacta .fcbtn{align-self:auto;flex:1 1 auto;white-space:nowrap;padding:11px 16px;font-size:.7rem}
 }
+.recshare{margin:44px 0 8px;padding:26px 22px;border-radius:18px;background:var(--warm);text-align:center}
+.recshare .sig{font-size:1.4rem;display:block;color:var(--stone-text)}
+.recshare p{color:var(--muted);font-weight:300;margin:8px auto 16px;max-width:46ch;line-height:1.6}
+.recshare p b{font-weight:500;color:var(--ink)}
+.recsoc{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.recsoc a{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:999px;padding:9px 16px;font-size:.82rem;color:var(--ink);text-decoration:none;transition:border-color .16s}
+.recsoc a:hover{border-color:var(--ink)}
+.recsoc svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 @media print{
   .note,.dock,footer,.igfab,.reelov,.reelbox,.overlay,.drawer,.searchbar,.searchov,.mobmenu,.back,.share,.recvid,.vidthumb,.suggest,.crosssell,.hd nav,.hd .ibtn{display:none!important}
   .hd{position:static!important;border:none!important;background:none!important}
@@ -832,6 +840,9 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
   .recbody{display:block!important}
   .recside{margin-bottom:18px}
   .ing li,.steps li{break-inside:avoid;page-break-inside:avoid}
+  .recshare{background:none!important;border:1px solid #ccc!important;margin-top:28px!important;break-inside:avoid}
+  .recshare .sig,.recshare p,.recshare b,.recsoc a{color:#000!important}
+  .recsoc a{border-color:#999!important}
   a[href]::after{content:''!important}
 }
 </style>
@@ -1047,6 +1058,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
   var SORTS=[['novo','Últimos lançados'],['antigo','Menos recentes'],['preco-asc','Preço: menor primeiro'],['preco-desc','Preço: maior primeiro']];
   function sortLabel(k){var s=SORTS.find(x=>x[0]===k);return s?s[1]:'';}
   function labelOf(facet,v){
+    if(facet==='promo')return 'Em promoção';
     if(facet==='size'){var s=SIZEF.find(x=>x[0]===v);return s?s[1]:v;}
     if(facet==='status'){var s=STATUSF.find(x=>x[0]===v);return s?s[1]:v;}
     if(facet==='price'){var s=PRICEF.find(x=>x[0]===v);return s?s[1]:v;}
@@ -1192,15 +1204,16 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
   document.querySelectorAll('.carwrap').forEach(initCarousel);
 
   /* ===== PRODUTOS (filtros + ordenação) ===== */
-  var FS={size:[],status:[],coll:[],price:[],sort:'novo',q:''};
+  var FS={size:[],status:[],coll:[],price:[],promo:[],sort:'novo',q:''};
   var pageShown=9;
-  function activeCount(){return FS.size.length+FS.status.length+FS.coll.length+FS.price.length;}
+  function activeCount(){return FS.size.length+FS.status.length+FS.coll.length+FS.price.length+FS.promo.length;}
   function matchFilter(p){
     if(FS.q && (p.name+' '+p.use+' '+p.coll).toLowerCase().indexOf(FS.q.toLowerCase())<0)return false;
     if(FS.size.length && !p.sizes.some(s=>FS.size.indexOf(s)>-1))return false;
     if(FS.status.length && FS.status.indexOf(p.status)<0)return false;
     if(FS.coll.length && FS.coll.indexOf(p.coll)<0)return false;
     if(FS.price.length && !FS.price.some(k=>inBucket(p,k)))return false;
+    if(FS.promo.length && !saleP(p))return false;
     return true;
   }
   function sortList(list){
@@ -1225,7 +1238,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
     var pills=document.getElementById('pills');
     if(pills){
       var out='';
-      ['size','status','coll','price'].forEach(function(f){FS[f].forEach(function(v){out+='<button class="apill" data-f="'+f+'" data-v="'+v+'">'+labelOf(f,v)+' <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>';});});
+      ['promo','size','status','coll','price'].forEach(function(f){FS[f].forEach(function(v){out+='<button class="apill" data-f="'+f+'" data-v="'+v+'">'+labelOf(f,v)+' <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>';});});
       pills.innerHTML=out+(activeCount()?'<button class="clear" id="clearAll">Limpar tudo</button>':'');
       pills.style.display=activeCount()?'flex':'none';
       pills.querySelectorAll('.apill').forEach(b=>b.onclick=function(){var f=b.dataset.f;FS[f]=FS[f].filter(x=>x!==b.dataset.v);syncChips();pageShown=9;renderProducts();});
@@ -1235,7 +1248,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
   function syncChips(){document.querySelectorAll('.fchip').forEach(function(c){c.setAttribute('aria-pressed', FS[c.dataset.facet].indexOf(c.dataset.val)>-1);});}
   function produtosView(){
     function grp(title,facet,items){var LIM=6;var chips=items.map(function(it,i){var v=it[0],lab=it[1],sub=it[2];return '<button class="fchip'+(items.length>LIM&&i>=LIM?' fhide':'')+'" data-facet="'+facet+'" data-val="'+v+'" aria-pressed="'+(FS[facet].indexOf(v)>-1)+'">'+lab+(sub?'<small>'+sub+'</small>':'')+'</button>';}).join('');return '<div class="fgroup"><p class="flabel">'+title+'</p><div class="fchips">'+chips+'</div>'+(items.length>LIM?'<button class="fmore" type="button">Ver todas ('+items.length+')</button>':'')+'</div>';}
-    var groups=grp('Tamanho','size',SIZEF)+grp('Coleção','coll',COLLS.map(c=>[c,c]))+grp('Preço','price',PRICEF);
+    var groups=grp('Promoção','promo',[['sale','Em promoção']])+grp('Tamanho','size',SIZEF)+grp('Coleção','coll',COLLS.map(c=>[c,c]))+grp('Preço','price',PRICEF);
     var panel='<aside class="fpanel" id="filterPanel"><div class="fph"><b>Filtrar</b><button class="ibtn" id="closeFilter" aria-label="Fechar"><svg viewBox="0 0 24 24" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div><div class="fgroups"><label class="fsearch"><svg viewBox="0 0 24 24" fill="none" stroke="var(--stone)" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input id="fq" type="search" placeholder="Buscar por nome…" aria-label="Buscar"></label>'+groups+'</div><div class="fpf"><button class="clear" id="clearSheet">Limpar</button><button class="btn" id="applyBtn">Ver peças</button></div></aside>';
     var sortSheet='<div class="sheetov" id="sheetov"></div><div class="sheet" id="sortSheet"><div class="sh"><b>Ordenar</b><button class="ibtn" id="closeSort" aria-label="Fechar"><svg viewBox="0 0 24 24" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div><div class="sc">'+
       SORTS.map(s=>'<button class="sortopt" data-sort="'+s[0]+'" aria-pressed="'+(FS.sort===s[0])+'">'+s[1]+'</button>').join('')+'</div></div>';
@@ -1256,6 +1269,15 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
   function receitasView(){
     return backHome()+'<div class="listing"><h1>Receitas</h1><p class="lead">O processo em vídeo e o passo a passo por escrito — feito com as nossas formas.</p><div class="rgrid" style="margin-top:30px">'+RECIPES.map(recCard).join('')+'</div></div>';
   }
+  function recShare(){
+    var IG='https://www.instagram.com/studio.suzu/',TT='https://www.tiktok.com/@studio.suzu';
+    return '<div class="recshare"><span class="sig">Faz e marca a gente!</span>'
+      +'<p>Fez essa receita? A gente adora ver — e reposta com o maior carinho. É só marcar <b>@studio.suzu</b>.</p>'
+      +'<div class="recsoc">'
+      +'<a href="'+IG+'" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>Instagram · @studio.suzu</a>'
+      +'<a href="'+TT+'" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" style="fill:currentColor;stroke:none"><path d="M12.53 2h3.12c.17 1.53.83 2.87 1.94 3.66.86.61 1.9.97 3.01 1.03v3.17a8.1 8.1 0 0 1-4.42-1.4v6.34a6.06 6.06 0 1 1-6.06-6.06c.32 0 .63.03.94.08v3.28a2.78 2.78 0 1 0 1.93 2.65V2z"/></svg>TikTok · @studio.suzu</a>'
+      +'</div></div>';
+  }
   function receitaView(id){
     var r=RECIPES.find(function(x){return x.id===id;}); if(!r)return '';
     var mp=byId(r.mold);
@@ -1264,7 +1286,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
     var wa='https://wa.me/?text='+encodeURIComponent(r.name+' — receita do Studio Suzu');
     var share='<div class="share"><span class="label">Compartilhar</span><a class="shb" href="'+wa+'" target="_blank" rel="noopener" aria-label="WhatsApp"><svg viewBox="0 0 24 24" style="fill:currentColor;stroke:none"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.86 9.86 0 0 0 4.79 1.22h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2zm0 18.13h-.01c-1.53 0-3.03-.41-4.34-1.19l-.31-.18-3.22.84.86-3.14-.2-.32a8.19 8.19 0 0 1-1.26-4.37c0-4.54 3.7-8.23 8.24-8.23 2.2 0 4.27.86 5.82 2.42a8.18 8.18 0 0 1 2.41 5.83c0 4.54-3.7 8.24-8.23 8.24zm4.52-6.16c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.12-.16.25-.64.81-.78.97-.14.17-.29.19-.54.06-.25-.12-1.05-.39-1.99-1.23-.74-.66-1.23-1.47-1.38-1.72-.14-.25-.02-.38.11-.51.11-.11.25-.29.37-.43.12-.14.16-.25.25-.41.08-.17.04-.31-.02-.43-.06-.12-.56-1.35-.77-1.84-.2-.48-.41-.42-.56-.42h-.48c-.17 0-.43.06-.66.31-.23.25-.87.85-.87 2.07 0 1.22.89 2.4 1.02 2.56.12.17 1.75 2.67 4.23 3.74.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.68-1.18.21-.58.21-1.07.14-1.18-.06-.11-.22-.17-.47-.29z"/></svg></a><button class="shb" id="copyLink" aria-label="Copiar link"><svg viewBox="0 0 24 24"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"/><line x1="8" y1="12" x2="16" y2="12"/></svg></button><button class="shb" onclick="window.print()" aria-label="Imprimir"><svg viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button></div>';
     var recsug='<section class="suggest"><div class="sec-head"><div class="lead"><h2>Outras receitas</h2></div><div class="sec-tools"><a class="more" href="#/receitas">Ver todas</a></div></div><div class="carwrap"><div class="hcar">'+RECIPES.filter(function(x){return x.id!==r.id;}).slice(0,6).map(recCard).join('')+'</div><div class="cdots" hidden></div></div></section>';
-    return '<a class="back" href="#/receitas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>Voltar às receitas</a><article class="recipe"><div class="recvid" style="background:var(--'+r.tint+'-wash)">'+vid+'</div><div class="rechead"><span class="label">'+r.time+' · '+r.level+'</span><h1>'+r.name+'</h1>'+share+'</div><div class="recbody"><div class="recside"><h2>Ingredientes</h2><ul class="ing">'+r.ing.map(function(i){return '<li>'+i+'</li>';}).join('')+'</ul></div><div class="recmain"><h2>Passo a passo</h2><ol class="steps">'+r.steps.map(function(s,i){return '<li><span class="sn">'+(i+1)+'</span><p>'+s+'</p></li>';}).join('')+'</ol></div></div>'+moldbox+recsug+'</article>';
+    return '<a class="back" href="#/receitas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>Voltar às receitas</a><article class="recipe"><div class="recvid" style="background:var(--'+r.tint+'-wash)">'+vid+'</div><div class="rechead"><span class="label">'+r.time+' · '+r.level+'</span><h1>'+r.name+'</h1>'+share+'</div><div class="recbody"><div class="recside"><h2>Ingredientes</h2><ul class="ing">'+r.ing.map(function(i){return '<li>'+i+'</li>';}).join('')+'</ul></div><div class="recmain"><h2>Passo a passo</h2><ol class="steps">'+r.steps.map(function(s,i){return '<li><span class="sn">'+(i+1)+'</span><p>'+s+'</p></li>';}).join('')+'</ol></div></div>'+recShare()+moldbox+recsug+'</article>';
   }
   /* "Leve junto" (frequently bought together) = COMPLEMENTARES: categoria/forma diferente + populares
      (proxy de "comprado junto"). Determinístico (sem random). */
@@ -1434,7 +1456,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
       document.getElementById('closeSort').onclick=closeS;
       ov.onclick=closeS;
       var ab=document.getElementById('applyBtn'); if(ab)ab.onclick=closeS;
-      document.getElementById('clearSheet').onclick=function(){FS.size=[];FS.status=[];FS.coll=[];FS.price=[];syncChips();pageShown=9;renderProducts();};
+      document.getElementById('clearSheet').onclick=function(){FS.size=[];FS.status=[];FS.coll=[];FS.price=[];FS.promo=[];syncChips();pageShown=9;renderProducts();};
       document.querySelectorAll('.fchip').forEach(function(c){c.onclick=function(){var f=c.dataset.facet,v=c.dataset.val,arr=FS[f],i=arr.indexOf(v);if(i>-1)arr.splice(i,1);else arr.push(v);c.setAttribute('aria-pressed',arr.indexOf(v)>-1);pageShown=9;renderProducts();};});
       document.querySelectorAll('.fmore').forEach(function(b){b.onclick=function(){b.previousElementSibling.querySelectorAll('.fhide').forEach(function(c){c.classList.remove('fhide');});b.remove();};});
       document.querySelectorAll('.sortopt').forEach(function(o){o.onclick=function(){FS.sort=o.dataset.sort;document.querySelectorAll('.sortopt').forEach(x=>x.setAttribute('aria-pressed',x.dataset.sort===FS.sort));pageShown=9;renderProducts();closeS();};});
