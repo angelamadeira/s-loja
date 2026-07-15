@@ -450,6 +450,14 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
 .pdp .buyrow .price.so{font-size:1rem;color:var(--muted)}
 .pdp .addbtn{flex:1;min-width:200px;text-align:center}
 .prenote{margin-top:12px;font-size:.78rem;color:var(--muted);font-weight:300}
+.offtag{display:inline-block;background:var(--ink);color:#fff;font-size:.56rem;font-weight:600;letter-spacing:.03em;padding:2px 6px;border-radius:999px;vertical-align:middle;margin-left:3px;text-transform:none}
+.wasp{color:var(--muted);font-weight:300;text-decoration:line-through;margin-right:4px}
+.couprow{display:flex;gap:8px;margin-top:2px}
+.couprow input{flex:1;min-width:0;border:1px solid var(--line);border-radius:999px;padding:12px 15px;font-size:.9rem;font-family:inherit;color:var(--text);background:var(--white);outline:none;text-transform:uppercase;letter-spacing:.04em}
+.couprow input:focus{border-color:var(--stone)}
+.couphint{font-size:.74rem;color:var(--muted);font-weight:300;margin:8px 0 0;min-height:1em}
+.couphint.err{color:#b4553f}
+.couphint.ok{color:#3f6f4a}
 .notifybox{margin-top:12px}
 .notifyform{display:flex;gap:8px}
 .notifyin{flex:1;min-width:0;border:1px solid var(--line);border-radius:11px;padding:11px 12px;font-size:.9rem;font-family:inherit;color:var(--text);background:var(--white);outline:none}
@@ -991,7 +999,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
     {id:'tablete',name:'Tablete Seigaiha',shape:'bar',cols:3,rows:4,base:89,rating:4.9,rev:128,use:'Tablete · 12 gomos',coll:'Essenciais',sizes:['M','G'],out:['G'],launch:6,seigaiha:true,edition:40,left:7,status:'live',ig:IG,desc:'Doze gomos com o relevo de ondas seigaiha — o mesmo traço que assina as nossas embalagens. Uma barra que já chega autoral.'},
     {id:'coracao',name:'Coração Selado',shape:'heart', cols:4,rows:2,base:68,rating:5.0,rev:64,use:'Bombom · coração',coll:'Bombons',sizes:['P','M'],launch:5,edition:50,left:50,status:'presale',avail:'15/03',ig:IG,desc:'Corações com o relevo do selo, para as datas que pedem afeto — sem cair no óbvio.'},
     {id:'concha', name:'Bombom Concha', shape:'circle',cols:6,rows:4,base:71,rating:4.8,rev:203,use:'Bombom · mini',coll:'Bombons',sizes:['P','M'],launch:4,edition:80,left:44,status:'presale',avail:'02/04',ig:IG,desc:'Vinte e quatro mini bombons por fornada — para caixas e mimos que se vendem no olhar.'},
-    {id:'cubo',   name:'Pão de Mel Cubo',shape:'square',cols:3,rows:3,base:82,rating:4.9,rev:52,use:'Pão de mel · cubo',coll:'Bento & Festa',sizes:['M','G'],launch:3,edition:45,left:21,status:'live',ig:IG,desc:'Cubos de faces retas e vivas — pães de mel, brownies e entremets com acabamento de galeria.'},
+    {id:'cubo',   name:'Pão de Mel Cubo',shape:'square',cols:3,rows:3,base:82,sale:20,rating:4.9,rev:52,use:'Pão de mel · cubo',coll:'Bento & Festa',sizes:['M','G'],launch:3,edition:45,left:21,status:'live',ig:IG,desc:'Cubos de faces retas e vivas — pães de mel, brownies e entremets com acabamento de galeria.'},
     {id:'esfera', name:'Bombom Esfera', shape:'circle',cols:5,rows:3,base:74,rating:4.8,rev:96,use:'Bombom · esfera',coll:'Bombons',sizes:['P','M','G'],launch:2,edition:60,left:33,status:'live',ig:IG,desc:'Esferas de fecho perfeito para bombons recheados. Desenforma limpa, brilho de vitrine.',media:[{type:'mold',tint:'sakura'},{type:'mold',tint:'sango'}]},
     {id:'macaron',name:'Macaron Anel',  shape:'ring',  cols:4,rows:3,base:79,rating:4.7,rev:141,use:'Macaron',coll:'Essenciais',sizes:['P','M'],launch:1,edition:40,left:0,status:'soldout',ig:IG,desc:'Anéis de borda impecável: macarons de altura uniforme, fileira após fileira.'}
   ];
@@ -1002,6 +1010,19 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
   var byId=id=>PRODUCTS.find(p=>p.id===id);
   var priceOf=(p,s)=>p.base+SIZES[s].add;
   var fromPrice=p=>p.base+Math.min.apply(null,p.sizes.map(s=>SIZES[s].add));
+  /* ── PROMOÇÕES / DESCONTOS ──────────────────────────────────────────────
+     1) Desconto por PRODUTO: adicione `sale:20` (= −20%) no produto no PRODUCTS.
+     2) Promoção GERAL do site: ligue SALE.active=true (pct; `coll` opcional p/ limitar a uma coleção).
+        SALE.label vira a faixa do topo (.note).
+     3) CUPOM no checkout: cadastre em COUPONS (código→% ). FRONT — validar de verdade no back-end.
+     Regra: desconto do produto tem prioridade sobre a promoção geral. ────────── */
+  var SALE={active:false,pct:0,label:'',coll:null};
+  var COUPONS={PRIMEIRA10:10,SUZU15:15};
+  function saleP(p){if(p&&p.sale)return p.sale;if(SALE.active&&(!SALE.coll||SALE.coll===p.coll))return SALE.pct;return 0;}
+  function priceNow(p,s){var b=priceOf(p,s),d=saleP(p);return d?Math.round(b*(1-d/100)*100)/100:b;}
+  function fromNow(p){var b=fromPrice(p),d=saleP(p);return d?Math.round(b*(1-d/100)*100)/100:b;}
+  function offtag(p){var d=saleP(p);return d?' <span class="offtag">−'+d+'%</span>':'';}
+  function wasPrice(p,base){return saleP(p)?'<s class="wasp">'+BRL(base)+'</s> ':'';}
   /* estoque POR TAMANHO: p.out = lista de tamanhos esgotados. allOut = produto 100% esgotado. */
   function sizeOut(p,s){return p.status==='soldout' || (p.out && p.out.indexOf(s)>-1);}
   function allOut(p){return p.status==='soldout' || p.sizes.every(function(s){return sizeOut(p,s);});}
@@ -1130,7 +1151,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
   }
   function cardHTML(p){
     var st=statusMeta(p);
-    var pr=p.status==='soldout'?'<div class="pr so">Esgotado</div>':(p.status==='presale'?'<div class="pr">reserva · a partir de <b>'+BRL(fromPrice(p))+'</b><small class="avail">disponível '+p.avail+'</small></div>':'<div class="pr">a partir de <b>'+BRL(fromPrice(p))+'</b></div>');
+    var pr=p.status==='soldout'?'<div class="pr so">Esgotado</div>':(p.status==='presale'?'<div class="pr">reserva · a partir de <b>'+BRL(fromPrice(p))+'</b><small class="avail">disponível '+p.avail+'</small></div>':'<div class="pr">a partir de '+wasPrice(p,fromPrice(p))+'<b>'+BRL(fromNow(p))+'</b>'+offtag(p)+'</div>');
     return '<a class="pcard'+(p.status==='soldout'?' out':'')+'" href="#/p/'+p.id+'" aria-label="'+p.name+'"><div class="m"><span class="pbadge '+st.k+'">'+st.label+'</span>'+coverHTML(p)+'</div><div class="b"><span class="use">'+p.use+'</span><h3>'+p.name+'</h3>'+pr+'</div></a>';
   }
 
@@ -1263,7 +1284,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
     var def=full?(p.sizes.indexOf('M')>-1?'M':p.sizes[0]):firstAvail(p);
     var defOut=full||sizeOut(p,def);
     var sizes=(!full && p.sizes.length>1)?'<div class="fcsizes">'+p.sizes.map(function(s){var o=sizeOut(p,s);return '<button type="button" class="fcsz'+(o?' out':'')+'" data-s="'+s+'" aria-pressed="'+(s===def)+'">'+SIZES[s].name+' · '+SIZES[s].dim+'</button>';}).join('')+'</div>':'';
-    var price=defOut?'<span class="fcprice so">Esgotado nesta tiragem</span>':'<span class="fcprice">'+BRL(priceOf(p,def))+'<small>em até 6× · '+SIZES[def].name+'</small></span>';
+    var price=defOut?'<span class="fcprice so">Esgotado nesta tiragem</span>':'<span class="fcprice">'+wasPrice(p,priceOf(p,def))+BRL(priceNow(p,def))+offtag(p)+'<small>em até 6× · '+SIZES[def].name+'</small></span>';
     var btn='<button type="button" class="btn '+(defOut?'ghost ':'')+'buybtn fcbtn">'+(defOut?'Avise-me quando voltar':'Adicionar à sacola')+'</button>';
     return '<div class="formacta buycard" data-id="'+p.id+'" data-size="'+def+'"><a class="fcimg" href="#/p/'+p.id+'" style="background:var(--'+tint+'-wash)"><span class="pbadge '+st.k+'">'+st.label+'</span>'+coverHTML(p)+'</a><div class="fctxt"><a class="fcname" href="#/p/'+p.id+'"><b>'+p.name+'</b></a><p>'+p.use+' · silicone platinum</p>'+sizes+'</div><div class="fcbuy">'+price+btn+'</div></div>';
   }
@@ -1287,7 +1308,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
       var p=byId(card.dataset.id); if(!p)return;
       var chips=[].slice.call(card.querySelectorAll('.fcsz')), pr=card.querySelector('.fcprice'), btn=card.querySelector('.buybtn');
       function refresh(s){card.dataset.size=s;var o=sizeOut(p,s);
-        if(pr){pr.className='fcprice'+(o?' so':'');pr.innerHTML=o?'Esgotado nesta tiragem':(BRL(priceOf(p,s))+'<small>em até 6× · '+SIZES[s].name+'</small>');}
+        if(pr){pr.className='fcprice'+(o?' so':'');pr.innerHTML=o?'Esgotado nesta tiragem':(wasPrice(p,priceOf(p,s))+BRL(priceNow(p,s))+offtag(p)+'<small>em até 6× · '+SIZES[s].name+'</small>');}
         if(btn&&btn.tagName==='BUTTON')btn.textContent=o?'Avise-me quando voltar':'Adicionar à sacola';}
       chips.forEach(function(b){b.onclick=function(){chips.forEach(function(x){x.setAttribute('aria-pressed',x===b);});refresh(b.dataset.s);};});
       if(btn)btn.onclick=function(){var s=card.dataset.size;
@@ -1309,12 +1330,12 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
     var def=allOut(p)?(p.sizes.indexOf('M')>-1?'M':p.sizes[0]):firstAvail(p);
     var st=statusMeta(p);
     var tints={tablete:'mizu',coracao:'sakura',concha:'sango',cubo:'torinoko',esfera:'matcha',macaron:'fuji'},tint='var(--'+(tints[p.id]||'mizu')+'-wash)';
-    var szs=p.sizes.map(function(s){var z=SIZES[s];var o=sizeOut(p,s);return '<button class="sz'+(o?' out':'')+'" data-s="'+s+'" aria-pressed="'+(s===def)+'"><div class="t">'+z.name+'</div><div class="d">'+z.dim+'</div><div class="p">'+(o?'esgotado':BRL(priceOf(p,s)))+'</div></button>';}).join('');
+    var szs=p.sizes.map(function(s){var z=SIZES[s];var o=sizeOut(p,s);return '<button class="sz'+(o?' out':'')+'" data-s="'+s+'" aria-pressed="'+(s===def)+'"><div class="t">'+z.name+'</div><div class="d">'+z.dim+'</div><div class="p">'+(o?'esgotado':BRL(priceNow(p,s)))+'</div></button>';}).join('');
     var pat=p.seigaiha?'<span class="pat">O relevo desta peça é o padrão seigaiha (ondas) — a assinatura gráfica que também percorre as nossas embalagens.</span> ':'';
     var buy;
     if(allOut(p)) buy='<div class="buyrow"><span class="price so">Esgotado nesta tiragem</span><button class="btn" id="notifyBtn">Avise-me quando voltar</button></div>';
     else if(p.status==='presale'){var dep=Math.round(priceOf(p,def)*0.3); buy='<div class="buyrow"><span class="price" id="pdpPrice">'+BRL(dep)+'<small>sinal de reserva · '+SIZES[def].name+' de '+BRL(priceOf(p,def))+'</small></span><button class="btn addbtn" id="pdpAdd">Reservar com sinal</button></div><p class="prenote">O sinal garante a sua peça e a prioridade — e é descontado do valor final quando ela lança, em '+p.avail+'.</p>';}
-    else buy='<div class="buyrow"><span class="price" id="pdpPrice">'+BRL(priceOf(p,def))+'<small>em até 6× · '+SIZES[def].name+'</small></span><button class="btn addbtn" id="pdpAdd">Adicionar à sacola</button></div>';
+    else buy='<div class="buyrow"><span class="price" id="pdpPrice">'+wasPrice(p,priceOf(p,def))+BRL(priceNow(p,def))+offtag(p)+'<small>em até 6× · '+SIZES[def].name+'</small></span><button class="btn addbtn" id="pdpAdd">Adicionar à sacola</button></div>';
     return backHome()+'<div class="pdp"><div class="media">'+mediaGallery(p)+'<button class="vidthumb reeltrigger" aria-label="Ver o vídeo desta peça"><span class="vtp" style="background:'+tint+'">'+mold(p)+'<span class="vtplay"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></span></span><span class="vtlabel">Ver o vídeo desse produto</span></button></div>'+
       '<div class="info"><span class="use">'+p.use+'</span><h1>'+p.name+'</h1>'+
       '<p class="lead">'+p.desc+'</p>'+scarceBlock(p)+
@@ -1427,7 +1448,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
       szgrid.querySelectorAll('.sz').forEach(function(b){b.onclick=function(){sel=b.dataset.s;szgrid.querySelectorAll('.sz').forEach(x=>x.setAttribute('aria-pressed','false'));b.setAttribute('aria-pressed','true');
         var o=sizeOut(p,sel),pp=document.getElementById('pdpPrice'),addb=document.getElementById('pdpAdd');
         if(o){if(pp){pp.className='price so';pp.innerHTML='Esgotado nesta tiragem';}if(addb)addb.textContent='Avise-me quando voltar';}
-        else{var pv=presale?Math.round(priceOf(p,sel)*0.3):priceOf(p,sel);if(pp){pp.className='price';pp.innerHTML=BRL(pv)+'<small>'+(presale?'sinal · '+SIZES[sel].name+' de '+BRL(priceOf(p,sel)):'em até 6× · '+SIZES[sel].name)+'</small>';}if(addb)addb.textContent=presale?'Reservar com sinal':'Adicionar à sacola';}};});
+        else{var pv=presale?Math.round(priceNow(p,sel)*0.3):priceNow(p,sel);if(pp){pp.className='price';pp.innerHTML=(presale?'':wasPrice(p,priceOf(p,sel)))+BRL(pv)+(presale?'':offtag(p))+'<small>'+(presale?'sinal · '+SIZES[sel].name+' de '+BRL(priceNow(p,sel)):'em até 6× · '+SIZES[sel].name)+'</small>';}if(addb)addb.textContent=presale?'Reservar com sinal':'Adicionar à sacola';}};});
       var add=document.getElementById('pdpAdd'); if(add)add.onclick=function(){if(sizeOut(p,sel)){this.outerHTML='<span class="prenote" style="margin:0">Avisaremos você assim que voltar. ✿</span>';}else{addProduct(p.id,sel,presale);}};
       var nb=document.getElementById('notifyBtn'); if(nb)nb.onclick=function(){notifyReveal(this);};
     }
@@ -1479,8 +1500,15 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
   }
   function wireCheckout(){
     var cof=document.getElementById('coForm'); if(!cof)return;
-    CO.ship=null;CO.pay='pix';CO.parc=1;
+    CO.ship=null;CO.pay='pix';CO.parc=1;CO.coupon=null;
     renderCoSummary();
+    var coupBtn=document.getElementById('coCoupBtn'),coupIn=document.getElementById('coCoupon'),coupHint=document.getElementById('coCoupHint');
+    if(coupBtn){var applyCoup=function(){var code=(coupIn.value||'').trim().toUpperCase();
+        if(!code){CO.coupon=null;coupHint.textContent='';coupHint.className='couphint';renderCoSummary();return;}
+        if(COUPONS[code]){CO.coupon={code:code,pct:COUPONS[code]};coupHint.textContent='Cupom aplicado: −'+COUPONS[code]+'%.';coupHint.className='couphint ok';}
+        else{CO.coupon=null;coupHint.textContent='Cupom inválido.';coupHint.className='couphint err';}
+        renderCoSummary();};
+      coupBtn.onclick=applyCoup;coupIn.onkeydown=function(e){if(e.key==='Enter'){e.preventDefault();applyCoup();}};}
     var cep=document.getElementById('coCep');
     if(cep)cep.oninput=function(){var d=this.value.replace(/\D/g,'').slice(0,8);this.value=d.length>5?d.slice(0,5)+'-'+d.slice(5):d;};
     var cepBtn=document.getElementById('cepBtn');
@@ -1573,6 +1601,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
       +'<div class="parcbox" id="parcBox" hidden><label class="cofield"><span>Parcelas</span><select id="coParc"></select></label></div>'
       +'<label class="payopt" data-pay="boleto"><input type="radio" name="pay" value="boleto"><span class="payb"><b>Boleto bancário</b><small>à vista · compensa em até 2 dias úteis</small></span></label>'
       +'</div></section>'
+      +'<div class="couprow"><input type="text" id="coCoupon" placeholder="Cupom de desconto" autocomplete="off"><button type="button" class="btn ghost" id="coCoupBtn">Aplicar</button></div><p class="couphint" id="coCoupHint"></p>'
       +'<button type="submit" class="btn cofinish" id="coFinish">Concluir pedido</button>'
       +'<div class="cotrust"><span>Compra protegida</span><span><a href="#/faq">Trocas em até 7 dias</a></span><span>Enviamos para todo o Brasil</span></div>'
       +'<p class="cosafe">Ambiente seguro · protótipo de demonstração</p>'
@@ -1583,13 +1612,15 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
     var s=cartSplit(), merch=s.subNow+s.subPre;
     var ship=s.now.length===0?0:(CO.ship?(CO.ship.free?0:CO.ship.price):null);
     var pixDisc=CO.pay==='pix'?Math.round(merch*0.05*100)/100:0;
-    var total=merch+(ship||0)-pixDisc;
+    var coupDisc=CO.coupon?Math.round(merch*CO.coupon.pct/100*100)/100:0;
+    var total=merch+(ship||0)-pixDisc-coupDisc;
     var rows=s.now.concat(s.pre).map(function(it){return '<div class="cirow"><span class="ciq">'+it.qty+'×</span><span class="cin">'+it.name+'</span><span class="cip">'+BRL(it.qty*it.price)+'</span></div>';}).join('');
     var frete=s.now.length===0?'no lançamento':(CO.ship?(CO.ship.free?'Grátis':BRL(CO.ship.price)):'calcule no passo 2');
     var h='<h3>Resumo</h3><div class="ciList">'+rows+'</div><div class="cisep"></div>';
     h+='<div class="sumrow"><span>Subtotal</span><span>'+BRL(merch)+'</span></div>';
     h+='<div class="sumrow"><span>Frete</span><span>'+frete+'</span></div>';
     if(pixDisc>0)h+='<div class="sumrow disc"><span>Desconto Pix</span><span>−'+BRL(pixDisc)+'</span></div>';
+    if(coupDisc>0)h+='<div class="sumrow disc"><span>Cupom '+CO.coupon.code+'</span><span>−'+BRL(coupDisc)+'</span></div>';
     h+='<div class="sumrow tot"><span>Total</span><b>'+BRL(total)+'</b></div>';
     if(CO.pay==='cartao'){var n=CO.parc||1;h+='<p class="sumnote">'+n+'× de '+BRL(total/n)+' sem juros</p>';}
     else if(CO.pay==='pix')h+='<p class="sumnote">À vista no Pix, já com o desconto aplicado.</p>';
@@ -1670,7 +1701,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
   }
   var cart={};
   function cartKey(id,size,presale){return id+'-'+size+(presale?'-pre':'');}
-  function cartItem(p,size,presale){var full=priceOf(p,size),price=presale?Math.round(full*0.3):full;return {p:p,size:size,presale:!!presale,name:p.name+(presale?' — reserva':''),price:price,sub:presale?('Sinal de reserva · '+SIZES[size].name):(SIZES[size].name+' · '+SIZES[size].dim),qty:1};}
+  function cartItem(p,size,presale){var full=priceNow(p,size),price=presale?Math.round(full*0.3):full;return {p:p,size:size,presale:!!presale,name:p.name+(presale?' — reserva':''),price:price,sub:presale?('Sinal de reserva · '+SIZES[size].name):(SIZES[size].name+' · '+SIZES[size].dim),qty:1};}
   /* Persiste a sacola — assim um refresh no meio do checkout não perde os itens (bug do fluxo de pagamento). */
   function saveCart(){try{localStorage.setItem('suzu_cart',JSON.stringify(Object.keys(cart).map(function(k){var it=cart[k];return {id:it.p.id,size:it.size,presale:it.presale,qty:it.qty};})));}catch(e){}}
   function restoreCart(){try{JSON.parse(localStorage.getItem('suzu_cart')||'[]').forEach(function(o){var p=byId(o.id);if(!p||!o.qty)return;var it=cartItem(p,o.size,o.presale);it.qty=o.qty;cart[cartKey(o.id,o.size,o.presale)]=it;});}catch(e){}}
@@ -1732,6 +1763,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
     gq.onkeydown=function(e){if(e.key==='Enter' && gq.value.trim()){FS.q=gq.value;closeSb();location.hash='#/produtos';}};
     window.addEventListener('keydown',function(e){if(e.key==='Escape')closeSb();});
   })();
+  if(SALE.active&&SALE.label){var _sn=document.querySelector('.note');if(_sn)_sn.textContent=SALE.label;}
   restoreCart();router();render();
 })();
 </script>
