@@ -474,7 +474,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
 .offtag{display:inline-block;background:var(--sango);color:#6e2f1e;font-size:.66rem;font-weight:700;letter-spacing:.02em;padding:3px 9px;border-radius:999px;vertical-align:middle;margin-left:6px;text-transform:none;white-space:nowrap}
 .wasp{color:var(--muted);font-weight:300;text-decoration:line-through;margin-right:4px;white-space:nowrap}
 .pr{overflow-wrap:normal}
-.couprow{display:flex;gap:8px;margin-top:2px}
+.couprow{display:flex;gap:8px;margin-top:22px;padding-top:20px;border-top:1px solid var(--line-soft)}
 .couprow input{flex:1;min-width:0;border:1px solid var(--line);border-radius:999px;padding:12px 15px;font-size:.9rem;font-family:inherit;color:var(--text);background:var(--white);outline:none;text-transform:uppercase;letter-spacing:.04em}
 .couprow input:focus{border-color:var(--stone)}
 .couphint{font-size:.74rem;color:var(--muted);font-weight:300;margin:8px 0 0;min-height:1em}
@@ -668,7 +668,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
 .pdpship .cepmini{margin-bottom:10px}
 .pdpship .cephint{margin-top:12px;line-height:1.55}
 .optlabel{text-transform:none;letter-spacing:0;font-style:normal;color:var(--muted);opacity:.65}
-.cotrust{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 14px;font-size:.72rem;color:var(--muted);font-weight:300;margin-top:-2px}
+.cotrust{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 14px;font-size:.72rem;color:var(--muted);font-weight:300;margin-top:18px}
 .cotrust span{position:relative;padding-left:16px}
 .cotrust span:first-child{padding-left:0}
 .cotrust span:not(:first-child)::before{content:'·';position:absolute;left:5px;opacity:.7}
@@ -684,7 +684,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
 .paylist{display:flex;flex-direction:column;gap:10px}
 .parcbox{padding:2px}
 .cofinish{width:100%;padding:16px;font-size:.8rem;letter-spacing:.06em;text-transform:uppercase}
-.cosafe{text-align:center;font-size:.74rem;color:var(--muted);font-weight:300;margin-top:-8px}
+.cosafe{text-align:center;font-size:.74rem;color:var(--muted);font-weight:300;margin-top:10px}
 .cosummary{border:1px solid var(--line-soft);border-radius:18px;padding:22px 20px;background:var(--warm)}
 @media(min-width:860px){.cosummary{position:sticky;top:88px}}
 .cosummary h3{font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:500;margin:0 0 14px}
@@ -1680,7 +1680,16 @@ button.cohd{width:100%;border:0;background:none;font:inherit;color:inherit;text-
       function markDone(n){var el=document.getElementById('cstep'+n);if(el)el.classList.add('done');var sum=document.getElementById('sum'+n);if(sum)sum.textContent=sumFor(n);}
       function validStep(n){
         if(n===1){var em=document.getElementById('coEmail');if(!em.value||em.value.indexOf('@')<1){em.focus();em.style.borderColor='#b4553f';return false;}return true;}
-        if(n===2){var sp=cartSplit();if(sp.now.length && !CO.ship){var h=document.getElementById('cepHint');if(h){h.textContent='Calcule o frete para continuar.';h.className='cephint err';}var c=document.getElementById('coCep');if(c)c.focus();return false;}return true;}
+        if(n===2){var sp=cartSplit();
+          if(sp.now.length){
+            if(!CO.ship){var h=document.getElementById('cepHint');if(h){h.textContent='Calcule o frete para continuar.';h.className='cephint err';}var c=document.getElementById('coCep');if(c)c.focus();return false;}
+            var reqd=['coNome','coRua','coNum','coBairro','coCidade'],bad=null;
+            reqd.forEach(function(id){var el=document.getElementById(id);if(!el)return;if(!el.value.trim()){el.classList.add('bad');if(!bad)bad=el;}else{el.classList.remove('bad');}});
+            var ah=document.getElementById('addrHint');
+            if(bad){if(ah){ah.textContent='Preencha os campos destacados do endereço.';ah.className='cephint err';}bad.focus();return false;}
+            if(ah){ah.textContent='';ah.className='cephint';}
+          }
+          return true;}
         return true;
       }
       function sumFor(n){
@@ -1690,6 +1699,7 @@ button.cohd{width:100%;border:0;background:none;font:inherit;color:inherit;text-
       }
       cof.querySelectorAll('.conext').forEach(function(b){b.onclick=function(){var n=+b.dataset.next;if(!validStep(n))return;markDone(n);
         var nx=n+1;while(nx<3 && document.getElementById('cstep'+nx).classList.contains('done'))nx++;openStep(nx);};});
+      ['coNome','coRua','coNum','coBairro','coCidade'].forEach(function(id){var el=document.getElementById(id);if(el)el.addEventListener('input',function(){el.classList.remove('bad');var ah=document.getElementById('addrHint');if(ah&&!cof.querySelector('#addrFields .bad')){ah.textContent='';ah.className='cephint';}});});
       cof.querySelectorAll('button.cohd').forEach(function(h){h.onclick=function(){var sec=h.closest('.costep');if(sec.classList.contains('done'))openStep(+sec.dataset.step);};});
     })();
     cof.onsubmit=function(e){e.preventDefault();
@@ -1697,6 +1707,7 @@ button.cohd{width:100%;border:0;background:none;font:inherit;color:inherit;text-
       if(!email.value||email.value.indexOf('@')<1){email.focus();email.style.borderColor='#b4553f';return;}
       var s=cartSplit();
       if(s.now.length && !CO.ship){var hint=document.getElementById('cepHint');if(hint){hint.textContent='Calcule o frete para continuar.';hint.className='cephint err';}if(cep)cep.focus();return;}
+      if(s.now.length){var _rq=['coNome','coRua','coNum','coBairro','coCidade'],_bad=null;_rq.forEach(function(id){var el=document.getElementById(id);if(el&&!el.value.trim()){el.classList.add('bad');if(!_bad)_bad=el;}});if(_bad){var _ah=document.getElementById('addrHint');if(_ah){_ah.textContent='Preencha os campos destacados do endereço.';_ah.className='cephint err';}_bad.focus();return;}}
       var _w=document.getElementById('coWhats');CO.whats=_w?_w.value.trim():'';
       CO.hadPre=s.pre.length>0;CO.email=email.value;CO.order='SUZU-'+Math.floor(100000+Math.random()*900000);
       Object.keys(cart).forEach(function(k){delete cart[k];});render();
@@ -1747,6 +1758,7 @@ button.cohd{width:100%;border:0;background:none;font:inherit;color:inherit;text-
         +'<label class="cofield"><span>Endereço</span><input type="text" id="coRua" autocomplete="address-line1"></label>'
         +'<div class="tworow"><label class="cofield"><span>Número</span><input type="text" id="coNum"></label><label class="cofield"><span>Complemento</span><input type="text" id="coComp" placeholder="opcional"></label></div>'
         +'<div class="tworow"><label class="cofield"><span>Bairro</span><input type="text" id="coBairro"></label><label class="cofield"><span>Cidade / UF</span><input type="text" id="coCidade"></label></div>'
+        +'<p class="cephint" id="addrHint"></p>'
         +'</div>';
     var entrega='<section class="costep" data-step="2" id="cstep2">'+stepHead(2,'Entrega')+'<div class="costep-body">'+entregaBody
       +'<div class="costep-cta"><button type="button" class="btn conext" data-next="2">Continuar</button></div></div></section>';
