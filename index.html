@@ -594,6 +594,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
 .li .info small{color:var(--muted);font-size:.76rem;font-weight:300}
 .qty{display:flex;align-items:center;gap:10px}
 .qty button{width:29px;height:29px;border-radius:50%;border:1px solid var(--line-strong);background:var(--surface);font-size:1rem;line-height:1;display:grid;place-items:center;color:var(--ink)}
+.qty button svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;display:block}
 .qty span{min-width:14px;text-align:center;font-variant-numeric:tabular-nums;font-size:.88rem}
 .empty{padding:56px 20px;text-align:center;color:var(--muted);font-weight:300}
 .empty .sig{display:block;font-size:1.2rem;margin-bottom:8px;color:var(--stone-text)}
@@ -1683,7 +1684,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
     syncDrawerCep(s,q);
     var box=document.getElementById('items'),keys=Object.keys(cart);
     if(!keys.length){box.innerHTML='<p class="empty"><span class="sig">Ainda vazia.</span>Escolha uma forma para começar.</p>';return;}
-    box.innerHTML=keys.map(function(k){var it=cart[k];return '<div class="li"><div class="mini">'+mold(it.p)+'</div><div class="info"><b>'+it.name+'</b><small>'+BRL(it.price)+' · '+it.sub+'</small></div><div class="qty"><button data-m="'+k+'" aria-label="menos">−</button><span>'+it.qty+'</span><button data-p="'+k+'" aria-label="mais">+</button></div></div>';}).join('');
+    box.innerHTML=keys.map(function(k){var it=cart[k];return '<div class="li"><div class="mini">'+mold(it.p)+'</div><div class="info"><b>'+it.name+'</b><small>'+BRL(it.price)+' · '+it.sub+'</small></div><div class="qty"><button data-m="'+k+'" aria-label="menos"><svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/></svg></button><span>'+it.qty+'</span><button data-p="'+k+'" aria-label="mais"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></div></div>';}).join('');
     box.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{cart[b.dataset.p].qty++;render();});
     box.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{var k=b.dataset.m;if(--cart[k].qty<=0)delete cart[k];render();});
   }
