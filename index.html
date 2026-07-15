@@ -144,7 +144,11 @@ section{padding:52px 0}
 .pcard.out .m .mold{opacity:.55}
 .pbadge{position:absolute;top:10px;left:10px;font-size:.52rem;letter-spacing:.12em;text-transform:uppercase;font-weight:600;padding:5px 9px;border-radius:999px}
 .pbadge.limited{display:none}   /* todas as peças são edição limitada — tag redundante, oculta */
-.pbadge.last{background:var(--sango);color:#6e2f1e}
+.pbadge.last{background:var(--torinoko);color:#6b551d}
+.pbadge.promo{background:#b4553f;color:#fff}
+.pbadges{position:absolute;top:10px;left:10px;display:flex;gap:6px;z-index:2}
+.pbadges .pbadge{position:static;top:auto;left:auto}
+.fctxt .pbadge{position:static;top:auto;left:auto;display:inline-block;align-self:flex-start;margin-bottom:6px}
 .pbadge.presale{background:var(--mizu);color:#233f3d}
 .pbadge.soldout{background:#efe9e0;color:var(--muted)}
 .exhero{position:relative;border-radius:20px;overflow:hidden;background:var(--st,var(--sakura-wash));margin-bottom:34px;margin-top:-8px;min-height:clamp(420px,58vh,520px);display:flex;align-items:center}
@@ -347,7 +351,9 @@ footer{background:var(--warm);border-top:1px solid var(--line-soft);padding:48px
 .apill svg{width:12px;height:12px;stroke:var(--muted);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .clear{font-size:.76rem;color:var(--gold-text);background:none;border:none;text-decoration:underline;padding:6px 2px}
 .plist{margin-top:16px}
-.empty2{color:var(--muted);font-weight:300;padding:30px 0}
+.empty2{text-align:center;padding:52px 20px;color:var(--muted);font-weight:300}
+.empty2 .sig{display:block;font-size:1.4rem;color:var(--stone-text);margin-bottom:8px}
+.empty2 p{margin:0 0 18px}
 .fsearch{display:flex;align-items:center;gap:9px;border:1px solid var(--line);border-radius:12px;padding:10px 13px;margin:16px 0 4px}
 .fsearch svg{width:18px;height:18px;flex:0 0 auto}
 .fsearch input{flex:1;border:none;outline:none;background:transparent;font-size:.9rem;color:var(--text)}
@@ -1033,7 +1039,8 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
         SALE.label vira a faixa do topo (.note).
      3) CUPOM no checkout: cadastre em COUPONS (código→% ). FRONT — validar de verdade no back-end.
      Regra: desconto do produto tem prioridade sobre a promoção geral. ────────── */
-  var SALE={active:true,pct:15,label:'Semana dos bombons · 15% OFF',coll:'Bombons'};  /* DEMO da promoção geral — ponha active:false p/ desligar */
+  var SALE={active:false,pct:0,label:'',coll:null};  /* promoção geral do site — ligue active:true (a faixa vira SALE.label) */
+  var BANNER='Frete grátis acima de R$ 150 · peças autorais em tiragem limitada';  /* ← texto da FAIXA MARROM do topo (edite aqui) */
   var COUPONS={PRIMEIRA10:10,SUZU15:15};
   function saleP(p){if(p&&p.sale)return p.sale;if(SALE.active&&(!SALE.coll||SALE.coll===p.coll))return SALE.pct;return 0;}
   function priceNow(p,s){var b=priceOf(p,s),d=saleP(p);return d?Math.round(b*(1-d/100)*100)/100:b;}
@@ -1169,8 +1176,8 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
   }
   function cardHTML(p){
     var st=statusMeta(p);
-    var pr=p.status==='soldout'?'<div class="pr so">Esgotado</div>':(p.status==='presale'?'<div class="pr">reserva · a partir de <b>'+BRL(fromPrice(p))+'</b><small class="avail">disponível '+p.avail+'</small></div>':'<div class="pr">a partir de '+wasPrice(p,fromPrice(p))+'<b>'+BRL(fromNow(p))+'</b>'+offtag(p)+'</div>');
-    return '<a class="pcard'+(p.status==='soldout'?' out':'')+'" href="#/p/'+p.id+'" aria-label="'+p.name+'"><div class="m"><span class="pbadge '+st.k+'">'+st.label+'</span>'+coverHTML(p)+'</div><div class="b"><span class="use">'+p.use+'</span><h3>'+p.name+'</h3>'+pr+'</div></a>';
+    var pr=p.status==='soldout'?'<div class="pr so">Esgotado</div>':(p.status==='presale'?'<div class="pr">reserva · a partir de <b>'+BRL(fromPrice(p))+'</b><small class="avail">disponível '+p.avail+'</small></div>':'<div class="pr">a partir de '+wasPrice(p,fromPrice(p))+'<b>'+BRL(fromNow(p))+'</b></div>');
+    return '<a class="pcard'+(p.status==='soldout'?' out':'')+'" href="#/p/'+p.id+'" aria-label="'+p.name+'"><div class="m"><div class="pbadges"><span class="pbadge '+st.k+'">'+st.label+'</span>'+(saleP(p)?'<span class="pbadge promo">−'+saleP(p)+'%</span>':'')+'</div>'+coverHTML(p)+'</div><div class="b"><span class="use">'+p.use+'</span><h3>'+p.name+'</h3>'+pr+'</div></a>';
   }
 
   /* HERO */
@@ -1255,7 +1262,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
     var tools='<div class="ptools"><h1 class="ptitle">Produtos</h1><span class="cnt" id="prodCount"></span>'+
       '<div class="orddrop" id="orddrop"><button class="ptbtn" id="ordDropBtn" type="button"><svg viewBox="0 0 24 24"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg><span id="ordDropLabel"></span><svg class="ochev" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></button><div class="ordmenu" id="ordMenu">'+SORTS.map(function(s){return '<button class="ordmi" type="button" data-sort="'+s[0]+'">'+s[1]+'</button>';}).join('')+'</div></div><button class="ptbtn" id="ordBtn"><svg viewBox="0 0 24 24"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg><span id="ordBtnLabel"></span></button>'+
       '<button class="ptbtn ptfilter" id="filterBtn"><svg viewBox="0 0 24 24"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>Filtrar <span class="bn" id="fbadge" style="display:none">0</span></button></div>';
-    var main='<div class="fmain"><div class="pills" id="pills" style="display:none"></div><div class="grid plist" id="prodGrid"></div><div style="text-align:center;margin-top:32px"><button class="btn ghost" id="loadMore" style="display:none">Carregar mais</button></div><p class="empty2" id="prodEmpty" hidden>Nenhuma peça com esse filtro.</p></div>';
+    var main='<div class="fmain"><div class="pills" id="pills" style="display:none"></div><div class="grid plist" id="prodGrid"></div><div style="text-align:center;margin-top:32px"><button class="btn ghost" id="loadMore" style="display:none">Carregar mais</button></div><div class="empty2" id="prodEmpty" hidden><span class="sig">Nada por aqui com esse filtro.</span><p>Tenta afrouxar a busca — tem peça linda esperando.</p><button type="button" class="btn ghost" id="clearEmpty">Limpar filtro</button></div></div>';
     return backHome()+'<div class="listing">'+tools+'<div class="plisting">'+panel+main+'</div></div>'+sortSheet;
   }
   function prevendaView(){
@@ -1314,7 +1321,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
     var sizes=(!full && p.sizes.length>1)?'<div class="fcsizes">'+p.sizes.map(function(s){var o=sizeOut(p,s);return '<button type="button" class="fcsz'+(o?' out':'')+'" data-s="'+s+'" aria-pressed="'+(s===def)+'">'+SIZES[s].name+' · '+SIZES[s].dim+'</button>';}).join('')+'</div>':'';
     var price=defOut?'<span class="fcprice so">Esgotado nesta tiragem</span>':'<span class="fcprice">'+wasPrice(p,priceOf(p,def))+BRL(priceNow(p,def))+offtag(p)+'<small>em até 6× · '+SIZES[def].name+'</small></span>';
     var btn='<button type="button" class="btn '+(defOut?'ghost ':'')+'buybtn fcbtn">'+(defOut?'Avise-me quando voltar':'Adicionar à sacola')+'</button>';
-    return '<div class="formacta buycard" data-id="'+p.id+'" data-size="'+def+'"><a class="fcimg" href="#/p/'+p.id+'" style="background:var(--'+tint+'-wash)"><span class="pbadge '+st.k+'">'+st.label+'</span>'+coverHTML(p)+'</a><div class="fctxt"><a class="fcname" href="#/p/'+p.id+'"><b>'+p.name+'</b></a><p>'+p.use+' · silicone platinum</p>'+sizes+'</div><div class="fcbuy">'+price+btn+'</div></div>';
+    return '<div class="formacta buycard" data-id="'+p.id+'" data-size="'+def+'"><a class="fcimg" href="#/p/'+p.id+'" style="background:var(--'+tint+'-wash)">'+coverHTML(p)+'</a><div class="fctxt"><span class="pbadge '+st.k+'">'+st.label+'</span><a class="fcname" href="#/p/'+p.id+'"><b>'+p.name+'</b></a><p>'+p.use+' · silicone platinum</p>'+sizes+'</div><div class="fcbuy">'+price+btn+'</div></div>';
   }
   /* liga os cards de compra: escolha de tamanho atualiza preço + botão; botão adapta ao tamanho (comprar ou avisar) */
   /* "Avise-me quando voltar" — captura contato (e-mail ou WhatsApp) antes de confirmar.
@@ -1457,6 +1464,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
       ov.onclick=closeS;
       var ab=document.getElementById('applyBtn'); if(ab)ab.onclick=closeS;
       document.getElementById('clearSheet').onclick=function(){FS.size=[];FS.status=[];FS.coll=[];FS.price=[];FS.promo=[];syncChips();pageShown=9;renderProducts();};
+      var _ce=document.getElementById('clearEmpty');if(_ce)_ce.onclick=function(){FS.size=[];FS.status=[];FS.coll=[];FS.price=[];FS.promo=[];FS.q='';syncChips();pageShown=9;renderProducts();};
       document.querySelectorAll('.fchip').forEach(function(c){c.onclick=function(){var f=c.dataset.facet,v=c.dataset.val,arr=FS[f],i=arr.indexOf(v);if(i>-1)arr.splice(i,1);else arr.push(v);c.setAttribute('aria-pressed',arr.indexOf(v)>-1);pageShown=9;renderProducts();};});
       document.querySelectorAll('.fmore').forEach(function(b){b.onclick=function(){b.previousElementSibling.querySelectorAll('.fhide').forEach(function(c){c.classList.remove('fhide');});b.remove();};});
       document.querySelectorAll('.sortopt').forEach(function(o){o.onclick=function(){FS.sort=o.dataset.sort;document.querySelectorAll('.sortopt').forEach(x=>x.setAttribute('aria-pressed',x.dataset.sort===FS.sort));pageShown=9;renderProducts();closeS();};});
@@ -1791,7 +1799,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
     gq.onkeydown=function(e){if(e.key==='Enter' && gq.value.trim()){FS.q=gq.value;closeSb();location.hash='#/produtos';}};
     window.addEventListener('keydown',function(e){if(e.key==='Escape')closeSb();});
   })();
-  if(SALE.active&&SALE.label){var _sn=document.querySelector('.note');if(_sn)_sn.textContent=SALE.label;}
+  (function(){var _sn=document.querySelector('.note');if(_sn)_sn.textContent=(SALE.active&&SALE.label)?SALE.label:BANNER;})();
   restoreCart();router();render();
   (function(){var pd=document.getElementById('printdate');if(!pd)return;function setD(){try{pd.textContent='Impresso em '+new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});}catch(e){}}setD();try{window.addEventListener('beforeprint',setD);}catch(e){}})();
 })();
