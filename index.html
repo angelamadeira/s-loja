@@ -149,6 +149,7 @@ section{padding:52px 0}
 .pbadges{position:absolute;top:10px;left:10px;display:flex;gap:6px;z-index:2}
 .pbadges .pbadge{position:static;top:auto;left:auto}
 .fctxt .pbadge{position:static;top:auto;left:auto;display:inline-block;align-self:flex-start;margin-bottom:6px}
+.pdptag{position:static;top:auto;left:auto;display:inline-block;margin-top:16px}
 .pbadge.presale{background:var(--mizu);color:#233f3d}
 .pbadge.soldout{background:#efe9e0;color:var(--muted)}
 .exhero{position:relative;border-radius:20px;overflow:hidden;background:var(--st,var(--sakura-wash));margin-bottom:34px;margin-top:-8px;min-height:clamp(420px,58vh,520px);display:flex;align-items:center}
@@ -826,7 +827,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
   .formacta .fcprice small{display:block}
   .formacta .fcbtn{align-self:auto;flex:1 1 auto;white-space:nowrap;padding:11px 16px;font-size:.7rem}
 }
-.recshare{margin:44px 0 8px;padding:26px 22px;border-radius:18px;background:var(--warm);text-align:center}
+.recshare{margin:44px 0 8px;padding:26px 22px;border-radius:18px;background:var(--white);border:1px solid var(--line-soft);text-align:center}
 .recshare .sig{font-size:1.4rem;display:block;color:var(--stone-text)}
 .recshare p{color:var(--muted);font-weight:300;margin:8px auto 16px;max-width:46ch;line-height:1.6}
 .recshare p b{font-weight:500;color:var(--ink)}
@@ -1061,14 +1062,14 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
   var SIZEF=[['P','Pequeno','≈ 3 cm'],['M','Médio','≈ 7 cm'],['G','Grande','≈ 12 cm']];
   var STATUSF=PREVENDA?[['live','À venda'],['presale','Pré-venda']]:[['live','À venda']];
   var PRICEF=[['a','Até R$ 80'],['b','R$ 80 – R$ 120'],['c','Acima de R$ 120']];
-  function inBucket(p,k){var v=fromPrice(p);return k==='a'?v<80:k==='b'?(v>=80&&v<=120):v>120;}
+  function inBucket(p,k){if(k==='sale')return saleP(p)>0;var v=fromPrice(p);return k==='a'?v<80:k==='b'?(v>=80&&v<=120):v>120;}
   var SORTS=[['novo','Últimos lançados'],['antigo','Menos recentes'],['preco-asc','Preço: menor primeiro'],['preco-desc','Preço: maior primeiro']];
   function sortLabel(k){var s=SORTS.find(x=>x[0]===k);return s?s[1]:'';}
   function labelOf(facet,v){
     if(facet==='promo')return 'Em promoção';
     if(facet==='size'){var s=SIZEF.find(x=>x[0]===v);return s?s[1]:v;}
     if(facet==='status'){var s=STATUSF.find(x=>x[0]===v);return s?s[1]:v;}
-    if(facet==='price'){var s=PRICEF.find(x=>x[0]===v);return s?s[1]:v;}
+    if(facet==='price'){if(v==='sale')return 'Em promoção';var s=PRICEF.find(x=>x[0]===v);return s?s[1]:v;}
     return v;
   }
   var REVIEWS=[
@@ -1255,7 +1256,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
   function syncChips(){document.querySelectorAll('.fchip').forEach(function(c){c.setAttribute('aria-pressed', FS[c.dataset.facet].indexOf(c.dataset.val)>-1);});}
   function produtosView(){
     function grp(title,facet,items){var LIM=6;var chips=items.map(function(it,i){var v=it[0],lab=it[1],sub=it[2];return '<button class="fchip'+(items.length>LIM&&i>=LIM?' fhide':'')+'" data-facet="'+facet+'" data-val="'+v+'" aria-pressed="'+(FS[facet].indexOf(v)>-1)+'">'+lab+(sub?'<small>'+sub+'</small>':'')+'</button>';}).join('');return '<div class="fgroup"><p class="flabel">'+title+'</p><div class="fchips">'+chips+'</div>'+(items.length>LIM?'<button class="fmore" type="button">Ver todas ('+items.length+')</button>':'')+'</div>';}
-    var groups=grp('Promoção','promo',[['sale','Em promoção']])+grp('Tamanho','size',SIZEF)+grp('Coleção','coll',COLLS.map(c=>[c,c]))+grp('Preço','price',PRICEF);
+    var groups=grp('Tamanho','size',SIZEF)+grp('Coleção','coll',COLLS.map(c=>[c,c]))+grp('Preço','price',[['sale','Em promoção']].concat(PRICEF));
     var panel='<aside class="fpanel" id="filterPanel"><div class="fph"><b>Filtrar</b><button class="ibtn" id="closeFilter" aria-label="Fechar"><svg viewBox="0 0 24 24" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div><div class="fgroups"><label class="fsearch"><svg viewBox="0 0 24 24" fill="none" stroke="var(--stone)" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input id="fq" type="search" placeholder="Buscar por nome…" aria-label="Buscar"></label>'+groups+'</div><div class="fpf"><button class="clear" id="clearSheet">Limpar</button><button class="btn" id="applyBtn">Ver peças</button></div></aside>';
     var sortSheet='<div class="sheetov" id="sheetov"></div><div class="sheet" id="sortSheet"><div class="sh"><b>Ordenar</b><button class="ibtn" id="closeSort" aria-label="Fechar"><svg viewBox="0 0 24 24" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div><div class="sc">'+
       SORTS.map(s=>'<button class="sortopt" data-sort="'+s[0]+'" aria-pressed="'+(FS.sort===s[0])+'">'+s[1]+'</button>').join('')+'</div></div>';
@@ -1293,7 +1294,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
     var wa='https://wa.me/?text='+encodeURIComponent(r.name+' — receita do Studio Suzu');
     var share='<div class="share"><span class="label">Compartilhar</span><a class="shb" href="'+wa+'" target="_blank" rel="noopener" aria-label="WhatsApp"><svg viewBox="0 0 24 24" style="fill:currentColor;stroke:none"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.86 9.86 0 0 0 4.79 1.22h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2zm0 18.13h-.01c-1.53 0-3.03-.41-4.34-1.19l-.31-.18-3.22.84.86-3.14-.2-.32a8.19 8.19 0 0 1-1.26-4.37c0-4.54 3.7-8.23 8.24-8.23 2.2 0 4.27.86 5.82 2.42a8.18 8.18 0 0 1 2.41 5.83c0 4.54-3.7 8.24-8.23 8.24zm4.52-6.16c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.12-.16.25-.64.81-.78.97-.14.17-.29.19-.54.06-.25-.12-1.05-.39-1.99-1.23-.74-.66-1.23-1.47-1.38-1.72-.14-.25-.02-.38.11-.51.11-.11.25-.29.37-.43.12-.14.16-.25.25-.41.08-.17.04-.31-.02-.43-.06-.12-.56-1.35-.77-1.84-.2-.48-.41-.42-.56-.42h-.48c-.17 0-.43.06-.66.31-.23.25-.87.85-.87 2.07 0 1.22.89 2.4 1.02 2.56.12.17 1.75 2.67 4.23 3.74.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.68-1.18.21-.58.21-1.07.14-1.18-.06-.11-.22-.17-.47-.29z"/></svg></a><button class="shb" id="copyLink" aria-label="Copiar link"><svg viewBox="0 0 24 24"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"/><line x1="8" y1="12" x2="16" y2="12"/></svg></button><button class="shb" onclick="window.print()" aria-label="Imprimir"><svg viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button></div>';
     var recsug='<section class="suggest"><div class="sec-head"><div class="lead"><h2>Outras receitas</h2></div><div class="sec-tools"><a class="more" href="#/receitas">Ver todas</a></div></div><div class="carwrap"><div class="hcar">'+RECIPES.filter(function(x){return x.id!==r.id;}).slice(0,6).map(recCard).join('')+'</div><div class="cdots" hidden></div></div></section>';
-    return '<a class="back" href="#/receitas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>Voltar às receitas</a><article class="recipe"><div class="recvid" style="background:var(--'+r.tint+'-wash)">'+vid+'</div><div class="rechead"><span class="label">'+r.time+' · '+r.level+'</span><h1>'+r.name+'</h1>'+share+'</div><div class="recbody"><div class="recside"><h2>Ingredientes</h2><ul class="ing">'+r.ing.map(function(i){return '<li>'+i+'</li>';}).join('')+'</ul></div><div class="recmain"><h2>Passo a passo</h2><ol class="steps">'+r.steps.map(function(s,i){return '<li><span class="sn">'+(i+1)+'</span><p>'+s+'</p></li>';}).join('')+'</ol></div></div>'+recShare()+moldbox+recsug+'</article>';
+    return '<a class="back" href="#/receitas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>Voltar às receitas</a><article class="recipe"><div class="recvid" style="background:var(--'+r.tint+'-wash)">'+vid+'</div><div class="rechead"><span class="label">'+r.time+' · '+r.level+'</span><h1>'+r.name+'</h1>'+share+'</div><div class="recbody"><div class="recside"><h2>Ingredientes</h2><ul class="ing">'+r.ing.map(function(i){return '<li>'+i+'</li>';}).join('')+'</ul></div><div class="recmain"><h2>Passo a passo</h2><ol class="steps">'+r.steps.map(function(s,i){return '<li><span class="sn">'+(i+1)+'</span><p>'+s+'</p></li>';}).join('')+'</ol></div></div>'+moldbox+recShare()+recsug+'</article>';
   }
   /* "Leve junto" (frequently bought together) = COMPLEMENTARES: categoria/forma diferente + populares
      (proxy de "comprado junto"). Determinístico (sem random). */
@@ -1372,7 +1373,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
     else if(p.status==='presale'){var dep=Math.round(priceOf(p,def)*0.3); buy='<div class="buyrow"><span class="price" id="pdpPrice">'+BRL(dep)+'<small>sinal de reserva · '+SIZES[def].name+' de '+BRL(priceOf(p,def))+'</small></span><button class="btn addbtn" id="pdpAdd">Reservar com sinal</button></div><p class="prenote">O sinal garante a sua peça e a prioridade — e é descontado do valor final quando ela lança, em '+p.avail+'.</p>';}
     else buy='<div class="buyrow"><span class="price" id="pdpPrice">'+wasPrice(p,priceOf(p,def))+BRL(priceNow(p,def))+offtag(p)+'<small>em até 6× · '+SIZES[def].name+'</small></span><button class="btn addbtn" id="pdpAdd">Adicionar à sacola</button></div>';
     return backHome()+'<div class="pdp"><div class="media">'+mediaGallery(p)+'<button class="vidthumb reeltrigger" aria-label="Ver o vídeo desta peça"><span class="vtp" style="background:'+tint+'">'+mold(p)+'<span class="vtplay"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></span></span><span class="vtlabel">Ver o vídeo desse produto</span></button></div>'+
-      '<div class="info"><span class="use">'+p.use+'</span><h1>'+p.name+'</h1>'+
+      '<div class="info"><span class="use">'+p.use+'</span><h1>'+p.name+'</h1>'+(st.k!=='limited'?'<span class="pbadge pdptag '+st.k+'">'+st.label+'</span>':'')+
       '<p class="lead">'+p.desc+'</p>'+scarceBlock(p)+
       '<p class="szlabel">Escolha o tamanho</p><div class="szgrid" id="szgrid">'+szs+'</div>'+buy+pdpShipBlock(p)+
       '<div class="acc pdpacc"><details><summary>Cuidados</summary><div class="ac">Lave à mão, com água morna e sabão neutro; seca ao natural. Vai do congelador (−40 °C) ao forno (230 °C) sem perder o desenho.</div></details>'+
@@ -1407,7 +1408,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
   }
   function mediaGallery(p){
     var st=statusMeta(p),items=pmediaAll(p);
-    var stage='<div class="mimg"><span class="pbadge '+st.k+'">'+st.label+'</span><div class="mstage" id="mstage">'+pmediaMain(p,items[0])+'</div></div>';
+    var stage='<div class="mimg"><div class="mstage" id="mstage">'+pmediaMain(p,items[0])+'</div></div>';
     if(items.length<2)return stage;
     return stage+'<div class="mthumbs" id="mthumbs">'+items.map(function(it,i){return pmediaThumb(p,it,i);}).join('')+'</div>';
   }
