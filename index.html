@@ -1098,7 +1098,9 @@ button.cohd{width:100%;border:0;background:none;font:inherit;color:inherit;text-
 .costep.done .cn-ok{display:block}
 .costep:not(.open):not(.done)>.cohd .conum{background:var(--white);color:var(--wood);border:1px solid var(--line-strong)}
 .costep:not(.open):not(.done)>.cohd h2{color:var(--muted)}
-.costep-cta{margin-top:18px}
+.costep-cta{margin-top:14px}
+#addrHint:empty{display:none}
+.cofield select{-webkit-appearance:none;appearance:none;padding-right:38px;background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%23463C34'%20stroke-width='2'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpolyline%20points='6%209%2012%2015%2018%209'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;background-size:16px}
 .costep-cta .conext{width:100%;padding:14px;font-size:.78rem;letter-spacing:.05em;text-transform:uppercase}
 </style>
 <div class="nfov" id="nfov"></div>
@@ -1402,7 +1404,7 @@ button.cohd{width:100%;border:0;background:none;font:inherit;color:inherit;text-
     return backHome()+'<div class="listing"><span class="label">Ajuda</span><h1>Perguntas frequentes</h1><div class="acc" style="margin-top:26px">'+FAQ.map(function(fq,i){return '<details id="fq'+i+'"'+(i===oi?' open':'')+'><summary>'+fq[0]+'</summary><div class="ac">'+fq[1]+'</div></details>';}).join('')+'</div></div>';
   }
   function receitasView(){
-    return backHome()+'<div class="listing"><span class="label">Do ateliê</span><h1>Receitas</h1><p class="lead">O processo em vídeo e o passo a passo por escrito — feito com as nossas formas.</p><div class="rgrid" style="margin-top:30px">'+RECIPES.map(recCard).join('')+'</div></div>';
+    return backHome()+'<div class="listing"><h1>Receitas</h1><p class="lead">O processo em vídeo e o passo a passo por escrito — feito com as nossas formas.</p><div class="rgrid" style="margin-top:30px">'+RECIPES.map(recCard).join('')+'</div></div>';
   }
   function recShare(){
     var IG='https://www.instagram.com/studio.suzu/',TT='https://www.tiktok.com/@studio.suzu';
@@ -1861,7 +1863,7 @@ button.cohd{width:100%;border:0;background:none;font:inherit;color:inherit;text-
         +'</div>';
     var entrega='<section class="costep" data-step="2" id="cstep2">'+stepHead(2,'Entrega')+'<div class="costep-body">'+entregaBody
       +'<div class="costep-cta"><button type="button" class="btn conext" data-next="2">Continuar</button></div></div></section>';
-    return backHome()+'<div class="wrap cowrap"><span class="label">Falta pouco</span><h1 class="cotitle">Finalizar compra</h1><div class="cogrid">'
+    return backHome()+'<div class="wrap cowrap"><h1 class="cotitle">Finalizar compra</h1><div class="cogrid">'
       +'<form class="coform coacc" id="coForm" novalidate>'
       +'<section class="costep open" data-step="1" id="cstep1">'+stepHead(1,'Contato')+'<div class="costep-body">'
       +'<label class="cofield"><span>E-mail</span><input type="email" id="coEmail" placeholder="voce@email.com" autocomplete="email"></label>'
