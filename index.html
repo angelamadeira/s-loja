@@ -155,7 +155,7 @@ section{padding:52px 0}
 .exhero{position:relative;border-radius:20px;overflow:hidden;background:var(--st,var(--sakura-wash));margin-bottom:34px;margin-top:-8px;min-height:clamp(420px,58vh,520px);display:flex;align-items:center}
 .exhero .exbg{position:absolute;inset:0;overflow:hidden}
 .exhero .exbg svg{position:absolute;right:-9%;top:50%;transform:translateY(-50%);width:min(52%,340px);height:auto;opacity:.9}
-.excopy{position:relative;z-index:2;padding:38px 26px;max-width:100%}.exhero.sobrehero{min-height:clamp(300px,42vh,400px);margin-top:20px}@media(max-width:559px){.sobrehero .exbg svg{opacity:.32;right:-16%;width:min(58%,230px)}.sobrehero .excopy{padding:30px 22px}}
+.excopy{position:relative;z-index:2;padding:38px 26px;max-width:100%}.exhero.sobrehero{min-height:clamp(300px,42vh,400px);margin-top:20px}.faqcta{margin-top:14px}.faqbtn{display:inline-flex;align-items:center;gap:7px;padding:9px 16px;border:1px solid var(--line);border-radius:999px;font-size:.8rem;color:var(--ink);font-weight:400;transition:border-color .16s ease,background .16s ease}.faqbtn:hover{border-color:var(--ink);background:var(--warm)}.faqbtn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}@media(max-width:559px){.sobrehero .exbg svg{opacity:.32;right:-16%;width:min(58%,230px)}.sobrehero .excopy{padding:30px 22px}}
 @media(min-width:640px){.excopy{padding:56px 48px;max-width:66%}}
 @media(min-width:860px){.exhero{min-height:clamp(440px,64vh,560px);border-radius:24px;margin-top:-2px}}
 .excopy .label{margin:0}
@@ -1208,10 +1208,10 @@ button.cohd{width:100%;border:0;background:none;font:inherit;color:inherit;text-
     ['Do que é feito o molde?','Silicone platinum grau alimentício, atóxico e antiaderente. Vai do congelador (−40 °C) ao forno (230 °C) sem perder o desenho.'],
     ['O que é “edição limitada”?','Produzimos em lotes pequenos, sem reposição garantida. Quando esgota, pode não voltar — por isso cada peça é uma edição.'],
     ['Como funciona a pré-venda?','Você reserva a peça antes do lote; o primeiro envio sai a partir da data indicada na página. Sem custo extra pela reserva.'],
-    ['Vocês fazem forma exclusiva?','Sim — um projeto só seu, do sketch ao molde, sob análise de orçamento. Peça pelo Projeto exclusivo.'],
+    ['Vocês fazem forma exclusiva?','Sim — um projeto só seu, do sketch ao molde, sob análise de orçamento. Peça pelo Projeto exclusivo.<div class="faqcta"><a class="faqbtn" href="#/exclusivo">Conhecer o Projeto exclusivo <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a></div>'],
     ['Como cuido do molde?','Lave à mão com água morna e detergente neutro e deixe secar naturalmente. Evite faca, esponja de aço e lava-louças — o silicone é resistente, mas o desenho dura mais com carinho. Do congelador (−40 °C) ao forno (230 °C), sem problema.'],
-    ['Qual o prazo de entrega?','Enviamos para todo o Brasil. Frete grátis acima de R$ 150; o valor e o prazo aparecem no checkout assim que você informa o CEP. Peças de pré-venda ou de lote esgotado podem ter espera — sempre indicada na página.'],
-    ['Como funcionam trocas e devoluções?','Você tem até 7 dias corridos após receber para desistir da compra (direito de arrependimento). Peça com defeito a gente troca ou devolve sem custo — é só chamar no WhatsApp que a gente resolve com você.']
+    ['Qual o prazo de entrega?','Enviamos para todo o Brasil. Frete grátis acima de R$ 150; o valor e o prazo aparecem no checkout assim que você informa o CEP. Peças de pré-venda ou de lote esgotado podem ter espera — sempre indicada na página.<div class="faqcta"><a class="faqbtn" href="#/entrega">Ver Entrega &amp; frete <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a></div>'],
+    ['Como funcionam trocas e devoluções?','Você tem até 7 dias corridos após receber para desistir da compra (direito de arrependimento). Peça com defeito a gente troca ou devolve sem custo — é só chamar no WhatsApp que a gente resolve com você.<div class="faqcta"><a class="faqbtn" href="#/trocas">Ver Trocas &amp; devoluções <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a></div>']
   ];
   if(!PREVENDA)FAQ=FAQ.filter(function(q){return !/pr[eé]-?venda/i.test(q[0]);});
   var RECIPES=[
