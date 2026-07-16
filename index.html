@@ -1029,6 +1029,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
 
 <div class="dock"><div class="dock-in"><div class="sum"><b id="dockTotal">R$ 0,00</b><small id="dockCount">sua sacola está vazia</small></div><button class="btn" id="openCart2">Ver sacola</button></div></div>
 <div class="overlay" id="overlay"></div>
+<div class="coproc" id="coProc" hidden role="alertdialog" aria-live="polite" aria-label="Processando pedido"><div class="coproc-in"><div class="coproc-ring" id="coProcRing"></div><svg class="coproc-ico" id="coProcIco" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" hidden><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg><p class="coproc-msg" id="coProcMsg">Confirmando…</p><p class="coproc-sub" id="coProcSub" hidden></p><button type="button" class="btn coproc-retry" id="coProcRetry" hidden>Tentar de novo</button></div></div>
 <a class="wafloat" href="https://wa.me/5511912345678?text=Ol%C3%A1!%20Vim%20pela%20loja%20Studio%20Suzu%20e%20queria%20tirar%20uma%20d%C3%BAvida." target="_blank" rel="noopener" aria-label="Falar no WhatsApp"><svg viewBox="0 0 24 24"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.86 9.86 0 0 0 4.79 1.22h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2zm0 18.13h-.01c-1.53 0-3.03-.41-4.34-1.19l-.31-.18-3.22.84.86-3.14-.2-.32a8.19 8.19 0 0 1-1.26-4.37c0-4.54 3.7-8.23 8.24-8.23 2.2 0 4.27.86 5.82 2.42a8.18 8.18 0 0 1 2.41 5.83c0 4.54-3.7 8.24-8.23 8.24zm4.52-6.16c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.12-.16.25-.64.81-.78.97-.14.17-.29.19-.54.06-.25-.12-1.05-.39-1.99-1.23-.74-.66-1.23-1.47-1.38-1.72-.14-.25-.02-.38.11-.51.11-.11.25-.29.37-.43.12-.14.16-.25.25-.41.08-.17.04-.31-.02-.43-.06-.12-.56-1.35-.77-1.84-.2-.48-.41-.42-.56-.42h-.48c-.17 0-.43.06-.66.31-.23.25-.87.85-.87 2.07 0 1.22.89 2.4 1.02 2.56.12.17 1.75 2.67 4.23 3.74.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.68-1.18.21-.58.21-1.07.14-1.18-.06-.11-.22-.17-.47-.29z"/></svg></a>
 <style>
 .wafloat{position:fixed;right:20px;bottom:88px;z-index:46;width:54px;height:54px;border-radius:50%;background:var(--ink);color:#fff;display:grid;place-items:center;box-shadow:0 6px 20px rgba(70,60,52,.24);transition:transform .18s ease,box-shadow .18s ease}
@@ -1103,7 +1104,7 @@ button.cohd{width:100%;border:0;background:none;font:inherit;color:inherit;text-
 #addrHint:empty{display:none}
 .cofield select{-webkit-appearance:none;appearance:none;padding-right:38px;background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%23463C34'%20stroke-width='2'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpolyline%20points='6%209%2012%2015%2018%209'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;background-size:16px}
 .costep-cta .conext{width:100%;padding:14px;font-size:.78rem;letter-spacing:.05em;text-transform:uppercase}
-</style>
+.coproc{position:fixed;inset:0;z-index:120;display:flex;align-items:center;justify-content:center;background:var(--white);opacity:0;transition:opacity .35s ease}.coproc.show{opacity:1}.coproc[hidden]{display:none}.coproc-in{display:flex;flex-direction:column;align-items:center;gap:20px;padding:28px;text-align:center;max-width:340px}.coproc-ring{width:50px;height:50px;border-radius:50%;border:2.5px solid var(--line);border-top-color:var(--matcha);animation:coprocspin .9s linear infinite}@keyframes coprocspin{to{transform:rotate(360deg)}}.coproc-ico{width:50px;height:50px;color:var(--alert)}.coproc-msg{font-size:1.05rem;color:var(--ink);font-weight:400;letter-spacing:.01em;margin:0;min-height:1.4em;transition:opacity .25s ease}.coproc-sub{font-size:.82rem;color:var(--muted);font-weight:300;line-height:1.5;margin:0}.coproc-retry{margin-top:4px}@media(prefers-reduced-motion:reduce){.coproc-ring{animation-duration:2.4s}.coproc{transition:none}}</style>
 <div class="nfov" id="nfov"></div>
 <div class="nfmodal" id="nfmodal" role="dialog" aria-modal="true" aria-labelledby="nftitle" aria-hidden="true">
   <button class="ibtn nfx" id="nfx" aria-label="Fechar"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
@@ -1811,10 +1812,35 @@ button.cohd{width:100%;border:0;background:none;font:inherit;color:inherit;text-
       if(s.now.length && !CO.ship){var hint=document.getElementById('cepHint');if(hint){hint.textContent='Calcule o frete para continuar.';hint.className='cephint err';}if(cep)cep.focus();return;}
       if(s.now.length){var _rq=['coNome','coRua','coNum','coBairro','coCidade'],_bad=null;_rq.forEach(function(id){var el=document.getElementById(id);if(el&&!el.value.trim()){el.classList.add('bad');if(!_bad)_bad=el;}});if(_bad){var _ah=document.getElementById('addrHint');if(_ah){_ah.textContent='Preencha os campos destacados do endereço.';_ah.className='cephint err';}_bad.focus();return;}}
       var _w=document.getElementById('coWhats');CO.whats=_w?_w.value.trim():'';
-      CO.hadPre=s.pre.length>0;CO.email=email.value;CO.order='SUZU-'+Math.floor(100000+Math.random()*900000);
-      Object.keys(cart).forEach(function(k){delete cart[k];});render();
-      location.hash='#/pedido';
+      CO.hadPre=s.pre.length>0;CO.email=email.value;
+      runProcessing();
     };
+    function runProcessing(){
+      var ov=document.getElementById('coProc');
+      if(!ov){CO.order='SUZU-'+Math.floor(100000+Math.random()*900000);Object.keys(cart).forEach(function(k){delete cart[k];});render();location.hash='#/pedido';return;}
+      var msg=document.getElementById('coProcMsg'),sub=document.getElementById('coProcSub'),ring=document.getElementById('coProcRing'),ico=document.getElementById('coProcIco'),retry=document.getElementById('coProcRetry');
+      var msgs=['Embrulhando seu pedido com carinho\u2026','Conferindo cada detalhe\u2026','Confirmando seu pagamento\u2026'];
+      ring.hidden=false;ico.hidden=true;sub.hidden=true;retry.hidden=true;msg.style.opacity=1;msg.textContent=msgs[0];
+      ov.hidden=false;requestAnimationFrame(function(){ov.classList.add('show');});
+      var i=0,pend=null,done=false,cyc=setInterval(function(){i++;if(i<msgs.length){msg.style.opacity=0;pend=setTimeout(function(){if(done)return;msg.textContent=msgs[i];msg.style.opacity=1;},220);}},900);
+      var willFail=false;try{willFail=localStorage.getItem('suzu_sim_fail')==='1';}catch(e){}
+      if(/[?&]fail=1/.test(location.search))willFail=true;
+      setTimeout(function(){
+        done=true;clearInterval(cyc);if(pend)clearTimeout(pend);
+        if(willFail){
+          ring.hidden=true;ico.hidden=false;msg.style.opacity=1;
+          msg.textContent='N\u00e3o conseguimos confirmar o pagamento';
+          sub.textContent='Deu um probleminha ao processar. Nada foi cobrado \u2014 \u00e9 s\u00f3 tentar de novo.';sub.hidden=false;
+          retry.hidden=false;retry.focus();
+          return;
+        }
+        CO.order='SUZU-'+Math.floor(100000+Math.random()*900000);
+        Object.keys(cart).forEach(function(k){delete cart[k];});render();
+        ov.classList.remove('show');
+        setTimeout(function(){ov.hidden=true;location.hash='#/pedido';},340);
+      }, willFail?1700:2650);
+      retry.onclick=function(){ov.classList.remove('show');setTimeout(function(){ov.hidden=true;},320);};
+    }
   }
   var CO={ship:null,pay:'pix',parc:1};
   function cartSplit(){
