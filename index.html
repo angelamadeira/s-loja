@@ -340,7 +340,7 @@ footer{background:var(--warm);border-top:1px solid var(--line-soft);padding:48px
 .listing .lead{margin:12px 0 0;color:var(--text-3);font-weight:300;max-width:52ch}
 
 /* TOOLBAR filtros/ordenar */
-.ptools{position:sticky;top:64px;z-index:22;background:var(--white);display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:14px 0;margin-top:18px}
+.ptools{position:sticky;top:64px;z-index:22;background:var(--white);display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:14px 0;margin-top:0}
 .ptools .cnt{font-size:.82rem;color:var(--text-3);font-variant-numeric:tabular-nums}
 .ptools .ptitle{font-size:1.5rem;font-weight:500;letter-spacing:-.01em;margin:0}
 @media (min-width:560px){.ptools .ptitle{margin-right:auto}}
@@ -682,6 +682,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
 .pdpship .cephint{margin-top:12px;line-height:1.55}
 .optlabel{text-transform:none;letter-spacing:0;font-style:normal;color:var(--muted);opacity:.65}
 .cotrust{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 14px;font-size:.72rem;color:var(--muted);font-weight:300;margin-top:18px}
+.pdptrust{font-size:.76rem;color:var(--muted);font-weight:300;line-height:1.5;margin:16px 0 0}
 .cotrust span{position:relative;padding-left:16px}
 .cotrust span:first-child{padding-left:0}
 .cotrust span:not(:first-child)::before{content:'·';position:absolute;left:5px;opacity:.7}
@@ -1529,10 +1530,10 @@ button.cohd{width:100%;border:0;background:none;font:inherit;color:inherit;text-
     return backHome()+'<div class="pdp"><div class="media">'+mediaGallery(p)+'<button class="vidthumb reeltrigger" aria-label="Ver o vídeo desta peça"><span class="vtp" style="background:'+tint+'">'+mold(p)+'<span class="vtplay"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></span></span><span class="vtlabel">Ver o vídeo desse produto</span></button></div>'+
       '<div class="info"><span class="use">'+p.use+'</span><h1>'+p.name+'</h1>'+(st.k!=='limited'?'<span class="pbadge pdptag '+st.k+'">'+st.label+'</span>':'')+
       '<p class="lead">'+p.desc+'</p>'+scarceBlock(p)+
-      '<p class="szlabel">Escolha o tamanho</p><div class="szgrid" id="szgrid">'+szs+'</div>'+buy+pdpShipBlock(p)+
-      '<div class="acc pdpacc"><details><summary>Cuidados</summary><div class="ac">Lave à mão, com água morna e sabão neutro; seca ao natural. Vai do congelador (−40 °C) ao forno (230 °C) sem perder o desenho.</div></details>'+
+      '<p class="szlabel">Escolha o tamanho</p><div class="szgrid" id="szgrid">'+szs+'</div>'+buy+'<p class="pdptrust">Frete grátis acima de R$ 150 · Trocas em 7 dias · Enviamos pra todo o Brasil</p>'+pdpShipBlock(p)+
+      '<div class="acc pdpacc"><details><summary>Entrega e trocas</summary><div class="ac">Frete grátis acima de R$ 150; o prazo aparece assim que você calcula o CEP. Peças de tiragem limitada podem ter espera. Trocas e devoluções em até 7 dias após o recebimento. Detalhes em <a href="#/entrega">Entrega</a> e <a href="#/trocas">Trocas &amp; devoluções</a>.</div></details><details><summary>Cuidados</summary><div class="ac">Lave à mão, com água morna e sabão neutro; seca ao natural. Vai do congelador (−40 °C) ao forno (230 °C) sem perder o desenho.</div></details>'+
       '<details><summary>Ficha técnica</summary><div class="ac">Silicone platinum grau alimentício, atóxico e antiaderente. Medidas: Pequeno ≈ 3 cm · Médio ≈ 7 cm · Grande ≈ 12 cm. '+pat+'</div></details>'+
-      '<details><summary>Entrega</summary><div class="ac">Enviamos para todo o Brasil; frete grátis acima de R$ 150. Tiragem limitada — alguns lotes podem ter espera.</div></details></div>'+
+      '</div>'+
       '</div></div>'+crossSell(p)+suggestionsHTML(p)+
       '<button class="igfab reeltrigger" id="reelFab" aria-label="Ver o vídeo desta peça"><span class="fabframe" style="background:'+tint+'">'+(p.video?'<video class="fabvid" src="'+p.video+'" muted loop autoplay playsinline></video>':mold(p))+'<span class="fabplay"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></span></span></button>'+
       '<div class="reelov" id="reelov"></div><div class="reelbox" id="reelbox"><button class="reelclose" id="reelclose" aria-label="Fechar"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button><div class="reelframe" style="background:'+tint+'">'+(p.video?'<video src="'+p.video+'" controls autoplay loop playsinline></video>':'<div class="reelph">'+mold(p)+'<span class="reelplay"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></span><b>Vídeo em breve</b></div>')+'</div><p class="reelcap">'+p.name+' · @studio.suzu</p></div>';
