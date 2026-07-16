@@ -613,9 +613,9 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
 .duo div{border:1px solid var(--line-soft);border-radius:16px;padding:22px}
 .duo b{display:block;font-weight:500;margin-bottom:6px}
 .duo p{margin:0;font-size:.86rem;color:var(--muted);font-weight:300;line-height:1.55}
-.vals{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:44px}
+.vals{display:grid;grid-template-columns:1fr 1fr;gap:22px 26px;margin-top:18px}
 .vals div b{display:block;font-weight:500;margin-bottom:4px}
-.vals div p{margin:0;font-size:.82rem;color:var(--muted);font-weight:300}
+.vals div p{margin:0;font-size:.82rem;color:var(--muted);font-weight:300}.valshd{font-weight:500;font-size:1.02rem;color:var(--ink);margin:50px 0 0}.vals div{border-top:1px solid var(--line-strong);padding-top:14px}.vals div b{font-size:1rem;margin-bottom:5px}.vals div p{font-size:.86rem;line-height:1.55}.sobrecta{display:flex;flex-wrap:wrap;gap:12px;margin-top:36px}
 
 /* SACOLA */
 .dock{position:fixed;left:0;right:0;bottom:0;z-index:45;background:var(--white);border-top:1px solid var(--line);padding:9px 24px calc(9px + env(safe-area-inset-bottom))}
@@ -1639,8 +1639,8 @@ button.cohd{width:100%;border:0;background:none;font:inherit;color:inherit;text-
       '<p class="lead">Precisão e afeto não são adjetivos que escolhemos. São duas pessoas. O Studio Suzu é tocado por um casal: um modela em 3D — superfícies, tolerâncias, o ângulo exato em que o molde solta. A outra cozinha, e sabe o que uma forma precisa prometer antes de alguém provar.</p>'+
       '<p class="q">Esta é a parte que nenhum catálogo copia. Máquinas estão à venda. Uma mesa compartilhada, não.</p>'+
       '<div class="duo"><div><b>Quem modela</b><p>Traz a disciplina: modelagem 3D, encaixe exato, uma forma que desenforma limpa mil vezes.</p></div><div><b>Quem cozinha</b><p>Traz a razão: o que a sobremesa precisa dizer ao chegar à mesa, e como deve sentir-se na mão.</p></div></div>'+
-      '<div class="vals"><div><b>Autoria</b><p>Desenho exclusivo — o molde é da marca, não de um catálogo.</p></div><div><b>Refinamento</b><p>Excelência técnica em cada forma.</p></div><div><b>Afeto</b><p>Feito devagar, com cuidado — criar é um gesto de ternura.</p></div><div><b>Exclusividade</b><p>Tiragens pequenas, sem reposição garantida.</p></div></div>'+
-      '<p class="sig" style="font-size:1.4rem;margin-top:44px;color:var(--stone-text)">pequenas alegrias, lindamente moldadas.</p></div>';
+      '<p class="valshd">No que a gente acredita</p><div class="vals"><div><b>Autoria</b><p>Desenho exclusivo — o molde é da marca, não de um catálogo.</p></div><div><b>Refinamento</b><p>Excelência técnica em cada forma.</p></div><div><b>Afeto</b><p>Feito devagar, com cuidado — criar é um gesto de ternura.</p></div><div><b>Exclusividade</b><p>Tiragens pequenas, sem reposição garantida.</p></div></div>'+
+      '<p class="sig" style="font-size:1.4rem;margin-top:44px;color:var(--stone-text)">pequenas alegrias, lindamente moldadas.</p><div class="sobrecta"><a class="btn" href="#/produtos">Conheça as formas</a><a class="btn ghost" href="#/exclusivo">Projeto exclusivo</a></div></div>';
   }
   function exclusivoView(){
     return backHome()+'<div class="listing"><div class="exhero" style="--st:var(--sakura-wash)"><div class="exbg">'+mold(byId('coracao'))+'</div><div class="excopy"><h1>Seu projeto. <em>Sua cara.</em></h1><p>Uma forma que só existe para você: desenhamos, do sketch ao molde, a sua assinatura — impossível de copiar. Sob análise de orçamento.</p></div></div>'+
@@ -1817,7 +1817,7 @@ button.cohd{width:100%;border:0;background:none;font:inherit;color:inherit;text-
     };
     function runProcessing(){
       var ov=document.getElementById('coProc');
-      if(!ov){CO.order='SUZU-'+Math.floor(100000+Math.random()*900000);Object.keys(cart).forEach(function(k){delete cart[k];});render();location.hash='#/pedido';return;}
+      if(!ov){CO.order='SUZU-'+Math.floor(100000+Math.random()*900000);Object.keys(cart).forEach(function(k){delete cart[k];});render();location.replace('#/pedido');return;}
       var msg=document.getElementById('coProcMsg'),sub=document.getElementById('coProcSub'),ring=document.getElementById('coProcRing'),ico=document.getElementById('coProcIco'),retry=document.getElementById('coProcRetry');
       var msgs=['Embrulhando seu pedido com carinho\u2026','Conferindo cada detalhe\u2026','Confirmando seu pagamento\u2026'];
       ring.hidden=false;ico.hidden=true;sub.hidden=true;retry.hidden=true;msg.style.opacity=1;msg.textContent=msgs[0];
@@ -1847,7 +1847,7 @@ button.cohd{width:100%;border:0;background:none;font:inherit;color:inherit;text-
         CO.order='SUZU-'+Math.floor(100000+Math.random()*900000);
         Object.keys(cart).forEach(function(k){delete cart[k];});render();
         ov.classList.remove('show');
-        setTimeout(function(){ov.hidden=true;location.hash='#/pedido';},340);
+        setTimeout(function(){ov.hidden=true;location.replace('#/pedido');},340);
       }, willFail?1700:2650);
       retry.onclick=function(){ov.classList.remove('show');setTimeout(function(){ov.hidden=true;},320);};
     }
