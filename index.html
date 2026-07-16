@@ -1820,15 +1820,14 @@ button.cohd{width:100%;border:0;background:none;font:inherit;color:inherit;text-
       if(!ov){CO.order='SUZU-'+Math.floor(100000+Math.random()*900000);Object.keys(cart).forEach(function(k){delete cart[k];});render();location.replace('#/pedido');return;}
       var msg=document.getElementById('coProcMsg'),sub=document.getElementById('coProcSub'),ring=document.getElementById('coProcRing'),ico=document.getElementById('coProcIco'),retry=document.getElementById('coProcRetry');
       var msgs=['Embrulhando seu pedido com carinho\u2026','Conferindo cada detalhe\u2026','Confirmando seu pagamento\u2026'];
-      ring.hidden=false;ico.hidden=true;sub.hidden=true;retry.hidden=true;msg.style.opacity=1;msg.textContent=msgs[0];
+      ring.style.display='';ico.style.display='none';sub.hidden=true;retry.hidden=true;msg.style.opacity=1;msg.textContent=msgs[0];
       ov.hidden=false;requestAnimationFrame(function(){ov.classList.add('show');});
       var i=0,pend=null,done=false,cyc=setInterval(function(){i++;if(i<msgs.length){msg.style.opacity=0;pend=setTimeout(function(){if(done)return;msg.textContent=msgs[i];msg.style.opacity=1;},220);}},900);
-      var willFail=false;try{willFail=localStorage.getItem('suzu_sim_fail')==='1';}catch(e){}
-      if(/[?&]fail=1/.test(location.search))willFail=true;
+      var willFail=/[?&]fail=1/.test(location.search);
       setTimeout(function(){
         done=true;clearInterval(cyc);if(pend)clearTimeout(pend);
         if(willFail){
-          ring.hidden=true;ico.hidden=false;msg.style.opacity=1;
+          ring.style.display='none';ico.style.display='block';msg.style.opacity=1;
           msg.textContent='N\u00e3o conseguimos confirmar o pagamento';
           sub.textContent='Deu um probleminha ao processar. Nada foi cobrado \u2014 \u00e9 s\u00f3 tentar de novo.';sub.hidden=false;
           retry.hidden=false;retry.focus();
