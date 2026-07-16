@@ -943,6 +943,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
     <a href="#/receitas">Receitas</a>
     <a href="#/sobre" class="sub">Sobre o estúdio</a>
     <a href="#/faq" class="sub">Perguntas frequentes</a>
+    <a href="#/atendimento" class="sub">Atendimento</a>
   </nav>
   <p class="mfoot">Studio Suzu · Feito no Brasil</p>
 </div>
@@ -1019,7 +1020,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
     <div class="foot-cols">
       <div class="fcol"><h4 class="label">Loja</h4><a href="#/produtos">Produtos</a><a href="#/prevenda" data-prevenda>Pré-venda</a><a href="#/exclusivo">Projeto exclusivo</a><a href="#/receitas">Receitas</a></div>
       <div class="fcol"><h4 class="label">Studio</h4><a href="#/sobre">Sobre o estúdio</a><a href="#/faq">Perguntas frequentes</a></div>
-      <div class="fcol"><h4 class="label">Ajuda</h4><a href="#/faq/cuidados">Cuidados</a><a href="#/entrega">Entrega</a><a href="#/trocas">Trocas</a><a href="https://wa.me/5511912345678?text=Ol%C3%A1!%20Vim%20pela%20loja%20Studio%20Suzu%20e%20queria%20tirar%20uma%20d%C3%BAvida." target="_blank" rel="noopener">Contato</a></div>
+      <div class="fcol"><h4 class="label">Ajuda</h4><a href="#/faq/cuidados">Cuidados</a><a href="#/entrega">Entrega</a><a href="#/trocas">Trocas</a><a href="#/atendimento">Atendimento</a></div>
     </div>
   </div>
   <div class="wrap foot-bot"><p class="foot-cnpj">Studio Suzu · [Razão Social] · CNPJ [00.000.000/0001-00] · [Endereço completo] · [contato@studiosuzu.com]</p><nav class="foot-legal"><a href="#/privacidade">Privacidade</a><a href="#/termos">Termos de uso</a><span class="label">© 2026 · Feito no Brasil</span></nav></div>
@@ -1027,6 +1028,32 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
 
 <div class="dock"><div class="dock-in"><div class="sum"><b id="dockTotal">R$ 0,00</b><small id="dockCount">sua sacola está vazia</small></div><button class="btn" id="openCart2">Ver sacola</button></div></div>
 <div class="overlay" id="overlay"></div>
+<a class="wafloat" href="https://wa.me/5511912345678?text=Ol%C3%A1!%20Vim%20pela%20loja%20Studio%20Suzu%20e%20queria%20tirar%20uma%20d%C3%BAvida." target="_blank" rel="noopener" aria-label="Falar no WhatsApp"><span class="wafloat-tip">Fale com a gente</span><svg viewBox="0 0 24 24"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.86 9.86 0 0 0 4.79 1.22h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2zm0 18.13h-.01c-1.53 0-3.03-.41-4.34-1.19l-.31-.18-3.22.84.86-3.14-.2-.32a8.19 8.19 0 0 1-1.26-4.37c0-4.54 3.7-8.23 8.24-8.23 2.2 0 4.27.86 5.82 2.42a8.18 8.18 0 0 1 2.41 5.83c0 4.54-3.7 8.24-8.23 8.24zm4.52-6.16c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.12-.16.25-.64.81-.78.97-.14.17-.29.19-.54.06-.25-.12-1.05-.39-1.99-1.23-.74-.66-1.23-1.47-1.38-1.72-.14-.25-.02-.38.11-.51.11-.11.25-.29.37-.43.12-.14.16-.25.25-.41.08-.17.04-.31-.02-.43-.06-.12-.56-1.35-.77-1.84-.2-.48-.41-.42-.56-.42h-.48c-.17 0-.43.06-.66.31-.23.25-.87.85-.87 2.07 0 1.22.89 2.4 1.02 2.56.12.17 1.75 2.67 4.23 3.74.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.68-1.18.21-.58.21-1.07.14-1.18-.06-.11-.22-.17-.47-.29z"/></svg></a>
+<style>
+.wafloat{position:fixed;right:20px;bottom:88px;z-index:46;width:54px;height:54px;border-radius:50%;background:var(--matcha);color:#38471f;display:grid;place-items:center;box-shadow:0 6px 20px rgba(70,60,52,.22);transition:transform .18s ease,box-shadow .18s ease}
+.wafloat:hover{transform:translateY(-2px);box-shadow:0 10px 26px rgba(70,60,52,.3)}
+.wafloat svg{width:28px;height:28px;fill:currentColor;stroke:none}
+.wafloat-tip{position:absolute;right:64px;white-space:nowrap;background:var(--ink);color:#fff;font-size:.72rem;font-weight:400;padding:6px 12px;border-radius:999px;opacity:0;transform:translateX(6px);transition:opacity .18s,transform .18s;pointer-events:none;box-shadow:0 4px 12px rgba(70,60,52,.18)}
+.wafloat:hover .wafloat-tip{opacity:1;transform:translateX(0)}
+@media(max-width:560px){.wafloat{right:14px;bottom:82px;width:50px;height:50px}.wafloat-tip{display:none}}
+/* Atendimento */
+.atcards{display:grid;gap:12px;margin-top:26px;max-width:520px}
+.atcard{display:flex;align-items:center;gap:16px;border:1px solid var(--line-soft);border-radius:16px;padding:16px 18px;background:var(--white);transition:border-color .18s,background .18s}
+.atcard:hover{border-color:var(--line-strong);background:var(--warm)}
+.atico{width:42px;height:42px;border-radius:50%;background:var(--warm);display:grid;place-items:center;flex:0 0 auto;color:var(--ink)}
+.atcard:hover .atico{background:var(--white)}
+.atico svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.atico svg.wa{fill:currentColor;stroke:none}
+.atcard b{font-weight:500;display:block;font-size:1rem}
+.atcard div span{font-size:.84rem;color:var(--muted);font-weight:300}
+.athours{display:flex;flex-wrap:wrap;gap:20px 48px;margin-top:30px}
+.athours b{font-weight:500;font-size:.82rem}
+.athours p{color:var(--text-3);font-weight:300;font-size:.9rem;line-height:1.5;margin:0}
+.atfaq{margin-top:26px;font-size:.9rem;color:var(--text-3);font-weight:300}
+.atfaq a,.athours a{color:var(--gold-text)}
+.cohelp,.okhelp{font-size:.8rem;color:var(--muted);font-weight:300;text-align:center;margin-top:14px}
+.cohelp a,.okhelp a{color:var(--gold-text)}
+</style>
 <style>
 .nfov{position:fixed;inset:0;z-index:70;background:rgba(70,60,52,.34);opacity:0;visibility:hidden;transition:opacity .25s,visibility .25s}
 .nfov.open{opacity:1;visibility:visible}
@@ -1583,6 +1610,22 @@ button.cohd{width:100%;border:0;background:none;font:inherit;color:inherit;text-
       +'<h3>Pré-venda</h3><p>Peças de pré-venda saem a partir da data indicada na página; o frete é confirmado no envio.</p>'
       +'<h3>Extravio ou atraso</h3><p>Qualquer problema com a entrega, fale com a gente por [contato@studiosuzu.com] ou WhatsApp que a gente resolve.</p>']
   };
+  function atendimentoView(){
+    var wa='https://wa.me/5511912345678?text='+encodeURIComponent('Olá! Vim pela loja Studio Suzu e queria tirar uma dúvida.');
+    var waIco='<svg class="wa" viewBox="0 0 24 24"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.86 9.86 0 0 0 4.79 1.22h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2zm0 18.13h-.01c-1.53 0-3.03-.41-4.34-1.19l-.31-.18-3.22.84.86-3.14-.2-.32a8.19 8.19 0 0 1-1.26-4.37c0-4.54 3.7-8.23 8.24-8.23 2.2 0 4.27.86 5.82 2.42a8.18 8.18 0 0 1 2.41 5.83c0 4.54-3.7 8.24-8.23 8.24zm4.52-6.16c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.12-.16.25-.64.81-.78.97-.14.17-.29.19-.54.06-.25-.12-1.05-.39-1.99-1.23-.74-.66-1.23-1.47-1.38-1.72-.14-.25-.02-.38.11-.51.11-.11.25-.29.37-.43.12-.14.16-.25.25-.41.08-.17.04-.31-.02-.43-.06-.12-.56-1.35-.77-1.84-.2-.48-.41-.42-.56-.42h-.48c-.17 0-.43.06-.66.31-.23.25-.87.85-.87 2.07 0 1.22.89 2.4 1.02 2.56.12.17 1.75 2.67 4.23 3.74.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.68-1.18.21-.58.21-1.07.14-1.18-.06-.11-.22-.17-.47-.29z"/></svg>';
+    var mailIco='<svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 5L2 7"/></svg>';
+    var igIco='<svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>';
+    return backHome()+'<div class="listing"><span class="label">Atendimento</span><h1>Fale com a gente</h1>'
+      +'<p class="lead">A gente está por aqui pra ajudar — antes, durante e depois da compra. Escolha o canal que preferir.</p>'
+      +'<div class="atcards">'
+      +'<a class="atcard" href="'+wa+'" target="_blank" rel="noopener"><span class="atico">'+waIco+'</span><div><b>WhatsApp</b><span>O jeito mais rápido de falar com a gente.</span></div></a>'
+      +'<a class="atcard" href="mailto:[contato@studiosuzu.com]"><span class="atico">'+mailIco+'</span><div><b>E-mail</b><span>[contato@studiosuzu.com]</span></div></a>'
+      +'<a class="atcard" href="https://instagram.com/studio.suzu" target="_blank" rel="noopener"><span class="atico">'+igIco+'</span><div><b>Instagram</b><span>@studio.suzu — novidades e bastidores.</span></div></a>'
+      +'</div>'
+      +'<div class="athours"><p><b>Horário de atendimento</b><br>[Segunda a sexta, 9h às 18h]</p><p><b>Tempo de resposta</b><br>Respondemos em até [24h] úteis.</p></div>'
+      +'<p class="atfaq">Prefere se virar sozinha? Dúvidas comuns (tamanhos, entrega, trocas, cuidados) têm resposta na hora no nosso <a href="#/faq">FAQ</a>.</p>'
+      +'</div>';
+  }
   function politicaView(slug){
     var p=POLICIES[slug];if(!p)return '';
     return backHome()+'<div class="listing legaldoc"><span class="label">'+p[0]+'</span><h1>'+p[1]+'</h1><div class="prose">'+p[2]+'</div></div>';
@@ -1836,6 +1879,7 @@ button.cohd{width:100%;border:0;background:none;font:inherit;color:inherit;text-
       +'<div class="couprow"><input type="text" id="coCoupon" placeholder="Cupom de desconto" autocomplete="off"><button type="button" class="btn ghost" id="coCoupBtn">Aplicar</button></div><p class="couphint" id="coCoupHint"></p>'
       +'<button type="submit" class="btn cofinish" id="coFinish">Concluir pedido</button>'
       +'<div class="cotrust"><span>Compra protegida</span><span><a href="#/faq">Trocas em até 7 dias</a></span><span>Enviamos para todo o Brasil</span></div>'
+      +'<p class="cohelp">Dúvida antes de finalizar? <a href="#/atendimento">Fale com a gente</a>.</p>'
       +'<p class="cosafe">Ambiente seguro · protótipo de demonstração</p>'
       +'</div></section>'
       +'</form><aside class="cosummary" id="coSummary"></aside></div></div>';
@@ -1868,7 +1912,8 @@ button.cohd{width:100%;border:0;background:none;font:inherit;color:inherit;text-
       +'<p class="oktext">Enviamos a confirmação para <b>'+(CO.email||'seu e-mail')+'</b> — é por lá que você acompanha cada etapa, do preparo ao envio.'+(CO.whats?' Se precisarmos de algo, damos um oi no seu WhatsApp.':'')+'</p>'
       +'<p class="oktext">Agora é a nossa vez: vamos moldar as suas pequenas alegrias com todo o cuidado.</p>'
       +(CO.hadPre?'<p class="oktext pre">Os itens de reserva ficam guardados com o seu nome; avisamos e cobramos o restante quando a peça é lançada.</p>':'')
-      +'<a class="btn" href="#/produtos">Continuar comprando</a></div></div>';
+      +'<a class="btn" href="#/produtos">Continuar comprando</a>'
+      +'<p class="okhelp">Qualquer dúvida sobre o pedido, <a href="#/atendimento">fale com a gente</a>.</p></div></div>';
   }
   function router(){
     var h=location.hash,v=null;
@@ -1877,6 +1922,7 @@ button.cohd{width:100%;border:0;background:none;font:inherit;color:inherit;text-
     else if(h==='#/prevenda'){if(PREVENDA){v=prevendaView();}else{location.replace('#/produtos');return;}}
     else if(h==='#/exclusivo')v=exclusivoView();
     else if(h==='#/sobre')v=sobreView();
+    else if(h==='#/atendimento')v=atendimentoView();
     else if(h.indexOf('#/receita/')===0){v=receitaView(h.slice(10));if(!v){location.replace('#/receitas');return;}}
     else if(h==='#/receitas')v=receitasView();
     else if(h.indexOf('#/faq')===0){v=faqView(h.indexOf('#/faq/')===0?h.slice(6):'');}
