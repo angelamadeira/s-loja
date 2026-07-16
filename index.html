@@ -317,7 +317,7 @@ footer{background:var(--warm);border-top:1px solid var(--line-soft);padding:48px
 .foot-bot{margin-top:22px;padding-top:16px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:10px}
 .foot-bot .label{font-size:.6rem}
 .foot-cnpj{font-size:.64rem;color:var(--muted);font-weight:300;line-height:1.6;margin:0}
-.foot-legal{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px}
+.foot-legal{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;width:100%}
 .foot-legal a{font-size:.7rem;color:var(--text-3);font-weight:300}
 .foot-legal a:hover{color:var(--gold-text)}
 .foot-legal .label{font-size:.6rem;margin-left:auto}
@@ -1054,7 +1054,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
 .atfaq{margin-top:26px;font-size:.9rem;color:var(--text-3);font-weight:300}
 .atfaq a,.athours a{color:var(--gold-text)}
 .cohelp,.okhelp{font-size:.8rem;color:var(--muted);font-weight:300;text-align:center;margin-top:14px}
-.cohelp a,.okhelp a{color:var(--gold-text)}
+.cohelp a,.okhelp a{color:var(--gold-text)}.oketa{font-size:.92rem;color:var(--ink);font-weight:400;margin:2px 0 6px}.oketa b{font-weight:500}.okrecap{width:100%;max-width:400px;background:var(--torinoko-wash);border:1px solid var(--line-soft);border-radius:16px;padding:16px 18px;margin:10px 0 4px;text-align:left}.okrilist{display:flex;flex-direction:column;gap:8px}.okri{display:flex;gap:10px;font-size:.9rem;color:var(--ink)}.okriq{color:var(--muted);font-variant-numeric:tabular-nums}.okrin{flex:1}.okrip{font-variant-numeric:tabular-nums}.okrisep{height:1px;background:var(--line-soft);margin:13px 0}.okrrow{display:flex;justify-content:space-between;align-items:center;font-size:.95rem;color:var(--ink)}.okrrow.sub{font-size:.82rem;color:var(--muted);font-weight:300;margin-top:6px}.okrrow b{font-weight:600}.oksteps{position:relative;display:flex;flex-direction:column;gap:2px;width:100%;max-width:400px;text-align:left;margin:14px 0 2px;padding-left:2px}.oksteps::before{content:\'\';position:absolute;left:6px;top:16px;bottom:16px;width:1px;background:var(--line-soft)}.okstep{display:flex;align-items:center;gap:11px;font-size:.85rem;color:var(--muted);font-weight:300;padding:5px 0}.okstep .okdot{position:relative;z-index:1;width:9px;height:9px;border-radius:50%;border:1.5px solid var(--line-strong);background:var(--white);flex:0 0 auto}.okstep.on{color:var(--ink);font-weight:400}.okstep.on .okdot{background:var(--matcha);border-color:var(--matcha)}.okcta{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:18px}.okcta .btn{margin-top:0}
 </style>
 <style>
 .nfov{position:fixed;inset:0;z-index:70;background:rgba(70,60,52,.34);opacity:0;visibility:hidden;transition:opacity .25s,visibility .25s}
@@ -1834,6 +1834,16 @@ button.cohd{width:100%;border:0;background:none;font:inherit;color:inherit;text-
           retry.hidden=false;retry.focus();
           return;
         }
+        (function(){var sp=cartSplit(),merch=sp.subNow+sp.subPre;
+          var shp=sp.now.length===0?0:(CO.ship?(CO.ship.free?0:CO.ship.price):0);
+          var pixD=CO.pay==='pix'?Math.round(merch*0.05*100)/100:0;
+          var coupD=CO.coupon?Math.round(merch*CO.coupon.pct/100*100)/100:0;
+          CO.paidTotal=merch+shp-pixD-coupD;
+          CO.items=sp.now.concat(sp.pre).map(function(it){return {q:it.qty,name:it.name,price:it.qty*it.price};});
+          CO.payLabel=CO.pay==='pix'?'Pix (à vista)':(CO.pay==='cartao'?((CO.parc||1)+'× no cartão'):'Boleto');
+          CO.shipLabel=sp.now.length===0?'no lançamento':(CO.ship?(CO.ship.free?'Frete grátis':BRL(CO.ship.price)):'—');
+          CO.eta=(sp.now.length&&CO.ship)?CO.ship.days:'';
+        })();
         CO.order='SUZU-'+Math.floor(100000+Math.random()*900000);
         Object.keys(cart).forEach(function(k){delete cart[k];});render();
         ov.classList.remove('show');
@@ -1935,13 +1945,19 @@ button.cohd{width:100%;border:0;background:none;font:inherit;color:inherit;text-
   }
   function pedidoView(){
     if(!CO.order) return coEmptyView();
+    var items=(CO.items||[]).map(function(it){return '<div class="okri"><span class="okriq">'+it.q+'×</span><span class="okrin">'+it.name+'</span><span class="okrip">'+BRL(it.price)+'</span></div>';}).join('');
+    var lancamento=CO.shipLabel==='no lançamento';
+    var entrega=lancamento?'combinamos no lançamento':((CO.shipLabel||'—')+(CO.eta?(' · '+CO.eta):''));
     return '<div class="wrap cowrap"><div class="okwrap"><div class="okseal"><svg class="okcheck" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>'
       +'<span class="sig oksig">Deu tudo certo!</span>'
       +'<p class="oknum">Nº '+CO.order+'</p>'
+      +(CO.eta&&!lancamento?'<p class="oketa">Chega em <b>'+CO.eta+'</b></p>':'')
+      +(items?'<div class="okrecap"><div class="okrilist">'+items+'</div><div class="okrisep"></div><div class="okrrow"><span>Total pago</span><b>'+BRL(CO.paidTotal||0)+'</b></div><div class="okrrow sub"><span>Pagamento</span><span>'+(CO.payLabel||'—')+'</span></div><div class="okrrow sub"><span>Entrega</span><span>'+entrega+'</span></div></div>':'')
+      +'<div class="oksteps"><div class="okstep on"><span class="okdot"></span>Pedido confirmado</div><div class="okstep"><span class="okdot"></span>Em preparo no ateliê</div><div class="okstep"><span class="okdot"></span>A caminho</div></div>'
       +'<p class="oktext">Enviamos a confirmação para <b>'+(CO.email||'seu e-mail')+'</b> — é por lá que você acompanha cada etapa, do preparo ao envio.'+(CO.whats?' Se precisarmos de algo, damos um oi no seu WhatsApp.':'')+'</p>'
-      +'<p class="oktext">Agora é a nossa vez: vamos moldar as suas pequenas alegrias com todo o cuidado.</p>'
       +(CO.hadPre?'<p class="oktext pre">Os itens de reserva ficam guardados com o seu nome; avisamos e cobramos o restante quando a peça é lançada.</p>':'')
-      +'<a class="btn" href="#/produtos">Continuar comprando</a>'
+      +'<p class="oktext">Agora é a nossa vez: vamos moldar as suas pequenas alegrias com todo o cuidado.</p>'
+      +'<div class="okcta"><a class="btn" href="#/produtos">Continuar comprando</a><a class="btn ghost" href="https://www.instagram.com/studio.suzu/" target="_blank" rel="noopener">Acompanhe no Instagram</a></div>'
       +'<p class="okhelp">Qualquer dúvida sobre o pedido, <a href="#/atendimento">fale com a gente</a>.</p></div></div>';
   }
   function router(){
