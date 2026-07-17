@@ -580,7 +580,7 @@
     else buy='<div class="buyrow"><span class="price" id="pdpPrice">'+wasPrice(p,priceOf(p,def))+BRL(priceNow(p,def))+offtag(p)+'<small>em até 6× · '+SIZES[def].name+'</small></span><button class="btn addbtn" id="pdpAdd">Adicionar à sacola</button></div>';
     return backHome()+'<div class="pdp"><div class="media">'+mediaGallery(p)+'<button class="vidthumb reeltrigger" aria-label="Ver o vídeo desta peça"><span class="vtp" style="background:'+tint+'">'+mold(p)+'<span class="vtplay"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></span></span><span class="vtlabel">Ver o vídeo desse produto</span></button></div>'+
       '<div class="info"><span class="use">'+p.use+'</span><h1>'+p.name+'</h1>'+(st.k!=='limited'?'<span class="pbadge pdptag '+st.k+'">'+st.label+'</span>':'')+
-      '<p class="lead">'+p.desc+'</p>'+scarceBlock(p)+
+      '<p class="lead">'+p.desc+'</p>'+
       '<p class="szlabel">Escolha o tamanho</p><div class="szgrid" id="szgrid">'+szs+'</div>'+buy+'<p class="pdptrust">Frete grátis acima de R$ 150 · Trocas em 7 dias · Enviamos pra todo o Brasil</p>'+pdpShipBlock(p)+
       '<div class="acc pdpacc"><details><summary>Entrega e trocas</summary><div class="ac">Frete grátis acima de R$ 150; o prazo aparece assim que você calcula o CEP. Peças de tiragem limitada podem ter espera. Trocas e devoluções em até 7 dias após o recebimento. Detalhes em <a href="#/entrega">Entrega</a> e <a href="#/trocas">Trocas &amp; devoluções</a>.</div></details><details><summary>Cuidados</summary><div class="ac">Lave à mão, com água morna e sabão neutro; seca ao natural. Vai do congelador (−40 °C) ao forno (230 °C) sem perder o desenho.</div></details>'+
       '<details><summary>Ficha técnica</summary><div class="ac">Silicone platinum grau alimentício, atóxico e antiaderente. Medidas: Pequeno ≈ 3 cm · Médio ≈ 7 cm · Grande ≈ 12 cm. '+pat+'</div></details>'+
@@ -624,11 +624,6 @@
     if(c&&c.type==='image')return '<img class="cover" src="'+c.src+'" alt="'+p.name+'" loading="lazy">';
     if(c&&c.type==='video')return '<video class="cover" src="'+c.src+'"'+(c.poster?' poster="'+c.poster+'"':'')+' muted loop autoplay playsinline></video>';
     return mold(p);
-  }
-  function scarceBlock(p){
-    if(p.status==='soldout')return '';
-    if(p.status==='presale')return '<div class="scarce pre"><span class="ed">Pré-venda · disponível em '+p.avail+'</span><p class="sl" style="margin:8px 0 0">Garanta com um sinal de reserva; o restante você paga quando a peça lança. Tiragem limitada.</p></div>';
-    return '';
   }
   /* Páginas legais/políticas — RASCUNHO placeholder, revisar (ver pasta JURIDICO/). Campos [entre colchetes] a preencher. */
   var POLICIES={
