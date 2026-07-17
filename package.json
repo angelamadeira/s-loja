@@ -1,0 +1,15 @@
+{
+  "name": "suzu-loja",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "lint:css": "stylelint \"css/**/*.css\"",
+    "lint:markup": "bash scripts/check-no-hardcoded-color.sh",
+    "lint": "npm run lint:css && npm run lint:markup",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "stylelint": "^16.10.0",
+    "husky": "^9.1.6"
+  }
+}

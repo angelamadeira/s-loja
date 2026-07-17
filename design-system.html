@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Design System · Studio Suzu</title>
+<link rel="stylesheet" href="css/tokens.css">
+<link rel="stylesheet" href="css/components.css">
+<style>
+  /* Estilos só do styleguide (chrome da documentação) — nunca da loja.
+     Regra do próprio DS: zero hex aqui, só var(--token). */
+  *{box-sizing:border-box}
+  html{background:var(--white)}
+  body{font-family:var(--sans);color:var(--ink);background:var(--white);margin:0;padding:0 24px 96px;max-width:980px}
+  .dswrap{max-width:100%}
+  header.dshd{padding:56px 0 28px;border-bottom:1px solid var(--line)}
+  header.dshd h1{font-family:var(--serif);font-style:italic;font-weight:400;font-size:2.4rem;margin:0 0 10px}
+  header.dshd p{color:var(--muted);font-size:.95rem;line-height:1.6;max-width:62ch;margin:0 0 6px}
+  header.dshd code{background:var(--raw);padding:2px 7px;border-radius:6px;font-size:.82rem}
+  nav.dstoc{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:22px;padding-top:18px;border-top:1px solid var(--line-soft)}
+  nav.dstoc a{color:var(--stone-text);font-size:.78rem;letter-spacing:.03em;text-decoration:none;text-transform:uppercase}
+  nav.dstoc a:hover{color:var(--ink)}
+
+  section.ds{margin:52px 0}
+  section.ds h2{font-family:var(--serif);font-style:italic;font-weight:400;font-size:1.7rem;margin:0 0 6px}
+  section.ds > p.lead{color:var(--muted);font-size:.9rem;max-width:66ch;margin:0 0 28px;line-height:1.6}
+  h3.dsgroup{font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--label);font-weight:600;margin:30px 0 4px}
+  h3.dsgroup:first-of-type{margin-top:0}
+  p.dsrule{color:var(--stone-text);font-size:.78rem;margin:2px 0 14px;line-height:1.55}
+  p.dsrule b{color:var(--ink);font-weight:600}
+
+  .swrow{display:flex;flex-wrap:wrap;gap:4px 0}
+  .sw{width:112px;margin:6px 8px 6px 0}
+  .sw i{display:block;height:58px;border-radius:10px;border:1px solid var(--line)}
+  .sw b{display:block;font-size:.7rem;margin-top:6px;font-weight:600}
+  .sw span{display:block;font-size:.64rem;color:var(--muted);font-variant-numeric:tabular-nums}
+
+  .comp-block{margin:0 0 44px}
+  .comp-block > h4{font-size:1.02rem;font-weight:500;margin:0 0 4px}
+  .demo{border:1px solid var(--line-soft);border-radius:16px;padding:26px;background:var(--warm)}
+  .demo-row{display:flex;flex-wrap:wrap;gap:14px;align-items:center}
+  .demo-stage{position:relative;height:230px;border-radius:18px;overflow:hidden;flex:1 1 220px;min-width:220px}
+  .demo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:16px}
+  .demo-mold{width:52px;height:52px;flex:0 0 auto}
+  .demo-mold svg{width:100%;height:100%;display:block}
+
+  table.dstable{width:100%;border-collapse:collapse;font-size:.82rem;margin-top:6px}
+  table.dstable th, table.dstable td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line-soft)}
+  table.dstable th{color:var(--label);font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;font-weight:600}
+  table.dstable td code{font-size:.78rem}
+
+  .type-sample{padding:20px 0;border-bottom:1px solid var(--line-soft)}
+  .type-sample:last-child{border-bottom:none}
+  .type-sample .tag{font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;color:var(--label);margin-bottom:8px}
+  .type-sample .val{font-size:1.5rem}
+  .type-sample.serif .val{font-family:var(--serif);font-style:italic;font-weight:400}
+  .type-sample .meta{font-size:.72rem;color:var(--muted);margin-top:8px}
+
+  .line-demo{display:flex;flex-wrap:wrap;gap:18px}
+  .line-demo div{flex:1 1 220px}
+  .line-demo b{display:block;font-size:.78rem;margin-bottom:6px}
+  .line-demo .strip{height:44px;border-radius:10px;background:var(--white)}
+  .line-demo span{display:block;font-size:.66rem;color:var(--muted);margin-top:6px;font-variant-numeric:tabular-nums}
+
+  footer.dsft{margin-top:70px;padding-top:22px;border-top:1px solid var(--line);color:var(--muted);font-size:.76rem}
+</style>
+</head>
+<body>
+<div class="dswrap">
+
+  <!-- Defs compartilhados com a loja (selo Suzu) — mesmos paths de index.html, sem duplicar arte fora daqui -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+    <path id="p-su" d="M77.9990234375 130.9993896484375 36.2003173828125 107.2003173828125Q45.60009765625 78.2001953125 67.4998779296875 51.20013427734375Q89.399658203125 24.2000732421875 124.799560546875 7.10003662109375Q160.199462890625 -10.0 208.1995849609375 -10.0Q274.3992919921875 -10.0 315.4991455078125 27.599853515625Q356.5989990234375 65.19970703125 356.5989990234375 124.7996826171875Q356.5989990234375 163.799560546875 337.4990234375 188.99951171875Q318.3990478515625 214.199462890625 286.79913330078125 231.29937744140625Q255.19921875 248.3992919921875 217.9993896484375 261.59912109375Q189.59912109375 271.59912109375 164.99896240234375 282.79913330078125Q140.3988037109375 293.9991455078125 125.19873046875 311.39935302734375Q109.9986572265625 328.799560546875 109.9986572265625 356.0001220703125Q109.9986572265625 389.4007568359375 133.5989990234375 406.0010986328125Q157.1993408203125 422.6014404296875 190.599853515625 422.6014404296875Q236.6004638671875 422.6014404296875 265.70050048828125 401.00115966796875Q294.800537109375 379.40087890625 311.400390625 349.400634765625L353.799072265625 375.19970703125Q341.7991943359375 401.19970703125 319.79937744140625 422.19976806640625Q297.799560546875 443.1998291015625 266.899658203125 456.19989013671875Q235.999755859375 469.199951171875 196.599609375 469.199951171875Q161.19970703125 469.199951171875 129.69989013671875 456.39996337890625Q98.2000732421875 443.5999755859375 78.7001953125 417.800048828125Q59.2003173828125 392.0001220703125 59.2003173828125 353.000244140625Q59.2003173828125 311.8001708984375 78.500244140625 286.30023193359375Q97.8001708984375 260.80029296875 127.900146484375 245.70037841796875Q158.0001220703125 230.6004638671875 190.4002685546875 219.00048828125Q220.200439453125 209.00048828125 246.00054931640625 196.50042724609375Q271.8006591796875 184.0003662109375 287.90069580078125 165.500244140625Q304.000732421875 147.0001220703125 304.000732421875 119.39990234375Q304.000732421875 80.7991943359375 278.30035400390625 59.298828125Q252.5999755859375 37.7984619140625 210.5994873046875 37.7984619140625Q174.9990234375 37.7984619140625 148.6988525390625 50.6986083984375Q122.398681640625 63.5987548828125 105.19873046875 84.99896240234375Q87.998779296875 106.399169921875 77.9990234375 130.9993896484375ZM713.99853515625 167.999267578125V460.0H662.000244140625V161.99951171875Q662.000244140625 83.19970703125 700.199951171875 36.599853515625Q738.399658203125 -10.0 809.9996337890625 -10.0Q861.5999755859375 -10.0 899.8002319335938 18.1004638671875Q938.00048828125 46.200927734375 957.000244140625 96.00146484375V0.0H1008.99853515625V460.0H957.000244140625V180.0Q957.000244140625 140.7996826171875 939.7000732421875 108.79931640625Q922.39990234375 76.7989501953125 891.899658203125 58.09869384765625Q861.3994140625 39.3984375 821.9991455078125 39.3984375Q766.398681640625 39.3984375 740.1986083984375 73.59869384765625Q713.99853515625 107.7989501953125 713.99853515625 167.999267578125Z"/>
+    <path id="p-zu" d="M331.6019287109375 411.0015869140625 17.0001220703125 0.0H418.9996337890625V48.9984130859375H112.3970947265625L426.9989013671875 460.0H42.9998779296875V411.0015869140625ZM758.99853515625 167.999267578125V460.0H707.000244140625V161.99951171875Q707.000244140625 83.19970703125 745.199951171875 36.599853515625Q783.399658203125 -10.0 854.9996337890625 -10.0Q906.5999755859375 -10.0 944.8002319335938 18.1004638671875Q983.00048828125 46.200927734375 1002.000244140625 96.00146484375V0.0H1053.99853515625V460.0H1002.000244140625V180.0Q1002.000244140625 140.7996826171875 984.7000732421875 108.79931640625Q967.39990234375 76.7989501953125 936.899658203125 58.09869384765625Q906.3994140625 39.3984375 866.9991455078125 39.3984375Q811.398681640625 39.3984375 785.1986083984375 73.59869384765625Q758.99853515625 107.7989501953125 758.99853515625 167.999267578125Z"/>
+  </defs></svg>
+
+  <header class="dshd">
+    <h1>Design System · Suzu</h1>
+    <p>Fonte única da verdade. Esta página não copia valores — ela lê <code>css/tokens.css</code> e <code>css/components.css</code> ao vivo. Os componentes abaixo são os mesmos elementos da loja, renderizados com as classes reais.</p>
+    <p>Regra do DS: cor só existe como hex dentro de <code>css/tokens.css</code>. Em qualquer outro lugar — incluindo esta própria página — só <code>var(--token)</code>. Os valores hex mostrados nos swatches abaixo são lidos do navegador em tempo real via <code>getComputedStyle</code>, nunca escritos aqui.</p>
+    <nav class="dstoc">
+      <a href="#cores">Cores</a>
+      <a href="#tipografia">Tipografia</a>
+      <a href="#linhas">Linhas</a>
+      <a href="#componentes">Componentes</a>
+    </nav>
+  </header>
+
+  <section class="ds" id="cores">
+    <h2>Cores</h2>
+    <p class="lead">Tokens definidos uma única vez em <code>:root</code>, em duas camadas — <b>paleta</b> (bruta, nunca troca de tema) e <b>semântico</b> (papéis, ganha override no tema escuro da 0.5b). Agrupados por função — não por matiz — porque é assim que são usados no CSS.</p>
+    <div id="colorGroups"><!-- preenchido via JS a partir de COLOR_GROUPS --></div>
+  </section>
+
+  <section class="ds" id="tipografia">
+    <h2>Tipografia</h2>
+    <p class="lead">Duas famílias, papéis fixos. Jost carrega o produto inteiro; Cormorant itálico é reservado a detalhe e ênfase — nunca corpo de texto longo.</p>
+
+    <div class="type-sample">
+      <p class="tag">--sans</p>
+      <p class="val" style="font-family:var(--sans)">Jost — corpo, títulos, botões, formulário. A voz do dia a dia da loja.</p>
+      <p class="meta">valor computado: <code id="tokSans"></code></p>
+    </div>
+    <div class="type-sample serif">
+      <p class="tag">--serif</p>
+      <p class="val" style="font-family:var(--serif);font-style:italic">Cormorant itálico — só detalhe, assinatura, ênfase pontual.</p>
+      <p class="meta">valor computado: <code id="tokSerif"></code></p>
+    </div>
+  </section>
+
+  <section class="ds" id="linhas">
+    <h2>Linhas</h2>
+    <p class="lead"><b>--line</b>, <b>--line-soft</b> e <b>--line-strong</b> não são hex — são <code>rgba()</code> derivados de <code>--ink</code> (também documentados em Papéis semânticos, acima). Três intensidades da mesma cor de borda, nunca cinzas soltos.</p>
+    <div class="line-demo">
+      <div><b>--line</b><div class="strip" style="border:1px solid var(--line)"></div><span id="tokLine"></span></div>
+      <div><b>--line-soft</b><div class="strip" style="border:1px solid var(--line-soft)"></div><span id="tokLineSoft"></span></div>
+      <div><b>--line-strong</b><div class="strip" style="border:1px solid var(--line-strong)"></div><span id="tokLineStrong"></span></div>
+    </div>
+  </section>
+
+  <section class="ds" id="componentes">
+    <h2>Componentes</h2>
+    <p class="lead">Renderizados com as classes reais de <code>index.html</code>. O que muda aqui é o dado de exemplo — nunca a marcação.</p>
+
+    <div class="comp-block">
+      <h4>Botão — <code>.btn</code></h4>
+      <p class="dsrule">Preenchido (<code>.btn</code>) é a ação primária de cada tela. <code>.btn.ghost</code> é a secundária — nunca dois botões preenchidos lado a lado.</p>
+      <div class="demo demo-row">
+        <a class="btn" href="#">Adicionar à sacola</a>
+        <a class="btn ghost" href="#">Calcular frete</a>
+      </div>
+    </div>
+
+    <div class="comp-block">
+      <h4>Selo — <code>.seal</code></h4>
+      <p class="dsrule">Marca gráfica do brand. Sempre em <code>--ink</code>, sempre monocromático — não recolorir por tema ou seção.</p>
+      <div class="demo demo-row">
+        <svg class="seal" viewBox="0 0 1600 1600" aria-hidden="true" style="width:56px;height:56px">
+          <circle cx="800" cy="800" r="774" fill="none" stroke="var(--ink)" stroke-width="52"/>
+          <g fill="var(--ink)" transform="translate(800 800) scale(.74) translate(-800 -800)">
+            <use href="#p-su" transform="translate(277.4 734.6) scale(1 -1)"/>
+            <use href="#p-zu" transform="translate(264.5 1324.6) scale(1 -1)"/>
+          </g>
+        </svg>
+      </div>
+    </div>
+
+    <div class="comp-block">
+      <h4>Card de produto — <code>.pcard</code></h4>
+      <p class="dsrule">Badge de estado (<code>.pbadge</code>) só aparece quando há algo a comunicar: <b>últimas unidades</b>, <b>pré-venda</b> ou <b>esgotado</b>. Sem badge = disponibilidade normal.</p>
+      <div class="demo demo-grid" id="pcardDemo"><!-- preenchido via JS --></div>
+    </div>
+
+    <div class="comp-block">
+      <h4>Slide de vitrine — <code>.slide</code> + <code>.kick</code></h4>
+      <p class="dsrule">Versão do badge de estado para o carrossel de vitrine. Mesma semântica de cor do <code>.pbadge</code>, formato de pílula com rótulo por extenso.</p>
+      <div class="demo demo-row" id="slideDemo"><!-- preenchido via JS --></div>
+    </div>
+
+    <div class="comp-block">
+      <h4>Badges de estado — referência</h4>
+      <p class="dsrule">As mesmas três cores de estado, nos dois formatos em que aparecem na loja.</p>
+      <table class="dstable">
+        <thead><tr><th>Estado</th><th>.pbadge / .kick</th><th>fundo</th><th>texto</th></tr></thead>
+        <tbody id="badgeTable"><!-- preenchido via JS --></tbody>
+      </table>
+    </div>
+
+    <div class="comp-block">
+      <h4>Chips de sabor — <code>.fchip</code></h4>
+      <p class="dsrule">Filtro de múltipla escolha. Estado ativo é <code>aria-pressed="true"</code> — nunca uma classe extra de cor; o estilo segue o atributo.</p>
+      <div class="demo demo-row">
+        <button type="button" class="fchip" aria-pressed="false">Sakura</button>
+        <button type="button" class="fchip" aria-pressed="true">Matcha</button>
+        <button type="button" class="fchip" aria-pressed="false">Yuzu<small>em breve</small></button>
+      </div>
+    </div>
+
+    <div class="comp-block">
+      <h4>Chips de tamanho — <code>.fcsz</code></h4>
+      <p class="dsrule">Seleção única por produto. <code>.out</code> risca o tamanho esgotado sem escondê-lo — o cliente vê que a opção existiu.</p>
+      <div class="demo demo-row">
+        <button type="button" class="fcsz" aria-pressed="false">Pequeno · ≈ 3 cm</button>
+        <button type="button" class="fcsz" aria-pressed="true">Médio · ≈ 7 cm</button>
+        <button type="button" class="fcsz out" aria-pressed="false">Grande · ≈ 12 cm</button>
+      </div>
+    </div>
+
+    <div class="comp-block">
+      <h4>Campo de formulário — <code>.cofield</code></h4>
+      <p class="dsrule">Rótulo sempre acima, sempre maiúsculo pequeno. Erro é <code>.field-err</code> na borda + <code>.fielderr.show</code> no texto de apoio — nunca só cor, sempre com mensagem.</p>
+      <div class="demo demo-row" style="align-items:flex-start">
+        <label class="cofield" style="flex:1 1 220px">
+          <span>Nome completo</span>
+          <input type="text" placeholder="Seu nome">
+        </label>
+        <label class="cofield" style="flex:1 1 220px">
+          <span>E-mail ou WhatsApp</span>
+          <input type="text" class="field-err" value="angela@" aria-describedby="dsErr">
+          <small class="fielderr show" id="dsErr">Confira o e-mail — parece incompleto.</small>
+        </label>
+      </div>
+    </div>
+
+  </section>
+
+  <footer class="dsft">Studio Suzu — design-system.html não é uma cópia, é a documentação viva de <code>css/tokens.css</code> + <code>css/components.css</code>. Se um valor mudar nas folhas, ele muda aqui sozinho.</footer>
+</div>
+
+<script>
+(function(){
+  'use strict';
+  var root = document.documentElement;
+  function tok(name){ return getComputedStyle(root).getPropertyValue('--' + name).trim(); }
+
+  // Lista literal dos NOMES de token, agrupados por função (nenhum valor — os valores vêm do navegador).
+  var COLOR_GROUPS = [
+    { title: 'Superfície & base', rule: 'Fundo, texto principal e os dois neutros de apoio (madeira, pedra). A loja inteira parte daqui.',
+      tokens: ['white','warm','raw','wood','gold','stone','ink'] },
+    { title: 'Sabores', rule: 'Uma cor por sabor/tint de produto — usada em molde, ícone e detalhe de destaque. Nunca como fundo de bloco de texto.',
+      tokens: ['sakura','fuji','torinoko','mizu','sango','matcha'] },
+    { title: 'Washes — fundo suave do sabor', rule: 'Versão lavada de cada sabor, para fundo de card/imagem onde o sabor precisa aparecer sem competir com o produto.',
+      tokens: ['sakura-wash','fuji-wash','torinoko-wash','mizu-wash','sango-wash','matcha-wash'] },
+    { title: 'Texto & rótulo', rule: 'Hierarquia de leitura: --text é o corpo, --text-2/--text-3 são variações de peso visual, --muted e --label são metadado e rótulo pequeno.',
+      tokens: ['text','text-2','text-3','muted','label','gold-text','stone-text'] },
+    { title: 'Estado & semântica', rule: '--alert para erro de formulário; --cav para o fundo do bloco "Cavalete"/aviso de marca.',
+      tokens: ['alert','cav'] },
+    { title: 'Texto sobre cor — derivados de estado', rule: 'Cor de texto/hover legível sobre os fundos de badge e estado acima. Sempre em par com o token que o originou.',
+      tokens: ['ink-hover','gold-ink','kick-text','mizu-text','sango-text','disc-text','soldout-bg','coinfo-text'] },
+    { title: 'Papéis semânticos', rule: 'O que os componentes devem consumir para superfície, texto e linha — nunca os tokens de paleta acima (--white, --ink…). É essa camada que faz o tema escuro (0.5b) funcionar sem tocar em nenhum componente.',
+      tokens: ['bg','surface','raised','text','text-2','text-3','muted','label','line','line-soft','line-strong','gold-text','stone-text','wood-text','logo-ink','footer-plate'] },
+    { title: 'Feedback', rule: 'Par fundo/texto para cada estado de mensagem — sucesso, erro, aviso e informação. Sempre usados em conjunto, nunca a cor isolada.',
+      tokens: ['error-surface','error-text','success-surface','success-text','warning-surface','warning-text','info-surface','info-text'] },
+    { title: 'Acento — 4 tons', rule: 'Cada sabor tem quatro intensidades, na ordem wash → light → base → deep (ex.: --sakura-wash, --sakura-light, --sakura, --sakura-deep), mostradas lado a lado abaixo, sabor por sabor.',
+      tokens: ['sakura-wash','sakura-light','sakura','sakura-deep','fuji-wash','fuji-light','fuji','fuji-deep','torinoko-wash','torinoko-light','torinoko','torinoko-deep','mizu-wash','mizu-light','mizu','mizu-deep','sango-wash','sango-light','sango','sango-deep','matcha-wash','matcha-light','matcha','matcha-deep'] },
+    { title: 'Alfa', rule: '--hexbtn-fill e --swatch-ring são rgba() — como os --line* acima, nunca achatados para hex sólido (regra do brandbook). Mostrados aqui sobre fundo branco.',
+      tokens: ['hexbtn-fill','swatch-ring'] }
+  ];
+
+  var groupsEl = document.getElementById('colorGroups');
+  COLOR_GROUPS.forEach(function(group){
+    var h = document.createElement('h3'); h.className = 'dsgroup'; h.textContent = group.title;
+    var p = document.createElement('p'); p.className = 'dsrule'; p.textContent = group.rule;
+    var row = document.createElement('div'); row.className = 'swrow';
+    group.tokens.forEach(function(name){
+      var sw = document.createElement('div'); sw.className = 'sw';
+      var i = document.createElement('i'); i.style.background = 'var(--' + name + ')';
+      var b = document.createElement('b'); b.textContent = '--' + name;
+      var span = document.createElement('span'); span.textContent = tok(name) || '(vazio)';
+      sw.appendChild(i); sw.appendChild(b); sw.appendChild(span);
+      row.appendChild(sw);
+    });
+    groupsEl.appendChild(h); groupsEl.appendChild(p); groupsEl.appendChild(row);
+  });
+
+  // Tipografia + linhas — mesmo princípio: valor lido, nunca escrito.
+  document.getElementById('tokSans').textContent = tok('sans');
+  document.getElementById('tokSerif').textContent = tok('serif');
+  document.getElementById('tokLine').textContent = tok('line');
+  document.getElementById('tokLineSoft').textContent = tok('line-soft');
+  document.getElementById('tokLineStrong').textContent = tok('line-strong');
+
+  // Molde de produto — mesma técnica de css/tokens.css + var(--tint) usada em index.html:
+  // um fundo "wash", um bloco tingido e formas brancas com contorno da mesma cor.
+  function moldSVG(shape, tint, label){
+    var shapes = { circle: '<circle cx="26" cy="26" r="14"/>',
+      ring: '<circle cx="26" cy="26" r="14"/><circle cx="26" cy="26" r="7" fill="var(--' + tint + '-wash)" stroke="none"/>',
+      heart: '<path transform="translate(26,28) scale(1.1)" d="M0,4 C-4.5,-1.5 -11,-1 -11,-6 C-11,-9.5 -6.5,-10.8 -3,-8 C-1.4,-6.8 0,-5 0,-4.4 C0,-5 1.4,-6.8 3,-8 C6.5,-10.8 11,-9.5 11,-6 C11,-1 4.5,-1.5 0,4 Z"/>' };
+    return '<svg viewBox="0 0 52 52" role="img" aria-label="Molde ' + label + '">' +
+      '<rect x="0" y="0" width="52" height="52" rx="10" fill="var(--' + tint + '-wash)"/>' +
+      '<rect x="5" y="5" width="42" height="42" rx="8" fill="var(--' + tint + ')" opacity=".42"/>' +
+      '<g fill="var(--white)" stroke="var(--' + tint + ')" stroke-width="1.4" stroke-opacity=".6">' + (shapes[shape] || shapes.circle) + '</g></svg>';
+  }
+
+  // Card de produto — três variantes de .pbadge, mesma marcação de cardHTML() em index.html.
+  var PCARDS = [
+    { badge: 'last',    label: 'Últimas unidades', name: 'Coração Selado',   use: 'Bombom · coração', price: 'R$ 68,00', shape: 'heart', tint: 'sakura' },
+    { badge: 'presale', label: 'Pré-venda',         name: 'Bombom Concha',   use: 'Bombom · mini',    price: 'R$ 71,00', shape: 'ring',  tint: 'sango' },
+    { badge: 'soldout', label: 'Esgotado',          name: 'Macaron Anel',    use: 'Macaron',          price: 'R$ 79,00', shape: 'ring',  tint: 'matcha', out: true }
+  ];
+  var pcardEl = document.getElementById('pcardDemo');
+  PCARDS.forEach(function(p){
+    var a = document.createElement('a');
+    a.className = 'pcard' + (p.out ? ' out' : '');
+    a.href = '#';
+    a.innerHTML = '<div class="m"><span class="pbadge ' + p.badge + '">' + p.label + '</span>' + moldSVG(p.shape, p.tint, p.name) + '</div>' +
+      '<div class="b"><span class="use">' + p.use + '</span><h3>' + p.name + '</h3><div class="pr' + (p.badge==='soldout' ? ' so' : '') + '">' + (p.badge==='soldout' ? 'Esgotado' : 'a partir de <b>' + p.price + '</b>') + '</div></div>';
+    pcardEl.appendChild(a);
+  });
+
+  // Slide de vitrine — mesmas três variantes de .kick.
+  var SLIDES = [
+    { badge: 'last', label: 'Últimas unidades', name: 'Coração Selado', tint: 'sakura', shape: 'heart' },
+    { badge: 'presale', label: 'Pré-venda', name: 'Bombom Concha', tint: 'sango', shape: 'ring' },
+    { badge: 'soldout', label: 'Esgotado', name: 'Macaron Anel', tint: 'matcha', shape: 'ring' }
+  ];
+  var slideEl = document.getElementById('slideDemo');
+  SLIDES.forEach(function(s){
+    var stage = document.createElement('div'); stage.className = 'demo-stage';
+    var slide = document.createElement('a'); slide.className = 'slide on'; slide.href = '#';
+    slide.style.setProperty('--st', 'var(--' + s.tint + '-wash)');
+    slide.innerHTML = '<div class="bg"></div><div class="piece" style="width:64px">' + moldSVG(s.shape, s.tint, s.name) + '</div>' +
+      '<div class="copy"><span class="kick ' + s.badge + '">' + s.label + '</span><h2 style="font-size:1.05rem">' + s.name + '</h2></div>';
+    stage.appendChild(slide);
+    slideEl.appendChild(stage);
+  });
+
+  // Tabela de referência de badge — lê as mesmas variáveis usadas no CSS de .pbadge/.kick.
+  var STATES = [
+    { label: 'Últimas unidades', cls: '.last', bg: 'sango', fg: 'sango-text' },
+    { label: 'Pré-venda',        cls: '.presale', bg: 'mizu', fg: 'mizu-text' },
+    { label: 'Esgotado',         cls: '.soldout', bg: 'soldout-bg', fg: 'muted' }
+  ];
+  var tbody = document.getElementById('badgeTable');
+  STATES.forEach(function(s){
+    var tr = document.createElement('tr');
+    tr.innerHTML = '<td>' + s.label + '</td><td><code>' + s.cls + '</code></td>' +
+      '<td><code>--' + s.bg + '</code> · ' + tok(s.bg) + '</td>' +
+      '<td><code>--' + s.fg + '</code> · ' + tok(s.fg) + '</td>';
+    tbody.appendChild(tr);
+  });
+})();
+</script>
+</body>
+</html>

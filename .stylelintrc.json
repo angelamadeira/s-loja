@@ -1,0 +1,12 @@
+{
+  "//": "Guarda do design system: cor hex só pode viver em css/tokens.css. Não estendemos stylelint-config-standard de propósito — o CSS da loja é autoral/compacto e as regras estilísticas do standard (883 avisos) não fazem parte do contrato do DS.",
+  "rules": {
+    "color-no-hex": true
+  },
+  "overrides": [
+    {
+      "files": ["css/tokens.css"],
+      "rules": { "color-no-hex": null }
+    }
+  ]
+}
