@@ -927,6 +927,50 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
 .exreassure-grid b{font-weight:500;font-size:1rem;color:var(--ink)}
 .exreassure-grid p{margin:0;font-size:.85rem;color:var(--muted);font-weight:300;line-height:1.5;max-width:22ch}
 @media(min-width:560px){.exhd h2{max-width:none}}
+/* ===== SOBRE O ESTÚDIO — Angela & Gustavo — reusa os componentes do site ===== */
+@keyframes suzuRing{0%,68%,100%{transform:rotate(0)}74%{transform:rotate(10deg)}80%{transform:rotate(-8deg)}86%{transform:rotate(5deg)}92%{transform:rotate(-2deg)}}
+.sobrehero .excopy .label{display:block;margin-bottom:12px}
+.sobrehero .excopy h1{font-size:clamp(1.7rem,4.6vw,2.35rem)}
+.sobrehero .excopy h1 em{font-family:var(--serif);font-style:italic;font-weight:500}
+/* painel "Por que Suzu?" — sininho + texto (padrão do bloco .custom da home) */
+.suzupanel{border:1px solid var(--line-soft);border-radius:24px;overflow:hidden;background:var(--warm);display:grid;grid-template-columns:1fr;align-items:stretch;margin-top:clamp(30px,4.5vw,48px)}
+@media(min-width:720px){.suzupanel{grid-template-columns:.82fr 1.18fr}}
+.suzupic{background:linear-gradient(150deg,var(--torinoko-wash),var(--warm));display:grid;place-items:center;padding:34px 24px}
+.suzupic .sininho{width:clamp(150px,24vw,220px);height:auto;transform-origin:50% 12%;animation:suzuRing 4s ease-in-out .9s 2;cursor:pointer}
+.suzupic:hover .sininho{animation:suzuShake .8s ease-in-out}
+@keyframes suzuShake{0%{transform:rotate(0)}16%{transform:rotate(10deg)}34%{transform:rotate(-8deg)}52%{transform:rotate(6deg)}70%{transform:rotate(-3deg)}100%{transform:rotate(0)}}
+@media(prefers-reduced-motion:reduce){.suzupic .sininho,.suzupic:hover .sininho{animation:none}}
+.suzutxt{padding:clamp(28px,4vw,44px);align-self:center}
+.suzutxt .label{display:block;margin-bottom:10px}
+.suzutxt h2{font-family:var(--serif);font-style:italic;font-weight:500;font-size:clamp(1.4rem,2.6vw,1.8rem);color:var(--ink);line-height:1.28;margin:0;max-width:26ch}
+.suzutxt p{margin:14px 0 0;color:var(--muted);font-weight:300;line-height:1.62;max-width:54ch}
+.suzutxt .jp{margin-top:12px;font-size:.84rem;color:var(--text-3)}
+.suzutxt .jp em,.suzutxt p em{font-family:var(--serif);font-style:italic}
+/* casal — cards no estilo do site */
+.abduo{display:grid;grid-template-columns:1fr;gap:20px;margin-top:0}
+@media(min-width:680px){.abduo{grid-template-columns:1fr 1fr}}
+.abperson{border:1px solid var(--line-soft);border-radius:18px;padding:20px 20px 24px;background:var(--white);text-align:left}
+.abphoto{position:relative;aspect-ratio:4/3;border-radius:13px;border:1px solid var(--line-soft);display:grid;place-items:center;overflow:hidden;margin-bottom:16px}
+.abphoto.warm{background:linear-gradient(160deg,var(--sakura-wash),var(--warm))}
+.abphoto.cool{background:linear-gradient(160deg,var(--mizu-wash),var(--warm))}
+.abphoto svg{width:28px;height:28px;fill:none;stroke:var(--wood);stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;opacity:.5}
+.abperson .role{display:block;font-family:var(--serif);font-style:italic;font-weight:500;font-size:1rem;color:var(--gold-text);margin-bottom:2px}
+.abperson b{display:block;font-weight:500;font-size:1.08rem;color:var(--ink);margin-bottom:7px}
+.abperson p{margin:0;color:var(--muted);font-weight:300;font-size:.9rem;line-height:1.6}
+/* história + assinatura */
+.aboutus .abstoryp{margin:clamp(44px,6vw,66px) auto 0;max-width:58ch;text-align:center;color:var(--text-3);font-weight:300;font-size:1.05rem;line-height:1.7}
+.aboutus .q{font-family:var(--serif);font-style:italic;font-weight:500;font-size:clamp(1.5rem,3.2vw,2rem);color:var(--ink);line-height:1.32;margin:clamp(30px,4vw,44px) auto;max-width:22ch;text-align:center;position:relative;padding-top:30px}
+.aboutus .q::before{content:"";position:absolute;top:0;left:50%;transform:translateX(-50%);width:34px;height:1px;background:var(--matcha)}
+.sobresign{text-align:center;margin:clamp(40px,6vw,64px) 0 0;color:var(--muted);font-weight:300;font-size:.95rem}
+.sobresign .names{display:block;font-family:var(--serif);font-style:italic;font-weight:500;font-size:clamp(1.5rem,3.4vw,2rem);color:var(--ink);margin-top:4px}
+/* ===== CHECKOUT ENXUTO — menos distração no fluxo de compra (melhor prática) ===== */
+.co-mode nav.main,.co-mode #openSearch,.co-mode #openCart,.co-mode #openMenu,.co-mode footer,.co-mode .dock{display:none!important}
+.co-mode .hd-in{justify-content:center}
+.cofoot{display:none;max-width:1120px;margin:0 auto;padding:24px 24px 40px;text-align:center;color:var(--muted);font-size:.74rem;font-weight:300;border-top:1px solid var(--line-soft);flex-wrap:wrap;gap:8px 14px;align-items:center;justify-content:center}
+.co-mode .cofoot{display:flex}
+.cofoot .lock{display:inline-flex;align-items:center;gap:7px}
+.cofoot .lock svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.cofoot a{color:var(--gold-text)}
 </style>
 
 <svg width=0 height=0 style="position:absolute"><defs>
@@ -989,7 +1033,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
     <a href="#/prevenda" data-prevenda>Pré-venda</a>
     <a href="#/exclusivo">Projeto exclusivo</a>
     <a href="#/receitas">Receitas</a>
-    <a href="#/sobre" class="sub">Sobre o estúdio</a>
+    <a href="#/sobre">Sobre o estúdio</a>
     <a href="#/faq" class="sub">Perguntas frequentes</a>
     <a href="#/atendimento" class="sub">Atendimento</a>
   </nav>
@@ -1072,6 +1116,8 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
   </div>
   <div class="wrap foot-bot"><nav class="foot-legal"><span class="foot-cnpj">Studio Suzu · [Razão Social] · CNPJ [00.000.000/0001-00] · [Endereço completo] · [contato@studiosuzu.com]</span><a href="#/privacidade">Privacidade</a><a href="#/termos">Termos de uso</a><span class="label">© 2026 Studio Suzu</span></nav></div>
 </footer>
+
+<div class="cofoot"><span class="lock"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Pagamento seguro</span> · <a href="https://wa.me/5511912345678?text=Ol%C3%A1!%20Estou%20finalizando%20uma%20compra%20na%20loja%20Studio%20Suzu%20e%20queria%20tirar%20uma%20d%C3%BAvida." target="_blank" rel="noopener">Precisa de ajuda?</a> · <span>© 2026 Studio Suzu</span></div>
 
 <div class="dock"><div class="dock-in"><div class="sum"><b id="dockTotal">R$ 0,00</b><small id="dockCount">sua sacola está vazia</small></div><button class="btn" id="openCart2">Ver sacola</button></div></div>
 <div class="overlay" id="overlay"></div>
@@ -1693,15 +1739,18 @@ button.cohd{width:100%;border:0;background:none;font:inherit;color:inherit;text-
       ['Feita pra fotografar','Linhas desenhadas pra pegar luz e sombra. A sua sobremesa já nasce pronta pro feed.'],
       ['Preço que se justifica','Uma peça que ninguém tem é argumento pra cobrar mais. A forma se paga.']
     ];
-    return '<div class="sobretop"><div class="exhero sobrehero" style="--st:var(--torinoko-wash)"><div class="exbg">'+mold(byId('tablete'))+'</div><div class="excopy"><h1>O seu talento merece uma forma à altura.</h1><p>Moldes autorais, desenhados do zero — pra que os seus doces não se pareçam com os de mais ninguém.</p></div></div></div>'+
-      '<div class="sobre">'+
-      '<p class="lead">Você trabalhou anos pra ter mão, ponto e acabamento. Mas, na hora de montar, acaba usando a mesma forma que está na cozinha de mais mil confeiteiras — a mesma esfera, o mesmo coração, o molde que qualquer um compra no atacado. E o seu doce, que é único, sai parecido com o de todo mundo.</p>'+
-      '<p class="q">O problema nunca foi a sua mão. Foi a forma.</p>'+
-      '<p class="duointro">No Studio Suzu, cada molde nasce de um casal e dois ofícios que quase nunca se encontram:</p>'+
-      '<div class="duo"><div><b>Quem projeta</b><p>Engenharia e desenho 3D — superfície, encaixe e o ângulo exato pra peça soltar inteira, na primeira e na centésima vez.</p></div><div><b>Quem cozinha</b><p>Confeitaria de verdade — sabe o que uma sobremesa precisa ter pra encantar antes de alguém provar.</p></div></div>'+
-      '<p class="valshd">O que muda na sua confeitaria</p><div class="vals">'+benefits.map(function(b){return '<div><b>'+b[0]+'</b><p>'+b[1]+'</p></div>';}).join('')+'</div>'+
-      '<p class="valshd">Como a sua forma nasce</p><div class="exsteps">'+steps.map(function(t,i){return '<div class="exstep"><div class="exsthead"><span class="exsn">'+(i+1)+'</span><svg class="exsic" viewBox="0 0 24 24">'+t[2]+'</svg></div><b>'+t[0]+'</b><p>'+t[1]+'</p></div>';}).join('')+'</div>'+
-      '<p class="sig sobresig" style="font-size:1.5rem;margin-top:60px;color:var(--stone-text);text-align:center">Faça o que ninguém consegue copiar.</p><div class="sobrecta"><a class="btn" href="#/produtos">Ver as formas</a><a class="btn ghost" href="#/exclusivo">Quero uma forma só minha</a></div></div>';
+    var pic='<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>';
+    return backHome()
+      +'<div class="listing aboutus">'
+      +'<h1>Sobre o estúdio</h1>'
+      +'<p class="lead">A gente existe pra criar pequenas alegrias, lindamente moldadas — formas autorais que deixam a sua confeitaria inconfundível e a sua mesa, inesquecível.</p>'
+      +'<div class="suzupanel"><div class="suzupic"><img class="sininho" src="Suzu_sininho.svg" alt="Guizo Suzu" width="1150" height="923"></div><div class="suzutxt"><span class="label">Por que Suzu?</span><h2>Suzu quer dizer guizo — aquele sininho.</h2><p>E o sonzinho do guizo, pra gente, virou sinal de alegria: quando o nosso gatinho chega com ele tilintando, é aviso de que vem coisa fofa, daquelas que a gente ama. É essa a ideia que a gente quis trazer pro estúdio — cada forma como um pequeno guizo de alegria na sua cozinha.</p><p class="jp">No Japão, <em>suzu</em> (鈴) é justamente o nome desse sininho.</p></div></div>'
+      +'<div class="exhd"><h2>Quem somos</h2></div>'
+      +'<div class="abduo"><div class="abperson"><div class="abphoto warm">'+pic+'</div><b>Angela</b><p>Designer digital e apaixonada por confeitaria. Junto o olhar e o sabor — pra cada forma nascer bonita e fazer sentido na cozinha.</p></div><div class="abperson"><div class="abphoto cool">'+pic+'</div><b>Gustavo</b><p>Artista 3D e ilustrador. Cuido do 3D, da impressão e da criação dos moldes de silicone — cada curva pra soltar limpa.</p></div></div>'
+      +'<p class="abstoryp">A gente cansou de ver doce lindo saindo de forma de catálogo — igual ao de todo mundo. Aí juntamos o que cada um sabe fazer de melhor: a confeitaria de verdade e o 3D. E começamos a desenhar formas que não existiam.</p>'
+      +'<p class="q">Duas paixões, uma bancada só.</p>'
+      +'<p class="sobresign">com carinho,<span class="names">Angela &amp; Gustavo</span></p>'
+      +'</div>';
   }
   function exclusivoView(){
     return backHome()+'<div class="listing exclusivo"><div class="exhero" style="--st:var(--sakura-wash)"><div class="exbg">'+mold(byId('coracao'))+'</div><div class="excopy"><h1>Seu projeto. <em>Sua cara.</em></h1><p>Ter uma forma que é só sua faz diferença no seu negócio — é ela que mostra, logo de cara, por que o seu trabalho é único. A gente cria tudo do jeitinho que você imaginou, com o cuidado e o acabamento que são a nossa assinatura.</p></div></div>'+'<div class="sobre exsell">'+'<div class="exhd is-vals"><h2>O que entregamos</h2></div><div class="vals"><div><span class="valic"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg></span><b>Desenho só seu</b><p>Autoral e em tiragem exclusiva — nunca vai pro catálogo nem pro atacado.</p></div><div><span class="valic"><svg viewBox="0 0 24 24"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg></span><b>Acompanhamento e testes</b><p>Ajustes e provas na concepção, até a forma ficar exatamente do seu jeito.</p></div><div><span class="valic"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span><b>Cronograma detalhado</b><p>Produção e entrega com prazos claros, do briefing à sua porta.</p></div><div><span class="valic"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span><b>Material de qualidade e food-grade</b><p>Silicone platinum: do freezer ao forno, a peça desenforma limpa e dura anos.</p></div><div><span class="valic"><svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></span><b>Visual impactante</b><p>Linhas pensadas pra pegar luz — a sobremesa já nasce pronta pro feed.</p></div><div><span class="valic"><svg viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></span><b>Alto valor agregado</b><p>Uma forma exclusiva sustenta um preço maior — e se paga.</p></div></div>'+'</div>'+
@@ -1804,6 +1853,9 @@ button.cohd{width:100%;border:0;background:none;font:inherit;color:inherit;text-
   }
   function wireCheckout(){
     var cof=document.getElementById('coForm'); if(!cof)return;
+    function emailErr(msg){var b=document.getElementById('coEmailErr'),em=document.getElementById('coEmail');if(b){b.textContent=msg||'';b.classList.toggle('show',!!msg);}if(em){em.classList.toggle('bad',!!msg);em.setAttribute('aria-invalid',msg?'true':'false');em.style.borderColor=msg?'#b4553f':'';}}
+    function emailMsg(em){return !em.value.trim()?'Precisamos do seu e-mail pra enviar a confirmação.':'Confere o seu e-mail? Parece que falta algo.';}
+    (function(){var em=document.getElementById('coEmail');if(em)em.addEventListener('input',function(){if(em.classList.contains('bad'))emailErr('');});})();
     CO.ship=null;CO.pay='pix';CO.parc=1;CO.coupon=null;
     renderCoSummary();
     var coupBtn=document.getElementById('coCoupBtn'),coupIn=document.getElementById('coCoupon'),coupHint=document.getElementById('coCoupHint');
@@ -1843,7 +1895,7 @@ button.cohd{width:100%;border:0;background:none;font:inherit;color:inherit;text-
       function openStep(n){steps.forEach(function(sec){sec.classList.toggle('open',+sec.dataset.step===n);});var el=document.getElementById('cstep'+n);if(el)el.scrollIntoView({block:'nearest',behavior:'smooth'});}
       function markDone(n){var el=document.getElementById('cstep'+n);if(el)el.classList.add('done');var sum=document.getElementById('sum'+n);if(sum)sum.textContent=sumFor(n);}
       function validStep(n){
-        if(n===1){var em=document.getElementById('coEmail');if(!em.value||em.value.indexOf('@')<1){em.focus();em.style.borderColor='#b4553f';return false;}return true;}
+        if(n===1){var em=document.getElementById('coEmail');if(!em.value||em.value.indexOf('@')<1){emailErr(emailMsg(em));em.focus();return false;}emailErr('');return true;}
         if(n===2){var sp=cartSplit();
           if(sp.now.length){
             if(!CO.ship){var h=document.getElementById('cepHint');if(h){h.textContent='Calcule o frete para continuar.';h.className='cephint err';}var c=document.getElementById('coCep');if(c)c.focus();return false;}
@@ -1868,7 +1920,8 @@ button.cohd{width:100%;border:0;background:none;font:inherit;color:inherit;text-
     })();
     cof.onsubmit=function(e){e.preventDefault();
       var email=document.getElementById('coEmail');
-      if(!email.value||email.value.indexOf('@')<1){email.focus();email.style.borderColor='#b4553f';return;}
+      if(!email.value||email.value.indexOf('@')<1){emailErr(emailMsg(email));email.focus();return;}
+      emailErr('');
       var s=cartSplit();
       if(s.now.length && !CO.ship){var hint=document.getElementById('cepHint');if(hint){hint.textContent='Calcule o frete para continuar.';hint.className='cephint err';}if(cep)cep.focus();return;}
       if(s.now.length){var _rq=['coNome','coRua','coNum','coBairro','coCidade'],_bad=null;_rq.forEach(function(id){var el=document.getElementById(id);if(el&&!el.value.trim()){el.classList.add('bad');if(!_bad)_bad=el;}});if(_bad){var _ah=document.getElementById('addrHint');if(_ah){_ah.textContent='Preencha os campos destacados do endereço.';_ah.className='cephint err';}_bad.focus();return;}}
@@ -1963,7 +2016,7 @@ button.cohd{width:100%;border:0;background:none;font:inherit;color:inherit;text-
     return backHome()+'<div class="wrap cowrap"><h1 class="cotitle">Finalizar compra</h1><div class="cogrid">'
       +'<form class="coform coacc" id="coForm" novalidate>'
       +'<section class="costep open" data-step="1" id="cstep1">'+stepHead(1,'Contato')+'<div class="costep-body">'
-      +'<label class="cofield"><span>E-mail</span><input type="email" id="coEmail" placeholder="voce@email.com" autocomplete="email"></label>'
+      +'<label class="cofield"><span>E-mail</span><input type="email" id="coEmail" placeholder="voce@email.com" autocomplete="email" aria-describedby="coEmailErr"><small class="fielderr" id="coEmailErr" data-err></small></label>'
       +'<label class="cofield"><span>WhatsApp <em class="opt">opcional</em></span><input type="tel" id="coWhats" placeholder="(11) 90000-0000" autocomplete="tel"></label>'
       +'<label class="cocheck"><input type="checkbox" id="coNews"> Quero receber avisos de lançamentos e pré-vendas.</label>'
       +'<p class="coguest">Compra como convidado — sem precisar criar conta. Avisamos cada etapa por e-mail; se você deixar o WhatsApp, falamos por lá também.</p>'
@@ -1978,7 +2031,7 @@ button.cohd{width:100%;border:0;background:none;font:inherit;color:inherit;text-
       +'<div class="couprow"><input type="text" id="coCoupon" placeholder="Cupom de desconto" autocomplete="off"><button type="button" class="btn ghost" id="coCoupBtn">Aplicar</button></div><p class="couphint" id="coCoupHint"></p>'
       +'<button type="submit" class="btn cofinish" id="coFinish">Concluir pedido</button>'
       +'<div class="cotrust"><span>Compra protegida</span><span><a href="#/faq">Trocas em até 7 dias</a></span><span>Enviamos para todo o Brasil</span></div>'
-      +'<p class="cohelp">Dúvida antes de finalizar? <a href="#/atendimento">Fale com a gente</a>.</p>'
+      +'<p class="cohelp">Dúvida antes de finalizar? <a href="https://wa.me/5511912345678?text='+encodeURIComponent('Olá! Estou finalizando uma compra na loja Studio Suzu e queria tirar uma dúvida.')+'" target="_blank" rel="noopener">Fale com a gente no WhatsApp</a>.</p>'
       +'<p class="cosafe">Ambiente seguro · protótipo de demonstração</p>'
       +'</div></section>'
       +'</form><aside class="cosummary" id="coSummary"></aside></div></div>';
@@ -2035,6 +2088,7 @@ button.cohd{width:100%;border:0;background:none;font:inherit;color:inherit;text-
     else if(h==='#/checkout')v=checkoutView();
     else if(h==='#/pedido'){if(!CO.order){location.replace('#/');return;}v=pedidoView();}
     closeMenu(); setActiveNav(h);
+    document.body.classList.toggle('co-mode', h==='#/checkout');
     var _wa=document.querySelector('.wafloat');if(_wa){var _help=(h===''||h==='#'||h==='#/'||h.indexOf('#/faq')===0||h==='#/atendimento'||h==='#/trocas'||h==='#/entrega');_wa.style.display=_help?'':'none';}
     if(v!==null){detail.innerHTML=v;home.style.display='none';detail.style.display='block';window.scrollTo(0,0);wireDetail();if(h.indexOf('#/faq/')===0){var _od=detail.querySelector('details[open]');if(_od)_od.scrollIntoView({block:'center'});}}
     else{home.style.display='';detail.style.display='none';detail.innerHTML='';}
