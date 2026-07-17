@@ -36,4 +36,12 @@
 
   /* estado (Fase 0) */
   --ink-hover:#3A322B; --gold-ink:#3A2C10; --kick-text:#6B551D; --mizu-text:#233F3D; --sango-text:#6E2F1E; --disc-text:#3A6B4F; --soldout-bg:#EFE9E0; --coinfo-text:#2C4744;
+
+  /* print (Task 2 — re-ancoramento) */
+  --print-ink:#000; --print-line:#CCC; --print-muted:#999;
+
+  /* novos — auditoria Task 2 (hex achado na loja real sem token correspondente) */
+  --hint-ok-text:#3F6F4A; /* .couphint.ok — verde de confirmação de cupom, distinto de --disc-text */
+  --mask-ink:#000; /* stop de máscara/gradiente (opacidade), não é cor de print */
+  --mizu-text-alt:#2C4A44; /* variante próxima de --mizu-text usada no refino da seção Projeto Exclusivo */
 }
