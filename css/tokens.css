@@ -43,5 +43,4 @@
   /* novos — auditoria Task 2 (hex achado na loja real sem token correspondente) */
   --hint-ok-text:#3F6F4A; /* .couphint.ok — verde de confirmação de cupom, distinto de --disc-text */
   --mask-ink:#000; /* stop de máscara/gradiente (opacidade), não é cor de print */
-  --mizu-text-alt:#2C4A44; /* variante próxima de --mizu-text usada no refino da seção Projeto Exclusivo */
 }
