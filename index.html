@@ -806,7 +806,7 @@
   }
   function wireCheckout(){
     var cof=document.getElementById('coForm'); if(!cof)return;
-    function emailErr(msg){var b=document.getElementById('coEmailErr'),em=document.getElementById('coEmail');if(b){b.textContent=msg||'';b.classList.toggle('show',!!msg);}if(em){em.classList.toggle('bad',!!msg);em.setAttribute('aria-invalid',msg?'true':'false');em.style.borderColor=msg?'var(--alert)':'';}}
+    function emailErr(msg){var b=document.getElementById('coEmailErr'),em=document.getElementById('coEmail');if(b){b.textContent=msg||'';b.classList.toggle('show',!!msg);}if(em){em.classList.toggle('bad',!!msg);em.setAttribute('aria-invalid',msg?'true':'false');em.style.borderColor=msg?'var(--error-text)':'';}}
     function emailMsg(em){return !em.value.trim()?'Precisamos do seu e-mail pra enviar a confirmação.':'Confere o seu e-mail? Parece que falta algo.';}
     (function(){var em=document.getElementById('coEmail');if(em)em.addEventListener('input',function(){if(em.classList.contains('bad'))emailErr('');});})();
     CO.ship=null;CO.pay='pix';CO.parc=1;CO.coupon=null;

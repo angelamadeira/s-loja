@@ -801,10 +801,8 @@
       tokens: ['sakura-wash','fuji-wash','torinoko-wash','mizu-wash','sango-wash','matcha-wash'] },
     { title: 'Texto & rótulo', rule: 'Hierarquia de leitura: --text é o corpo, --text-2/--text-3 são variações de peso visual, --muted e --label são metadado e rótulo pequeno.',
       tokens: ['text','text-2','text-3','muted','label','gold-text','stone-text'] },
-    { title: 'Estado & semântica', rule: '--alert para erro de formulário; --cav para o fundo do bloco "Cavalete"/aviso de marca.',
-      tokens: ['alert','cav'] },
-    { title: 'Texto sobre cor — derivados de estado', rule: 'Cor de texto/hover legível sobre os fundos de badge e estado acima. Sempre em par com o token que o originou.',
-      tokens: ['ink-hover','gold-ink','kick-text','mizu-text','sango-text','disc-text','soldout-bg','coinfo-text'] },
+    { title: 'Utilitários funcionais', rule: 'Fora da paleta de marca — o brandbook não os define. Escurecimento do botão no hover e cores de impressão/máscara (preto/cinza).',
+      tokens: ['ink-hover','print-ink','print-line','print-muted','mask-ink'] },
     { title: 'Papéis semânticos', rule: 'O que os componentes devem consumir para superfície, texto e linha — nunca os tokens de paleta acima (--white, --ink…). É essa camada que faz o tema escuro (0.5b) funcionar sem tocar em nenhum componente.',
       tokens: ['bg','surface','raised','text','text-2','text-3','muted','label','line','line-soft','line-strong','gold-text','stone-text','wood-text','logo-ink','footer-plate'] },
     { title: 'Feedback', rule: 'Par fundo/texto para cada estado de mensagem — sucesso, erro, aviso e informação. Sempre usados em conjunto, nunca a cor isolada.',
@@ -885,9 +883,9 @@
 
   // Tabela de referência de badge — lê as mesmas variáveis usadas no CSS de .pbadge/.kick.
   var STATES = [
-    { label: 'Últimas unidades', cls: '.last', bg: 'sango', fg: 'sango-text' },
-    { label: 'Pré-venda',        cls: '.presale', bg: 'mizu', fg: 'mizu-text' },
-    { label: 'Esgotado',         cls: '.soldout', bg: 'soldout-bg', fg: 'muted' }
+    { label: 'Últimas unidades', cls: '.last', bg: 'sango', fg: 'ink' },
+    { label: 'Pré-venda',        cls: '.presale', bg: 'mizu', fg: 'ink' },
+    { label: 'Esgotado',         cls: '.soldout', bg: 'raw', fg: 'muted' }
   ];
   var tbody = document.getElementById('badgeTable');
   STATES.forEach(function(s){
