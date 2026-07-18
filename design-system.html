@@ -37,6 +37,12 @@
   p.dsrule{color:var(--stone-text);font-size:.78rem;max-width:66ch;margin:var(--space-1) 0 var(--space-4);line-height:1.55}
   p.dsrule b{color:var(--ink);font-weight:600}
 
+  /* Divisor de parte — só na seção Cores, separa "Do Brandbook" de "Adições do site". */
+  h3.dspart{font-family:var(--serif);font-style:italic;font-weight:400;font-size:1.2rem;color:var(--wood-text);margin:var(--space-8) 0 var(--space-2);padding-top:var(--space-6);border-top:2px solid var(--line-strong)}
+  h3.dspart:first-of-type{margin-top:0;padding-top:0;border-top:none}
+  p.dspart-note{color:var(--muted);font-size:.84rem;max-width:66ch;margin:0 0 var(--space-2);line-height:1.6}
+  p.dspart-note + h3.dsgroup{margin-top:0}
+
   .swrow{display:flex;flex-wrap:wrap;gap:4px 0}
   .sw{width:112px;margin:6px 8px 6px 0}
   .sw i{display:block;height:58px;border-radius:10px;border:1px solid var(--line)}
@@ -792,29 +798,51 @@
   function tok(name){ return getComputedStyle(root).getPropertyValue('--' + name).trim(); }
 
   // Lista literal dos NOMES de token, agrupados por função (nenhum valor — os valores vêm do navegador).
-  var COLOR_GROUPS = [
-    { title: 'Superfície & base', rule: 'Fundo, texto principal e os dois neutros de apoio (madeira, pedra). A loja inteira parte daqui.',
+  // PARTE A — idêntico ao Brandbook Suzu, token a token: é a fonte da verdade. Nada aqui é
+  // invenção do site; qualquer mudança de valor tem que vir do brandbook primeiro.
+  var COLOR_GROUPS_BRANDBOOK = [
+    { title: 'Neutros japandi', rule: 'Fundo, madeira, ouro, pedra e tinta — os sete neutros de base da paleta.',
       tokens: ['white','warm','raw','wood','gold','stone','ink'] },
-    { title: 'Sabores', rule: 'Uma cor por sabor/tint de produto — usada em molde, ícone e detalhe de destaque. Nunca como fundo de bloco de texto.',
-      tokens: ['sakura','fuji','torinoko','mizu','sango','matcha'] },
-    { title: 'Washes — fundo suave do sabor', rule: 'Versão lavada de cada sabor, para fundo de card/imagem onde o sabor precisa aparecer sem competir com o produto.',
-      tokens: ['sakura-wash','fuji-wash','torinoko-wash','mizu-wash','sango-wash','matcha-wash'] },
-    { title: 'Texto & rótulo', rule: 'Hierarquia de leitura: --text é o corpo, --text-2/--text-3 são variações de peso visual, --muted e --label são metadado e rótulo pequeno.',
-      tokens: ['text','text-2','text-3','muted','label','gold-text','stone-text'] },
-    { title: 'Utilitários funcionais', rule: 'Fora da paleta de marca — o brandbook não os define. Escurecimento do botão no hover e cores de impressão/máscara (preto/cinza).',
-      tokens: ['ink-hover','print-ink','print-line','print-muted','mask-ink'] },
+    { title: 'Acento sakura (4 tons)', rule: 'Quatro intensidades do sabor sakura, na ordem wash → light → base → deep.',
+      tokens: ['sakura-wash','sakura-light','sakura','sakura-deep'] },
+    { title: 'Acento fuji (4 tons)', rule: 'Quatro intensidades do sabor fuji, na ordem wash → light → base → deep.',
+      tokens: ['fuji-wash','fuji-light','fuji','fuji-deep'] },
+    { title: 'Acento torinoko (4 tons)', rule: 'Quatro intensidades do sabor torinoko, na ordem wash → light → base → deep.',
+      tokens: ['torinoko-wash','torinoko-light','torinoko','torinoko-deep'] },
+    { title: 'Acento mizu (4 tons)', rule: 'Quatro intensidades do sabor mizu, na ordem wash → light → base → deep.',
+      tokens: ['mizu-wash','mizu-light','mizu','mizu-deep'] },
+    { title: 'Acento sango (4 tons)', rule: 'Quatro intensidades do sabor sango, na ordem wash → light → base → deep.',
+      tokens: ['sango-wash','sango-light','sango','sango-deep'] },
+    { title: 'Acento matcha (4 tons)', rule: 'Quatro intensidades do sabor matcha, na ordem wash → light → base → deep.',
+      tokens: ['matcha-wash','matcha-light','matcha','matcha-deep'] },
     { title: 'Papéis semânticos', rule: 'O que os componentes devem consumir para superfície, texto e linha — nunca os tokens de paleta acima (--white, --ink…). É essa camada que faz o tema escuro (0.5b) funcionar sem tocar em nenhum componente.',
-      tokens: ['bg','surface','raised','text','text-2','text-3','muted','label','line','line-soft','line-strong','gold-text','stone-text','wood-text','logo-ink','footer-plate'] },
+      tokens: ['bg','surface','raised','text','text-2','text-3','muted','label','gold-text','stone-text','wood-text','logo-ink','footer-plate'] },
+    { title: 'Hairlines', rule: 'As duas linhas do brandbook — --line é o hairline forte (.12) e --cav-line é o hairline sutil (.10).',
+      tokens: ['line','cav-line'] },
     { title: 'Feedback', rule: 'Par fundo/texto para cada estado de mensagem — sucesso, erro, aviso e informação. Sempre usados em conjunto, nunca a cor isolada.',
       tokens: ['error-surface','error-text','success-surface','success-text','warning-surface','warning-text','info-surface','info-text'] },
-    { title: 'Acento — 4 tons', rule: 'Cada sabor tem quatro intensidades, na ordem wash → light → base → deep (ex.: --sakura-wash, --sakura-light, --sakura, --sakura-deep), mostradas lado a lado abaixo, sabor por sabor.',
-      tokens: ['sakura-wash','sakura-light','sakura','sakura-deep','fuji-wash','fuji-light','fuji','fuji-deep','torinoko-wash','torinoko-light','torinoko','torinoko-deep','mizu-wash','mizu-light','mizu','mizu-deep','sango-wash','sango-light','sango','sango-deep','matcha-wash','matcha-light','matcha','matcha-deep'] },
-    { title: 'Alfa', rule: '--hexbtn-fill e --swatch-ring são rgba() — como os --line* acima, nunca achatados para hex sólido (regra do brandbook). Mostrados aqui sobre fundo branco.',
+    { title: 'Alfa de interface', rule: '--hexbtn-fill e --swatch-ring são rgba() — nunca achatados para hex sólido (regra do brandbook).',
       tokens: ['hexbtn-fill','swatch-ring'] }
   ];
 
+  // PARTE B — derivados funcionais que o produto precisa e o Brandbook NÃO define. Mantidos
+  // separados de propósito, para deixar claro o que é canônico (Parte A) e o que é extensão do site.
+  var COLOR_GROUPS_SITE = [
+    { title: 'Hairlines extra', rule: 'Três intensidades extras derivadas de --ink, para casos que as duas linhas do brandbook (Parte A) não cobrem.',
+      tokens: ['line-faint','line-soft','line-strong'] },
+    { title: 'Sombras', rule: 'Elevação de cards, painéis e modais — não existe sombra no Brandbook impresso.',
+      tokens: ['shadow-sm','shadow-md','shadow-lg'] },
+    { title: 'Overlays / véus', rule: 'Camadas semitransparentes sobre imagem ou conteúdo — loading, estado vazio, fundo de modal.',
+      tokens: ['overlay','ink-dot','veil-60','veil-82','veil-86','veil-90'] },
+    { title: 'Backdrops (scrims de modal)', rule: 'Fundo dos botões de fechar sobre imagem ou vídeo — garante contraste em cima de qualquer imagem por trás.',
+      tokens: ['backdrop-btn','backdrop-btn-hover','backdrop-reel'] },
+    { title: 'Utilitários funcionais', rule: 'Escurecimento do botão no hover e cores de impressão/máscara (preto/cinza) — fora da paleta de marca.',
+      tokens: ['ink-hover','print-ink','print-line','print-muted','mask-ink'] }
+  ];
+
   var groupsEl = document.getElementById('colorGroups');
-  COLOR_GROUPS.forEach(function(group){
+
+  function renderColorGroup(group){
     var h = document.createElement('h3'); h.className = 'dsgroup'; h.textContent = group.title;
     var p = document.createElement('p'); p.className = 'dsrule'; p.textContent = group.rule;
     var row = document.createElement('div'); row.className = 'swrow';
@@ -827,7 +855,17 @@
       row.appendChild(sw);
     });
     groupsEl.appendChild(h); groupsEl.appendChild(p); groupsEl.appendChild(row);
-  });
+  }
+
+  function renderColorPart(label, intro, groups){
+    var partH = document.createElement('h3'); partH.className = 'dspart'; partH.textContent = label;
+    var partP = document.createElement('p'); partP.className = 'dspart-note'; partP.textContent = intro;
+    groupsEl.appendChild(partH); groupsEl.appendChild(partP);
+    groups.forEach(renderColorGroup);
+  }
+
+  renderColorPart('— Do Brandbook —', 'Estes tokens são idênticos ao Brandbook Suzu, valor por valor — a fonte da verdade.', COLOR_GROUPS_BRANDBOOK);
+  renderColorPart('— Adições do site —', 'Derivados funcionais que o brandbook não define — necessários no produto, mantidos separados para deixar claro o que é canônico e o que é extensão.', COLOR_GROUPS_SITE);
 
   // Tipografia + linhas — mesmo princípio: valor lido, nunca escrito.
   document.getElementById('tokSans').textContent = tok('sans');
