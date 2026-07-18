@@ -203,6 +203,84 @@
       </div>
     </div>
 
+    <div class="comp-block">
+      <h4>Checkout em acordeão — <code>.costep</code></h4>
+      <p class="dsrule">Uma etapa aberta por vez (<code>.costep.open</code>). Etapa concluída (<code>.costep.done</code>) colapsa e passa a mostrar <code>.costep-sum</code> (resumo) + <code>.coedit</code> ("Editar") no lugar do conteúdo; o número (<code>.cn-n</code>) vira check (<code>.cn-ok</code>).</p>
+      <div class="demo" style="display:flex;flex-direction:column;gap:14px">
+        <section class="costep done" data-step="1">
+          <button type="button" class="cohd" data-tog="1">
+            <span class="conum"><span class="cn-n">1</span><svg class="cn-ok" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
+            <h2>Contato</h2>
+            <span class="costep-sum">angela@studiosuzu.com</span>
+            <span class="coedit">Editar</span>
+          </button>
+          <div class="costep-body">
+            <label class="cofield"><span>E-mail</span><input type="email" value="angela@studiosuzu.com"></label>
+          </div>
+        </section>
+        <section class="costep open" data-step="2">
+          <button type="button" class="cohd" data-tog="2">
+            <span class="conum"><span class="cn-n">2</span><svg class="cn-ok" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
+            <h2>Entrega</h2>
+            <span class="costep-sum" id="dsCostepSum"></span>
+            <span class="coedit">Editar</span>
+          </button>
+          <div class="costep-body">
+            <div class="ceprow">
+              <label class="cofield"><span>CEP</span><input type="text" inputmode="numeric" placeholder="00000-000" maxlength="9" autocomplete="postal-code"></label>
+              <button type="button" class="btn ghost">Calcular frete</button>
+            </div>
+            <div class="costep-cta"><button type="button" class="btn conext">Continuar</button></div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <div class="comp-block">
+      <h4>Overlay de processamento de pagamento — <code>.coproc</code></h4>
+      <p class="dsrule">Cobre a tela inteira ao confirmar o pedido — trava a interação até o PSP responder. <code>.coproc-ring</code> gira enquanto aguarda; em erro, some e dá lugar a <code>.coproc-ico</code> + <code>.coproc-retry</code> (não demonstrado aqui — só o estado padrão de espera).</p>
+      <div class="demo demo-stage">
+        <div class="coproc show" style="position:absolute">
+          <div class="coproc-in">
+            <div class="coproc-ring"></div>
+            <p class="coproc-msg">Confirmando pagamento…</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="comp-block">
+      <h4>Modal "avise-me" — <code>.nfmodal</code></h4>
+      <p class="dsrule">Abre sobre <code>.nfov</code> (overlay de tela cheia) quando o produto está esgotado. Um campo só (e-mail ou WhatsApp) + opt-in de novidades; ao enviar, o conteúdo troca para <code>.nfdone</code> com selo de confirmação — nunca fecha sozinho sem esse passo.</p>
+      <div class="demo" style="display:flex;justify-content:center">
+        <div class="nfmodal open" style="position:relative;left:auto;top:auto;transform:none;max-width:380px" aria-hidden="false">
+          <button class="ibtn nfx" aria-label="Fechar"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+          <div>
+            <span class="nfkick">avise-me</span>
+            <h3 class="nftitle">Te aviso quando voltar</h3>
+            <p class="nfsub">Deixe seu contato e a gente te avisa assim que <b>Macaron Anel</b> voltar ao estoque. Sem spam — só o aviso.</p>
+          </div>
+          <form novalidate>
+            <input type="text" class="nfin" placeholder="E-mail ou WhatsApp" aria-label="Seu e-mail ou WhatsApp">
+            <label class="nfopt"><input type="checkbox"><span>Quero receber lançamentos e novidades do Studio Suzu também.</span></label>
+            <button type="submit" class="btn nfgo">Quero receber o aviso</button>
+            <p class="nfhint"></p>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="comp-block">
+      <h4>Botão flutuante WhatsApp — <code>.wafloat</code></h4>
+      <p class="dsrule">Fixo no canto inferior direito; aparece só nas telas de ajuda/atendimento (regra em <code>index.html</code>). <code>.wafloat-tip</code> é tooltip só de hover — fixado em <code>opacity:1</code> aqui apenas para demonstração, nunca assim na loja real.</p>
+      <div class="demo demo-stage" style="height:120px">
+        <a class="wafloat" href="#" style="position:absolute;right:24px;bottom:20px" aria-label="Falar no WhatsApp">
+          <svg viewBox="0 0 24 24"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.86 9.86 0 0 0 4.79 1.22h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2zm0 18.13h-.01c-1.53 0-3.03-.41-4.34-1.19l-.31-.18-3.22.84.86-3.14-.2-.32a8.19 8.19 0 0 1-1.26-4.37c0-4.54 3.7-8.23 8.24-8.23 2.2 0 4.27.86 5.82 2.42a8.18 8.18 0 0 1 2.41 5.83c0 4.54-3.7 8.24-8.23 8.24zm4.52-6.16c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.12-.16.25-.64.81-.78.97-.14.17-.29.19-.54.06-.25-.12-1.05-.39-1.99-1.23-.74-.66-1.23-1.47-1.38-1.72-.14-.25-.02-.38.11-.51.11-.11.25-.29.37-.43.12-.14.16-.25.25-.41.08-.17.04-.31-.02-.43-.06-.12-.56-1.35-.77-1.84-.2-.48-.41-.42-.56-.42h-.48c-.17 0-.43.06-.66.31-.23.25-.87.85-.87 2.07 0 1.22.89 2.4 1.02 2.56.12.17 1.75 2.67 4.23 3.74.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.68-1.18.21-.58.21-1.07.14-1.18-.06-.11-.22-.17-.47-.29z"/></svg>
+          <span class="wafloat-tip" style="opacity:1;transform:translateX(0)">Falar no WhatsApp</span>
+        </a>
+      </div>
+    </div>
+
   </section>
 
   <footer class="dsft">Studio Suzu — design-system.html não é uma cópia, é a documentação viva de <code>css/tokens.css</code> + <code>css/components.css</code>. Se um valor mudar nas folhas, ele muda aqui sozinho.</footer>
