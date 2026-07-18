@@ -12,22 +12,29 @@
      Regra do próprio DS: zero hex aqui, só var(--token). */
   *{box-sizing:border-box}
   html{background:var(--white)}
-  body{font-family:var(--sans);color:var(--ink);background:var(--white);margin:0;padding:0 24px 96px;max-width:980px}
+  body{font-family:var(--sans);color:var(--ink);background:var(--white);margin:0;padding:0 24px var(--space-8);max-width:980px}
   .dswrap{max-width:100%}
-  header.dshd{padding:56px 0 28px;border-bottom:1px solid var(--line)}
-  header.dshd h1{font-family:var(--serif);font-style:italic;font-weight:400;font-size:2.4rem;margin:0 0 10px}
-  header.dshd p{color:var(--muted);font-size:.95rem;line-height:1.6;max-width:62ch;margin:0 0 6px}
+
+  /* Rótulo eyebrow — mesmo princípio editorial do Brandbook: maiúsculo, tracked, cor de rótulo. */
+  .dseyebrow{display:block;font-size:.7rem;letter-spacing:.22em;text-transform:uppercase;color:var(--label);font-weight:500;margin:0 0 var(--space-3)}
+  .dsmeta{color:var(--muted);font-size:.72rem;letter-spacing:.04em;text-transform:uppercase;margin:var(--space-5) 0 0}
+
+  header.dshd{padding:var(--space-8) 0 var(--space-6);border-bottom:1px solid var(--line)}
+  header.dshd h1{font-family:var(--serif);font-style:italic;font-weight:400;font-size:2.4rem;margin:0 0 var(--space-3)}
+  header.dshd p{color:var(--muted);font-size:.95rem;line-height:1.6;max-width:66ch;margin:0 0 var(--space-2)}
   header.dshd code{background:var(--raw);padding:2px 7px;border-radius:6px;font-size:.82rem}
-  nav.dstoc{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:22px;padding-top:18px;border-top:1px solid var(--line-soft)}
+  nav.dstoc{display:flex;flex-wrap:wrap;gap:var(--space-2) var(--space-5);margin-top:var(--space-6);padding-top:var(--space-5);border-top:1px solid var(--line-soft)}
   nav.dstoc a{color:var(--stone-text);font-size:.78rem;letter-spacing:.03em;text-decoration:none;text-transform:uppercase}
   nav.dstoc a:hover{color:var(--ink)}
+  .dsback{display:inline-block;margin-top:var(--space-6);color:var(--stone-text);font-size:.78rem;letter-spacing:.03em;text-decoration:none;text-transform:uppercase}
+  .dsback:hover{color:var(--ink)}
 
-  section.ds{margin:52px 0}
-  section.ds h2{font-family:var(--serif);font-style:italic;font-weight:400;font-size:1.7rem;margin:0 0 6px}
-  section.ds > p.lead{color:var(--muted);font-size:.9rem;max-width:66ch;margin:0 0 28px;line-height:1.6}
-  h3.dsgroup{font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--label);font-weight:600;margin:30px 0 4px}
+  section.ds{margin:var(--space-8) 0;scroll-margin-top:var(--space-6)}
+  section.ds h2{font-family:var(--serif);font-style:italic;font-weight:400;font-size:1.7rem;margin:0 0 var(--space-2)}
+  section.ds > p.lead{color:var(--muted);font-size:.9rem;max-width:66ch;margin:0 0 var(--space-6);line-height:1.6}
+  h3.dsgroup{font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--label);font-weight:600;margin:var(--space-6) 0 var(--space-1)}
   h3.dsgroup:first-of-type{margin-top:0}
-  p.dsrule{color:var(--stone-text);font-size:.78rem;margin:2px 0 14px;line-height:1.55}
+  p.dsrule{color:var(--stone-text);font-size:.78rem;max-width:66ch;margin:var(--space-1) 0 var(--space-4);line-height:1.55}
   p.dsrule b{color:var(--ink);font-weight:600}
 
   .swrow{display:flex;flex-wrap:wrap;gap:4px 0}
@@ -36,10 +43,10 @@
   .sw b{display:block;font-size:.7rem;margin-top:6px;font-weight:600}
   .sw span{display:block;font-size:.64rem;color:var(--muted);font-variant-numeric:tabular-nums}
 
-  .comp-block{margin:0 0 44px}
-  .comp-block > h4{font-size:1.02rem;font-weight:500;margin:0 0 4px}
-  .demo{border:1px solid var(--line-soft);border-radius:16px;padding:26px;background:var(--warm)}
-  .demo-row{display:flex;flex-wrap:wrap;gap:14px;align-items:center}
+  .comp-block{margin:0 0 var(--space-7)}
+  .comp-block > h3{font-size:1.02rem;font-weight:500;margin:0 0 var(--space-1)}
+  .demo{border:1px solid var(--line-soft);border-radius:16px;padding:var(--space-6);background:var(--warm)}
+  .demo-row{display:flex;flex-wrap:wrap;gap:var(--space-3);align-items:center}
   .demo-stage{position:relative;height:230px;border-radius:18px;overflow:hidden;flex:1 1 220px;min-width:220px}
   .demo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:16px}
   .demo-mold{width:52px;height:52px;flex:0 0 auto}
@@ -63,7 +70,9 @@
   .line-demo .strip{height:44px;border-radius:10px;background:var(--white)}
   .line-demo span{display:block;font-size:.66rem;color:var(--muted);margin-top:6px;font-variant-numeric:tabular-nums}
 
-  footer.dsft{margin-top:70px;padding-top:22px;border-top:1px solid var(--line);color:var(--muted);font-size:.76rem}
+  footer.dsft{margin-top:var(--space-8);padding-top:var(--space-5);border-top:1px solid var(--line);color:var(--muted);font-size:.76rem}
+  footer.dsft p{max-width:66ch;margin:0 0 var(--space-2)}
+  footer.dsft .dsmeta{margin:var(--space-3) 0 0}
 
   /* Espaçamento */
   .space-row{display:flex;align-items:center;gap:16px;margin:10px 0}
@@ -121,10 +130,24 @@
   .pattern-item b{display:block;font-size:.72rem;margin-top:10px}
   .clareira-demo{width:160px;height:160px;position:relative}
   .clareira-demo svg{width:100%;height:100%;display:block;border-radius:var(--r-lg)}
+
+  /* Impressão — documento limpo em PDF/papel: sem elementos fixos (não há nenhum nesta página),
+     TOC e rodapé de navegação saem (jump-link não serve em papel), tokens de --print-* já
+     usados no restante do projeto (ver css/components.css) para preto/cinza de tinta. */
+  @media print{
+    body{background:var(--white);color:var(--print-ink);max-width:none;padding:0 18px}
+    a{color:var(--print-ink);text-decoration:none}
+    a[href^="#"]::after{content:""}
+    nav.dstoc,.dsback{display:none}
+    header.dshd{border-bottom:1px solid var(--print-line)}
+    .demo{background:none;border:1px solid var(--print-line)}
+    .comp-block,section.ds{break-inside:avoid-page}
+    footer.dsft{border-top:1px solid var(--print-line);color:var(--print-muted)}
+  }
 </style>
 </head>
 <body>
-<div class="dswrap">
+<div class="dswrap" id="topo">
 
   <!-- Defs compartilhados com a loja (selo Suzu) — mesmos paths de index.html, sem duplicar arte fora daqui -->
   <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
@@ -151,30 +174,34 @@
   </defs></svg>
 
   <header class="dshd">
-    <h1>Design System · Suzu</h1>
-    <p>Fonte única da verdade. Esta página não copia valores — ela lê <code>css/tokens.css</code> e <code>css/components.css</code> ao vivo. Os componentes abaixo são os mesmos elementos da loja, renderizados com as classes reais.</p>
+    <span class="dseyebrow">Documento de suporte técnico da marca</span>
+    <h1>Design System · Studio Suzu</h1>
+    <p>Companion do <a href="https://angelamadeira.github.io/studio_suzu/" target="_blank" rel="noopener">Brandbook Studio Suzu</a> para o produto digital: mesma voz, mesma tipografia, mesma cor — aqui aplicadas a tokens e componentes de código. Fonte única da verdade: esta página não copia valores, ela lê <code>css/tokens.css</code> e <code>css/components.css</code> ao vivo. Os componentes abaixo são os mesmos elementos da loja, renderizados com as classes reais.</p>
     <p>Regra do DS: cor só existe como hex dentro de <code>css/tokens.css</code>. Em qualquer outro lugar — incluindo esta própria página — só <code>var(--token)</code>. Os valores hex mostrados nos swatches abaixo são lidos do navegador em tempo real via <code>getComputedStyle</code>, nunca escritos aqui.</p>
-    <nav class="dstoc">
-      <a href="#cores">Cores</a>
-      <a href="#tipografia">Tipografia</a>
-      <a href="#linhas">Linhas</a>
-      <a href="#componentes">Componentes</a>
-      <a href="#espacamento">Espaçamento</a>
-      <a href="#raio">Raio</a>
-      <a href="#movimento">Movimento</a>
-      <a href="#logo-selo">Logo / Selo</a>
-      <a href="#icones">Ícones</a>
-      <a href="#padroes">Padrões</a>
+    <p class="dsmeta">v0.1.0 · atualizado em 18 de julho de 2026</p>
+    <nav class="dstoc" aria-label="Sumário do documento">
+      <a href="#cores">01 · Cores</a>
+      <a href="#tipografia">02 · Tipografia</a>
+      <a href="#linhas">03 · Linhas</a>
+      <a href="#componentes">04 · Componentes</a>
+      <a href="#espacamento">05 · Espaçamento</a>
+      <a href="#raio">06 · Raio</a>
+      <a href="#movimento">07 · Movimento</a>
+      <a href="#logo-selo">08 · Logo / Selo</a>
+      <a href="#icones">09 · Ícones</a>
+      <a href="#padroes">10 · Padrões</a>
     </nav>
   </header>
 
   <section class="ds" id="cores">
+    <span class="dseyebrow">Fundamentos · 01</span>
     <h2>Cores</h2>
     <p class="lead">Tokens definidos uma única vez em <code>:root</code>, em duas camadas — <b>paleta</b> (bruta, nunca troca de tema) e <b>semântico</b> (papéis, ganha override no tema escuro da 0.5b). Agrupados por função — não por matiz — porque é assim que são usados no CSS.</p>
     <div id="colorGroups"><!-- preenchido via JS a partir de COLOR_GROUPS --></div>
   </section>
 
   <section class="ds" id="tipografia">
+    <span class="dseyebrow">Fundamentos · 02</span>
     <h2>Tipografia</h2>
     <p class="lead">Duas famílias, papéis fixos. Jost carrega o produto inteiro; Cormorant itálico é reservado a detalhe e ênfase — nunca corpo de texto longo.</p>
 
@@ -191,6 +218,7 @@
   </section>
 
   <section class="ds" id="linhas">
+    <span class="dseyebrow">Fundamentos · 03</span>
     <h2>Linhas</h2>
     <p class="lead"><b>--line</b>, <b>--line-soft</b> e <b>--line-strong</b> não são hex — são <code>rgba()</code> derivados de <code>--ink</code> (também documentados em Papéis semânticos, acima). Três intensidades da mesma cor de borda, nunca cinzas soltos.</p>
     <div class="line-demo">
@@ -201,11 +229,12 @@
   </section>
 
   <section class="ds" id="componentes">
+    <span class="dseyebrow">Componentes · 04</span>
     <h2>Componentes</h2>
     <p class="lead">Renderizados com as classes reais de <code>index.html</code>. O que muda aqui é o dado de exemplo — nunca a marcação.</p>
 
     <div class="comp-block">
-      <h4>Botão — <code>.btn</code></h4>
+      <h3>Botão — <code>.btn</code></h3>
       <p class="dsrule">Preenchido (<code>.btn</code>) é a ação primária de cada tela. <code>.btn.ghost</code> é a secundária — nunca dois botões preenchidos lado a lado.</p>
       <div class="demo demo-row">
         <a class="btn" href="#">Adicionar à sacola</a>
@@ -214,7 +243,7 @@
     </div>
 
     <div class="comp-block">
-      <h4>Selo — <code>.seal</code></h4>
+      <h3>Selo — <code>.seal</code></h3>
       <p class="dsrule">Marca gráfica do brand. Sempre em <code>--ink</code>, sempre monocromático — não recolorir por tema ou seção.</p>
       <div class="demo demo-row">
         <svg class="seal" viewBox="0 0 1600 1600" aria-hidden="true" style="width:56px;height:56px">
@@ -228,19 +257,19 @@
     </div>
 
     <div class="comp-block">
-      <h4>Card de produto — <code>.pcard</code></h4>
+      <h3>Card de produto — <code>.pcard</code></h3>
       <p class="dsrule">Badge de estado (<code>.pbadge</code>) só aparece quando há algo a comunicar: <b>últimas unidades</b>, <b>pré-venda</b> ou <b>esgotado</b>. Sem badge = disponibilidade normal.</p>
       <div class="demo demo-grid" id="pcardDemo"><!-- preenchido via JS --></div>
     </div>
 
     <div class="comp-block">
-      <h4>Slide de vitrine — <code>.slide</code> + <code>.kick</code></h4>
+      <h3>Slide de vitrine — <code>.slide</code> + <code>.kick</code></h3>
       <p class="dsrule">Versão do badge de estado para o carrossel de vitrine. Mesma semântica de cor do <code>.pbadge</code>, formato de pílula com rótulo por extenso.</p>
       <div class="demo demo-row" id="slideDemo"><!-- preenchido via JS --></div>
     </div>
 
     <div class="comp-block">
-      <h4>Badges de estado — referência</h4>
+      <h3>Badges de estado — referência</h3>
       <p class="dsrule">As mesmas três cores de estado, nos dois formatos em que aparecem na loja.</p>
       <table class="dstable">
         <thead><tr><th>Estado</th><th>.pbadge / .kick</th><th>fundo</th><th>texto</th></tr></thead>
@@ -249,7 +278,7 @@
     </div>
 
     <div class="comp-block">
-      <h4>Chips de sabor — <code>.fchip</code></h4>
+      <h3>Chips de sabor — <code>.fchip</code></h3>
       <p class="dsrule">Filtro de múltipla escolha. Estado ativo é <code>aria-pressed="true"</code> — nunca uma classe extra de cor; o estilo segue o atributo.</p>
       <div class="demo demo-row">
         <button type="button" class="fchip" aria-pressed="false">Sakura</button>
@@ -259,7 +288,7 @@
     </div>
 
     <div class="comp-block">
-      <h4>Chips de tamanho — <code>.fcsz</code></h4>
+      <h3>Chips de tamanho — <code>.fcsz</code></h3>
       <p class="dsrule">Seleção única por produto. <code>.out</code> risca o tamanho esgotado sem escondê-lo — o cliente vê que a opção existiu.</p>
       <div class="demo demo-row">
         <button type="button" class="fcsz" aria-pressed="false">Pequeno · ≈ 3 cm</button>
@@ -269,7 +298,7 @@
     </div>
 
     <div class="comp-block">
-      <h4>Campo de formulário — <code>.cofield</code></h4>
+      <h3>Campo de formulário — <code>.cofield</code></h3>
       <p class="dsrule">Rótulo sempre acima, sempre maiúsculo pequeno. Erro é <code>.field-err</code> na borda + <code>.fielderr.show</code> no texto de apoio — nunca só cor, sempre com mensagem.</p>
       <div class="demo demo-row" style="align-items:flex-start">
         <label class="cofield" style="flex:1 1 220px">
@@ -285,13 +314,13 @@
     </div>
 
     <div class="comp-block">
-      <h4>Checkout em acordeão — <code>.costep</code></h4>
+      <h3>Checkout em acordeão — <code>.costep</code></h3>
       <p class="dsrule">Uma etapa aberta por vez (<code>.costep.open</code>). Etapa concluída (<code>.costep.done</code>) colapsa e passa a mostrar <code>.costep-sum</code> (resumo) + <code>.coedit</code> ("Editar") no lugar do conteúdo; o número (<code>.cn-n</code>) vira check (<code>.cn-ok</code>).</p>
       <div class="demo" style="display:flex;flex-direction:column;gap:14px">
         <section class="costep done" data-step="1">
           <button type="button" class="cohd" data-tog="1">
             <span class="conum"><span class="cn-n">1</span><svg class="cn-ok" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
-            <h2>Contato</h2>
+            <h2 role="presentation">Contato</h2>
             <span class="costep-sum">angela@studiosuzu.com</span>
             <span class="coedit">Editar</span>
           </button>
@@ -302,7 +331,7 @@
         <section class="costep open" data-step="2">
           <button type="button" class="cohd" data-tog="2">
             <span class="conum"><span class="cn-n">2</span><svg class="cn-ok" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
-            <h2>Entrega</h2>
+            <h2 role="presentation">Entrega</h2>
             <span class="costep-sum" id="dsCostepSum"></span>
             <span class="coedit">Editar</span>
           </button>
@@ -318,7 +347,7 @@
     </div>
 
     <div class="comp-block">
-      <h4>Overlay de processamento de pagamento — <code>.coproc</code></h4>
+      <h3>Overlay de processamento de pagamento — <code>.coproc</code></h3>
       <p class="dsrule">Cobre a tela inteira ao confirmar o pedido — trava a interação até o PSP responder. <code>.coproc-ring</code> gira enquanto aguarda; em erro, some e dá lugar a <code>.coproc-ico</code> + <code>.coproc-retry</code> (não demonstrado aqui — só o estado padrão de espera).</p>
       <div class="demo demo-stage">
         <div class="coproc show" style="position:absolute">
@@ -331,14 +360,14 @@
     </div>
 
     <div class="comp-block">
-      <h4>Modal "avise-me" — <code>.nfmodal</code></h4>
+      <h3>Modal "avise-me" — <code>.nfmodal</code></h3>
       <p class="dsrule">Abre sobre <code>.nfov</code> (overlay de tela cheia) quando o produto está esgotado. Um campo só (e-mail ou WhatsApp) + opt-in de novidades; ao enviar, o conteúdo troca para <code>.nfdone</code> com selo de confirmação — nunca fecha sozinho sem esse passo.</p>
       <div class="demo" style="display:flex;justify-content:center">
         <div class="nfmodal open" style="position:relative;left:auto;top:auto;transform:none;max-width:380px" aria-hidden="false">
           <button class="ibtn nfx" aria-label="Fechar"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
           <div>
             <span class="nfkick">avise-me</span>
-            <h3 class="nftitle">Te aviso quando voltar</h3>
+            <h3 class="nftitle" role="presentation">Te aviso quando voltar</h3>
             <p class="nfsub">Deixe seu contato e a gente te avisa assim que <b>Macaron Anel</b> voltar ao estoque. Sem spam — só o aviso.</p>
           </div>
           <form novalidate>
@@ -352,7 +381,7 @@
     </div>
 
     <div class="comp-block">
-      <h4>Botão flutuante WhatsApp — <code>.wafloat</code></h4>
+      <h3>Botão flutuante WhatsApp — <code>.wafloat</code></h3>
       <p class="dsrule">Fixo no canto inferior direito; aparece só nas telas de ajuda/atendimento (regra em <code>index.html</code>). <code>.wafloat-tip</code> é tooltip só de hover — fixado em <code>opacity:1</code> aqui apenas para demonstração, nunca assim na loja real.</p>
       <div class="demo demo-stage" style="height:120px">
         <a class="wafloat" href="#" style="position:absolute;right:24px;bottom:20px" aria-label="Falar no WhatsApp">
@@ -363,14 +392,14 @@
     </div>
 
     <div class="comp-block">
-      <h4>Carrossel &amp; galeria — <code>.carwrap</code> / <code>.hcar</code> / <code>.cdots</code> / <code>.carrow</code></h4>
+      <h3>Carrossel &amp; galeria — <code>.carwrap</code> / <code>.hcar</code> / <code>.cdots</code> / <code>.carrow</code></h3>
       <p class="dsrule">Trilha horizontal com arraste (mouse e touch) e snap por item — usado em vitrine, receitas e galeria da PDP. Telas largas com ponteiro fino mostram <code>.carrow</code> (setas fixas fora da fileira); telas estreitas ou touch mostram <code>.cdots</code> (bolinhas) no lugar — nunca os dois ao mesmo tempo. O JS de arraste (<code>initCarousel</code>) não é replicado aqui — a demo abaixo é estática.</p>
       <div class="demo">
         <div class="carwrap">
           <div class="hcar">
-            <a class="rcard" href="#"><div class="rimg" style="background:var(--sakura-wash)"><span class="rplay"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></span></div><h3>Brigadeiro Sakura</h3><span class="rmeta">18 min · Fácil</span></a>
-            <a class="rcard" href="#"><div class="rimg" style="background:var(--matcha-wash)"><span class="rplay"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></span></div><h3>Trufa Matcha</h3><span class="rmeta">25 min · Médio</span></a>
-            <a class="rcard" href="#"><div class="rimg" style="background:var(--sango-wash)"><span class="rplay"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></span></div><h3>Bombom Sango</h3><span class="rmeta">20 min · Fácil</span></a>
+            <a class="rcard" href="#"><div class="rimg" style="background:var(--sakura-wash)"><span class="rplay"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></span></div><h3 role="presentation">Brigadeiro Sakura</h3><span class="rmeta">18 min · Fácil</span></a>
+            <a class="rcard" href="#"><div class="rimg" style="background:var(--matcha-wash)"><span class="rplay"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></span></div><h3 role="presentation">Trufa Matcha</h3><span class="rmeta">25 min · Médio</span></a>
+            <a class="rcard" href="#"><div class="rimg" style="background:var(--sango-wash)"><span class="rplay"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></span></div><h3 role="presentation">Bombom Sango</h3><span class="rmeta">20 min · Fácil</span></a>
           </div>
           <div class="cdots">
             <button type="button" class="cdot on" aria-label="Ir para o grupo 1"></button>
@@ -384,7 +413,7 @@
     </div>
 
     <div class="comp-block">
-      <h4>Acordeão — <code>.acc</code></h4>
+      <h3>Acordeão — <code>.acc</code></h3>
       <p class="dsrule">Lista de <code>&lt;details&gt;</code>/<code>&lt;summary&gt;</code> nativos — sem JS de estado, o próprio navegador cuida do abre/fecha. Usado no FAQ e nos blocos de apoio da PDP (Cuidados, Ficha técnica, Entrega). No máximo um item costuma vir <code>open</code> por padrão; os demais ficam fechados até o clique.</p>
       <div class="demo">
         <div class="acc">
@@ -401,7 +430,7 @@
     </div>
 
     <div class="comp-block">
-      <h4>Busca — <code>.searchbar</code></h4>
+      <h3>Busca — <code>.searchbar</code></h3>
       <p class="dsrule">Desce sobre o topo da página (<code>.searchbar.open</code>) ao clicar na lupa do header, com <code>.searchov</code> escurecendo o resto da tela atrás dela. Aqui fixada em posição relativa e sempre aberta só para esta demonstração — na loja real ela cobre a viewport inteira.</p>
       <div class="demo demo-stage">
         <div class="searchbar open" style="position:relative;inset:auto;transform:none">
@@ -415,7 +444,7 @@
     </div>
 
     <div class="comp-block">
-      <h4>Estados vazios — <code>.empty</code></h4>
+      <h3>Estados vazios — <code>.empty</code></h3>
       <p class="dsrule">Mesma anatomia nas telas que podem ficar sem conteúdo (sacola vazia, busca sem resultado, lista filtrada sem match): ícone + <code>.sig</code> em destaque + frase de apoio + um único <code>.btn</code> de saída. Nunca deixa a pessoa num beco sem saída — sempre há uma ação a seguir.</p>
       <div class="demo" style="display:flex;justify-content:center">
         <div class="empty" style="max-width:360px">
@@ -428,7 +457,7 @@
     </div>
 
     <div class="comp-block">
-      <h4>Selos de preço &amp; promoção — <code>.offtag</code> · <code>.wasp</code> · <code>.pbadge.promo</code> · <code>.note</code> · <code>.couphint</code></h4>
+      <h3>Selos de preço &amp; promoção — <code>.offtag</code> · <code>.wasp</code> · <code>.pbadge.promo</code> · <code>.note</code> · <code>.couphint</code></h3>
       <p class="dsrule">Desconto sempre aparece nos dois lados do preço: <code>.wasp</code> risca o valor cheio, <code>.offtag</code> é a pílula "−X%" ao lado do preço atual (PDP, "Leve junto"). No card de listagem a mesma leitura vira selo sobre a imagem — <code>.pbadge.promo</code>, mesma família de cor de <code>.last</code>/<code>.presale</code>/<code>.soldout</code>. A faixa do topo (<code>.note</code>) mostra por padrão o aviso de frete grátis; com a promoção geral do site ativa (<code>SALE.active</code>), o mesmo elemento passa a exibir o texto da campanha — não existe uma classe própria de "faixa promo". <code>.couphint</code> dá o retorno do cupom digitado no checkout: neutro, <code>.err</code> (mesma cor de <code>.field-err</code>, não demonstrado aqui) ou <code>.ok</code>.</p>
       <div class="demo" style="display:flex;flex-direction:column;gap:20px">
         <div class="note" style="border-radius:12px">Promoção de verão — −20% em toda a coleção Bento &amp; Festa</div>
@@ -444,11 +473,11 @@
     </div>
 
     <div class="comp-block">
-      <h4>Cross-sell — <code>.crosssell</code> / <code>.csgrid</code> / <code>.formacta.buycard</code></h4>
+      <h3>Cross-sell — <code>.crosssell</code> / <code>.csgrid</code> / <code>.formacta.buycard</code></h3>
       <p class="dsrule">Bloco de compra complementar ao fim da tela: <b>"Leve junto"</b> na PDP (produtos que combinam com a peça vista) e <b>"A forma desta receita"</b> ao fim de uma receita (o molde usado nela). Mesma marcação nos dois — <code>.sec-head</code> com o título e <code>.csgrid</code> empilhando um ou mais <code>.formacta.buycard</code>: o mesmo cartão de <code>buyCard()</code>, com escolha de tamanho (<code>.fcsz</code>) e preço próprios, independentes do resto da página.</p>
       <div class="demo">
         <section class="crosssell">
-          <div class="sec-head"><div class="lead"><h2>Leve junto</h2></div></div>
+          <div class="sec-head"><div class="lead"><h2 role="presentation">Leve junto</h2></div></div>
           <div class="csgrid">
             <div class="formacta buycard">
               <a class="fcimg" href="#" style="background:var(--sango-wash)"><svg viewBox="0 0 52 52" aria-hidden="true"><circle cx="26" cy="26" r="16" fill="none" stroke="var(--sango)" stroke-width="2"/></svg></a>
@@ -488,7 +517,7 @@
     </div>
 
     <div class="comp-block">
-      <h4>Avaliação — <code>.rate</code></h4>
+      <h3>Avaliação — <code>.rate</code></h3>
       <p class="dsrule">Nota agregada da peça na PDP: o mesmo ícone de estrela dos depoimentos da home (<code>&lt;polygon&gt;</code>, preenchido em <code>--gold</code>) + a nota em destaque + a contagem de avaliações. Escopado a <code>.pdp .rate</code> — vive sempre junto do título do produto, nunca solto.</p>
       <div class="demo">
         <div class="pdp" style="padding:0;gap:0">
@@ -501,7 +530,7 @@
     </div>
 
     <div class="comp-block">
-      <h4>Vídeo / reel — <code>.vidthumb</code></h4>
+      <h3>Vídeo / reel — <code>.vidthumb</code></h3>
       <p class="dsrule">Convite para o vídeo do processo, logo abaixo da galeria da PDP — só existe a partir de 860px de largura (abaixo disso quem convida pro reel é o botão flutuante <code>.igfab</code>, já documentado acima; os dois nunca aparecem juntos). <code>.vtp</code> é a miniatura tingida na cor do produto, <code>.vtplay</code> é o círculo de play sobre ela. Forçado com <code>display:flex</code> aqui só para demonstração — o CSS real esconde este componente abaixo do breakpoint.</p>
       <div class="demo">
         <button type="button" class="vidthumb" aria-label="Ver o vídeo desta peça" style="display:flex">
@@ -515,7 +544,7 @@
     </div>
 
     <div class="comp-block">
-      <h4>Drawer / sacola — <code>.drawer</code></h4>
+      <h3>Drawer / sacola — <code>.drawer</code></h3>
       <p class="dsrule">Painel deslizante da sacola: <code>.dh</code> (cabeçalho + fechar), <code>.items</code> com um <code>.li</code> por peça (miniatura + nome/tamanho + <code>.qty</code> de menos/mais) e <code>.dfoot</code> fixo embaixo (CEP, resumo de subtotal/frete/total em <code>.drow</code> e o botão <code>.checkout</code>). Na loja real é <code>position:fixed</code>, cobrindo a viewport pela lateral; aqui fixado em posição relativa e sempre aberto (<code>.open</code>) só para esta demonstração.</p>
       <div class="demo" style="display:flex;justify-content:center">
         <aside class="drawer open" aria-label="Sacola" style="position:relative;right:auto;top:auto;bottom:auto;transform:none;height:460px;max-width:340px">
@@ -541,7 +570,7 @@
     </div>
 
     <div class="comp-block">
-      <h4>Tamanhos (PDP) — <code>.szgrid</code></h4>
+      <h3>Tamanhos (PDP) — <code>.szgrid</code></h3>
       <p class="dsrule">Grade de tamanho da PDP: até três colunas fixas (Pequeno/Médio/Grande), cada <code>.sz</code> já mostra nome, medida e preço daquele tamanho — sem precisar escolher pra ver o valor. Tamanho esgotado é <code>.sz.out</code>: opacidade reduzida e o preço vira "esgotado", a mesma lógica de <code>.fcsz.out</code> (Chips de tamanho), só que no card inteiro do tamanho.</p>
       <div class="demo">
         <div class="szgrid" style="max-width:420px">
@@ -555,18 +584,21 @@
   </section>
 
   <section class="ds" id="espacamento">
+    <span class="dseyebrow">Sistema · 05</span>
     <h2>Espaçamento</h2>
     <p class="lead">Escala canônica base-4 (<code>--space-1</code> a <code>--space-8</code>, de 4 a 64px). É uma escala nova em <code>tokens.css</code> — a <b>adoção é incremental</b>: o CSS legado da loja continua com valores ad-hoc (margens/paddings soltos), e migra componente por componente conforme cada tela é revisada, nunca de uma vez só.</p>
     <div id="spaceScale"><!-- preenchido via JS a partir de SPACE_TOKENS --></div>
   </section>
 
   <section class="ds" id="raio">
+    <span class="dseyebrow">Sistema · 06</span>
     <h2>Raio</h2>
     <p class="lead">Escala canônica de <code>border-radius</code> (<code>--r-sm</code> a <code>--r-2xl</code>, mais <code>--r-pill</code> para pílula e <code>--r-round</code> para círculo). Mesma regra de adoção incremental do espaçamento: componentes existentes com raio "solto" migram aos poucos, sem trocar pixel sem revisão.</p>
     <div class="r-row" id="radiusRow"><!-- preenchido via JS a partir de RADIUS_TOKENS --></div>
   </section>
 
   <section class="ds" id="movimento">
+    <span class="dseyebrow">Sistema · 07</span>
     <h2>Movimento</h2>
     <p class="lead">Três curvas (<code>--ease</code>, <code>--ease-out</code>, <code>--ease-pop</code>) e três durações (<code>--dur-fast</code>, <code>--dur</code>, <code>--dur-slow</code>) — canônicas, adoção incremental sobre as transições ad-hoc já existentes no CSS legado. Princípio: micro-interações usam curva + duração rápidas, entradas de tela usam durações mais longas, e <code>--ease-pop</code> é reservado só para elementos que "aparecem" (leve overshoot) — nunca para deslocamento comum.</p>
 
@@ -594,6 +626,7 @@
   </section>
 
   <section class="ds" id="logo-selo">
+    <span class="dseyebrow">Marca · 08</span>
     <h2>Logo / Selo</h2>
     <p class="lead">O selo é a marca gráfica do Studio Suzu — mesmos <code>&lt;path&gt;</code> <code>#p-su</code>/<code>#p-zu</code> usados em <code>index.html</code>, sem duplicar arte fora dos <code>&lt;defs&gt;</code> compartilhados no topo desta página.</p>
 
@@ -664,6 +697,7 @@
   </section>
 
   <section class="ds" id="icones">
+    <span class="dseyebrow">Marca · 09</span>
     <h2>Ícones</h2>
     <p class="lead">Família Feather: <code>viewBox 0 0 24 24</code>, <code>fill:none</code>, <code>stroke:currentColor</code>, <code>stroke-width:2</code>, <code>stroke-linecap</code>/<code>stroke-linejoin:round</code>, tamanho ~<code>1.2em</code>. Cor sempre herdada do texto ao redor — nunca uma cor fixa no próprio <code>&lt;svg&gt;</code> — o que deixa o ícone virar cor de status automaticamente dentro de um bloco de feedback (erro, sucesso, aviso).</p>
 
@@ -708,6 +742,7 @@
   </section>
 
   <section class="ds" id="padroes">
+    <span class="dseyebrow">Marca · 10</span>
     <h2>Padrões</h2>
     <p class="lead">Duas estampas autorais — <b>seigaiha</b> (ondas, leques de arcos concêntricos) e <b>shippō</b> (círculos entrelaçados) — mesmos <code>&lt;pattern&gt;</code> de <code>index.html</code>, reaproveitados aqui via os <code>&lt;defs&gt;</code> do topo da página. Regra: padrão carrega significado só em embalagem/destaque de peça (nunca na UI de compra em si) e, quando o selo ou conteúdo precisa viver sobre ele, vai sempre dentro de uma <b>clareira sólida</b> — nunca direto sobre a estampa.</p>
 
@@ -743,7 +778,11 @@
     </div>
   </section>
 
-  <footer class="dsft">Studio Suzu — design-system.html não é uma cópia, é a documentação viva de <code>css/tokens.css</code> + <code>css/components.css</code>. Se um valor mudar nas folhas, ele muda aqui sozinho.</footer>
+  <footer class="dsft">
+    <p>Studio Suzu — design-system.html não é uma cópia, é a documentação viva de <code>css/tokens.css</code> + <code>css/components.css</code>. Se um valor mudar nas folhas, ele muda aqui sozinho.</p>
+    <p class="dsmeta">v0.1.0 · atualizado em 18 de julho de 2026</p>
+    <a class="dsback" href="#topo">↑ Voltar ao topo</a>
+  </footer>
 </div>
 
 <script>
@@ -823,7 +862,7 @@
     a.className = 'pcard' + (p.out ? ' out' : '');
     a.href = '#';
     a.innerHTML = '<div class="m"><span class="pbadge ' + p.badge + '">' + p.label + '</span>' + moldSVG(p.shape, p.tint, p.name) + '</div>' +
-      '<div class="b"><span class="use">' + p.use + '</span><h3>' + p.name + '</h3><div class="pr' + (p.badge==='soldout' ? ' so' : '') + '">' + (p.badge==='soldout' ? 'Esgotado' : 'a partir de <b>' + p.price + '</b>') + '</div></div>';
+      '<div class="b"><span class="use">' + p.use + '</span><h3 role="presentation">' + p.name + '</h3><div class="pr' + (p.badge==='soldout' ? ' so' : '') + '">' + (p.badge==='soldout' ? 'Esgotado' : 'a partir de <b>' + p.price + '</b>') + '</div></div>';
     pcardEl.appendChild(a);
   });
 
@@ -839,7 +878,7 @@
     var slide = document.createElement('a'); slide.className = 'slide on'; slide.href = '#';
     slide.style.setProperty('--st', 'var(--' + s.tint + '-wash)');
     slide.innerHTML = '<div class="bg"></div><div class="piece" style="width:64px">' + moldSVG(s.shape, s.tint, s.name) + '</div>' +
-      '<div class="copy"><span class="kick ' + s.badge + '">' + s.label + '</span><h2 style="font-size:1.05rem">' + s.name + '</h2></div>';
+      '<div class="copy"><span class="kick ' + s.badge + '">' + s.label + '</span><h2 role="presentation" style="font-size:1.05rem">' + s.name + '</h2></div>';
     stage.appendChild(slide);
     slideEl.appendChild(stage);
   });
