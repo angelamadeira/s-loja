@@ -1,12 +1,13 @@
 {
-  "//": "Guarda do design system: cor hex só pode viver em css/tokens.css. Não estendemos stylelint-config-standard de propósito — o CSS da loja é autoral/compacto e as regras estilísticas do standard (883 avisos) não fazem parte do contrato do DS.",
+  "//": "Guarda do design system: TODA cor (hex E rgba/rgb/hsl) só pode viver em css/tokens.css — o brandbook trata α como token ('never flatten an α'). Não estendemos stylelint-config-standard de propósito (regras estilísticas do standard não fazem parte do contrato do DS).",
   "rules": {
-    "color-no-hex": true
+    "color-no-hex": true,
+    "function-disallowed-list": ["rgb", "rgba", "hsl", "hsla"]
   },
   "overrides": [
     {
       "files": ["css/tokens.css"],
-      "rules": { "color-no-hex": null }
+      "rules": { "color-no-hex": null, "function-disallowed-list": null }
     }
   ]
 }
