@@ -58,4 +58,15 @@
   /* novos — auditoria Task 2 (hex achado na loja real sem token correspondente) */
   --hint-ok-text:#3F6F4A; /* .couphint.ok — verde de confirmação de cupom, distinto de --disc-text */
   --mask-ink:#000; /* stop de máscara/gradiente (opacidade), não é cor de print */
+
+  /* ── ESCALAS (espaçamento · raio · movimento) — canônicas do DS.
+     Adoção incremental: o CSS legado usa valores ad-hoc. Movimento será migrado (mesmos
+     valores, sem mudar pixel); espaçamento/raio migram por componente (redesenho, revisão pixel). ── */
+  /* espaçamento (base 4) */
+  --space-1:4px; --space-2:8px; --space-3:12px; --space-4:16px; --space-5:24px; --space-6:32px; --space-7:48px; --space-8:64px;
+  /* raio */
+  --r-sm:8px; --r-md:12px; --r-lg:16px; --r-xl:20px; --r-2xl:24px; --r-pill:999px; --r-round:50%;
+  /* movimento */
+  --ease:cubic-bezier(.22,.61,.36,1); --ease-out:cubic-bezier(.32,.72,0,1); --ease-pop:cubic-bezier(.34,1.56,.64,1);
+  --dur-fast:.16s; --dur:.25s; --dur-slow:.8s;
 }
