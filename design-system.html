@@ -64,6 +64,63 @@
   .line-demo span{display:block;font-size:.66rem;color:var(--muted);margin-top:6px;font-variant-numeric:tabular-nums}
 
   footer.dsft{margin-top:70px;padding-top:22px;border-top:1px solid var(--line);color:var(--muted);font-size:.76rem}
+
+  /* Espaçamento */
+  .space-row{display:flex;align-items:center;gap:16px;margin:10px 0}
+  .space-bar{height:16px;background:var(--stone);border-radius:4px;flex:0 0 auto}
+  .space-row b{min-width:82px;font-size:.78rem}
+  .space-row span{font-size:.68rem;color:var(--muted);font-variant-numeric:tabular-nums}
+
+  /* Raio */
+  .r-row{display:flex;flex-wrap:wrap;gap:22px}
+  .r-item{text-align:center}
+  .r-box{background:var(--warm);border:1px solid var(--line)}
+  .r-item b{display:block;font-size:.72rem;margin-top:10px}
+  .r-item span{display:block;font-size:.64rem;color:var(--muted);font-variant-numeric:tabular-nums}
+
+  /* Movimento */
+  .ease-row{display:flex;align-items:center;gap:20px;margin:16px 0;flex-wrap:wrap}
+  .ease-row b{min-width:190px;font-size:.78rem}
+  .ease-row .meta{font-size:.68rem;color:var(--muted);min-width:150px}
+  .ease-track{position:relative;width:200px;height:32px;background:var(--warm);border-radius:var(--r-pill);flex:0 0 auto;border:1px solid var(--line-soft)}
+  .ease-dot{position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:var(--ink)}
+  .ease-dot.slide{animation-name:dsslide;animation-iteration-count:infinite;animation-direction:alternate}
+  .ease-pop-stage{position:relative;width:64px;height:32px;display:flex;align-items:center;justify-content:center}
+  .ease-dot.pop{position:static;animation-name:dspop;animation-iteration-count:infinite}
+  @keyframes dsslide{from{left:3px}to{left:calc(100% - 27px)}}
+  @keyframes dspop{0%,100%{transform:scale(.4);opacity:.5}50%{transform:scale(1);opacity:1}}
+  @media(prefers-reduced-motion:reduce){ .ease-dot{animation:none!important} }
+  .dur-list{display:flex;gap:26px;flex-wrap:wrap;margin-top:4px}
+  .dur-list div{font-size:.78rem}
+  .dur-list b{display:block;font-size:.68rem;color:var(--label);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px}
+
+  /* Logo / Selo */
+  .dsrules{margin:2px 0 0;padding-left:20px;color:var(--stone-text);font-size:.82rem;line-height:1.7}
+  .dsrules li{margin:5px 0}
+  .dsrules b{color:var(--ink);font-weight:600}
+  .seal-row{display:flex;flex-wrap:wrap;gap:32px;align-items:flex-end;margin-bottom:8px}
+  .seal-item{text-align:center}
+  .seal-item b{display:block;font-size:.72rem;margin-top:10px}
+  .seal-item span{display:block;font-size:.64rem;color:var(--muted)}
+  .clearspace{display:inline-block;border:1px dashed var(--line-strong);line-height:0}
+  .lockup-demo{display:flex;align-items:center;gap:12px}
+  .lockup-demo b{font-family:var(--serif);font-style:italic;font-weight:400;font-size:1.15rem;color:var(--ink)}
+
+  /* Ícones */
+  .icon-row{display:flex;flex-wrap:wrap;gap:30px}
+  .icon-item{text-align:center;color:var(--ink)}
+  .icon-item svg{width:26px;height:26px;display:block;margin:0 auto}
+  .icon-item b{display:block;font-size:.68rem;margin-top:10px;font-weight:500;color:var(--text)}
+  .icon-status{display:flex;align-items:center;gap:8px;font-size:.82rem;margin-top:18px;padding:10px 14px;border-radius:var(--r-md)}
+  .icon-status svg{width:1.2em;height:1.2em;flex:0 0 auto}
+
+  /* Padrões */
+  .pattern-row{display:flex;flex-wrap:wrap;gap:20px}
+  .pattern-item{text-align:center}
+  .pattern-tile{width:120px;height:120px;border-radius:var(--r-lg);border:1px solid var(--line);display:block}
+  .pattern-item b{display:block;font-size:.72rem;margin-top:10px}
+  .clareira-demo{width:160px;height:160px;position:relative}
+  .clareira-demo svg{width:100%;height:100%;display:block;border-radius:var(--r-lg)}
 </style>
 </head>
 <body>
@@ -73,6 +130,24 @@
   <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
     <path id="p-su" d="M77.9990234375 130.9993896484375 36.2003173828125 107.2003173828125Q45.60009765625 78.2001953125 67.4998779296875 51.20013427734375Q89.399658203125 24.2000732421875 124.799560546875 7.10003662109375Q160.199462890625 -10.0 208.1995849609375 -10.0Q274.3992919921875 -10.0 315.4991455078125 27.599853515625Q356.5989990234375 65.19970703125 356.5989990234375 124.7996826171875Q356.5989990234375 163.799560546875 337.4990234375 188.99951171875Q318.3990478515625 214.199462890625 286.79913330078125 231.29937744140625Q255.19921875 248.3992919921875 217.9993896484375 261.59912109375Q189.59912109375 271.59912109375 164.99896240234375 282.79913330078125Q140.3988037109375 293.9991455078125 125.19873046875 311.39935302734375Q109.9986572265625 328.799560546875 109.9986572265625 356.0001220703125Q109.9986572265625 389.4007568359375 133.5989990234375 406.0010986328125Q157.1993408203125 422.6014404296875 190.599853515625 422.6014404296875Q236.6004638671875 422.6014404296875 265.70050048828125 401.00115966796875Q294.800537109375 379.40087890625 311.400390625 349.400634765625L353.799072265625 375.19970703125Q341.7991943359375 401.19970703125 319.79937744140625 422.19976806640625Q297.799560546875 443.1998291015625 266.899658203125 456.19989013671875Q235.999755859375 469.199951171875 196.599609375 469.199951171875Q161.19970703125 469.199951171875 129.69989013671875 456.39996337890625Q98.2000732421875 443.5999755859375 78.7001953125 417.800048828125Q59.2003173828125 392.0001220703125 59.2003173828125 353.000244140625Q59.2003173828125 311.8001708984375 78.500244140625 286.30023193359375Q97.8001708984375 260.80029296875 127.900146484375 245.70037841796875Q158.0001220703125 230.6004638671875 190.4002685546875 219.00048828125Q220.200439453125 209.00048828125 246.00054931640625 196.50042724609375Q271.8006591796875 184.0003662109375 287.90069580078125 165.500244140625Q304.000732421875 147.0001220703125 304.000732421875 119.39990234375Q304.000732421875 80.7991943359375 278.30035400390625 59.298828125Q252.5999755859375 37.7984619140625 210.5994873046875 37.7984619140625Q174.9990234375 37.7984619140625 148.6988525390625 50.6986083984375Q122.398681640625 63.5987548828125 105.19873046875 84.99896240234375Q87.998779296875 106.399169921875 77.9990234375 130.9993896484375ZM713.99853515625 167.999267578125V460.0H662.000244140625V161.99951171875Q662.000244140625 83.19970703125 700.199951171875 36.599853515625Q738.399658203125 -10.0 809.9996337890625 -10.0Q861.5999755859375 -10.0 899.8002319335938 18.1004638671875Q938.00048828125 46.200927734375 957.000244140625 96.00146484375V0.0H1008.99853515625V460.0H957.000244140625V180.0Q957.000244140625 140.7996826171875 939.7000732421875 108.79931640625Q922.39990234375 76.7989501953125 891.899658203125 58.09869384765625Q861.3994140625 39.3984375 821.9991455078125 39.3984375Q766.398681640625 39.3984375 740.1986083984375 73.59869384765625Q713.99853515625 107.7989501953125 713.99853515625 167.999267578125Z"/>
     <path id="p-zu" d="M331.6019287109375 411.0015869140625 17.0001220703125 0.0H418.9996337890625V48.9984130859375H112.3970947265625L426.9989013671875 460.0H42.9998779296875V411.0015869140625ZM758.99853515625 167.999267578125V460.0H707.000244140625V161.99951171875Q707.000244140625 83.19970703125 745.199951171875 36.599853515625Q783.399658203125 -10.0 854.9996337890625 -10.0Q906.5999755859375 -10.0 944.8002319335938 18.1004638671875Q983.00048828125 46.200927734375 1002.000244140625 96.00146484375V0.0H1053.99853515625V460.0H1002.000244140625V180.0Q1002.000244140625 140.7996826171875 984.7000732421875 108.79931640625Q967.39990234375 76.7989501953125 936.899658203125 58.09869384765625Q906.3994140625 39.3984375 866.9991455078125 39.3984375Q811.398681640625 39.3984375 785.1986083984375 73.59869384765625Q758.99853515625 107.7989501953125 758.99853515625 167.999267578125Z"/>
+    <!-- Padrões (mesmos defs de index.html — shippō e seigaiha, cor via var() apenas) -->
+    <pattern id="estampa-coral" x="0" y="0" width="34" height="34" patternUnits="userSpaceOnUse">
+      <g fill="none" stroke="var(--sango)" stroke-width="1.1">
+        <circle cx="0" cy="0" r="24"/><circle cx="34" cy="0" r="24"/><circle cx="0" cy="34" r="24"/><circle cx="34" cy="34" r="24"/><circle cx="17" cy="17" r="24"/>
+      </g>
+    </pattern>
+    <pattern id="estampa-ouro" x="0" y="0" width="34" height="34" patternUnits="userSpaceOnUse">
+      <g fill="none" stroke="var(--gold)" stroke-width="1.1">
+        <circle cx="0" cy="0" r="24"/><circle cx="34" cy="0" r="24"/><circle cx="0" cy="34" r="24"/><circle cx="34" cy="34" r="24"/><circle cx="17" cy="17" r="24"/>
+      </g>
+    </pattern>
+    <pattern id="estampa-sakura" x="0" y="0" width="34" height="34" patternUnits="userSpaceOnUse">
+      <g fill="none" stroke="var(--sakura)" stroke-width="1.1">
+        <circle cx="0" cy="0" r="24"/><circle cx="34" cy="0" r="24"/><circle cx="0" cy="34" r="24"/><circle cx="34" cy="34" r="24"/><circle cx="17" cy="17" r="24"/>
+      </g>
+    </pattern>
+    <pattern id="seigaiha-azul" x="0" y="0" width="45" height="45" patternUnits="userSpaceOnUse"><g fill="none" stroke="var(--mizu)" stroke-width="1.2" stroke-linecap="round"><path d="M-45.00 -22.50A22.5 22.5 0 0 1 0.00 -22.50 M-38.98 -21.68A16.5 16.5 0 1 1 -6.02 -21.68 M-34.17 -19.72A12 12 0 1 1 -10.83 -19.72 M0.00 -22.50A22.5 22.5 0 0 1 45.00 -22.50 M6.02 -21.68A16.5 16.5 0 1 1 38.98 -21.68 M10.83 -19.72A12 12 0 1 1 34.17 -19.72 M45.00 -22.50A22.5 22.5 0 0 1 90.00 -22.50 M51.02 -21.68A16.5 16.5 0 1 1 83.98 -21.68 M55.83 -19.72A12 12 0 1 1 79.17 -19.72 M-22.50 0.00A22.5 22.5 0 0 1 22.50 0.00 M-16.48 0.82A16.5 16.5 0 1 1 16.48 0.82 M-11.67 2.78A12 12 0 1 1 11.67 2.78 M22.50 0.00A22.5 22.5 0 0 1 67.50 0.00 M28.52 0.82A16.5 16.5 0 1 1 61.48 0.82 M33.33 2.78A12 12 0 1 1 56.67 2.78 M-45.00 22.50A22.5 22.5 0 0 1 0.00 22.50 M-38.98 23.32A16.5 16.5 0 1 1 -6.02 23.32 M-34.17 25.28A12 12 0 1 1 -10.83 25.28 M0.00 22.50A22.5 22.5 0 0 1 45.00 22.50 M6.02 23.32A16.5 16.5 0 1 1 38.98 23.32 M10.83 25.28A12 12 0 1 1 34.17 25.28 M45.00 22.50A22.5 22.5 0 0 1 90.00 22.50 M51.02 23.32A16.5 16.5 0 1 1 83.98 23.32 M55.83 25.28A12 12 0 1 1 79.17 25.28 M-22.50 45.00A22.5 22.5 0 0 1 22.50 45.00 M-16.48 45.82A16.5 16.5 0 1 1 16.48 45.82 M-11.67 47.78A12 12 0 1 1 11.67 47.78 M22.50 45.00A22.5 22.5 0 0 1 67.50 45.00 M28.52 45.82A16.5 16.5 0 1 1 61.48 45.82 M33.33 47.78A12 12 0 1 1 56.67 47.78 M-45.00 67.50A22.5 22.5 0 0 1 0.00 67.50 M-38.98 68.32A16.5 16.5 0 1 1 -6.02 68.32 M-34.17 70.28A12 12 0 1 1 -10.83 70.28 M0.00 67.50A22.5 22.5 0 0 1 45.00 67.50 M6.02 68.32A16.5 16.5 0 1 1 38.98 68.32 M10.83 70.28A12 12 0 1 1 34.17 70.28 M45.00 67.50A22.5 22.5 0 0 1 90.00 67.50 M51.02 68.32A16.5 16.5 0 1 1 83.98 68.32 M55.83 70.28A12 12 0 1 1 79.17 70.28"/></g></pattern>
+    <pattern id="seigaiha-ouro" x="0" y="0" width="45" height="45" patternUnits="userSpaceOnUse"><g fill="none" stroke="var(--gold)" stroke-width="1.2" stroke-linecap="round"><path d="M-45.00 -22.50A22.5 22.5 0 0 1 0.00 -22.50 M-38.98 -21.68A16.5 16.5 0 1 1 -6.02 -21.68 M-34.17 -19.72A12 12 0 1 1 -10.83 -19.72 M0.00 -22.50A22.5 22.5 0 0 1 45.00 -22.50 M6.02 -21.68A16.5 16.5 0 1 1 38.98 -21.68 M10.83 -19.72A12 12 0 1 1 34.17 -19.72 M45.00 -22.50A22.5 22.5 0 0 1 90.00 -22.50 M51.02 -21.68A16.5 16.5 0 1 1 83.98 -21.68 M55.83 -19.72A12 12 0 1 1 79.17 -19.72 M-22.50 0.00A22.5 22.5 0 0 1 22.50 0.00 M-16.48 0.82A16.5 16.5 0 1 1 16.48 0.82 M-11.67 2.78A12 12 0 1 1 11.67 2.78 M22.50 0.00A22.5 22.5 0 0 1 67.50 0.00 M28.52 0.82A16.5 16.5 0 1 1 61.48 0.82 M33.33 2.78A12 12 0 1 1 56.67 2.78 M-45.00 22.50A22.5 22.5 0 0 1 0.00 22.50 M-38.98 23.32A16.5 16.5 0 1 1 -6.02 23.32 M-34.17 25.28A12 12 0 1 1 -10.83 25.28 M0.00 22.50A22.5 22.5 0 0 1 45.00 22.50 M6.02 23.32A16.5 16.5 0 1 1 38.98 23.32 M10.83 25.28A12 12 0 1 1 34.17 25.28 M45.00 22.50A22.5 22.5 0 0 1 90.00 22.50 M51.02 23.32A16.5 16.5 0 1 1 83.98 23.32 M55.83 25.28A12 12 0 1 1 79.17 25.28 M-22.50 45.00A22.5 22.5 0 0 1 22.50 45.00 M-16.48 45.82A16.5 16.5 0 1 1 16.48 45.82 M-11.67 47.78A12 12 0 1 1 11.67 47.78 M22.50 45.00A22.5 22.5 0 0 1 67.50 45.00 M28.52 45.82A16.5 16.5 0 1 1 61.48 45.82 M33.33 47.78A12 12 0 1 1 56.67 47.78 M-45.00 67.50A22.5 22.5 0 0 1 0.00 67.50 M-38.98 68.32A16.5 16.5 0 1 1 -6.02 68.32 M-34.17 70.28A12 12 0 1 1 -10.83 70.28 M0.00 67.50A22.5 22.5 0 0 1 45.00 67.50 M6.02 68.32A16.5 16.5 0 1 1 38.98 68.32 M10.83 70.28A12 12 0 1 1 34.17 70.28 M45.00 67.50A22.5 22.5 0 0 1 90.00 67.50 M51.02 68.32A16.5 16.5 0 1 1 83.98 68.32 M55.83 70.28A12 12 0 1 1 79.17 70.28"/></g></pattern>
   </defs></svg>
 
   <header class="dshd">
@@ -84,6 +159,12 @@
       <a href="#tipografia">Tipografia</a>
       <a href="#linhas">Linhas</a>
       <a href="#componentes">Componentes</a>
+      <a href="#espacamento">Espaçamento</a>
+      <a href="#raio">Raio</a>
+      <a href="#movimento">Movimento</a>
+      <a href="#logo-selo">Logo / Selo</a>
+      <a href="#icones">Ícones</a>
+      <a href="#padroes">Padrões</a>
     </nav>
   </header>
 
@@ -283,6 +364,195 @@
 
   </section>
 
+  <section class="ds" id="espacamento">
+    <h2>Espaçamento</h2>
+    <p class="lead">Escala canônica base-4 (<code>--space-1</code> a <code>--space-8</code>, de 4 a 64px). É uma escala nova em <code>tokens.css</code> — a <b>adoção é incremental</b>: o CSS legado da loja continua com valores ad-hoc (margens/paddings soltos), e migra componente por componente conforme cada tela é revisada, nunca de uma vez só.</p>
+    <div id="spaceScale"><!-- preenchido via JS a partir de SPACE_TOKENS --></div>
+  </section>
+
+  <section class="ds" id="raio">
+    <h2>Raio</h2>
+    <p class="lead">Escala canônica de <code>border-radius</code> (<code>--r-sm</code> a <code>--r-2xl</code>, mais <code>--r-pill</code> para pílula e <code>--r-round</code> para círculo). Mesma regra de adoção incremental do espaçamento: componentes existentes com raio "solto" migram aos poucos, sem trocar pixel sem revisão.</p>
+    <div class="r-row" id="radiusRow"><!-- preenchido via JS a partir de RADIUS_TOKENS --></div>
+  </section>
+
+  <section class="ds" id="movimento">
+    <h2>Movimento</h2>
+    <p class="lead">Três curvas (<code>--ease</code>, <code>--ease-out</code>, <code>--ease-pop</code>) e três durações (<code>--dur-fast</code>, <code>--dur</code>, <code>--dur-slow</code>) — canônicas, adoção incremental sobre as transições ad-hoc já existentes no CSS legado. Princípio: micro-interações usam curva + duração rápidas, entradas de tela usam durações mais longas, e <code>--ease-pop</code> é reservado só para elementos que "aparecem" (leve overshoot) — nunca para deslocamento comum.</p>
+
+    <h3 class="dsgroup">Curvas × duração</h3>
+    <p class="dsrule">O ponto que desliza usa <code>animation-timing-function</code> e <code>animation-duration</code> lidos ao vivo de cada token — nunca uma curva reescrita aqui.</p>
+    <div class="ease-row">
+      <b>--ease-out + --dur-fast</b>
+      <div class="ease-track"><div class="ease-dot slide" id="easeDotFast"></div></div>
+      <span class="meta">micro-interações — hover, toggle, chip</span>
+    </div>
+    <div class="ease-row">
+      <b>--ease + --dur</b>
+      <div class="ease-track"><div class="ease-dot slide" id="easeDotBase"></div></div>
+      <span class="meta">padrão — a maioria das transições</span>
+    </div>
+    <div class="ease-row">
+      <b>--ease-pop + --dur-slow</b>
+      <div class="ease-pop-stage"><div class="ease-dot pop" id="easeDotPop"></div></div>
+      <span class="meta">só para "aparecer" — overshoot leve</span>
+    </div>
+    <p class="dsrule" id="reducedMotionNote" hidden><b>prefers-reduced-motion: reduce</b> está ativo neste navegador — as animações acima estão desligadas.</p>
+
+    <h3 class="dsgroup">Durações</h3>
+    <div class="dur-list" id="durList"><!-- preenchido via JS a partir de DUR_TOKENS --></div>
+  </section>
+
+  <section class="ds" id="logo-selo">
+    <h2>Logo / Selo</h2>
+    <p class="lead">O selo é a marca gráfica do Studio Suzu — mesmos <code>&lt;path&gt;</code> <code>#p-su</code>/<code>#p-zu</code> usados em <code>index.html</code>, sem duplicar arte fora dos <code>&lt;defs&gt;</code> compartilhados no topo desta página.</p>
+
+    <h3 class="dsgroup">Sempre (regras do Brandbook)</h3>
+    <ol class="dsrules">
+      <li>O selo com contorno (<b>outline</b>) é o logo oficial — tinta (<code>--ink</code>) no tema claro, branco (<code>--white</code>) no tema escuro.</li>
+      <li>Espaço livre mínimo ao redor: <b>¼ do diâmetro</b> do selo, nos 4 lados.</li>
+      <li>Tamanhos mínimos: <b>32px</b> outline · <b>24px</b> preenchido · <b>80px</b> em uso inline (ao lado do texto).</li>
+      <li>Abaixo de 32px, sempre trocar para o selo <b>preenchido</b> — o traço fino do outline deixa de ler.</li>
+      <li>Sobre padrão (seigaiha/shippō), o selo sempre vive dentro de uma <b>clareira sólida</b> — nunca direto sobre a estampa.</li>
+      <li>Traço do anel: proporção fixa de <b>52/1600</b> (mesma relação usada no <code>viewBox</code> e <code>stroke-width</code> do <code>.seal</code> abaixo).</li>
+      <li>Letras só em <code>--ink</code> ou <code>--white</code> — nunca outra cor.</li>
+      <li>Preenchimento sempre <b>chapado</b> — sem gradiente, sem sombra.</li>
+      <li>Cor de sabor da paleta preenchendo o selo só existe no <b>flavor system</b> — nunca em uso institucional.</li>
+      <li>Wordmark exatamente como fornecido — nunca esticar, inclinar ou distorcer.</li>
+    </ol>
+
+    <h3 class="dsgroup">Tamanhos mínimos</h3>
+    <div class="seal-row">
+      <div class="seal-item">
+        <svg class="seal" viewBox="0 0 1600 1600" aria-hidden="true" style="width:32px;height:32px">
+          <circle cx="800" cy="800" r="774" fill="none" stroke="var(--ink)" stroke-width="52"/>
+          <g fill="var(--ink)" transform="translate(800 800) scale(.74) translate(-800 -800)">
+            <use href="#p-su" transform="translate(277.4 734.6) scale(1 -1)"/>
+            <use href="#p-zu" transform="translate(264.5 1324.6) scale(1 -1)"/>
+          </g>
+        </svg>
+        <b>Outline · 32px</b>
+        <span>mínimo absoluto</span>
+      </div>
+      <div class="seal-item">
+        <svg viewBox="0 0 1600 1600" aria-hidden="true" style="width:24px;height:24px;display:block">
+          <circle cx="800" cy="800" r="800" fill="var(--ink)"/>
+          <g fill="var(--white)" transform="translate(800 800) scale(.74) translate(-800 -800)">
+            <use href="#p-su" transform="translate(277.4 734.6) scale(1 -1)"/>
+            <use href="#p-zu" transform="translate(264.5 1324.6) scale(1 -1)"/>
+          </g>
+        </svg>
+        <b>Preenchido · 24px</b>
+        <span>abaixo de 32px</span>
+      </div>
+      <div class="seal-item">
+        <div class="lockup-demo">
+          <svg class="seal" viewBox="0 0 1600 1600" aria-hidden="true" style="width:80px;height:80px">
+            <circle cx="800" cy="800" r="774" fill="none" stroke="var(--ink)" stroke-width="52"/>
+            <g fill="var(--ink)" transform="translate(800 800) scale(.74) translate(-800 -800)">
+              <use href="#p-su" transform="translate(277.4 734.6) scale(1 -1)"/>
+              <use href="#p-zu" transform="translate(264.5 1324.6) scale(1 -1)"/>
+            </g>
+          </svg>
+          <b>Studio Suzu</b>
+        </div>
+        <span>Inline · 80px (ao lado do wordmark)</span>
+      </div>
+    </div>
+
+    <h3 class="dsgroup">Espaço livre — ¼ do diâmetro</h3>
+    <p class="dsrule">Selo de 96px pede pelo menos 24px de respiro em cada lado (tracejado ilustra o limite — nunca desenhado na loja real).</p>
+    <div class="clearspace" style="padding:24px">
+      <svg class="seal" viewBox="0 0 1600 1600" aria-hidden="true" style="width:96px;height:96px;display:block">
+        <circle cx="800" cy="800" r="774" fill="none" stroke="var(--ink)" stroke-width="52"/>
+        <g fill="var(--ink)" transform="translate(800 800) scale(.74) translate(-800 -800)">
+          <use href="#p-su" transform="translate(277.4 734.6) scale(1 -1)"/>
+          <use href="#p-zu" transform="translate(264.5 1324.6) scale(1 -1)"/>
+        </g>
+      </svg>
+    </div>
+  </section>
+
+  <section class="ds" id="icones">
+    <h2>Ícones</h2>
+    <p class="lead">Família Feather: <code>viewBox 0 0 24 24</code>, <code>fill:none</code>, <code>stroke:currentColor</code>, <code>stroke-width:2</code>, <code>stroke-linecap</code>/<code>stroke-linejoin:round</code>, tamanho ~<code>1.2em</code>. Cor sempre herdada do texto ao redor — nunca uma cor fixa no próprio <code>&lt;svg&gt;</code> — o que deixa o ícone virar cor de status automaticamente dentro de um bloco de feedback (erro, sucesso, aviso).</p>
+
+    <h3 class="dsgroup">Glifos em uso na loja</h3>
+    <div class="demo icon-row">
+      <div class="icon-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <b>search</b>
+      </div>
+      <div class="icon-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+        <b>shopping-bag</b>
+      </div>
+      <div class="icon-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        <b>x</b>
+      </div>
+      <div class="icon-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        <b>check</b>
+      </div>
+      <div class="icon-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <b>alert-circle</b>
+      </div>
+      <div class="icon-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+        <b>instagram</b>
+      </div>
+    </div>
+
+    <h3 class="dsgroup">Cor de status — mesmo ícone, papel de feedback</h3>
+    <p class="dsrule"><code>alert-circle</code> não muda de marcação — só o texto ao redor troca de cor semântica, e o <code>currentColor</code> do ícone acompanha.</p>
+    <div class="icon-status" style="background:var(--error-surface);color:var(--error-text)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      Confira o e-mail — parece incompleto.
+    </div>
+    <div class="icon-status" style="background:var(--success-surface);color:var(--success-text)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/></svg>
+      Pedido confirmado com sucesso.
+    </div>
+  </section>
+
+  <section class="ds" id="padroes">
+    <h2>Padrões</h2>
+    <p class="lead">Duas estampas autorais — <b>seigaiha</b> (ondas, leques de arcos concêntricos) e <b>shippō</b> (círculos entrelaçados) — mesmos <code>&lt;pattern&gt;</code> de <code>index.html</code>, reaproveitados aqui via os <code>&lt;defs&gt;</code> do topo da página. Regra: padrão carrega significado só em embalagem/destaque de peça (nunca na UI de compra em si) e, quando o selo ou conteúdo precisa viver sobre ele, vai sempre dentro de uma <b>clareira sólida</b> — nunca direto sobre a estampa.</p>
+
+    <h3 class="dsgroup">Seigaiha — 45×45, traço ~1.2</h3>
+    <div class="demo pattern-row">
+      <div class="pattern-item"><svg class="pattern-tile"><rect width="100%" height="100%" fill="url(#seigaiha-azul)"/></svg><b>--mizu</b></div>
+      <div class="pattern-item"><svg class="pattern-tile"><rect width="100%" height="100%" fill="url(#seigaiha-ouro)"/></svg><b>--gold</b></div>
+    </div>
+
+    <h3 class="dsgroup">Shippō — 34×34, traço ~1.1</h3>
+    <div class="demo pattern-row">
+      <div class="pattern-item"><svg class="pattern-tile"><rect width="100%" height="100%" fill="url(#estampa-sakura)"/></svg><b>--sakura</b></div>
+      <div class="pattern-item"><svg class="pattern-tile"><rect width="100%" height="100%" fill="url(#estampa-coral)"/></svg><b>--sango</b></div>
+      <div class="pattern-item"><svg class="pattern-tile"><rect width="100%" height="100%" fill="url(#estampa-ouro)"/></svg><b>--gold</b></div>
+    </div>
+
+    <h3 class="dsgroup">Selo sobre padrão — sempre em clareira sólida</h3>
+    <p class="dsrule">O selo nunca fica direto sobre a estampa: uma clareira do tom <code>--warm</code> abre espaço sólido ao redor dele antes de tocar o padrão.</p>
+    <div class="demo">
+      <div class="clareira-demo">
+        <svg viewBox="0 0 160 160" aria-hidden="true" style="position:absolute;inset:0">
+          <rect width="160" height="160" fill="url(#seigaiha-azul)"/>
+          <circle cx="80" cy="80" r="46" fill="var(--warm)"/>
+        </svg>
+        <svg class="seal" viewBox="0 0 1600 1600" aria-hidden="true" style="position:absolute;top:36px;left:36px;width:68px;height:68px">
+          <circle cx="800" cy="800" r="774" fill="none" stroke="var(--ink)" stroke-width="52"/>
+          <g fill="var(--ink)" transform="translate(800 800) scale(.74) translate(-800 -800)">
+            <use href="#p-su" transform="translate(277.4 734.6) scale(1 -1)"/>
+            <use href="#p-zu" transform="translate(264.5 1324.6) scale(1 -1)"/>
+          </g>
+        </svg>
+      </div>
+    </div>
+  </section>
+
   <footer class="dsft">Studio Suzu — design-system.html não é uma cópia, é a documentação viva de <code>css/tokens.css</code> + <code>css/components.css</code>. Se um valor mudar nas folhas, ele muda aqui sozinho.</footer>
 </div>
 
@@ -397,6 +667,72 @@
       '<td><code>--' + s.bg + '</code> · ' + tok(s.bg) + '</td>' +
       '<td><code>--' + s.fg + '</code> · ' + tok(s.fg) + '</td>';
     tbody.appendChild(tr);
+  });
+
+  // Espaçamento — escala canônica base-4. Nomes dos tokens, valores lidos ao vivo.
+  var SPACE_TOKENS = ['space-1','space-2','space-3','space-4','space-5','space-6','space-7','space-8'];
+  var spaceEl = document.getElementById('spaceScale');
+  SPACE_TOKENS.forEach(function(name){
+    var row = document.createElement('div'); row.className = 'space-row';
+    var bar = document.createElement('div'); bar.className = 'space-bar';
+    var px = tok(name);
+    bar.style.width = px; bar.style.maxWidth = '260px';
+    var b = document.createElement('b'); b.textContent = '--' + name;
+    var span = document.createElement('span'); span.textContent = px;
+    row.appendChild(bar); row.appendChild(b); row.appendChild(span);
+    spaceEl.appendChild(row);
+  });
+
+  // Raio — cada token aplicado a uma caixa de exemplo. --r-pill precisa de caixa retangular
+  // (não quadrada) pra virar pílula de verdade; as demais usam uma caixa quadrada padrão.
+  var RADIUS_TOKENS = [
+    { name: 'r-sm' }, { name: 'r-md' }, { name: 'r-lg' }, { name: 'r-xl' }, { name: 'r-2xl' },
+    { name: 'r-pill', w: 96, h: 40 },
+    { name: 'r-round' }
+  ];
+  var radiusEl = document.getElementById('radiusRow');
+  RADIUS_TOKENS.forEach(function(r){
+    var item = document.createElement('div'); item.className = 'r-item';
+    var box = document.createElement('div'); box.className = 'r-box';
+    box.style.width = (r.w || 64) + 'px';
+    box.style.height = (r.h || 64) + 'px';
+    var val = tok(r.name);
+    box.style.borderRadius = val;
+    var b = document.createElement('b'); b.textContent = '--' + r.name;
+    var span = document.createElement('span'); span.textContent = val;
+    item.appendChild(box); item.appendChild(b); item.appendChild(span);
+    radiusEl.appendChild(item);
+  });
+
+  // Movimento — timing-function e duration aplicados via JS, lidos do token, nunca reescritos em CSS.
+  function applyMotion(id, easeName, durName){
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.style.animationTimingFunction = tok(easeName);
+    el.style.animationDuration = tok(durName);
+  }
+  applyMotion('easeDotFast', 'ease-out', 'dur-fast');
+  applyMotion('easeDotBase', 'ease', 'dur');
+  applyMotion('easeDotPop', 'ease-pop', 'dur-slow');
+
+  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduceMotion) {
+    var note = document.getElementById('reducedMotionNote');
+    if (note) note.hidden = false;
+  }
+
+  var DUR_TOKENS = [
+    { name: 'dur-fast', label: 'rápida' },
+    { name: 'dur', label: 'padrão' },
+    { name: 'dur-slow', label: 'lenta' }
+  ];
+  var durEl = document.getElementById('durList');
+  DUR_TOKENS.forEach(function(d){
+    var div = document.createElement('div');
+    var b = document.createElement('b'); b.textContent = '--' + d.name + ' · ' + d.label;
+    var span = document.createElement('span'); span.textContent = tok(d.name);
+    div.appendChild(b); div.appendChild(span);
+    durEl.appendChild(div);
   });
 })();
 </script>
