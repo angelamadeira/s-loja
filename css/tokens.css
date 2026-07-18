@@ -20,7 +20,7 @@
 
   /* ── SEMÂNTICO (papéis · ganham override [data-theme=dark] na 0.5b) ── */
   --bg:var(--white); --surface:var(--white); --raised:var(--warm);
-  --text:#463C34; --text-2:#4D423A; --text-3:#5F5347; --muted:#6B5F52; --label:#8A7A63;
+  --text:#463C34; --text-secondary:#4D423A; --text-tertiary:#5F5347; --text-muted:#6B5F52; --label:#8A7A63;
   --gold-text:#907234; --stone-text:#84745E;
   --line:rgba(70,60,52,.12); --line-soft:rgba(70,60,52,.07); --line-strong:rgba(70,60,52,.18); --cav-line:rgba(70,60,52,.10);
   --sans:'Jost',system-ui,-apple-system,sans-serif; --serif:'Cormorant',Georgia,serif;
