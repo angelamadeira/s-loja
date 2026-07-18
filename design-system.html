@@ -362,6 +362,71 @@
       </div>
     </div>
 
+    <div class="comp-block">
+      <h4>Carrossel &amp; galeria — <code>.carwrap</code> / <code>.hcar</code> / <code>.cdots</code> / <code>.carrow</code></h4>
+      <p class="dsrule">Trilha horizontal com arraste (mouse e touch) e snap por item — usado em vitrine, receitas e galeria da PDP. Telas largas com ponteiro fino mostram <code>.carrow</code> (setas fixas fora da fileira); telas estreitas ou touch mostram <code>.cdots</code> (bolinhas) no lugar — nunca os dois ao mesmo tempo. O JS de arraste (<code>initCarousel</code>) não é replicado aqui — a demo abaixo é estática.</p>
+      <div class="demo">
+        <div class="carwrap">
+          <div class="hcar">
+            <a class="rcard" href="#"><div class="rimg" style="background:var(--sakura-wash)"><span class="rplay"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></span></div><h3>Brigadeiro Sakura</h3><span class="rmeta">18 min · Fácil</span></a>
+            <a class="rcard" href="#"><div class="rimg" style="background:var(--matcha-wash)"><span class="rplay"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></span></div><h3>Trufa Matcha</h3><span class="rmeta">25 min · Médio</span></a>
+            <a class="rcard" href="#"><div class="rimg" style="background:var(--sango-wash)"><span class="rplay"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></span></div><h3>Bombom Sango</h3><span class="rmeta">20 min · Fácil</span></a>
+          </div>
+          <div class="cdots">
+            <button type="button" class="cdot on" aria-label="Ir para o grupo 1"></button>
+            <button type="button" class="cdot" aria-label="Ir para o grupo 2"></button>
+            <button type="button" class="cdot" aria-label="Ir para o grupo 3"></button>
+          </div>
+          <button type="button" class="carrow prev" aria-label="Anterior"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
+          <button type="button" class="carrow next" aria-label="Próximo"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="comp-block">
+      <h4>Acordeão — <code>.acc</code></h4>
+      <p class="dsrule">Lista de <code>&lt;details&gt;</code>/<code>&lt;summary&gt;</code> nativos — sem JS de estado, o próprio navegador cuida do abre/fecha. Usado no FAQ e nos blocos de apoio da PDP (Cuidados, Ficha técnica, Entrega). No máximo um item costuma vir <code>open</code> por padrão; os demais ficam fechados até o clique.</p>
+      <div class="demo">
+        <div class="acc">
+          <details open>
+            <summary>Cuidados</summary>
+            <div class="ac">Lave à mão, com água morna e sabão neutro; seca ao natural. Vai do congelador (−40 °C) ao forno (230 °C) sem perder o desenho.</div>
+          </details>
+          <details>
+            <summary>Ficha técnica</summary>
+            <div class="ac">Silicone alimentício grau premium, atóxico e sem BPA. Fabricado no Brasil, cada peça é moldada e acabada à mão no ateliê.</div>
+          </details>
+        </div>
+      </div>
+    </div>
+
+    <div class="comp-block">
+      <h4>Busca — <code>.searchbar</code></h4>
+      <p class="dsrule">Desce sobre o topo da página (<code>.searchbar.open</code>) ao clicar na lupa do header, com <code>.searchov</code> escurecendo o resto da tela atrás dela. Aqui fixada em posição relativa e sempre aberta só para esta demonstração — na loja real ela cobre a viewport inteira.</p>
+      <div class="demo demo-stage">
+        <div class="searchbar open" style="position:relative;inset:auto;transform:none">
+          <div class="wrap sbin">
+            <svg class="slupa" viewBox="0 0 24 24" fill="none" stroke="var(--stone)" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="search" placeholder="Buscar peças e receitas…" aria-label="Buscar">
+            <button class="ibtn" aria-label="Fechar"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="comp-block">
+      <h4>Estados vazios — <code>.empty</code></h4>
+      <p class="dsrule">Mesma anatomia nas telas que podem ficar sem conteúdo (sacola vazia, busca sem resultado, lista filtrada sem match): ícone + <code>.sig</code> em destaque + frase de apoio + um único <code>.btn</code> de saída. Nunca deixa a pessoa num beco sem saída — sempre há uma ação a seguir.</p>
+      <div class="demo" style="display:flex;justify-content:center">
+        <div class="empty" style="max-width:360px">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:34px;height:34px;margin-bottom:14px"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+          <span class="sig">Sua sacola está vazia.</span>
+          Escolha uma peça pra começar a sua coleção.
+          <div style="margin-top:20px"><a class="btn" href="#">Ver produtos</a></div>
+        </div>
+      </div>
+    </div>
+
   </section>
 
   <section class="ds" id="espacamento">
