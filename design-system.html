@@ -427,6 +427,131 @@
       </div>
     </div>
 
+    <div class="comp-block">
+      <h4>Selos de preço &amp; promoção — <code>.offtag</code> · <code>.wasp</code> · <code>.pbadge.promo</code> · <code>.note</code> · <code>.couphint</code></h4>
+      <p class="dsrule">Desconto sempre aparece nos dois lados do preço: <code>.wasp</code> risca o valor cheio, <code>.offtag</code> é a pílula "−X%" ao lado do preço atual (PDP, "Leve junto"). No card de listagem a mesma leitura vira selo sobre a imagem — <code>.pbadge.promo</code>, mesma família de cor de <code>.last</code>/<code>.presale</code>/<code>.soldout</code>. A faixa do topo (<code>.note</code>) mostra por padrão o aviso de frete grátis; com a promoção geral do site ativa (<code>SALE.active</code>), o mesmo elemento passa a exibir o texto da campanha — não existe uma classe própria de "faixa promo". <code>.couphint</code> dá o retorno do cupom digitado no checkout: neutro, <code>.err</code> (mesma cor de <code>.field-err</code>, não demonstrado aqui) ou <code>.ok</code>.</p>
+      <div class="demo" style="display:flex;flex-direction:column;gap:20px">
+        <div class="note" style="border-radius:12px">Promoção de verão — −20% em toda a coleção Bento &amp; Festa</div>
+        <div class="demo-row">
+          <span style="font-size:1.05rem;font-weight:500"><s class="wasp">R$ 89,00</s>R$ 71,20<span class="offtag">−20%</span></span>
+          <div class="pcard" style="max-width:64px"><div class="m" style="background:var(--sango-wash)"><span class="pbadge promo">−20%</span></div></div>
+        </div>
+        <div style="max-width:320px">
+          <div class="couprow"><input type="text" value="SUZU20" readonly><button type="button" class="btn ghost">Aplicar</button></div>
+          <p class="couphint ok">Cupom aplicado: −20%.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="comp-block">
+      <h4>Cross-sell — <code>.crosssell</code> / <code>.csgrid</code> / <code>.formacta.buycard</code></h4>
+      <p class="dsrule">Bloco de compra complementar ao fim da tela: <b>"Leve junto"</b> na PDP (produtos que combinam com a peça vista) e <b>"A forma desta receita"</b> ao fim de uma receita (o molde usado nela). Mesma marcação nos dois — <code>.sec-head</code> com o título e <code>.csgrid</code> empilhando um ou mais <code>.formacta.buycard</code>: o mesmo cartão de <code>buyCard()</code>, com escolha de tamanho (<code>.fcsz</code>) e preço próprios, independentes do resto da página.</p>
+      <div class="demo">
+        <section class="crosssell">
+          <div class="sec-head"><div class="lead"><h2>Leve junto</h2></div></div>
+          <div class="csgrid">
+            <div class="formacta buycard">
+              <a class="fcimg" href="#" style="background:var(--sango-wash)"><svg viewBox="0 0 52 52" aria-hidden="true"><circle cx="26" cy="26" r="16" fill="none" stroke="var(--sango)" stroke-width="2"/></svg></a>
+              <div class="fctxt">
+                <span class="pbadge last">Últimas unidades</span>
+                <a class="fcname" href="#"><b>Bombom Concha</b></a>
+                <p>Bombom · mini · silicone platinum</p>
+                <div class="fcsizes">
+                  <button type="button" class="fcsz" aria-pressed="true">Pequeno · ≈ 3 cm</button>
+                  <button type="button" class="fcsz" aria-pressed="false">Médio · ≈ 7 cm</button>
+                </div>
+              </div>
+              <div class="fcbuy">
+                <span class="fcprice">R$ 71,00<small>em até 6× · Pequeno</small></span>
+                <button type="button" class="btn buybtn fcbtn">Adicionar à sacola</button>
+              </div>
+            </div>
+            <div class="formacta buycard">
+              <a class="fcimg" href="#" style="background:var(--matcha-wash)"><svg viewBox="0 0 52 52" aria-hidden="true"><circle cx="26" cy="26" r="16" fill="none" stroke="var(--matcha)" stroke-width="2"/></svg></a>
+              <div class="fctxt">
+                <a class="fcname" href="#"><b>Bombom Esfera</b></a>
+                <p>Bombom · esfera · silicone platinum</p>
+                <div class="fcsizes">
+                  <button type="button" class="fcsz" aria-pressed="false">Pequeno · ≈ 3 cm</button>
+                  <button type="button" class="fcsz" aria-pressed="true">Médio · ≈ 7 cm</button>
+                  <button type="button" class="fcsz out" aria-pressed="false">Grande · ≈ 12 cm</button>
+                </div>
+              </div>
+              <div class="fcbuy">
+                <span class="fcprice">R$ 74,00<small>em até 6× · Médio</small></span>
+                <button type="button" class="btn buybtn fcbtn">Adicionar à sacola</button>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <div class="comp-block">
+      <h4>Avaliação — <code>.rate</code></h4>
+      <p class="dsrule">Nota agregada da peça na PDP: o mesmo ícone de estrela dos depoimentos da home (<code>&lt;polygon&gt;</code>, preenchido em <code>--gold</code>) + a nota em destaque + a contagem de avaliações. Escopado a <code>.pdp .rate</code> — vive sempre junto do título do produto, nunca solto.</p>
+      <div class="demo">
+        <div class="pdp" style="padding:0;gap:0">
+          <div class="rate">
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <b>4.9</b> · 128 avaliações
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="comp-block">
+      <h4>Vídeo / reel — <code>.vidthumb</code></h4>
+      <p class="dsrule">Convite para o vídeo do processo, logo abaixo da galeria da PDP — só existe a partir de 860px de largura (abaixo disso quem convida pro reel é o botão flutuante <code>.igfab</code>, já documentado acima; os dois nunca aparecem juntos). <code>.vtp</code> é a miniatura tingida na cor do produto, <code>.vtplay</code> é o círculo de play sobre ela. Forçado com <code>display:flex</code> aqui só para demonstração — o CSS real esconde este componente abaixo do breakpoint.</p>
+      <div class="demo">
+        <button type="button" class="vidthumb" aria-label="Ver o vídeo desta peça" style="display:flex">
+          <span class="vtp" style="background:var(--sakura-wash)">
+            <svg viewBox="0 0 52 52" aria-hidden="true"><circle cx="26" cy="26" r="16" fill="none" stroke="var(--sakura)" stroke-width="2"/></svg>
+            <span class="vtplay"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></span>
+          </span>
+          <span class="vtlabel">Ver o vídeo desse produto</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="comp-block">
+      <h4>Drawer / sacola — <code>.drawer</code></h4>
+      <p class="dsrule">Painel deslizante da sacola: <code>.dh</code> (cabeçalho + fechar), <code>.items</code> com um <code>.li</code> por peça (miniatura + nome/tamanho + <code>.qty</code> de menos/mais) e <code>.dfoot</code> fixo embaixo (CEP, resumo de subtotal/frete/total em <code>.drow</code> e o botão <code>.checkout</code>). Na loja real é <code>position:fixed</code>, cobrindo a viewport pela lateral; aqui fixado em posição relativa e sempre aberto (<code>.open</code>) só para esta demonstração.</p>
+      <div class="demo" style="display:flex;justify-content:center">
+        <aside class="drawer open" aria-label="Sacola" style="position:relative;right:auto;top:auto;bottom:auto;transform:none;height:460px;max-width:340px">
+          <div class="dh"><b>Sua sacola</b><button type="button" class="ibtn" aria-label="Fechar"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+          <div class="items">
+            <div class="li">
+              <div class="mini"><svg viewBox="0 0 52 52" aria-hidden="true"><circle cx="26" cy="26" r="16" fill="none" stroke="var(--sango)" stroke-width="2"/></svg></div>
+              <div class="info"><b>Bombom Concha</b><small>R$ 71,00 · Pequeno · ≈ 3 cm</small></div>
+              <div class="qty"><button type="button" aria-label="menos"><svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/></svg></button><span>1</span><button type="button" aria-label="mais"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></div>
+            </div>
+          </div>
+          <div class="dfoot">
+            <div class="cepmini"><input type="text" placeholder="Seu CEP" readonly><button type="button" class="btn ghost">Calcular frete</button></div>
+            <p class="cephint"></p>
+            <div class="drow"><span>Subtotal</span><span>R$ 71,00</span></div>
+            <div class="drow"><span>Frete</span><span>Grátis</span></div>
+            <div class="drow tot"><span>Total</span><b>R$ 71,00</b></div>
+            <button type="button" class="checkout">Finalizar compra</button>
+            <p class="dnote">Frete grátis acima de R$ 150 · em até 6×</p>
+          </div>
+        </aside>
+      </div>
+    </div>
+
+    <div class="comp-block">
+      <h4>Tamanhos (PDP) — <code>.szgrid</code></h4>
+      <p class="dsrule">Grade de tamanho da PDP: até três colunas fixas (Pequeno/Médio/Grande), cada <code>.sz</code> já mostra nome, medida e preço daquele tamanho — sem precisar escolher pra ver o valor. Tamanho esgotado é <code>.sz.out</code>: opacidade reduzida e o preço vira "esgotado", a mesma lógica de <code>.fcsz.out</code> (Chips de tamanho), só que no card inteiro do tamanho.</p>
+      <div class="demo">
+        <div class="szgrid" style="max-width:420px">
+          <button type="button" class="sz" data-s="P" aria-pressed="false"><div class="t">Pequeno</div><div class="d">≈ 3 cm</div><div class="p">R$ 68,00</div></button>
+          <button type="button" class="sz" data-s="M" aria-pressed="true"><div class="t">Médio</div><div class="d">≈ 7 cm</div><div class="p">R$ 102,00</div></button>
+          <button type="button" class="sz out" data-s="G" aria-pressed="false"><div class="t">Grande</div><div class="d">≈ 12 cm</div><div class="p">esgotado</div></button>
+        </div>
+      </div>
+    </div>
+
   </section>
 
   <section class="ds" id="espacamento">
