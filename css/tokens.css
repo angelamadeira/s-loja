@@ -34,6 +34,21 @@
   /* alfa (interface) */
   --hexbtn-fill:rgba(255,255,255,.55); --swatch-ring:rgba(128,120,110,.45);
 
+  /* alfa / overlays — auditoria A1: hairlines, sombras e véus de components.css tokenizados (rgba são tokens legítimos, nunca achatar) */
+  --line-faint:rgba(70,60,52,.06); /* hairline mais fraco que --line-soft — anel dos dots de sabor (.pal .dots i) */
+  --shadow-sm:rgba(70,60,52,.16); /* sombra leve — menu de pedido (.ordmenu) */
+  --shadow-md:rgba(70,60,52,.24); /* sombra média — fab flutuante e modal de aviso (.wafloat, .nfmodal) */
+  --shadow-lg:rgba(70,60,52,.3); /* sombra forte — hover do fab flutuante (.wafloat:hover) */
+  --ink-dot:rgba(70,60,52,.28); /* preenchimento do dot de carrossel (.dot) e sombra do dot da galeria (.mgal .cdot) */
+  --overlay:rgba(70,60,52,.34); /* véu de tela cheia — busca/sheet/modal (.searchov, .sheetov, .overlay, .nfov) e gradiente do carrossel (.mgal.multi .mgframe::after) */
+  --veil-60:rgba(255,255,255,.6); /* véu branco leve atrás do dot da galeria (.mgal .cdot) */
+  --veil-82:rgba(255,255,255,.82); /* fundo do botão de play em cards de reel (.rcard .rplay) */
+  --veil-86:rgba(255,255,255,.86); /* fundo da seta do carrossel de galeria (.mgal .carrow) */
+  --veil-90:rgba(255,255,255,.9); /* fundo dos botões de play (.igfab .fabplay, .reelplay, .recph .reelplay, .vidthumb .vtplay) */
+  --backdrop-reel:rgba(30,26,22,.62); /* fundo (scrim) do modal de reels (.reelov) */
+  --backdrop-btn:rgba(28,22,18,.5); /* fundo do botão fechar do reel (.reelclose) */
+  --backdrop-btn-hover:rgba(28,22,18,.75); /* hover do botão fechar do reel (.reelclose:hover) */
+
   /* estado (Fase 0) */
   --ink-hover:#3A322B; --gold-ink:#3A2C10; --kick-text:#6B551D; --mizu-text:#233F3D; --sango-text:#6E2F1E; --disc-text:#3A6B4F; --soldout-bg:#EFE9E0; --coinfo-text:#2C4744;
 
