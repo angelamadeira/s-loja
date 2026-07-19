@@ -71,6 +71,23 @@
   --dur-fast:.16s; --dur:.25s; --dur-slow:.8s;
 }
 
+/* ── TEMA CLARO explícito — mesmos valores do :root (default), mas escopável.
+   Necessário para PINAR um subtrecho em claro mesmo quando um ancestral está escuro
+   (ex.: o painel "claro" da comparação claro↔escuro dentro da página em dark). ── */
+[data-theme="light"]{
+  --bg:var(--white); --surface:var(--white); --raised:var(--warm);
+  --text:#463C34; --text-secondary:#4D423A; --text-tertiary:#5F5347; --text-muted:#6B5F52;
+  --label:#8A7A63; --gold-text:#907234; --stone-text:#84745E; --wood-text:#917147;
+  --logo-ink:#463C34; --footer-plate:#FBF8F1;
+  --line:rgba(70,60,52,.12); --cav-line:rgba(70,60,52,.10);
+  --line-faint:rgba(70,60,52,.06); --line-soft:rgba(70,60,52,.07); --line-strong:rgba(70,60,52,.18);
+  --error-surface:#E1CBCA; --error-text:#8E3B4E;
+  --success-surface:#ECEDDB; --success-text:#6F6B58;
+  --warning-surface:#ECE0C7; --warning-text:#736142;
+  --info-surface:#E3EBE7; --info-text:#656965;
+  --ink-hover:#3A322B;
+}
+
 /* ── TEMA ESCURO (0.5b) — override dos papéis semânticos. Só ativa com [data-theme="dark"]
    no <html>; a loja em produção segue clara por padrão (não seta o atributo). Valores = tabela
    claro↔escuro do Brandbook. A PALETA (bruta) acima nunca troca; aqui só remapeiam os papéis.
