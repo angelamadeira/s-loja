@@ -17,8 +17,14 @@
   --mizu-light:#D1E1DF; --mizu-deep:#80918F;
   --sango-light:#F2C9BB; --sango-deep:#A77465;
   --matcha-light:#E1E4CB; --matcha-deep:#939477;
+  /* dark japandi (charcoal) — bruta, consumida pelo override [data-theme=dark] abaixo */
+  --carvao:#1E1A16; --carvao-sup:#292521; --carvao-elev:#34302C; --carvao-borda:#44403B;
+  --d-text-2:#DFD5C6; --d-text-3:#CDC2B1; --d-text-4:#BDB2A1; --d-pedra:#B9AA93;
+  --d-hair:rgba(243,235,221,.10); --d-line:rgba(243,235,221,.16); --d-hx:rgba(243,235,221,.06);
+  --d-error-surface:#301F1F; --d-error-text:#B37B85;
+  --d-success-surface:#39372D; --d-warning-surface:#393021; --d-info-surface:#343633;
 
-  /* ── SEMÂNTICO (papéis · ganham override [data-theme=dark] na 0.5b) ── */
+  /* ── SEMÂNTICO (papéis · override no tema escuro abaixo, [data-theme=dark]) ── */
   --bg:var(--white); --surface:var(--white); --raised:var(--warm);
   --text:#463C34; --text-secondary:#4D423A; --text-tertiary:#5F5347; --text-muted:#6B5F52; --label:#8A7A63;
   --gold-text:#907234; --stone-text:#84745E;
@@ -63,4 +69,21 @@
   /* movimento */
   --ease:cubic-bezier(.22,.61,.36,1); --ease-out:cubic-bezier(.32,.72,0,1); --ease-pop:cubic-bezier(.34,1.56,.64,1);
   --dur-fast:.16s; --dur:.25s; --dur-slow:.8s;
+}
+
+/* ── TEMA ESCURO (0.5b) — override dos papéis semânticos. Só ativa com [data-theme="dark"]
+   no <html>; a loja em produção segue clara por padrão (não seta o atributo). Valores = tabela
+   claro↔escuro do Brandbook. A PALETA (bruta) acima nunca troca; aqui só remapeiam os papéis. ── */
+:root[data-theme="dark"]{
+  --bg:var(--carvao); --surface:var(--carvao-sup); --raised:var(--carvao-elev);
+  --text:var(--raw); --text-secondary:var(--d-text-2); --text-tertiary:var(--d-text-3); --text-muted:var(--d-text-4);
+  --label:var(--wood); --gold-text:var(--gold); --stone-text:var(--d-pedra); --wood-text:var(--wood);
+  --logo-ink:var(--white); --footer-plate:var(--carvao-sup);
+  --line:var(--d-line); --cav-line:var(--d-hair);
+  --line-faint:rgba(243,235,221,.06); --line-soft:rgba(243,235,221,.08); --line-strong:rgba(243,235,221,.22);
+  --error-surface:var(--d-error-surface); --error-text:var(--d-error-text);
+  --success-surface:var(--d-success-surface); --success-text:var(--matcha);
+  --warning-surface:var(--d-warning-surface); --warning-text:var(--gold);
+  --info-surface:var(--d-info-surface); --info-text:var(--mizu);
+  --ink-hover:var(--raw); /* no escuro o hover clareia (no claro, escurece) */
 }
