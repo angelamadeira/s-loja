@@ -104,5 +104,5 @@
   --success-surface:var(--d-success-surface); --success-text:var(--matcha);
   --warning-surface:var(--d-warning-surface); --warning-text:var(--gold);
   --info-surface:var(--d-info-surface); --info-text:var(--mizu);
-  --ink-hover:var(--raw); /* no escuro o hover clareia (no claro, escurece) */
+  --ink-hover:#E6DCC6; /* botão vira claro no dark; hover ESCURECE o creme (mantém contraste do texto) */
 }

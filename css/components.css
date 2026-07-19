@@ -14,10 +14,10 @@ input,textarea{font-family:inherit}
 .label{font-weight:400;font-size:.64rem;letter-spacing:.24em;text-transform:uppercase;color:var(--label)}
 .sig{font-family:var(--serif);font-style:italic;font-weight:500;color:var(--text-secondary)}
 .seal{width:38px;height:38px}
-.btn{display:inline-block;border:1px solid var(--ink);background:var(--ink);color:var(--white);padding:14px 28px;border-radius:999px;font-size:.78rem;font-weight:500;letter-spacing:.06em;text-transform:uppercase;transition:background .16s}
+.btn{display:inline-block;border:1px solid var(--text);background:var(--text);color:var(--bg);padding:14px 28px;border-radius:999px;font-size:.78rem;font-weight:500;letter-spacing:.06em;text-transform:uppercase;transition:background .16s}
 .btn:hover{background:var(--ink-hover)}
 .btn.ghost{background:transparent;color:var(--text);border-color:var(--line-strong)}
-.btn.ghost:hover{border-color:var(--ink)}
+.btn.ghost:hover{border-color:var(--text)}
 
 .note{background:var(--ink);color:var(--warm);text-align:center;padding:9px 24px;font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;font-weight:500}
 
@@ -620,7 +620,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
 .drow{display:flex;justify-content:space-between;font-size:.84rem;color:var(--text-tertiary);margin-bottom:8px;font-weight:300}
 .drow.tot{font-size:1.05rem;color:var(--text);margin:12px 0 16px;font-weight:400}
 .drow.tot b{font-weight:500;font-variant-numeric:tabular-nums}
-.checkout{width:100%;background:var(--ink);color:var(--white);border:none;padding:15px;border-radius:999px;font-size:.76rem;font-weight:500;letter-spacing:.08em;text-transform:uppercase}
+.checkout{width:100%;background:var(--text);color:var(--bg);border:none;padding:15px;border-radius:999px;font-size:.76rem;font-weight:500;letter-spacing:.08em;text-transform:uppercase}
 .checkout:hover{background:var(--ink-hover)}
 .cowrap{max-width:1040px;margin:0 auto;padding:22px 0 64px}
 .cotitle{font-size:1.5rem;font-weight:500;letter-spacing:-.01em;margin:14px 0 26px}
@@ -637,7 +637,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
 .cofield input:focus,.cofield select:focus{border-color:var(--stone)}
 .tworow{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .cocheck{display:flex;align-items:center;gap:9px;font-size:.85rem;color:var(--text);font-weight:300;margin-top:2px}
-.cocheck input{width:16px;height:16px;accent-color:var(--ink)}
+.cocheck input{width:16px;height:16px;accent-color:var(--text)}
 .coguest{font-size:.78rem;color:var(--text-muted);font-weight:300;margin-top:10px}
 .coinfo{background:var(--mizu-wash);border-radius:12px;padding:14px 15px;font-size:.86rem;font-weight:300;color:var(--ink);line-height:1.55}
 .ceprow{display:flex;gap:10px;align-items:flex-end}
