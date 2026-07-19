@@ -35,7 +35,7 @@ nav.main a:hover{color:var(--text)}
 nav.main a.active{color:var(--text);font-weight:500}
 .ibtn{width:42px;height:42px;display:grid;place-items:center;border:none;background:transparent;border-radius:50%}
 .ibtn:hover{background:var(--raised)}
-.ibtn svg{width:21px;height:21px;stroke:var(--ink);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.ibtn svg{width:21px;height:21px;stroke:var(--text);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .cart-btn{position:relative}
 .badge{position:absolute;top:4px;right:4px;min-width:17px;height:17px;padding:0 4px;background:var(--gold);color:var(--ink);font-size:.6rem;font-weight:600;border-radius:9px;display:grid;place-items:center;font-variant-numeric:tabular-nums;transform:scale(0);transition:transform .2s cubic-bezier(.3,1.5,.5,1)}
 .badge.on{transform:scale(1)}
@@ -325,14 +325,14 @@ footer{background:var(--footer-plate);border-top:1px solid var(--line-soft);padd
 .ptools .ptitle{font-size:1.5rem;font-weight:500;letter-spacing:-.01em;margin:0}
 @media (min-width:560px){.ptools .ptitle{margin-right:auto}}
 .ptbtn{border:1px solid var(--line-strong);background:var(--surface);border-radius:999px;padding:9px 15px;font-size:.8rem;font-weight:500;display:inline-flex;align-items:center;gap:7px}
-.ptbtn svg{width:16px;height:16px;stroke:var(--ink);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.ptbtn svg{width:16px;height:16px;stroke:var(--text);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .ptbtn .bn{background:var(--ink);color:var(--white);border-radius:999px;min-width:18px;height:18px;padding:0 5px;font-size:.6rem;display:grid;place-items:center;font-variant-numeric:tabular-nums}
 @media(max-width:559px){.ptools #ordBtnLabel{display:none}.ptools #ordBtn{margin-left:auto;width:44px;height:44px;padding:0;justify-content:center;gap:0;flex:0 0 auto}.ptools .ptfilter{position:relative;width:44px;height:44px;padding:0;justify-content:center;gap:0;font-size:0;flex:0 0 auto}.ptools .ptfilter .bn{font-size:.54rem;position:absolute;top:0;right:0}}
 .ordselect{display:none;border:1px solid var(--line-strong);background:var(--surface);border-radius:999px;padding:9px 36px 9px 16px;font-size:.8rem;font-weight:500;color:var(--text);font-family:inherit;cursor:pointer;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%23463C34'%20stroke-width='2'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpolyline%20points='6%209%2012%2015%2018%209'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 13px center;background-size:14px}
 .ordselect:focus{outline:none;border-color:var(--ink)}
 .orddrop{position:relative;display:none}
 @media (min-width:860px){.orddrop{display:inline-block}#ordBtn{display:none}}
-.orddrop .ochev{width:15px;height:15px;stroke:var(--ink);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:transform .18s ease}
+.orddrop .ochev{width:15px;height:15px;stroke:var(--text);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:transform .18s ease}
 .orddrop.open .ochev{transform:rotate(180deg)}
 .ordmenu{position:absolute;top:calc(100% + 8px);right:0;min-width:232px;background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:0 14px 36px var(--shadow-sm);padding:6px;display:none;z-index:30}
 .orddrop.open .ordmenu{display:block}
