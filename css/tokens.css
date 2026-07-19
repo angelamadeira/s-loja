@@ -73,8 +73,10 @@
 
 /* ── TEMA ESCURO (0.5b) — override dos papéis semânticos. Só ativa com [data-theme="dark"]
    no <html>; a loja em produção segue clara por padrão (não seta o atributo). Valores = tabela
-   claro↔escuro do Brandbook. A PALETA (bruta) acima nunca troca; aqui só remapeiam os papéis. ── */
-:root[data-theme="dark"]{
+   claro↔escuro do Brandbook. A PALETA (bruta) acima nunca troca; aqui só remapeiam os papéis.
+   Seletor sem :root de propósito — assim [data-theme="dark"] também escopa prévias locais
+   (ex.: um <div data-theme="dark"> no styleguide) além do <html> inteiro no toggle. ── */
+[data-theme="dark"]{
   --bg:var(--carvao); --surface:var(--carvao-sup); --raised:var(--carvao-elev);
   --text:var(--raw); --text-secondary:var(--d-text-2); --text-tertiary:var(--d-text-3); --text-muted:var(--d-text-4);
   --label:var(--wood); --gold-text:var(--gold); --stone-text:var(--d-pedra); --wood-text:var(--wood);

@@ -67,6 +67,21 @@
   p.dspart-note{color:var(--text-muted);font-size:.84rem;max-width:66ch;margin:0 0 var(--space-2);line-height:1.6}
   p.dspart-note + h3.dsgroup{margin-top:0}
 
+  /* Divisor de PARTE do documento — Parte 1 (Do Brandbook) / Parte 2 (Adições do site) */
+  .dspart-head{margin:var(--space-8) 0 var(--space-6);padding-bottom:var(--space-4);border-bottom:2px solid var(--line-strong);scroll-margin-top:var(--space-6)}
+  .dspart-title{font-family:var(--sans);font-weight:600;font-size:clamp(1.8rem,4vw,2.6rem);letter-spacing:-.01em;margin:var(--space-2) 0 0;color:var(--text)}
+  .dspart-title em{font-family:var(--serif);font-style:italic;font-weight:500}
+  .dspart-head .lead{color:var(--text-secondary);max-width:60ch;margin:var(--space-3) 0 0;font-size:1rem;line-height:1.6}
+
+  /* Comparação claro ↔ escuro (dois painéis lado a lado, mesmos tokens) */
+  .darkcmp{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-4)}
+  @media(max-width:640px){ .darkcmp{grid-template-columns:1fr} }
+  .dkcol > .dsgroup{margin:0 0 var(--space-2)}
+  .dkpane{background:var(--bg);border:1px solid var(--line);border-radius:16px;padding:var(--space-5);display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:14px;color:var(--text)}
+  .dksw i{display:block;height:38px;border-radius:8px;border:1px solid var(--line)}
+  .dksw b{display:block;font-size:.64rem;margin-top:5px;font-weight:600;color:var(--text)}
+  .dksw span{display:block;font-size:.58rem;color:var(--text-muted);font-variant-numeric:tabular-nums}
+
   .swrow{display:flex;flex-wrap:wrap;gap:4px 0}
   .sw{width:112px;margin:6px 8px 6px 0}
   .sw i{display:block;height:58px;border-radius:10px;border:1px solid var(--line)}
@@ -261,15 +276,31 @@
       </nav>
     </div>
 
+  <div class="dspart-head" id="parte-brandbook">
+    <span class="dseyebrow">Parte 1</span>
+    <h2 class="dspart-title">Do <em>Brandbook</em></h2>
+    <p class="lead">Fundamentos id&ecirc;nticos ao Brandbook Suzu &mdash; cor, tema, tipografia, logo, &iacute;cones e padr&otilde;es. Aqui o produto n&atilde;o inventa: reproduz a fonte da verdade, valor por valor.</p>
+  </div>
+
   <section class="ds" id="cores">
-    <span class="dseyebrow">Fundamentos · 01</span>
+    <span class="dseyebrow">Fundamento · cor</span>
     <h2>Cores</h2>
     <p class="lead">Tokens definidos uma única vez em <code>:root</code>, em duas camadas — <b>paleta</b> (bruta, nunca troca de tema) e <b>semântico</b> (papéis, ganha override no tema escuro da 0.5b). Agrupados por função — não por matiz — porque é assim que são usados no CSS.</p>
     <div id="colorGroups"><!-- preenchido via JS a partir de COLOR_GROUPS --></div>
   </section>
 
+  <section class="ds" id="modo-escuro">
+    <span class="dseyebrow">Fundamento · tema</span>
+    <h2>Modo claro ↔ escuro</h2>
+    <p class="lead">O mesmo sistema em dois temas. No escuro as superf&iacute;cies viram <b>charcoal</b>, o texto vira <b>creme</b> e os hairlines invertem para creme transl&uacute;cido &mdash; e os seis acentos <b>n&atilde;o mudam</b>. &Eacute; a tabela claro↔escuro do Brandbook aplicada aos pap&eacute;is sem&acirc;nticos. Alterne no bot&atilde;o ☀/☾ no canto; abaixo, os dois lados a par &mdash; mesmos tokens, um painel em <code>data-theme=&quot;dark&quot;</code>.</p>
+    <div class="darkcmp">
+      <div class="dkcol"><h3 class="dsgroup">Tema claro</h3><div class="dkpane" id="dkLight"></div></div>
+      <div class="dkcol"><h3 class="dsgroup">Tema escuro</h3><div class="dkpane" data-theme="dark" id="dkDark"></div></div>
+    </div>
+  </section>
+
   <section class="ds" id="tipografia">
-    <span class="dseyebrow">Fundamentos · 02</span>
+    <span class="dseyebrow">Fundamento · tipografia</span>
     <h2>Tipografia</h2>
     <p class="lead">Duas famílias, papéis fixos. Jost carrega o produto inteiro; Cormorant itálico é reservado a detalhe e ênfase — nunca corpo de texto longo.</p>
 
@@ -285,19 +316,168 @@
     </div>
   </section>
 
-  <section class="ds" id="linhas">
-    <span class="dseyebrow">Fundamentos · 03</span>
-    <h2>Linhas</h2>
-    <p class="lead">As linhas (hairlines) não são hex — são <code>rgba()</code> derivados de <code>--ink</code>, nunca cinzas soltos. Demo visual em tiras abaixo; o inventário completo com a separação <b>brandbook × adições do site</b> está nos grupos de <b>Cores</b>, acima (<code>--line</code> e <code>--cav-line</code> são do brandbook; <code>--line-soft</code>/<code>--line-strong</code>/<code>--line-faint</code> são adições do site).</p>
-    <div class="line-demo">
-      <div><b>--line</b><div class="strip" style="border:1px solid var(--line)"></div><span id="tokLine"></span></div>
-      <div><b>--line-soft</b><div class="strip" style="border:1px solid var(--line-soft)"></div><span id="tokLineSoft"></span></div>
-      <div><b>--line-strong</b><div class="strip" style="border:1px solid var(--line-strong)"></div><span id="tokLineStrong"></span></div>
+  <section class="ds" id="logo-selo">
+    <span class="dseyebrow">Marca · logo & selo</span>
+    <h2>Logo / Selo</h2>
+    <p class="lead">O selo é a marca gráfica do Studio Suzu — mesmos <code>&lt;path&gt;</code> <code>#p-su</code>/<code>#p-zu</code> usados em <code>index.html</code>, sem duplicar arte fora dos <code>&lt;defs&gt;</code> compartilhados no topo desta página.</p>
+
+    <h3 class="dsgroup">Sempre (regras do Brandbook)</h3>
+    <ol class="dsrules">
+      <li>O selo com contorno (<b>outline</b>) é o logo oficial — tinta (<code>--ink</code>) no tema claro, branco (<code>--white</code>) no tema escuro.</li>
+      <li>Espaço livre mínimo ao redor: <b>¼ do diâmetro</b> do selo, nos 4 lados.</li>
+      <li>Tamanhos mínimos: <b>32px</b> outline · <b>24px</b> preenchido · <b>80px</b> em uso inline (ao lado do texto).</li>
+      <li>Abaixo de 32px, sempre trocar para o selo <b>preenchido</b> — o traço fino do outline deixa de ler.</li>
+      <li>Sobre padrão (seigaiha/shippō), o selo sempre vive dentro de uma <b>clareira sólida</b> — nunca direto sobre a estampa.</li>
+      <li>Traço do anel: proporção fixa de <b>52/1600</b> (mesma relação usada no <code>viewBox</code> e <code>stroke-width</code> do <code>.seal</code> abaixo).</li>
+      <li>Letras só em <code>--ink</code> ou <code>--white</code> — nunca outra cor.</li>
+      <li>Preenchimento sempre <b>chapado</b> — sem gradiente, sem sombra.</li>
+      <li>Cor de sabor da paleta preenchendo o selo só existe no <b>flavor system</b> — nunca em uso institucional.</li>
+      <li>Wordmark exatamente como fornecido — nunca esticar, inclinar ou distorcer.</li>
+    </ol>
+
+    <h3 class="dsgroup">Tamanhos mínimos</h3>
+    <div class="seal-row">
+      <div class="seal-item">
+        <svg class="seal" viewBox="0 0 1600 1600" aria-hidden="true" style="width:32px;height:32px">
+          <circle cx="800" cy="800" r="774" fill="none" stroke="var(--ink)" stroke-width="52"/>
+          <g fill="var(--ink)" transform="translate(800 800) scale(.74) translate(-800 -800)">
+            <use href="#p-su" transform="translate(277.4 734.6) scale(1 -1)"/>
+            <use href="#p-zu" transform="translate(264.5 1324.6) scale(1 -1)"/>
+          </g>
+        </svg>
+        <b>Outline · 32px</b>
+        <span>mínimo absoluto</span>
+      </div>
+      <div class="seal-item">
+        <svg viewBox="0 0 1600 1600" aria-hidden="true" style="width:24px;height:24px;display:block">
+          <circle cx="800" cy="800" r="800" fill="var(--ink)"/>
+          <g fill="var(--white)" transform="translate(800 800) scale(.74) translate(-800 -800)">
+            <use href="#p-su" transform="translate(277.4 734.6) scale(1 -1)"/>
+            <use href="#p-zu" transform="translate(264.5 1324.6) scale(1 -1)"/>
+          </g>
+        </svg>
+        <b>Preenchido · 24px</b>
+        <span>abaixo de 32px</span>
+      </div>
+      <div class="seal-item">
+        <div class="lockup-demo">
+          <svg class="seal" viewBox="0 0 1600 1600" aria-hidden="true" style="width:80px;height:80px">
+            <circle cx="800" cy="800" r="774" fill="none" stroke="var(--ink)" stroke-width="52"/>
+            <g fill="var(--ink)" transform="translate(800 800) scale(.74) translate(-800 -800)">
+              <use href="#p-su" transform="translate(277.4 734.6) scale(1 -1)"/>
+              <use href="#p-zu" transform="translate(264.5 1324.6) scale(1 -1)"/>
+            </g>
+          </svg>
+          <b>Studio Suzu</b>
+        </div>
+        <span>Inline · 80px (ao lado do wordmark)</span>
+      </div>
+    </div>
+
+    <h3 class="dsgroup">Espaço livre — ¼ do diâmetro</h3>
+    <p class="dsrule">Selo de 96px pede pelo menos 24px de respiro em cada lado (tracejado ilustra o limite — nunca desenhado na loja real).</p>
+    <div class="clearspace" style="padding:24px">
+      <svg class="seal" viewBox="0 0 1600 1600" aria-hidden="true" style="width:96px;height:96px;display:block">
+        <circle cx="800" cy="800" r="774" fill="none" stroke="var(--ink)" stroke-width="52"/>
+        <g fill="var(--ink)" transform="translate(800 800) scale(.74) translate(-800 -800)">
+          <use href="#p-su" transform="translate(277.4 734.6) scale(1 -1)"/>
+          <use href="#p-zu" transform="translate(264.5 1324.6) scale(1 -1)"/>
+        </g>
+      </svg>
     </div>
   </section>
 
+  <section class="ds" id="icones">
+    <span class="dseyebrow">Marca · ícones</span>
+    <h2>Ícones</h2>
+    <p class="lead">Família Feather: <code>viewBox 0 0 24 24</code>, <code>fill:none</code>, <code>stroke:currentColor</code>, <code>stroke-width:2</code>, <code>stroke-linecap</code>/<code>stroke-linejoin:round</code>, tamanho ~<code>1.2em</code>. Cor sempre herdada do texto ao redor — nunca uma cor fixa no próprio <code>&lt;svg&gt;</code> — o que deixa o ícone virar cor de status automaticamente dentro de um bloco de feedback (erro, sucesso, aviso).</p>
+
+    <h3 class="dsgroup">Glifos em uso na loja</h3>
+    <div class="demo icon-row">
+      <div class="icon-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <b>search</b>
+      </div>
+      <div class="icon-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+        <b>shopping-bag</b>
+      </div>
+      <div class="icon-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        <b>x</b>
+      </div>
+      <div class="icon-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        <b>check</b>
+      </div>
+      <div class="icon-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <b>alert-circle</b>
+      </div>
+      <div class="icon-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+        <b>instagram</b>
+      </div>
+    </div>
+
+    <h3 class="dsgroup">Cor de status — mesmo ícone, papel de feedback</h3>
+    <p class="dsrule"><code>alert-circle</code> não muda de marcação — só o texto ao redor troca de cor semântica, e o <code>currentColor</code> do ícone acompanha.</p>
+    <div class="icon-status" style="background:var(--error-surface);color:var(--error-text)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      Confira o e-mail — parece incompleto.
+    </div>
+    <div class="icon-status" style="background:var(--success-surface);color:var(--success-text)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/></svg>
+      Pedido confirmado com sucesso.
+    </div>
+  </section>
+
+  <section class="ds" id="padroes">
+    <span class="dseyebrow">Marca · padrões</span>
+    <h2>Padrões</h2>
+    <p class="lead">Duas estampas autorais — <b>seigaiha</b> (ondas, leques de arcos concêntricos) e <b>shippō</b> (círculos entrelaçados) — mesmos <code>&lt;pattern&gt;</code> de <code>index.html</code>, reaproveitados aqui via os <code>&lt;defs&gt;</code> do topo da página. Regra: padrão carrega significado só em embalagem/destaque de peça (nunca na UI de compra em si) e, quando o selo ou conteúdo precisa viver sobre ele, vai sempre dentro de uma <b>clareira sólida</b> — nunca direto sobre a estampa.</p>
+
+    <h3 class="dsgroup">Seigaiha — 45×45, traço ~1.2</h3>
+    <div class="demo pattern-row">
+      <div class="pattern-item"><svg class="pattern-tile"><rect width="100%" height="100%" fill="url(#seigaiha-azul)"/></svg><b>--mizu</b></div>
+      <div class="pattern-item"><svg class="pattern-tile"><rect width="100%" height="100%" fill="url(#seigaiha-ouro)"/></svg><b>--gold</b></div>
+    </div>
+
+    <h3 class="dsgroup">Shippō — 34×34, traço ~1.1</h3>
+    <div class="demo pattern-row">
+      <div class="pattern-item"><svg class="pattern-tile"><rect width="100%" height="100%" fill="url(#estampa-sakura)"/></svg><b>--sakura</b></div>
+      <div class="pattern-item"><svg class="pattern-tile"><rect width="100%" height="100%" fill="url(#estampa-coral)"/></svg><b>--sango</b></div>
+      <div class="pattern-item"><svg class="pattern-tile"><rect width="100%" height="100%" fill="url(#estampa-ouro)"/></svg><b>--gold</b></div>
+    </div>
+
+    <h3 class="dsgroup">Selo sobre padrão — sempre em clareira sólida</h3>
+    <p class="dsrule">O selo nunca fica direto sobre a estampa: uma clareira do tom <code>--warm</code> abre espaço sólido ao redor dele antes de tocar o padrão.</p>
+    <div class="demo">
+      <div class="clareira-demo">
+        <svg viewBox="0 0 160 160" aria-hidden="true" style="position:absolute;inset:0">
+          <rect width="160" height="160" fill="url(#seigaiha-azul)"/>
+          <circle cx="80" cy="80" r="46" fill="var(--warm)"/>
+        </svg>
+        <svg class="seal" viewBox="0 0 1600 1600" aria-hidden="true" style="position:absolute;top:36px;left:36px;width:68px;height:68px">
+          <circle cx="800" cy="800" r="774" fill="none" stroke="var(--ink)" stroke-width="52"/>
+          <g fill="var(--ink)" transform="translate(800 800) scale(.74) translate(-800 -800)">
+            <use href="#p-su" transform="translate(277.4 734.6) scale(1 -1)"/>
+            <use href="#p-zu" transform="translate(264.5 1324.6) scale(1 -1)"/>
+          </g>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+    <p class="dsmeta" style="text-align:center;margin-top:var(--space-8)">Documentação viva — se um valor mudar em <code>css/tokens.css</code> ou <code>css/components.css</code>, muda aqui sozinho. <a class="dsback" href="#topo" style="margin:0 0 0 .6em">↑ topo</a></p>
+    <div class="dspart-head" id="parte-site">
+    <span class="dseyebrow">Parte 2</span>
+    <h2 class="dspart-title">Adi&ccedil;&otilde;es do <em>site</em></h2>
+    <p class="lead">O que o produto digital precisou criar e o Brandbook n&atilde;o define &mdash; componentes reais da loja, mais as escalas funcionais (linhas, espa&ccedil;amento, raio, movimento). Extens&otilde;es, mantidas separadas do can&ocirc;nico.</p>
+  </div>
+
   <section class="ds" id="componentes">
-    <span class="dseyebrow">Componentes · 04</span>
+    <span class="dseyebrow">Adição do site · componentes</span>
     <h2>Componentes</h2>
     <p class="lead">Renderizados com as classes reais de <code>index.html</code>. O que muda aqui é o dado de exemplo — nunca a marcação.</p>
 
@@ -651,22 +831,33 @@
 
   </section>
 
+  <section class="ds" id="linhas">
+    <span class="dseyebrow">Adição do site · linhas</span>
+    <h2>Linhas</h2>
+    <p class="lead">As linhas (hairlines) não são hex — são <code>rgba()</code> derivados de <code>--ink</code>, nunca cinzas soltos. Demo visual em tiras abaixo; o inventário completo com a separação <b>brandbook × adições do site</b> está nos grupos de <b>Cores</b>, acima (<code>--line</code> e <code>--cav-line</code> são do brandbook; <code>--line-soft</code>/<code>--line-strong</code>/<code>--line-faint</code> são adições do site).</p>
+    <div class="line-demo">
+      <div><b>--line</b><div class="strip" style="border:1px solid var(--line)"></div><span id="tokLine"></span></div>
+      <div><b>--line-soft</b><div class="strip" style="border:1px solid var(--line-soft)"></div><span id="tokLineSoft"></span></div>
+      <div><b>--line-strong</b><div class="strip" style="border:1px solid var(--line-strong)"></div><span id="tokLineStrong"></span></div>
+    </div>
+  </section>
+
   <section class="ds" id="espacamento">
-    <span class="dseyebrow">Sistema · 05</span>
+    <span class="dseyebrow">Adição do site · espaçamento</span>
     <h2>Espaçamento</h2>
     <p class="lead">Escala canônica base-4 (<code>--space-1</code> a <code>--space-8</code>, de 4 a 64px). É uma escala nova em <code>tokens.css</code> — a <b>adoção é incremental</b>: o CSS legado da loja continua com valores ad-hoc (margens/paddings soltos), e migra componente por componente conforme cada tela é revisada, nunca de uma vez só.</p>
     <div id="spaceScale"><!-- preenchido via JS a partir de SPACE_TOKENS --></div>
   </section>
 
   <section class="ds" id="raio">
-    <span class="dseyebrow">Sistema · 06</span>
+    <span class="dseyebrow">Adição do site · raio</span>
     <h2>Raio</h2>
     <p class="lead">Escala canônica de <code>border-radius</code> (<code>--r-sm</code> a <code>--r-2xl</code>, mais <code>--r-pill</code> para pílula e <code>--r-round</code> para círculo). Mesma regra de adoção incremental do espaçamento: componentes existentes com raio "solto" migram aos poucos, sem trocar pixel sem revisão.</p>
     <div class="r-row" id="radiusRow"><!-- preenchido via JS a partir de RADIUS_TOKENS --></div>
   </section>
 
   <section class="ds" id="movimento">
-    <span class="dseyebrow">Sistema · 07</span>
+    <span class="dseyebrow">Adição do site · movimento</span>
     <h2>Movimento</h2>
     <p class="lead">Três curvas (<code>--ease</code>, <code>--ease-out</code>, <code>--ease-pop</code>) e três durações (<code>--dur-fast</code>, <code>--dur</code>, <code>--dur-slow</code>) — canônicas, adoção incremental sobre as transições ad-hoc já existentes no CSS legado. Princípio: micro-interações usam curva + duração rápidas, entradas de tela usam durações mais longas, e <code>--ease-pop</code> é reservado só para elementos que "aparecem" (leve overshoot) — nunca para deslocamento comum.</p>
 
@@ -693,161 +884,7 @@
     <div class="dur-list" id="durList"><!-- preenchido via JS a partir de DUR_TOKENS --></div>
   </section>
 
-  <section class="ds" id="logo-selo">
-    <span class="dseyebrow">Marca · 08</span>
-    <h2>Logo / Selo</h2>
-    <p class="lead">O selo é a marca gráfica do Studio Suzu — mesmos <code>&lt;path&gt;</code> <code>#p-su</code>/<code>#p-zu</code> usados em <code>index.html</code>, sem duplicar arte fora dos <code>&lt;defs&gt;</code> compartilhados no topo desta página.</p>
-
-    <h3 class="dsgroup">Sempre (regras do Brandbook)</h3>
-    <ol class="dsrules">
-      <li>O selo com contorno (<b>outline</b>) é o logo oficial — tinta (<code>--ink</code>) no tema claro, branco (<code>--white</code>) no tema escuro.</li>
-      <li>Espaço livre mínimo ao redor: <b>¼ do diâmetro</b> do selo, nos 4 lados.</li>
-      <li>Tamanhos mínimos: <b>32px</b> outline · <b>24px</b> preenchido · <b>80px</b> em uso inline (ao lado do texto).</li>
-      <li>Abaixo de 32px, sempre trocar para o selo <b>preenchido</b> — o traço fino do outline deixa de ler.</li>
-      <li>Sobre padrão (seigaiha/shippō), o selo sempre vive dentro de uma <b>clareira sólida</b> — nunca direto sobre a estampa.</li>
-      <li>Traço do anel: proporção fixa de <b>52/1600</b> (mesma relação usada no <code>viewBox</code> e <code>stroke-width</code> do <code>.seal</code> abaixo).</li>
-      <li>Letras só em <code>--ink</code> ou <code>--white</code> — nunca outra cor.</li>
-      <li>Preenchimento sempre <b>chapado</b> — sem gradiente, sem sombra.</li>
-      <li>Cor de sabor da paleta preenchendo o selo só existe no <b>flavor system</b> — nunca em uso institucional.</li>
-      <li>Wordmark exatamente como fornecido — nunca esticar, inclinar ou distorcer.</li>
-    </ol>
-
-    <h3 class="dsgroup">Tamanhos mínimos</h3>
-    <div class="seal-row">
-      <div class="seal-item">
-        <svg class="seal" viewBox="0 0 1600 1600" aria-hidden="true" style="width:32px;height:32px">
-          <circle cx="800" cy="800" r="774" fill="none" stroke="var(--ink)" stroke-width="52"/>
-          <g fill="var(--ink)" transform="translate(800 800) scale(.74) translate(-800 -800)">
-            <use href="#p-su" transform="translate(277.4 734.6) scale(1 -1)"/>
-            <use href="#p-zu" transform="translate(264.5 1324.6) scale(1 -1)"/>
-          </g>
-        </svg>
-        <b>Outline · 32px</b>
-        <span>mínimo absoluto</span>
-      </div>
-      <div class="seal-item">
-        <svg viewBox="0 0 1600 1600" aria-hidden="true" style="width:24px;height:24px;display:block">
-          <circle cx="800" cy="800" r="800" fill="var(--ink)"/>
-          <g fill="var(--white)" transform="translate(800 800) scale(.74) translate(-800 -800)">
-            <use href="#p-su" transform="translate(277.4 734.6) scale(1 -1)"/>
-            <use href="#p-zu" transform="translate(264.5 1324.6) scale(1 -1)"/>
-          </g>
-        </svg>
-        <b>Preenchido · 24px</b>
-        <span>abaixo de 32px</span>
-      </div>
-      <div class="seal-item">
-        <div class="lockup-demo">
-          <svg class="seal" viewBox="0 0 1600 1600" aria-hidden="true" style="width:80px;height:80px">
-            <circle cx="800" cy="800" r="774" fill="none" stroke="var(--ink)" stroke-width="52"/>
-            <g fill="var(--ink)" transform="translate(800 800) scale(.74) translate(-800 -800)">
-              <use href="#p-su" transform="translate(277.4 734.6) scale(1 -1)"/>
-              <use href="#p-zu" transform="translate(264.5 1324.6) scale(1 -1)"/>
-            </g>
-          </svg>
-          <b>Studio Suzu</b>
-        </div>
-        <span>Inline · 80px (ao lado do wordmark)</span>
-      </div>
-    </div>
-
-    <h3 class="dsgroup">Espaço livre — ¼ do diâmetro</h3>
-    <p class="dsrule">Selo de 96px pede pelo menos 24px de respiro em cada lado (tracejado ilustra o limite — nunca desenhado na loja real).</p>
-    <div class="clearspace" style="padding:24px">
-      <svg class="seal" viewBox="0 0 1600 1600" aria-hidden="true" style="width:96px;height:96px;display:block">
-        <circle cx="800" cy="800" r="774" fill="none" stroke="var(--ink)" stroke-width="52"/>
-        <g fill="var(--ink)" transform="translate(800 800) scale(.74) translate(-800 -800)">
-          <use href="#p-su" transform="translate(277.4 734.6) scale(1 -1)"/>
-          <use href="#p-zu" transform="translate(264.5 1324.6) scale(1 -1)"/>
-        </g>
-      </svg>
-    </div>
-  </section>
-
-  <section class="ds" id="icones">
-    <span class="dseyebrow">Marca · 09</span>
-    <h2>Ícones</h2>
-    <p class="lead">Família Feather: <code>viewBox 0 0 24 24</code>, <code>fill:none</code>, <code>stroke:currentColor</code>, <code>stroke-width:2</code>, <code>stroke-linecap</code>/<code>stroke-linejoin:round</code>, tamanho ~<code>1.2em</code>. Cor sempre herdada do texto ao redor — nunca uma cor fixa no próprio <code>&lt;svg&gt;</code> — o que deixa o ícone virar cor de status automaticamente dentro de um bloco de feedback (erro, sucesso, aviso).</p>
-
-    <h3 class="dsgroup">Glifos em uso na loja</h3>
-    <div class="demo icon-row">
-      <div class="icon-item">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <b>search</b>
-      </div>
-      <div class="icon-item">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-        <b>shopping-bag</b>
-      </div>
-      <div class="icon-item">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        <b>x</b>
-      </div>
-      <div class="icon-item">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-        <b>check</b>
-      </div>
-      <div class="icon-item">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-        <b>alert-circle</b>
-      </div>
-      <div class="icon-item">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
-        <b>instagram</b>
-      </div>
-    </div>
-
-    <h3 class="dsgroup">Cor de status — mesmo ícone, papel de feedback</h3>
-    <p class="dsrule"><code>alert-circle</code> não muda de marcação — só o texto ao redor troca de cor semântica, e o <code>currentColor</code> do ícone acompanha.</p>
-    <div class="icon-status" style="background:var(--error-surface);color:var(--error-text)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-      Confira o e-mail — parece incompleto.
-    </div>
-    <div class="icon-status" style="background:var(--success-surface);color:var(--success-text)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/></svg>
-      Pedido confirmado com sucesso.
-    </div>
-  </section>
-
-  <section class="ds" id="padroes">
-    <span class="dseyebrow">Marca · 10</span>
-    <h2>Padrões</h2>
-    <p class="lead">Duas estampas autorais — <b>seigaiha</b> (ondas, leques de arcos concêntricos) e <b>shippō</b> (círculos entrelaçados) — mesmos <code>&lt;pattern&gt;</code> de <code>index.html</code>, reaproveitados aqui via os <code>&lt;defs&gt;</code> do topo da página. Regra: padrão carrega significado só em embalagem/destaque de peça (nunca na UI de compra em si) e, quando o selo ou conteúdo precisa viver sobre ele, vai sempre dentro de uma <b>clareira sólida</b> — nunca direto sobre a estampa.</p>
-
-    <h3 class="dsgroup">Seigaiha — 45×45, traço ~1.2</h3>
-    <div class="demo pattern-row">
-      <div class="pattern-item"><svg class="pattern-tile"><rect width="100%" height="100%" fill="url(#seigaiha-azul)"/></svg><b>--mizu</b></div>
-      <div class="pattern-item"><svg class="pattern-tile"><rect width="100%" height="100%" fill="url(#seigaiha-ouro)"/></svg><b>--gold</b></div>
-    </div>
-
-    <h3 class="dsgroup">Shippō — 34×34, traço ~1.1</h3>
-    <div class="demo pattern-row">
-      <div class="pattern-item"><svg class="pattern-tile"><rect width="100%" height="100%" fill="url(#estampa-sakura)"/></svg><b>--sakura</b></div>
-      <div class="pattern-item"><svg class="pattern-tile"><rect width="100%" height="100%" fill="url(#estampa-coral)"/></svg><b>--sango</b></div>
-      <div class="pattern-item"><svg class="pattern-tile"><rect width="100%" height="100%" fill="url(#estampa-ouro)"/></svg><b>--gold</b></div>
-    </div>
-
-    <h3 class="dsgroup">Selo sobre padrão — sempre em clareira sólida</h3>
-    <p class="dsrule">O selo nunca fica direto sobre a estampa: uma clareira do tom <code>--warm</code> abre espaço sólido ao redor dele antes de tocar o padrão.</p>
-    <div class="demo">
-      <div class="clareira-demo">
-        <svg viewBox="0 0 160 160" aria-hidden="true" style="position:absolute;inset:0">
-          <rect width="160" height="160" fill="url(#seigaiha-azul)"/>
-          <circle cx="80" cy="80" r="46" fill="var(--warm)"/>
-        </svg>
-        <svg class="seal" viewBox="0 0 1600 1600" aria-hidden="true" style="position:absolute;top:36px;left:36px;width:68px;height:68px">
-          <circle cx="800" cy="800" r="774" fill="none" stroke="var(--ink)" stroke-width="52"/>
-          <g fill="var(--ink)" transform="translate(800 800) scale(.74) translate(-800 -800)">
-            <use href="#p-su" transform="translate(277.4 734.6) scale(1 -1)"/>
-            <use href="#p-zu" transform="translate(264.5 1324.6) scale(1 -1)"/>
-          </g>
-        </svg>
-      </div>
-    </div>
-  </section>
-
-    <p class="dsmeta" style="text-align:center;margin-top:var(--space-8)">Documentação viva — se um valor mudar em <code>css/tokens.css</code> ou <code>css/components.css</code>, muda aqui sozinho. <a class="dsback" href="#topo" style="margin:0 0 0 .6em">↑ topo</a></p>
-  </div><!-- /.dsbody -->
+</div><!-- /.dsbody -->
 
   <!-- ===== Rodapé .close (padrão Brandbook) ===== -->
   <footer class="close">
@@ -959,6 +996,32 @@
 
   renderColorPart('— Do Brandbook —', 'Estes tokens são idênticos ao Brandbook Suzu, valor por valor — a fonte da verdade.', COLOR_GROUPS_BRANDBOOK);
   renderColorPart('— Adições do site —', 'Derivados funcionais que o brandbook não define — necessários no produto, mantidos separados para deixar claro o que é canônico e o que é extensão.', COLOR_GROUPS_SITE);
+
+  // Modo claro↔escuro — mesmos papéis nos dois painéis. #dkDark está em data-theme="dark",
+  // então var(--token) resolve escuro nele: um único conjunto de valores (tokens.css), dois temas.
+  var DARK_ROLES = [
+    ['bg','fundo'],['surface','superfície'],['raised','elevado'],
+    ['text','texto'],['text-secondary','texto 2º'],['text-tertiary','texto 3º'],['text-muted','texto suave'],
+    ['label','rótulo'],['line','hairline forte'],['cav-line','hairline sutil'],
+    ['gold-text','ouro · texto'],['stone-text','pedra · texto'],['wood-text','madeira · texto'],
+    ['error-surface','erro · fundo'],['error-text','erro · texto'],
+    ['success-surface','ok · fundo'],['success-text','ok · texto'],
+    ['warning-surface','aviso · fundo'],['warning-text','aviso · texto'],
+    ['info-surface','info · fundo'],['info-text','info · texto']
+  ];
+  function renderDarkPane(el){
+    if(!el) return;
+    DARK_ROLES.forEach(function(r){
+      var sw=document.createElement('div'); sw.className='dksw';
+      var i=document.createElement('i'); i.style.background='var(--'+r[0]+')';
+      var b=document.createElement('b'); b.textContent='--'+r[0];
+      var s=document.createElement('span'); s.textContent=r[1];
+      sw.appendChild(i); sw.appendChild(b); sw.appendChild(s);
+      el.appendChild(sw);
+    });
+  }
+  renderDarkPane(document.getElementById('dkLight'));
+  renderDarkPane(document.getElementById('dkDark'));
 
   // Tipografia + linhas — mesmo princípio: valor lido, nunca escrito.
   document.getElementById('tokSans').textContent = tok('sans');
