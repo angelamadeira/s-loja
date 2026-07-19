@@ -880,13 +880,14 @@
       if(s.now.length){var _rq=['coNome','coRua','coNum','coBairro','coCidade'],_bad=null;_rq.forEach(function(id){var el=document.getElementById(id);if(el&&!el.value.trim()){el.classList.add('bad');if(!_bad)_bad=el;}});if(_bad){var _ah=document.getElementById('addrHint');if(_ah){_ah.textContent='Preencha os campos destacados do endereço.';_ah.className='cephint err';}_bad.focus();return;}}
       var _w=document.getElementById('coWhats');CO.whats=_w?_w.value.trim():'';
       CO.hadPre=s.pre.length>0;CO.email=email.value;
+      var _n=document.getElementById('coNome');CO.name=_n?_n.value.trim():'';
       runProcessing();
     };
     function runProcessing(){
       var ov=document.getElementById('coProc');
       if(!ov){CO.order='SUZU-'+Math.floor(100000+Math.random()*900000);Object.keys(cart).forEach(function(k){delete cart[k];});render();location.replace('#/pedido');return;}
       var msg=document.getElementById('coProcMsg'),sub=document.getElementById('coProcSub'),ring=document.getElementById('coProcRing'),ico=document.getElementById('coProcIco'),retry=document.getElementById('coProcRetry');
-      var msgs=['Embrulhando seu pedido com carinho\u2026','Conferindo cada detalhe\u2026','Confirmando seu pagamento\u2026'];
+      var msgs=['Finalizando o seu pedido com carinho\u2026'];
       ring.style.display='';ico.style.display='none';sub.hidden=true;retry.hidden=true;msg.style.opacity=1;msg.textContent=msgs[0];
       ov.hidden=false;requestAnimationFrame(function(){ov.classList.add('show');});
       var i=0,pend=null,done=false,cyc=setInterval(function(){i++;if(i<msgs.length){msg.style.opacity=0;pend=setTimeout(function(){if(done)return;msg.textContent=msgs[i];msg.style.opacity=1;},220);}},900);
@@ -914,7 +915,7 @@
         Object.keys(cart).forEach(function(k){delete cart[k];});render();
         ov.classList.remove('show');
         setTimeout(function(){ov.hidden=true;location.replace('#/pedido');},340);
-      }, willFail?1700:2650);
+      }, willFail?1700:1500);
       retry.onclick=function(){ov.classList.remove('show');setTimeout(function(){ov.hidden=true;},320);};
     }
   }
@@ -1011,12 +1012,13 @@
   }
   function pedidoView(){
     if(!CO.order) return coEmptyView();
+    var _pnome=(CO.name||'').trim().split(/\s+/)[0];
     var items=(CO.items||[]).map(function(it){return '<div class="okri"><span class="okriq">'+it.q+'×</span><span class="okrin">'+it.name+'</span><span class="okrip">'+BRL(it.price)+'</span></div>';}).join('');
     var lancamento=CO.shipLabel==='no lançamento';
     var entrega=lancamento?'combinamos no lançamento':((CO.shipLabel||'—')+(CO.eta?(' · '+CO.eta):''));
     return '<div class="wrap cowrap"><div class="okwrap"><div class="okseal"><svg class="okcheck" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>'
-      +'<span class="sig oksig">Deu tudo certo!</span>'
-      +'<p class="oknum">Nº '+CO.order+'</p>'
+      +'<span class="sig oksig">Deu tudo certo'+(_pnome?', '+_pnome:'')+'!</span>'
+      +'<p class="oknum">Pedido Nº '+CO.order+'</p>'
       +(CO.eta&&!lancamento?'<p class="oketa">Chega em <b>'+CO.eta+'</b></p>':'')
       +(items?'<div class="okrecap"><div class="okrilist">'+items+'</div><div class="okrisep"></div><div class="okrrow"><span>Total pago</span><b>'+BRL(CO.paidTotal||0)+'</b></div><div class="okrrow sub"><span>Pagamento</span><span>'+(CO.payLabel||'—')+'</span></div><div class="okrrow sub"><span>Entrega</span><span>'+entrega+'</span></div></div>':'')
       +'<div class="oksteps"><div class="okstep on"><span class="okdot"></span>Pedido confirmado</div><div class="okstep"><span class="okdot"></span>Em preparo no ateliê</div><div class="okstep"><span class="okdot"></span>A caminho</div></div>'
