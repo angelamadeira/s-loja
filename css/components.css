@@ -64,10 +64,10 @@ nav.main a.active{color:var(--text);font-weight:500}
 .slide .kick{font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;font-weight:600;padding:5px 11px;border-radius:999px;background:var(--torinoko);color:var(--ink);border:none}
 .slide .kick.last{background:var(--torinoko);color:var(--ink);border:none}
 .slide .kick.presale{background:var(--mizu);color:var(--ink);border:none}
-.slide .kick.soldout{background:var(--raw);color:var(--text-muted);border:none}
+.slide .kick.soldout{background:var(--raised);color:var(--text-muted);border:none}
 .slide .kick.limited{display:none}   /* hero: oculta a tag redundante de edição limitada */
-.slide h2{font-weight:500;font-size:clamp(1.5rem,5.5vw,2rem);margin:10px 0 0;letter-spacing:-.01em}
-.slide .pr{font-size:.9rem;color:var(--text-secondary)}
+.slide h2{font-weight:500;font-size:clamp(1.5rem,5.5vw,2rem);margin:10px 0 0;letter-spacing:-.01em;color:var(--ink)}
+.slide .pr{font-size:.9rem;color:var(--ink)}
 .slide .cta{margin-top:16px;display:block;width:100%;background:var(--ink);color:var(--white);padding:14px 22px;border-radius:999px;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;font-weight:500;text-align:center}
 .dots{position:absolute;left:50%;transform:translateX(-50%);bottom:18px;display:flex;align-items:center;gap:7px;z-index:3}
 .dot{width:8px;height:8px;border-radius:50%;border:none;background:var(--ink-dot);padding:0;transition:width .25s ease,background .25s ease}
@@ -131,7 +131,7 @@ section{padding:52px 0}
 .fctxt .pbadge{position:static;top:auto;left:auto;display:inline-block;align-self:flex-start;margin-bottom:6px}
 .pdptag{position:static;top:auto;left:auto;display:inline-block;margin-top:16px}
 .pbadge.presale{background:var(--mizu);color:var(--ink)}
-.pbadge.soldout{background:var(--raw);color:var(--text-muted)}
+.pbadge.soldout{background:var(--raised);color:var(--text-muted)}
 .exhero{position:relative;border-radius:20px;overflow:hidden;background:var(--st,var(--sakura-wash));margin-bottom:34px;margin-top:-8px;min-height:clamp(420px,58vh,520px);display:flex;align-items:center}
 .exhero .exbg{position:absolute;inset:0;overflow:hidden}
 .exhero .exbg svg{position:absolute;right:-9%;top:50%;transform:translateY(-50%);width:min(52%,340px);height:auto;opacity:.9}
