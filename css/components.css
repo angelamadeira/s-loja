@@ -31,7 +31,7 @@ header.hd{position:sticky;top:0;z-index:40;background:var(--surface)}
 .brand .word span{font-size:.84rem;letter-spacing:.18em;text-transform:uppercase;color:var(--text);font-weight:500}
 nav.main{display:none}
 nav.main a{position:relative;font-size:.82rem;color:var(--text-secondary);padding:6px 2px;transition:color .16s}
-nav.main a:hover{color:var(--text)}
+nav.main a:hover{color:var(--gold-text)}
 nav.main a.active{color:var(--text);font-weight:500}
 .ibtn{width:42px;height:42px;display:grid;place-items:center;border:none;background:transparent;border-radius:50%}
 .ibtn:hover{background:var(--raised)}
