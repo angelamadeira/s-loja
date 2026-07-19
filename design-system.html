@@ -11,23 +11,47 @@
   /* Estilos só do styleguide (chrome da documentação) — nunca da loja.
      Regra do próprio DS: zero hex aqui, só var(--token). */
   *{box-sizing:border-box}
-  html{background:var(--white)}
-  body{font-family:var(--sans);color:var(--ink);background:var(--white);margin:0;padding:0 24px var(--space-8);max-width:980px}
+  html{background:var(--bg);color-scheme:light dark}
+  /* semânticos no chrome (dark-ready): fundo/texto trocam no [data-theme=dark] */
+  body{font-family:var(--sans);font-weight:300;color:var(--text);background:var(--bg);margin:0;line-height:1.7;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;overflow-x:hidden}
   .dswrap{max-width:100%}
+  .wrap{max-width:64rem;margin:0 auto;padding:0 clamp(1.4rem,5vw,2.6rem)}
 
   /* Rótulo eyebrow — mesmo princípio editorial do Brandbook: maiúsculo, tracked, cor de rótulo. */
   .dseyebrow{display:block;font-size:.7rem;letter-spacing:.22em;text-transform:uppercase;color:var(--label);font-weight:500;margin:0 0 var(--space-3)}
+  .dseyebrow .idx{font-variant-numeric:tabular-nums;color:var(--gold-text)}
   .dsmeta{color:var(--text-muted);font-size:.72rem;letter-spacing:.04em;text-transform:uppercase;margin:var(--space-5) 0 0}
 
-  header.dshd{padding:var(--space-8) 0 var(--space-6);border-bottom:1px solid var(--line)}
-  header.dshd h1{font-family:var(--serif);font-style:italic;font-weight:400;font-size:2.4rem;margin:0 0 var(--space-3)}
-  header.dshd p{color:var(--text-muted);font-size:.95rem;line-height:1.6;max-width:66ch;margin:0 0 var(--space-2)}
-  header.dshd code{background:var(--raw);padding:2px 7px;border-radius:6px;font-size:.82rem}
+  /* ===== Capa meia-lua editorial (doc de apoio · ref. Martins Fontes / Vitrúvio) =====
+     semicírculo chapado numa candy color (mizu), sangrando pela borda esquerda. */
+  .cover{position:relative;overflow:hidden;min-height:100vh;min-height:100svh}
+  .capa-meia{position:absolute;left:0;top:50%;transform:translate(-50%,-50%);width:clamp(13rem,46vw,32rem);aspect-ratio:1;border-radius:50%;background:var(--mizu);z-index:0}
+  .cover-inner{position:relative;z-index:1;max-width:64rem;margin:0 auto;min-height:100vh;min-height:100svh;display:grid;grid-template-rows:auto 1fr auto;padding:clamp(2.4rem,7vh,4.6rem) clamp(1.4rem,5vw,2.6rem) clamp(2.2rem,6vh,3.6rem)}
+  .cover .dseyebrow{margin:0}
+  .cover-mid{align-self:center;padding-left:clamp(0rem,34vw,20rem)}
+  .cover-title{font-family:var(--sans);font-weight:600;font-size:clamp(2.5rem,7.2vw,5rem);line-height:.94;letter-spacing:-.015em;color:var(--text);margin:0}
+  .cover-title em{font-family:var(--serif);font-style:italic;font-weight:500}
+  .cover-sub{margin-top:1.4rem;font-size:clamp(1.05rem,2.1vw,1.3rem);color:var(--text-secondary);max-width:34rem;font-weight:300}
+  .cover-foot{display:flex;align-items:flex-end;justify-content:space-between;gap:1.2rem 2rem;flex-wrap:wrap}
+  .cover-foot .sig{font-family:var(--serif);font-style:italic;font-weight:500;font-size:1.5rem;color:var(--text)}
+  .cover-meta{display:flex;flex-direction:column;align-items:flex-end;gap:.55rem;font-size:.62rem;letter-spacing:.22em;text-transform:uppercase;color:var(--label);margin-left:auto}
+  @media(max-width:640px){ .capa-meia{top:18%;width:clamp(10rem,50vw,17rem)} .cover-mid{padding-left:0;align-self:end;margin-bottom:1.4rem} .cover-foot{align-items:center} }
+
+  /* Toggle claro/escuro — fixo no canto */
+  .toggle{position:fixed;top:16px;right:16px;z-index:30;width:42px;height:42px;border-radius:50%;border:1px solid var(--line);background:var(--surface);color:var(--text);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 10px var(--shadow-sm)}
+  .toggle svg{width:20px;height:20px}
+  .toggle .moon{display:none}
+  :root[data-theme="dark"] .toggle .sun{display:none}
+  :root[data-theme="dark"] .toggle .moon{display:block}
+
+  /* corpo do documento após a capa */
+  .dsbody{padding:0 24px var(--space-8);max-width:980px;margin:0 auto}
+
   nav.dstoc{display:flex;flex-wrap:wrap;gap:var(--space-2) var(--space-5);margin-top:var(--space-6);padding-top:var(--space-5);border-top:1px solid var(--line-soft)}
   nav.dstoc a{color:var(--stone-text);font-size:.78rem;letter-spacing:.03em;text-decoration:none;text-transform:uppercase}
-  nav.dstoc a:hover{color:var(--ink)}
+  nav.dstoc a:hover{color:var(--text)}
   .dsback{display:inline-block;margin-top:var(--space-6);color:var(--stone-text);font-size:.78rem;letter-spacing:.03em;text-decoration:none;text-transform:uppercase}
-  .dsback:hover{color:var(--ink)}
+  .dsback:hover{color:var(--text)}
 
   section.ds{margin:var(--space-8) 0;scroll-margin-top:var(--space-6)}
   section.ds h2{font-family:var(--serif);font-style:italic;font-weight:400;font-size:1.7rem;margin:0 0 var(--space-2)}
@@ -51,7 +75,8 @@
 
   .comp-block{margin:0 0 var(--space-7)}
   .comp-block > h3{font-size:1.02rem;font-weight:500;margin:0 0 var(--space-1)}
-  .demo{border:1px solid var(--line-soft);border-radius:16px;padding:var(--space-6);background:var(--warm)}
+  .demo{border:1px solid var(--line-soft);border-radius:16px;padding:var(--space-6);background:var(--raised)}
+  .dsbody code{background:var(--raised);padding:2px 7px;border-radius:6px;font-size:.82rem}
   .demo-row{display:flex;flex-wrap:wrap;gap:var(--space-3);align-items:center}
   .demo-stage{position:relative;height:230px;border-radius:18px;overflow:hidden;flex:1 1 220px;min-width:220px}
   .demo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:16px}
@@ -73,12 +98,21 @@
   .line-demo{display:flex;flex-wrap:wrap;gap:18px}
   .line-demo div{flex:1 1 220px}
   .line-demo b{display:block;font-size:.78rem;margin-bottom:6px}
-  .line-demo .strip{height:44px;border-radius:10px;background:var(--white)}
+  .line-demo .strip{height:44px;border-radius:10px;background:var(--surface)}
   .line-demo span{display:block;font-size:.66rem;color:var(--text-muted);margin-top:6px;font-variant-numeric:tabular-nums}
 
-  footer.dsft{margin-top:var(--space-8);padding-top:var(--space-5);border-top:1px solid var(--line);color:var(--text-muted);font-size:.76rem}
-  footer.dsft p{max-width:66ch;margin:0 0 var(--space-2)}
-  footer.dsft .dsmeta{margin:var(--space-3) 0 0}
+  /* ===== Rodapé .close (padrão Brandbook) ===== */
+  .close{background:var(--footer-plate);color:var(--text);text-align:center;overflow:hidden;border-top:1px solid var(--line);padding:clamp(2.8rem,7vh,4.2rem) 0;margin-top:var(--space-8)}
+  .close-brand{display:flex;flex-direction:column;align-items:center;gap:.85rem}
+  .close-brand svg{width:130px;height:auto;display:block}
+  .close-brand svg use, .close-brand svg path{fill:var(--logo-ink)}
+  .close-dots{display:flex;justify-content:center;gap:.45rem}
+  .close-dots i{width:8px;height:8px;border-radius:50%;display:block}
+  .close-meta{margin-top:1.6rem}
+  .close .sig{font-family:var(--serif);font-style:italic;font-weight:500;color:var(--text);margin:0;font-size:clamp(1.05rem,2.2vw,1.35rem)}
+  .close .foot{font-size:.62rem;letter-spacing:.22em;text-transform:uppercase;color:var(--label)}
+  .close .foot:first-of-type{margin-top:1.5rem}
+  .close .foot + .foot{margin-top:.35rem}
 
   /* Espaçamento */
   .space-row{display:flex;align-items:center;gap:16px;margin:10px 0}
@@ -89,7 +123,7 @@
   /* Raio */
   .r-row{display:flex;flex-wrap:wrap;gap:22px}
   .r-item{text-align:center}
-  .r-box{background:var(--warm);border:1px solid var(--line)}
+  .r-box{background:var(--raised);border:1px solid var(--line)}
   .r-item b{display:block;font-size:.72rem;margin-top:10px}
   .r-item span{display:block;font-size:.64rem;color:var(--text-muted);font-variant-numeric:tabular-nums}
 
@@ -97,8 +131,8 @@
   .ease-row{display:flex;align-items:center;gap:20px;margin:16px 0;flex-wrap:wrap}
   .ease-row b{min-width:190px;font-size:.78rem}
   .ease-row .meta{font-size:.68rem;color:var(--text-muted);min-width:150px}
-  .ease-track{position:relative;width:200px;height:32px;background:var(--warm);border-radius:var(--r-pill);flex:0 0 auto;border:1px solid var(--line-soft)}
-  .ease-dot{position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:var(--ink)}
+  .ease-track{position:relative;width:200px;height:32px;background:var(--raised);border-radius:var(--r-pill);flex:0 0 auto;border:1px solid var(--line-soft)}
+  .ease-dot{position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:var(--text)}
   .ease-dot.slide{animation-name:dsslide;animation-iteration-count:infinite;animation-direction:alternate}
   .ease-pop-stage{position:relative;width:64px;height:32px;display:flex;align-items:center;justify-content:center}
   .ease-dot.pop{position:static;animation-name:dspop;animation-iteration-count:infinite}
@@ -141,14 +175,16 @@
      TOC e rodapé de navegação saem (jump-link não serve em papel), tokens de --print-* já
      usados no restante do projeto (ver css/components.css) para preto/cinza de tinta. */
   @media print{
-    body{background:var(--white);color:var(--print-ink);max-width:none;padding:0 18px}
+    body{background:var(--white);color:var(--print-ink)}
+    .dsbody{max-width:none;padding:0 18px}
     a{color:var(--print-ink);text-decoration:none}
     a[href^="#"]::after{content:""}
-    nav.dstoc,.dsback{display:none}
-    header.dshd{border-bottom:1px solid var(--print-line)}
+    nav.dstoc,.dsback,.toggle{display:none}
+    .cover{min-height:auto;page-break-after:always}
+    .capa-meia{background:var(--print-line)}
     .demo{background:none;border:1px solid var(--print-line)}
     .comp-block,section.ds{break-inside:avoid-page}
-    footer.dsft{border-top:1px solid var(--print-line);color:var(--print-muted)}
+    .close{border-top:1px solid var(--print-line);background:none}
   }
 </style>
 </head>
@@ -159,6 +195,8 @@
   <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
     <path id="p-su" d="M77.9990234375 130.9993896484375 36.2003173828125 107.2003173828125Q45.60009765625 78.2001953125 67.4998779296875 51.20013427734375Q89.399658203125 24.2000732421875 124.799560546875 7.10003662109375Q160.199462890625 -10.0 208.1995849609375 -10.0Q274.3992919921875 -10.0 315.4991455078125 27.599853515625Q356.5989990234375 65.19970703125 356.5989990234375 124.7996826171875Q356.5989990234375 163.799560546875 337.4990234375 188.99951171875Q318.3990478515625 214.199462890625 286.79913330078125 231.29937744140625Q255.19921875 248.3992919921875 217.9993896484375 261.59912109375Q189.59912109375 271.59912109375 164.99896240234375 282.79913330078125Q140.3988037109375 293.9991455078125 125.19873046875 311.39935302734375Q109.9986572265625 328.799560546875 109.9986572265625 356.0001220703125Q109.9986572265625 389.4007568359375 133.5989990234375 406.0010986328125Q157.1993408203125 422.6014404296875 190.599853515625 422.6014404296875Q236.6004638671875 422.6014404296875 265.70050048828125 401.00115966796875Q294.800537109375 379.40087890625 311.400390625 349.400634765625L353.799072265625 375.19970703125Q341.7991943359375 401.19970703125 319.79937744140625 422.19976806640625Q297.799560546875 443.1998291015625 266.899658203125 456.19989013671875Q235.999755859375 469.199951171875 196.599609375 469.199951171875Q161.19970703125 469.199951171875 129.69989013671875 456.39996337890625Q98.2000732421875 443.5999755859375 78.7001953125 417.800048828125Q59.2003173828125 392.0001220703125 59.2003173828125 353.000244140625Q59.2003173828125 311.8001708984375 78.500244140625 286.30023193359375Q97.8001708984375 260.80029296875 127.900146484375 245.70037841796875Q158.0001220703125 230.6004638671875 190.4002685546875 219.00048828125Q220.200439453125 209.00048828125 246.00054931640625 196.50042724609375Q271.8006591796875 184.0003662109375 287.90069580078125 165.500244140625Q304.000732421875 147.0001220703125 304.000732421875 119.39990234375Q304.000732421875 80.7991943359375 278.30035400390625 59.298828125Q252.5999755859375 37.7984619140625 210.5994873046875 37.7984619140625Q174.9990234375 37.7984619140625 148.6988525390625 50.6986083984375Q122.398681640625 63.5987548828125 105.19873046875 84.99896240234375Q87.998779296875 106.399169921875 77.9990234375 130.9993896484375ZM713.99853515625 167.999267578125V460.0H662.000244140625V161.99951171875Q662.000244140625 83.19970703125 700.199951171875 36.599853515625Q738.399658203125 -10.0 809.9996337890625 -10.0Q861.5999755859375 -10.0 899.8002319335938 18.1004638671875Q938.00048828125 46.200927734375 957.000244140625 96.00146484375V0.0H1008.99853515625V460.0H957.000244140625V180.0Q957.000244140625 140.7996826171875 939.7000732421875 108.79931640625Q922.39990234375 76.7989501953125 891.899658203125 58.09869384765625Q861.3994140625 39.3984375 821.9991455078125 39.3984375Q766.398681640625 39.3984375 740.1986083984375 73.59869384765625Q713.99853515625 107.7989501953125 713.99853515625 167.999267578125Z"/>
     <path id="p-zu" d="M331.6019287109375 411.0015869140625 17.0001220703125 0.0H418.9996337890625V48.9984130859375H112.3970947265625L426.9989013671875 460.0H42.9998779296875V411.0015869140625ZM758.99853515625 167.999267578125V460.0H707.000244140625V161.99951171875Q707.000244140625 83.19970703125 745.199951171875 36.599853515625Q783.399658203125 -10.0 854.9996337890625 -10.0Q906.5999755859375 -10.0 944.8002319335938 18.1004638671875Q983.00048828125 46.200927734375 1002.000244140625 96.00146484375V0.0H1053.99853515625V460.0H1002.000244140625V180.0Q1002.000244140625 140.7996826171875 984.7000732421875 108.79931640625Q967.39990234375 76.7989501953125 936.899658203125 58.09869384765625Q906.3994140625 39.3984375 866.9991455078125 39.3984375Q811.398681640625 39.3984375 785.1986083984375 73.59869384765625Q758.99853515625 107.7989501953125 758.99853515625 167.999267578125Z"/>
+    <!-- Wordmark suzu (rodapé) — mesmo path do Brandbook (viewBox 0 0 2765.8 659.2) -->
+    <path id="p-suzu" d="M77.9990234375 130.9993896484375 36.2003173828125 107.2003173828125Q45.60009765625 78.2001953125 67.4998779296875 51.20013427734375Q89.399658203125 24.2000732421875 124.799560546875 7.10003662109375Q160.199462890625 -10.0 208.1995849609375 -10.0Q274.3992919921875 -10.0 315.4991455078125 27.599853515625Q356.5989990234375 65.19970703125 356.5989990234375 124.7996826171875Q356.5989990234375 163.799560546875 337.4990234375 188.99951171875Q318.3990478515625 214.199462890625 286.79913330078125 231.29937744140625Q255.19921875 248.3992919921875 217.9993896484375 261.59912109375Q189.59912109375 271.59912109375 164.99896240234375 282.79913330078125Q140.3988037109375 293.9991455078125 125.19873046875 311.39935302734375Q109.9986572265625 328.799560546875 109.9986572265625 356.0001220703125Q109.9986572265625 389.4007568359375 133.5989990234375 406.0010986328125Q157.1993408203125 422.6014404296875 190.599853515625 422.6014404296875Q236.6004638671875 422.6014404296875 265.70050048828125 401.00115966796875Q294.800537109375 379.40087890625 311.400390625 349.400634765625L353.799072265625 375.19970703125Q341.7991943359375 401.19970703125 319.79937744140625 422.19976806640625Q297.799560546875 443.1998291015625 266.899658203125 456.19989013671875Q235.999755859375 469.199951171875 196.599609375 469.199951171875Q161.19970703125 469.199951171875 129.69989013671875 456.39996337890625Q98.2000732421875 443.5999755859375 78.7001953125 417.800048828125Q59.2003173828125 392.0001220703125 59.2003173828125 353.000244140625Q59.2003173828125 311.8001708984375 78.500244140625 286.30023193359375Q97.8001708984375 260.80029296875 127.900146484375 245.70037841796875Q158.0001220703125 230.6004638671875 190.4002685546875 219.00048828125Q220.200439453125 209.00048828125 246.00054931640625 196.50042724609375Q271.8006591796875 184.0003662109375 287.90069580078125 165.500244140625Q304.000732421875 147.0001220703125 304.000732421875 119.39990234375Q304.000732421875 80.7991943359375 278.30035400390625 59.298828125Q252.5999755859375 37.7984619140625 210.5994873046875 37.7984619140625Q174.9990234375 37.7984619140625 148.6988525390625 50.6986083984375Q122.398681640625 63.5987548828125 105.19873046875 84.99896240234375Q87.998779296875 106.399169921875 77.9990234375 130.9993896484375ZM813.99853515625 167.999267578125V460.0H762.000244140625V161.99951171875Q762.000244140625 83.19970703125 800.199951171875 36.599853515625Q838.399658203125 -10.0 909.9996337890625 -10.0Q961.5999755859375 -10.0 999.8002319335938 18.1004638671875Q1038.00048828125 46.200927734375 1057.000244140625 96.00146484375V0.0H1108.99853515625V460.0H1057.000244140625V180.0Q1057.000244140625 140.7996826171875 1039.7000732421875 108.79931640625Q1022.39990234375 76.7989501953125 991.899658203125 58.09869384765625Q961.3994140625 39.3984375 921.9991455078125 39.3984375Q866.398681640625 39.3984375 840.1986083984375 73.59869384765625Q813.99853515625 107.7989501953125 813.99853515625 167.999267578125ZM1799.6019287109375 411.0015869140625 1485.0001220703125 0.0H1886.9996337890625V48.9984130859375H1580.3970947265625L1894.9989013671875 460.0H1510.9998779296875V411.0015869140625ZM2326.99853515625 167.999267578125V460.0H2275.000244140625V161.99951171875Q2275.000244140625 83.19970703125 2313.199951171875 36.599853515625Q2351.399658203125 -10.0 2422.9996337890625 -10.0Q2474.5999755859375 -10.0 2512.8002319335938 18.1004638671875Q2551.00048828125 46.200927734375 2570.000244140625 96.00146484375V0.0H2621.99853515625V460.0H2570.000244140625V180.0Q2570.000244140625 140.7996826171875 2552.7000732421875 108.79931640625Q2535.39990234375 76.7989501953125 2504.899658203125 58.09869384765625Q2474.3994140625 39.3984375 2434.9991455078125 39.3984375Q2379.398681640625 39.3984375 2353.1986083984375 73.59869384765625Q2326.99853515625 107.7989501953125 2326.99853515625 167.999267578125Z"/>
     <!-- Padrões (mesmos defs de index.html — shippō e seigaiha, cor via var() apenas) -->
     <pattern id="estampa-coral" x="0" y="0" width="34" height="34" patternUnits="userSpaceOnUse">
       <g fill="none" stroke="var(--sango)" stroke-width="1.1">
@@ -179,25 +217,49 @@
     <pattern id="seigaiha-ouro" x="0" y="0" width="45" height="45" patternUnits="userSpaceOnUse"><g fill="none" stroke="var(--gold)" stroke-width="1.2" stroke-linecap="round"><path d="M-45.00 -22.50A22.5 22.5 0 0 1 0.00 -22.50 M-38.98 -21.68A16.5 16.5 0 1 1 -6.02 -21.68 M-34.17 -19.72A12 12 0 1 1 -10.83 -19.72 M0.00 -22.50A22.5 22.5 0 0 1 45.00 -22.50 M6.02 -21.68A16.5 16.5 0 1 1 38.98 -21.68 M10.83 -19.72A12 12 0 1 1 34.17 -19.72 M45.00 -22.50A22.5 22.5 0 0 1 90.00 -22.50 M51.02 -21.68A16.5 16.5 0 1 1 83.98 -21.68 M55.83 -19.72A12 12 0 1 1 79.17 -19.72 M-22.50 0.00A22.5 22.5 0 0 1 22.50 0.00 M-16.48 0.82A16.5 16.5 0 1 1 16.48 0.82 M-11.67 2.78A12 12 0 1 1 11.67 2.78 M22.50 0.00A22.5 22.5 0 0 1 67.50 0.00 M28.52 0.82A16.5 16.5 0 1 1 61.48 0.82 M33.33 2.78A12 12 0 1 1 56.67 2.78 M-45.00 22.50A22.5 22.5 0 0 1 0.00 22.50 M-38.98 23.32A16.5 16.5 0 1 1 -6.02 23.32 M-34.17 25.28A12 12 0 1 1 -10.83 25.28 M0.00 22.50A22.5 22.5 0 0 1 45.00 22.50 M6.02 23.32A16.5 16.5 0 1 1 38.98 23.32 M10.83 25.28A12 12 0 1 1 34.17 25.28 M45.00 22.50A22.5 22.5 0 0 1 90.00 22.50 M51.02 23.32A16.5 16.5 0 1 1 83.98 23.32 M55.83 25.28A12 12 0 1 1 79.17 25.28 M-22.50 45.00A22.5 22.5 0 0 1 22.50 45.00 M-16.48 45.82A16.5 16.5 0 1 1 16.48 45.82 M-11.67 47.78A12 12 0 1 1 11.67 47.78 M22.50 45.00A22.5 22.5 0 0 1 67.50 45.00 M28.52 45.82A16.5 16.5 0 1 1 61.48 45.82 M33.33 47.78A12 12 0 1 1 56.67 47.78 M-45.00 67.50A22.5 22.5 0 0 1 0.00 67.50 M-38.98 68.32A16.5 16.5 0 1 1 -6.02 68.32 M-34.17 70.28A12 12 0 1 1 -10.83 70.28 M0.00 67.50A22.5 22.5 0 0 1 45.00 67.50 M6.02 68.32A16.5 16.5 0 1 1 38.98 68.32 M10.83 70.28A12 12 0 1 1 34.17 70.28 M45.00 67.50A22.5 22.5 0 0 1 90.00 67.50 M51.02 68.32A16.5 16.5 0 1 1 83.98 68.32 M55.83 70.28A12 12 0 1 1 79.17 70.28"/></g></pattern>
   </defs></svg>
 
-  <header class="dshd">
-    <span class="dseyebrow">Documento de suporte técnico da marca</span>
-    <h1>Design System · Studio Suzu</h1>
-    <p>Companion do <a href="https://angelamadeira.github.io/studio_suzu/" target="_blank" rel="noopener">Brandbook Studio Suzu</a> para o produto digital: mesma voz, mesma tipografia, mesma cor — aqui aplicadas a tokens e componentes de código. Fonte única da verdade: esta página não copia valores, ela lê <code>css/tokens.css</code> e <code>css/components.css</code> ao vivo. Os componentes abaixo são os mesmos elementos da loja, renderizados com as classes reais.</p>
-    <p>Regra do DS: cor só existe como hex dentro de <code>css/tokens.css</code>. Em qualquer outro lugar — incluindo esta própria página — só <code>var(--token)</code>. Os valores hex mostrados nos swatches abaixo são lidos do navegador em tempo real via <code>getComputedStyle</code>, nunca escritos aqui.</p>
-    <p class="dsmeta">v0.1.0 · atualizado em 18 de julho de 2026</p>
-    <nav class="dstoc" aria-label="Sumário do documento">
-      <a href="#cores">01 · Cores</a>
-      <a href="#tipografia">02 · Tipografia</a>
-      <a href="#linhas">03 · Linhas</a>
-      <a href="#componentes">04 · Componentes</a>
-      <a href="#espacamento">05 · Espaçamento</a>
-      <a href="#raio">06 · Raio</a>
-      <a href="#movimento">07 · Movimento</a>
-      <a href="#logo-selo">08 · Logo / Selo</a>
-      <a href="#icones">09 · Ícones</a>
-      <a href="#padroes">10 · Padrões</a>
-    </nav>
+  <button class="toggle" id="themeToggle" type="button" aria-label="Alternar tema claro/escuro" title="Tema claro / escuro">
+    <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+    <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+  </button>
+
+  <!-- ===== Capa meia-lua (formato dos docs de apoio) ===== -->
+  <header class="cover">
+    <div class="capa-meia" aria-hidden="true"></div>
+    <div class="cover-inner">
+      <span class="dseyebrow">Studio Suzu · Documento de apoio</span>
+      <div class="cover-mid">
+        <h1 class="cover-title">Design <em>System</em></h1>
+        <p class="cover-sub">A tradução do Brandbook para o produto digital: os mesmos tokens, tipografia e cor, aplicados a código — lidos ao vivo de <code>css/tokens.css</code> e <code>css/components.css</code>.</p>
+      </div>
+      <div class="cover-foot">
+        <span class="sig">suzu</span>
+        <div class="cover-meta">
+          <span>Documento de suporte técnico da marca</span>
+          <span>v0.1.0 · 2026</span>
+        </div>
+      </div>
+    </div>
   </header>
+
+  <div class="dsbody">
+    <div class="dsintro">
+      <p>Companion do <a href="https://angelamadeira.github.io/studio_suzu/" target="_blank" rel="noopener">Brandbook Studio Suzu</a>: mesma voz, mesma tipografia, mesma cor — aqui aplicadas a tokens e componentes de código. Esta página não copia valores; ela lê <code>css/tokens.css</code> e <code>css/components.css</code> ao vivo, e os componentes são os mesmos elementos da loja, com as classes reais.</p>
+      <p>Regra do DS: cor só existe como hex dentro de <code>css/tokens.css</code>. Em qualquer outro lugar — incluindo esta página — só <code>var(--token)</code>. Os valores hex nos swatches são lidos do navegador em tempo real via <code>getComputedStyle</code>, nunca escritos aqui.</p>
+      <p class="dsmeta">v0.1.0 · atualizado em 19 de julho de 2026</p>
+      <nav class="dstoc" aria-label="Sumário do documento">
+        <a href="#cores">Cores</a>
+        <a href="#modo-escuro">Modo claro ↔ escuro</a>
+        <a href="#tipografia">Tipografia</a>
+        <a href="#logo-selo">Logo / Selo</a>
+        <a href="#icones">Ícones</a>
+        <a href="#padroes">Padrões</a>
+        <a href="#componentes">Componentes</a>
+        <a href="#linhas">Linhas</a>
+        <a href="#espacamento">Espaçamento</a>
+        <a href="#raio">Raio</a>
+        <a href="#movimento">Movimento</a>
+      </nav>
+    </div>
 
   <section class="ds" id="cores">
     <span class="dseyebrow">Fundamentos · 01</span>
@@ -784,10 +846,29 @@
     </div>
   </section>
 
-  <footer class="dsft">
-    <p>Studio Suzu — design-system.html não é uma cópia, é a documentação viva de <code>css/tokens.css</code> + <code>css/components.css</code>. Se um valor mudar nas folhas, ele muda aqui sozinho.</p>
-    <p class="dsmeta">v0.1.0 · atualizado em 18 de julho de 2026</p>
-    <a class="dsback" href="#topo">↑ Voltar ao topo</a>
+    <p class="dsmeta" style="text-align:center;margin-top:var(--space-8)">Documentação viva — se um valor mudar em <code>css/tokens.css</code> ou <code>css/components.css</code>, muda aqui sozinho. <a class="dsback" href="#topo" style="margin:0 0 0 .6em">↑ topo</a></p>
+  </div><!-- /.dsbody -->
+
+  <!-- ===== Rodapé .close (padrão Brandbook) ===== -->
+  <footer class="close">
+    <div class="wrap">
+      <div class="close-brand">
+        <svg viewBox="0 0 2765.8 659.2" role="img" aria-label="suzu"><use href="#p-suzu"/></svg>
+        <div class="close-dots">
+          <i style="background:var(--sakura)"></i>
+          <i style="background:var(--fuji)"></i>
+          <i style="background:var(--torinoko)"></i>
+          <i style="background:var(--mizu)"></i>
+          <i style="background:var(--sango)"></i>
+          <i style="background:var(--matcha)"></i>
+        </div>
+      </div>
+      <div class="close-meta">
+        <p class="sig">small joys, beautifully molded.</p>
+        <div class="foot">Studio Suzu · Design System · 2026</div>
+        <div class="foot">Made in Brazil</div>
+      </div>
+    </div>
   </footer>
 </div>
 
@@ -796,6 +877,18 @@
   'use strict';
   var root = document.documentElement;
   function tok(name){ return getComputedStyle(root).getPropertyValue('--' + name).trim(); }
+
+  /* Toggle claro/escuro — seta [data-theme] no <html> (mesmo gancho do tokens.css); lembra a escolha. */
+  (function(){
+    var KEY = 'suzu-ds-theme';
+    try { var saved = localStorage.getItem(KEY); if (saved) root.setAttribute('data-theme', saved); } catch(e){}
+    var btn = document.getElementById('themeToggle');
+    if (btn) btn.addEventListener('click', function(){
+      var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      root.setAttribute('data-theme', next);
+      try { localStorage.setItem(KEY, next); } catch(e){}
+    });
+  })();
 
   // Lista literal dos NOMES de token, agrupados por função (nenhum valor — os valores vêm do navegador).
   // PARTE A — idêntico ao Brandbook Suzu, token a token: é a fonte da verdade. Nada aqui é
