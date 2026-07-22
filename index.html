@@ -1013,13 +1013,14 @@
   function pedidoView(){
     if(!CO.order) return coEmptyView();
     var _pnome=(CO.name||'').trim().split(/\s+/)[0];
-    var items=(CO.items||[]).map(function(it){return '<div class="okri"><div class="okri-img">'+(it.mold||'')+'</div><div class="okri-tx"><b>'+it.name+'</b>'+(it.sub?'<small>'+it.sub+'</small>':'')+'</div><div class="okri-pr">'+(it.q>1?'<span class="okri-q">'+it.q+'× </span>':'')+BRL(it.price)+'</div></div>';}).join('');
+    var items=(CO.items||[]).map(function(it){return '<div class="okri"><div class="okri-img">'+(it.mold||'')+(it.q>1?'<span class="okri-qty">'+it.q+'×</span>':'')+'</div><div class="okri-tx"><b>'+it.name+'</b>'+(it.sub?'<small>'+it.sub+'</small>':'')+'</div><div class="okri-pr">'+BRL(it.price)+'</div></div>';}).join('');
     var lancamento=CO.shipLabel==='no lançamento';
     var entrega=lancamento?'combinamos no lançamento':((CO.shipLabel||'—')+(CO.eta?(' · '+CO.eta):''));
     return '<div class="wrap cowrap"><div class="okwrap">'
       +'<div class="okhead"><div class="okseal"><svg class="okcheck" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>'
         +'<span class="sig oksig">Deu tudo certo'+(_pnome?', '+_pnome:'')+'!</span>'
-        +'<p class="okhead-sub">Seu pedido está confirmado — agora é a nossa vez: vamos moldar as suas pequenas alegrias com todo o cuidado.</p></div>'
+        +'<p class="okhead-sub">Agora é a nossa vez: vamos moldar as suas pequenas alegrias com todo o cuidado.</p>'
+        +'<p class="okmail">A confirmação foi para <b>'+(CO.email||'seu e-mail')+'</b> — é por lá que a gente avisa cada passo, do preparo ao envio'+(CO.whats?', e um oi no seu WhatsApp se precisar':'')+'.</p></div>'
       +'<div class="okpanel"><div class="okrecap">'
         +'<div class="okrecap-hd">'+(CO.eta&&!lancamento?'<span class="okrecap-eta">Chega em <b>'+CO.eta+'</b></span>':'<span class="okrecap-eta">'+entrega+'</span>')+'<span class="okrecap-n">Nº '+CO.order+'</span></div>'
         +(items?'<div class="okrilist">'+items+'</div>':'')
@@ -1029,7 +1030,7 @@
         +(lancamento?'':'<div class="okrrow sub"><span>Entrega</span><span>'+(CO.shipLabel||'—')+'</span></div>')
         +(CO.hadPre?'<p class="okpre">Os itens de reserva ficam guardados com o seu nome; avisamos e cobramos o restante quando a peça é lançada.</p>':'')+'</div></div>'
       +'<div class="okcta"><a class="btn" href="#/produtos">Continuar comprando</a></div>'
-      +'<p class="okhelp">A confirmação foi para <b>'+(CO.email||'seu e-mail')+'</b>'+(CO.whats?' — e a gente dá um oi no seu WhatsApp se precisar':'')+'. Dúvida sobre o pedido? <a href="#/atendimento">Fale com a gente</a>.</p>'
+      +'<p class="okhelp">Dúvida sobre o pedido? <a href="#/atendimento">Fale com a gente</a>.</p>'
       +'</div></div>';
   }
   function router(){
@@ -1048,6 +1049,7 @@
     else if(h==='#/pedido'){if(!CO.order){location.replace('#/');return;}v=pedidoView();}
     closeMenu(); setActiveNav(h);
     document.body.classList.toggle('co-mode', h==='#/checkout');
+    document.body.classList.toggle('pedido-mode', h==='#/pedido');
     var _wa=document.querySelector('.wafloat');if(_wa){var _help=(h===''||h==='#'||h==='#/'||h.indexOf('#/faq')===0||h==='#/atendimento'||h==='#/trocas'||h==='#/entrega');_wa.style.display=_help?'':'none';}
     if(v!==null){detail.innerHTML=v;home.style.display='none';detail.style.display='block';window.scrollTo(0,0);wireDetail();if(h.indexOf('#/faq/')===0){var _od=detail.querySelector('details[open]');if(_od)_od.scrollIntoView({block:'center'});}}
     else{home.style.display='';detail.style.display='none';detail.innerHTML='';}
