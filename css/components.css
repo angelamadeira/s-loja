@@ -702,6 +702,9 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
 .okrrow.okrrow-total{font-size:1rem;color:var(--text);margin-top:2px}
 .okrrow.okrrow-total b{font-size:1.18rem;font-weight:600}
 .okpre{font-size:.82rem;color:var(--text-muted);font-weight:300;line-height:1.55;background:var(--surface);border-radius:12px;padding:11px 13px;margin:0}
+.okterms{font-size:.72rem;color:var(--text-muted);font-weight:300;line-height:1.5;margin:13px 0 0;padding-top:12px;border-top:1px solid var(--line-soft)}
+.okterms b{font-weight:500;color:var(--text)}
+.okterms a{color:var(--gold-text)}
 .okwrap .okcta,.okwrap .okhelp{margin-top:0}
 @media(min-width:820px){
   .okwrap{max-width:880px;display:grid;grid-template-columns:1fr 1fr;grid-template-areas:"head panel" "cta panel" "help panel";align-items:start;column-gap:52px;row-gap:20px;padding:64px 24px 76px}

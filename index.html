@@ -1031,9 +1031,10 @@
         +'<div class="okrrow okrrow-total"><span>Total pago</span><b>'+BRL(CO.paidTotal||0)+'</b></div>'
         +'<div class="okrrow sub"><span>Pagamento</span><span>'+(CO.payLabel||'—')+'</span></div>'
         +(lancamento?'':'<div class="okrrow sub"><span>Frete</span><span>'+(CO.shipLabel||'—')+'</span></div>')
-        +(CO.hadPre?'<p class="okpre">Os itens de reserva ficam guardados com o seu nome; avisamos e cobramos o restante quando a peça é lançada.</p>':'')+'</div></div>'
+        +(CO.hadPre?'<p class="okpre">Os itens de reserva ficam guardados com o seu nome; avisamos e cobramos o restante quando a peça é lançada.</p>':'')
+        +'<p class="okterms">Trocas e devoluções em até <b>7 dias</b> após o recebimento. <a href="#/trocas">Como funciona</a>.</p></div></div>'
       +'<div class="okcta"><a class="btn" href="#/produtos">Continuar comprando</a></div>'
-      +'<p class="okhelp">Trocas e devoluções em até <b>7 dias</b> após o recebimento — <a href="#/trocas">como funciona</a>. Dúvida sobre o pedido? <a href="#/atendimento">Fale com a gente</a>.</p>'
+      +'<p class="okhelp">Dúvida sobre o pedido? <a href="#/atendimento">Fale com a gente</a>.</p>'
       +'</div></div>';
   }
   function router(){
