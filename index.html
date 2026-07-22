@@ -680,28 +680,17 @@
     return backHome()+'<div class="listing legaldoc"><h1>'+p[1]+'</h1><div class="prose">'+p[2]+'</div></div>';
   }
   function sobreView(){
-    var steps=[
-      ['Desenho','Começa num rabisco: a ideia da peça e o gesto que ela vai ter.','<path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>'],
-      ['Modelagem 3D','Vira geometria — cada curva calculada pra soltar sem esforço.','<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/>'],
-      ['A forma','Ganha corpo em silicone platinum: autoral, impossível de copiar.','<path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>'],
-      ['À mesa','A prova é na cozinha, até a sobremesa ficar do jeito que você imaginou.','<path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/>']
-    ];
-    var benefits=[
-      ['Exclusividade real','Desenho autoral em tiragem pequena. A sua forma não está no atacado — nem na cozinha de todo mundo.'],
-      ['Desenforma limpa','Silicone platinum atóxico, do freezer ao forno. A peça sai inteira, com o detalhe vivo, do primeiro ao último uso.'],
-      ['Feita pra fotografar','Linhas desenhadas pra pegar luz e sombra. A sua sobremesa já nasce pronta pro feed.'],
-      ['Preço que se justifica','Uma peça que ninguém tem é argumento pra cobrar mais. A forma se paga.']
-    ];
     var pic='<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>';
     return backHome()
       +'<div class="listing aboutus">'
       +'<h1>Sobre o estúdio</h1>'
-      +'<p class="lead">A gente existe pra criar pequenas alegrias, lindamente moldadas — formas autorais que deixam a sua confeitaria inconfundível e a sua mesa, inesquecível.</p>'
-      +'<div class="suzupanel"><div class="suzupic"><img class="sininho" src="Suzu_sininho.svg" alt="Guizo Suzu" width="1150" height="923"></div><div class="suzutxt"><span class="label">Por que Suzu?</span><h2>Suzu quer dizer guizo — aquele sininho.</h2><p>E o sonzinho do guizo, pra gente, virou sinal de alegria: quando o nosso gatinho chega com ele tilintando, é aviso de que vem coisa fofa, daquelas que a gente ama. É essa a ideia que a gente quis trazer pro estúdio — cada forma como um pequeno guizo de alegria na sua cozinha.</p><p class="jp">No Japão, <em>suzu</em> (鈴) é justamente o nome desse sininho.</p></div></div>'
+      +'<p class="lead">A Suzu existe pra transformar doce em alegria. A gente cria formas autorais pra confeitaria — peças que fazem a sobremesa nascer bonita, daquelas que a pessoa fotografa antes de provar e divide numa mesa cheia. Esse docinho que vira sorriso é o que a gente chama de <em>momento Suzu</em>.</p>'
       +'<div class="exhd"><h2>Quem somos</h2></div>'
-      +'<div class="abduo"><div class="abperson"><div class="abphoto warm">'+pic+'</div><b>Angela</b><p>Designer digital e apaixonada por confeitaria. Junto o olhar e o sabor — pra cada forma nascer bonita e fazer sentido na cozinha.</p></div><div class="abperson"><div class="abphoto cool">'+pic+'</div><b>Gustavo</b><p>Artista 3D e ilustrador. Cuido do 3D, da impressão e da criação dos moldes de silicone — cada curva pra soltar limpa.</p></div></div>'
-      +'<p class="abstoryp">A gente cansou de ver doce lindo saindo de forma de catálogo — igual ao de todo mundo. Aí juntamos o que cada um sabe fazer de melhor: a confeitaria de verdade e o 3D. E começamos a desenhar formas que não existiam.</p>'
+      +'<div class="abduo"><div class="abperson"><div class="abphoto warm">'+pic+'</div><b>Angela</b><span class="role">Arquiteta e urbanista · USP</span><p>Traz o olhar de forma e proporção — e a paixão por confeitaria que começou tudo. Se a peça nasce bonita, é porque ela não deixou passar um detalhe.</p></div><div class="abperson"><div class="abphoto cool">'+pic+'</div><b>Gustavo</b><span class="role">Designer · Mackenzie · mestre pela FAUUSP</span><p>Cuida da modelagem 3D, da impressão e dos moldes de silicone. É a mão que transforma o rabisco em geometria — cada curva calculada pra desenformar limpa.</p></div></div>'
+      +'<p class="abstoryp">No fundo, a Suzu é um casal que juntou o que mais ama: a confeitaria de verdade e o desenho em 3D. A gente cansou de ver doce lindo saindo de forma de catálogo, igual ao de todo mundo — então passou a criar as formas que ainda não existiam.</p>'
       +'<p class="q">Duas paixões, uma bancada só.</p>'
+      +'<div class="suzupanel"><div class="suzupic"><img class="sininho" src="Suzu_sininho.svg" alt="Guizo Suzu" width="1150" height="923"></div><div class="suzutxt"><span class="label">Por que Suzu?</span><h2>Suzu quer dizer guizo — aquele sininho.</h2><p>E o sonzinho do guizo, pra gente, virou sinal de alegria: quando o nosso gatinho chega com ele tilintando, é aviso de que vem coisa fofa, daquelas que a gente ama. É essa a ideia que a gente quis trazer pro estúdio — cada forma como um pequeno guizo de alegria na sua cozinha.</p><p class="jp">No Japão, <em>suzu</em> (鈴) é justamente o nome desse sininho.</p></div></div>'
+      +'<p class="abstoryp">Cada forma que sai daqui leva a mesma torcida: virar um docinho feito com carinho, compartilhado numa mesa, que deixa o dia de alguém um tiquinho melhor. Se rolar um sorriso, deu certo — esse é o <em>momento Suzu</em>.</p>'
       +'<p class="sobresign">com carinho,<span class="names">Angela &amp; Gustavo</span></p>'
       +'</div>';
   }

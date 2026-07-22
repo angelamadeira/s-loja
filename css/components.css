@@ -937,8 +937,8 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
 .abphoto.warm{background:linear-gradient(160deg,var(--sakura-wash),var(--warm))}
 .abphoto.cool{background:linear-gradient(160deg,var(--mizu-wash),var(--warm))}
 .abphoto svg{width:28px;height:28px;fill:none;stroke:var(--wood);stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;opacity:.5}
-.abperson .role{display:block;font-family:var(--serif);font-style:italic;font-weight:500;font-size:1rem;color:var(--gold-text);margin-bottom:2px}
-.abperson b{display:block;font-weight:500;font-size:1.08rem;color:var(--text);margin-bottom:7px}
+.abperson .role{display:block;font-family:var(--serif);font-style:italic;font-weight:500;font-size:1rem;color:var(--gold-text);margin-bottom:10px}
+.abperson b{display:block;font-weight:500;font-size:1.08rem;color:var(--text);margin-bottom:2px}
 .abperson p{margin:0;color:var(--text-muted);font-weight:300;font-size:.9rem;line-height:1.6}
 /* história + assinatura */
 .aboutus .abstoryp{margin:clamp(44px,6vw,66px) auto 0;max-width:58ch;text-align:center;color:var(--text-tertiary);font-weight:300;font-size:1.05rem;line-height:1.7}
