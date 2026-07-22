@@ -918,7 +918,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
 /* painel "Por que Suzu?" — sininho + texto (padrão do bloco .custom da home) */
 .suzupanel{border:1px solid var(--line-soft);border-radius:24px;overflow:hidden;background:var(--raised);display:grid;grid-template-columns:1fr;align-items:stretch;margin-top:clamp(30px,4.5vw,48px)}
 @media(min-width:720px){.suzupanel{grid-template-columns:.82fr 1.18fr}}
-.suzupic{background:linear-gradient(150deg,var(--torinoko-wash),var(--warm));display:grid;place-items:center;padding:34px 24px}
+.suzupic{background:linear-gradient(150deg,var(--warm),var(--white));display:grid;place-items:center;padding:34px 24px}
 .suzupic .sininho{width:clamp(150px,24vw,220px);height:auto;transform-origin:50% 12%;animation:suzuRing 4s ease-in-out .9s 2;cursor:pointer}
 .suzupic:hover .sininho{animation:suzuShake .8s ease-in-out}
 @keyframes suzuShake{0%{transform:rotate(0)}16%{transform:rotate(10deg)}34%{transform:rotate(-8deg)}52%{transform:rotate(6deg)}70%{transform:rotate(-3deg)}100%{transform:rotate(0)}}
