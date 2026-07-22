@@ -999,7 +999,7 @@
     var pixDisc=CO.pay==='pix'?Math.round(merch*0.05*100)/100:0;
     var coupDisc=CO.coupon?Math.round(merch*CO.coupon.pct/100*100)/100:0;
     var total=merch+(ship||0)-pixDisc-coupDisc;
-    var rows=s.now.concat(s.pre).map(function(it){return '<div class="cirow"><span class="ciq">'+it.qty+'×</span><span class="cin">'+it.name+'</span><span class="cip">'+BRL(it.qty*it.price)+'</span></div>';}).join('');
+    var rows=s.now.concat(s.pre).map(function(it){return '<div class="okri"><div class="okri-img">'+mold(it.p)+(it.qty>1?'<span class="okri-qty">'+it.qty+'×</span>':'')+'</div><div class="okri-tx"><b>'+it.name+'</b>'+(it.sub?'<small>'+it.sub+'</small>':'')+'</div><div class="okri-pr">'+BRL(it.qty*it.price)+'</div></div>';}).join('');
     var frete=s.now.length===0?'no lançamento':(CO.ship?(CO.ship.free?'Grátis':BRL(CO.ship.price)):'calcule no passo 2');
     var h='<h3>Resumo</h3><div class="ciList">'+rows+'</div><div class="cisep"></div>';
     h+='<div class="sumrow"><span>Subtotal</span><span>'+BRL(merch)+'</span></div>';
