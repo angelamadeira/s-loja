@@ -709,12 +709,12 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
 .okwrap .okcta,.okwrap .okhelp{margin-top:0}
 @media(min-width:820px){
   .okwrap{max-width:880px;display:grid;grid-template-columns:1fr 1fr;grid-template-areas:"head panel" "cta panel" "help panel";align-items:start;column-gap:52px;row-gap:20px;padding:64px 24px 76px}
-  .okwrap .okhead{grid-area:head;align-items:flex-start;text-align:left;gap:12px}
+  .okwrap .okhead{grid-area:head;align-items:center;text-align:center;gap:12px}
   .okwrap .okhead .oksig{font-size:2rem}
   .okwrap .okhead-sub{max-width:34ch}
   .okwrap .okpanel{grid-area:panel}
-  .okwrap .okcta{grid-area:cta;justify-content:flex-start;margin-top:4px}
-  .okwrap .okhelp{grid-area:help;text-align:left;max-width:42ch;margin:0}
+  .okwrap .okcta{grid-area:cta;justify-content:center;margin-top:4px}
+  .okwrap .okhelp{grid-area:help;text-align:center;max-width:42ch;margin:0 auto}
 }
 .okseal{width:64px;height:64px;border-radius:50%;background:var(--mizu);display:flex;align-items:center;justify-content:center;margin-bottom:12px}
 .okcheck{width:30px;height:30px;fill:none;stroke:var(--ink);stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
