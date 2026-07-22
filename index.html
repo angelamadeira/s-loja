@@ -881,6 +881,8 @@
       var _w=document.getElementById('coWhats');CO.whats=_w?_w.value.trim():'';
       CO.hadPre=s.pre.length>0;CO.email=email.value;
       var _n=document.getElementById('coNome');CO.name=_n?_n.value.trim():'';
+      var _fv=function(id){var e=document.getElementById(id);return e?e.value.trim():'';};
+      if(s.now.length){var _rua=_fv('coRua'),_num=_fv('coNum'),_comp=_fv('coComp'),_bairro=_fv('coBairro'),_cid=_fv('coCidade'),_cep=_fv('coCep');CO.addr1=_rua+(_num?', '+_num:'')+(_comp?' · '+_comp:'');CO.addr2=[_bairro,_cid].filter(Boolean).join(' · ')+(_cep?' · CEP '+_cep:'');}else{CO.addr1='';CO.addr2='';}
       runProcessing();
     };
     function runProcessing(){
@@ -1025,9 +1027,10 @@
         +'<div class="okrecap-hd">'+(CO.eta&&!lancamento?'<span class="okrecap-eta">Chega em <b>'+CO.eta+'</b></span>':'<span class="okrecap-eta">'+entrega+'</span>')+'<span class="okrecap-n">Nº '+CO.order+'</span></div>'
         +(items?'<div class="okrilist">'+items+'</div>':'')
         +'<div class="okrisep"></div>'
+        +(!lancamento&&CO.addr1?'<div class="okrto"><span class="okrto-lb">Entrega para</span><span class="okrto-ad">'+(CO.name?'<b>'+CO.name+'</b> · ':'')+CO.addr1+(CO.addr2?'<br>'+CO.addr2:'')+'</span></div><div class="okrisep"></div>':'')
         +'<div class="okrrow okrrow-total"><span>Total pago</span><b>'+BRL(CO.paidTotal||0)+'</b></div>'
         +'<div class="okrrow sub"><span>Pagamento</span><span>'+(CO.payLabel||'—')+'</span></div>'
-        +(lancamento?'':'<div class="okrrow sub"><span>Entrega</span><span>'+(CO.shipLabel||'—')+'</span></div>')
+        +(lancamento?'':'<div class="okrrow sub"><span>Frete</span><span>'+(CO.shipLabel||'—')+'</span></div>')
         +(CO.hadPre?'<p class="okpre">Os itens de reserva ficam guardados com o seu nome; avisamos e cobramos o restante quando a peça é lançada.</p>':'')+'</div></div>'
       +'<div class="okcta"><a class="btn" href="#/produtos">Continuar comprando</a></div>'
       +'<p class="okhelp">Dúvida sobre o pedido? <a href="#/atendimento">Fale com a gente</a>.</p>'
