@@ -906,7 +906,7 @@
           var pixD=CO.pay==='pix'?Math.round(merch*0.05*100)/100:0;
           var coupD=CO.coupon?Math.round(merch*CO.coupon.pct/100*100)/100:0;
           CO.paidTotal=merch+shp-pixD-coupD;
-          CO.items=sp.now.concat(sp.pre).map(function(it){return {q:it.qty,name:it.name,price:it.qty*it.price};});
+          CO.items=sp.now.concat(sp.pre).map(function(it){return {q:it.qty,name:it.name,price:it.qty*it.price,mold:mold(it.p),sub:it.sub||''};});
           CO.payLabel=CO.pay==='pix'?'Pix (à vista)':(CO.pay==='cartao'?((CO.parc||1)+'× no cartão'):'Boleto');
           CO.shipLabel=sp.now.length===0?'no lançamento':(CO.ship?(CO.ship.free?'Frete grátis':BRL(CO.ship.price)):'—');
           CO.eta=(sp.now.length&&CO.ship)?CO.ship.days:'';
@@ -1013,20 +1013,24 @@
   function pedidoView(){
     if(!CO.order) return coEmptyView();
     var _pnome=(CO.name||'').trim().split(/\s+/)[0];
-    var items=(CO.items||[]).map(function(it){return '<div class="okri"><span class="okriq">'+it.q+'×</span><span class="okrin">'+it.name+'</span><span class="okrip">'+BRL(it.price)+'</span></div>';}).join('');
+    var items=(CO.items||[]).map(function(it){return '<div class="okri"><div class="okri-img">'+(it.mold||'')+'</div><div class="okri-tx"><b>'+it.name+'</b>'+(it.sub?'<small>'+it.sub+'</small>':'')+'</div><div class="okri-pr">'+(it.q>1?'<span class="okri-q">'+it.q+'× </span>':'')+BRL(it.price)+'</div></div>';}).join('');
     var lancamento=CO.shipLabel==='no lançamento';
     var entrega=lancamento?'combinamos no lançamento':((CO.shipLabel||'—')+(CO.eta?(' · '+CO.eta):''));
-    return '<div class="wrap cowrap"><div class="okwrap"><div class="okseal"><svg class="okcheck" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>'
-      +'<span class="sig oksig">Deu tudo certo'+(_pnome?', '+_pnome:'')+'!</span>'
-      +'<p class="oknum">Pedido Nº '+CO.order+'</p>'
-      +(CO.eta&&!lancamento?'<p class="oketa">Chega em <b>'+CO.eta+'</b></p>':'')
-      +(items?'<div class="okrecap"><div class="okrilist">'+items+'</div><div class="okrisep"></div><div class="okrrow"><span>Total pago</span><b>'+BRL(CO.paidTotal||0)+'</b></div><div class="okrrow sub"><span>Pagamento</span><span>'+(CO.payLabel||'—')+'</span></div><div class="okrrow sub"><span>Entrega</span><span>'+entrega+'</span></div></div>':'')
-      +'<div class="oksteps"><div class="okstep on"><span class="okdot"></span>Pedido confirmado</div><div class="okstep"><span class="okdot"></span>Em preparo no ateliê</div><div class="okstep"><span class="okdot"></span>A caminho</div></div>'
-      +'<p class="oktext">Enviamos a confirmação para <b>'+(CO.email||'seu e-mail')+'</b> — é por lá que você acompanha cada etapa, do preparo ao envio.'+(CO.whats?' Se precisarmos de algo, damos um oi no seu WhatsApp.':'')+'</p>'
-      +(CO.hadPre?'<p class="oktext pre">Os itens de reserva ficam guardados com o seu nome; avisamos e cobramos o restante quando a peça é lançada.</p>':'')
-      +'<p class="oktext">Agora é a nossa vez: vamos moldar as suas pequenas alegrias com todo o cuidado.</p>'
-      +'<div class="okcta"><a class="btn" href="#/produtos">Continuar comprando</a><a class="btn ghost" href="https://www.instagram.com/studio.suzu/" target="_blank" rel="noopener">Acompanhe no Instagram</a></div>'
-      +'<p class="okhelp">Qualquer dúvida sobre o pedido, <a href="#/atendimento">fale com a gente</a>.</p></div></div>';
+    return '<div class="wrap cowrap"><div class="okwrap">'
+      +'<div class="okhead"><div class="okseal"><svg class="okcheck" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>'
+        +'<span class="sig oksig">Deu tudo certo'+(_pnome?', '+_pnome:'')+'!</span>'
+        +'<p class="okhead-sub">Seu pedido está confirmado — agora é a nossa vez: vamos moldar as suas pequenas alegrias com todo o cuidado.</p></div>'
+      +'<div class="okpanel"><div class="okrecap">'
+        +'<div class="okrecap-hd">'+(CO.eta&&!lancamento?'<span class="okrecap-eta">Chega em <b>'+CO.eta+'</b></span>':'<span class="okrecap-eta">'+entrega+'</span>')+'<span class="okrecap-n">Nº '+CO.order+'</span></div>'
+        +(items?'<div class="okrilist">'+items+'</div>':'')
+        +'<div class="okrisep"></div>'
+        +'<div class="okrrow okrrow-total"><span>Total pago</span><b>'+BRL(CO.paidTotal||0)+'</b></div>'
+        +'<div class="okrrow sub"><span>Pagamento</span><span>'+(CO.payLabel||'—')+'</span></div>'
+        +(lancamento?'':'<div class="okrrow sub"><span>Entrega</span><span>'+(CO.shipLabel||'—')+'</span></div>')
+        +(CO.hadPre?'<p class="okpre">Os itens de reserva ficam guardados com o seu nome; avisamos e cobramos o restante quando a peça é lançada.</p>':'')+'</div></div>'
+      +'<div class="okcta"><a class="btn" href="#/produtos">Continuar comprando</a></div>'
+      +'<p class="okhelp">A confirmação foi para <b>'+(CO.email||'seu e-mail')+'</b>'+(CO.whats?' — e a gente dá um oi no seu WhatsApp se precisar':'')+'. Dúvida sobre o pedido? <a href="#/atendimento">Fale com a gente</a>.</p>'
+      +'</div></div>';
   }
   function router(){
     var h=location.hash,v=null;
