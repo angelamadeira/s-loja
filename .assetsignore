@@ -1,0 +1,17 @@
+# O que NÃO publicar como asset (Workers Static Assets, dir = raiz do repo).
+# O Pages clássico excluía node_modules sozinho; o método novo não — daí este arquivo.
+# node_modules é obrigatório excluir (tem arquivo >25 MiB e estoura o limite).
+**/node_modules
+**/.git
+**/.DS_Store
+
+# arquivos de dev / harness / docs — não fazem parte do site público
+.github
+.husky
+scripts
+*.md
+package.json
+package-lock.json
+.stylelintrc.json
+.gitignore
+.assetsignore
