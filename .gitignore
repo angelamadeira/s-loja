@@ -10,3 +10,6 @@ node_modules/
 secrets.json
 .dev.vars
 .wrangler/
+
+.dev.vars*
+!.dev.vars.example

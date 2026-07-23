@@ -7,10 +7,13 @@
     "lint:markup": "bash scripts/check-no-hardcoded-color.sh",
     "lint:space": "bash scripts/check-no-hardcoded-space.sh",
     "lint": "npm run lint:css && npm run lint:markup && npm run lint:space",
-    "prepare": "husky"
+    "prepare": "husky",
+    "deploy": "wrangler deploy",
+    "preview": "wrangler dev"
   },
   "devDependencies": {
+    "husky": "^9.1.6",
     "stylelint": "^16.10.0",
-    "husky": "^9.1.6"
+    "wrangler": "^4.114.0"
   }
 }
