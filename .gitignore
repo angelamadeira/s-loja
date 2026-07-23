@@ -1,2 +1,12 @@
 node_modules/
 .DS_Store
+
+# Segredos — nunca commitar (chaves Mercado Pago, Supabase, etc.)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets.json
+.dev.vars
+.wrangler/

@@ -60,12 +60,15 @@
   --mask-ink:#000; /* stop de máscara/gradiente (opacidade) */
 
   /* ── ESCALAS (espaçamento · raio · movimento) — canônicas do DS.
-     Adoção incremental: o CSS legado usa valores ad-hoc. Movimento será migrado (mesmos
-     valores, sem mudar pixel); espaçamento/raio migram por componente (redesenho, revisão pixel). ── */
-  /* espaçamento (base 4) */
-  --space-1:4px; --space-2:8px; --space-3:12px; --space-4:16px; --space-5:24px; --space-6:32px; --space-7:48px; --space-8:64px;
+     Espaçamento normalizado na base 4px (auditoria 2026-07-22, opção B): o CSS legado usava
+     ~40 valores ad-hoc num ritmo de 2px; consolidados nestes 11 degraus (deslocamentos ±2px
+     revisados em QA claro/escuro). Raio adota a escala --r-* já existente. ── */
+  /* espaçamento (base 4 · --space-2xs=2px é o passo fino p/ hairlines e ajustes ópticos) */
+  --space-2xs:2px;
+  --space-1:4px; --space-2:8px; --space-3:12px; --space-4:16px; --space-5:20px;
+  --space-6:24px; --space-7:32px; --space-8:40px; --space-9:48px; --space-10:64px;
   /* raio */
-  --r-sm:8px; --r-md:12px; --r-lg:16px; --r-xl:20px; --r-2xl:24px; --r-pill:999px; --r-round:50%;
+  --r-xs:4px; --r-sm:8px; --r-md:12px; --r-lg:16px; --r-xl:20px; --r-2xl:24px; --r-pill:999px; --r-round:50%;
   /* movimento */
   --ease:cubic-bezier(.22,.61,.36,1); --ease-out:cubic-bezier(.32,.72,0,1); --ease-pop:cubic-bezier(.34,1.56,.64,1);
   --dur-fast:.16s; --dur:.25s; --dur-slow:.8s;

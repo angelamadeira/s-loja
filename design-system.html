@@ -45,7 +45,7 @@
   :root[data-theme="dark"] .toggle .moon{display:block}
 
   /* corpo do documento após a capa */
-  .dsbody{padding:0 24px var(--space-8);max-width:980px;margin:0 auto}
+  .dsbody{padding:0 var(--space-6) var(--space-8);max-width:980px;margin:0 auto}
 
   nav.dstoc{display:flex;flex-wrap:wrap;gap:var(--space-2) var(--space-5);margin-top:var(--space-6);padding-top:var(--space-5);border-top:1px solid var(--line-soft)}
   nav.dstoc a{color:var(--stone-text);font-size:.78rem;letter-spacing:.03em;text-decoration:none;text-transform:uppercase}
@@ -77,44 +77,44 @@
   .darkcmp{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-4)}
   @media(max-width:640px){ .darkcmp{grid-template-columns:1fr} }
   .dkcol > .dsgroup{margin:0 0 var(--space-2)}
-  .dkpane{background:var(--bg);border:1px solid var(--line);border-radius:16px;padding:var(--space-5);display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:14px;color:var(--text)}
-  .dksw i{display:block;height:38px;border-radius:8px;border:1px solid var(--line)}
-  .dksw b{display:block;font-size:.64rem;margin-top:5px;font-weight:600;color:var(--text)}
+  .dkpane{background:var(--bg);border:1px solid var(--line);border-radius:var(--r-lg);padding:var(--space-5);display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:var(--space-4);color:var(--text)}
+  .dksw i{display:block;height:38px;border-radius:var(--r-sm);border:1px solid var(--line)}
+  .dksw b{display:block;font-size:.64rem;margin-top:var(--space-1);font-weight:600;color:var(--text)}
   .dksw span{display:block;font-size:.58rem;color:var(--text-muted);font-variant-numeric:tabular-nums}
 
-  .swrow{display:flex;flex-wrap:wrap;gap:4px 0}
-  .sw{width:112px;margin:6px 8px 6px 0}
-  .sw i{display:block;height:58px;border-radius:10px;border:1px solid var(--line)}
-  .sw b{display:block;font-size:.7rem;margin-top:6px;font-weight:600}
+  .swrow{display:flex;flex-wrap:wrap;gap:var(--space-1) 0}
+  .sw{width:112px;margin:var(--space-2) var(--space-2) var(--space-2) 0}
+  .sw i{display:block;height:58px;border-radius:var(--r-md);border:1px solid var(--line)}
+  .sw b{display:block;font-size:.7rem;margin-top:var(--space-2);font-weight:600}
   .sw span{display:block;font-size:.64rem;color:var(--text-muted);font-variant-numeric:tabular-nums}
 
   .comp-block{margin:0 0 var(--space-7)}
   .comp-block > h3{font-size:1.02rem;font-weight:500;margin:0 0 var(--space-1)}
-  .demo{border:1px solid var(--line-soft);border-radius:16px;padding:var(--space-6);background:var(--raised)}
-  .dsbody code{background:var(--raised);padding:2px 7px;border-radius:6px;font-size:.82rem}
+  .demo{border:1px solid var(--line-soft);border-radius:var(--r-lg);padding:var(--space-6);background:var(--raised)}
+  .dsbody code{background:var(--raised);padding:var(--space-2xs) var(--space-2);border-radius:var(--r-sm);font-size:.82rem}
   .demo-row{display:flex;flex-wrap:wrap;gap:var(--space-3);align-items:center}
-  .demo-stage{position:relative;height:230px;border-radius:18px;overflow:hidden;flex:1 1 220px;min-width:220px}
-  .demo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:16px}
+  .demo-stage{position:relative;height:230px;border-radius:var(--r-xl);overflow:hidden;flex:1 1 220px;min-width:220px}
+  .demo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:var(--space-4)}
   .demo-mold{width:52px;height:52px;flex:0 0 auto}
   .demo-mold svg{width:100%;height:100%;display:block}
 
-  table.dstable{width:100%;border-collapse:collapse;font-size:.82rem;margin-top:6px}
-  table.dstable th, table.dstable td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line-soft)}
+  table.dstable{width:100%;border-collapse:collapse;font-size:.82rem;margin-top:var(--space-2)}
+  table.dstable th, table.dstable td{text-align:left;padding:var(--space-2) var(--space-3);border-bottom:1px solid var(--line-soft)}
   table.dstable th{color:var(--label);font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;font-weight:600}
   table.dstable td code{font-size:.78rem}
 
-  .type-sample{padding:20px 0;border-bottom:1px solid var(--line-soft)}
+  .type-sample{padding:var(--space-5) 0;border-bottom:1px solid var(--line-soft)}
   .type-sample:last-child{border-bottom:none}
-  .type-sample .tag{font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;color:var(--label);margin-bottom:8px}
+  .type-sample .tag{font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;color:var(--label);margin-bottom:var(--space-2)}
   .type-sample .val{font-size:1.5rem}
   .type-sample.serif .val{font-family:var(--serif);font-style:italic;font-weight:400}
-  .type-sample .meta{font-size:.72rem;color:var(--text-muted);margin-top:8px}
+  .type-sample .meta{font-size:.72rem;color:var(--text-muted);margin-top:var(--space-2)}
 
-  .line-demo{display:flex;flex-wrap:wrap;gap:18px}
+  .line-demo{display:flex;flex-wrap:wrap;gap:var(--space-5)}
   .line-demo div{flex:1 1 220px}
-  .line-demo b{display:block;font-size:.78rem;margin-bottom:6px}
-  .line-demo .strip{height:44px;border-radius:10px;background:var(--surface)}
-  .line-demo span{display:block;font-size:.66rem;color:var(--text-muted);margin-top:6px;font-variant-numeric:tabular-nums}
+  .line-demo b{display:block;font-size:.78rem;margin-bottom:var(--space-2)}
+  .line-demo .strip{height:44px;border-radius:var(--r-md);background:var(--surface)}
+  .line-demo span{display:block;font-size:.66rem;color:var(--text-muted);margin-top:var(--space-2);font-variant-numeric:tabular-nums}
 
   /* ===== Rodapé .close (padrão Brandbook) ===== */
   .close{background:var(--footer-plate);color:var(--text);text-align:center;overflow:hidden;border-top:1px solid var(--line);padding:clamp(2.8rem,7vh,4.2rem) 0;margin-top:var(--space-8)}
@@ -130,20 +130,20 @@
   .close .foot + .foot{margin-top:.35rem}
 
   /* Espaçamento */
-  .space-row{display:flex;align-items:center;gap:16px;margin:10px 0}
-  .space-bar{height:16px;background:var(--stone);border-radius:4px;flex:0 0 auto}
+  .space-row{display:flex;align-items:center;gap:var(--space-4);margin:var(--space-3) 0}
+  .space-bar{height:16px;background:var(--stone);border-radius:var(--r-xs);flex:0 0 auto}
   .space-row b{min-width:82px;font-size:.78rem}
   .space-row span{font-size:.68rem;color:var(--text-muted);font-variant-numeric:tabular-nums}
 
   /* Raio */
-  .r-row{display:flex;flex-wrap:wrap;gap:22px}
+  .r-row{display:flex;flex-wrap:wrap;gap:var(--space-6)}
   .r-item{text-align:center}
   .r-box{background:var(--raised);border:1px solid var(--line)}
-  .r-item b{display:block;font-size:.72rem;margin-top:10px}
+  .r-item b{display:block;font-size:.72rem;margin-top:var(--space-3)}
   .r-item span{display:block;font-size:.64rem;color:var(--text-muted);font-variant-numeric:tabular-nums}
 
   /* Movimento */
-  .ease-row{display:flex;align-items:center;gap:20px;margin:16px 0;flex-wrap:wrap}
+  .ease-row{display:flex;align-items:center;gap:var(--space-5);margin:var(--space-4) 0;flex-wrap:wrap}
   .ease-row b{min-width:190px;font-size:.78rem}
   .ease-row .meta{font-size:.68rem;color:var(--text-muted);min-width:150px}
   .ease-track{position:relative;width:200px;height:32px;background:var(--raised);border-radius:var(--r-pill);flex:0 0 auto;border:1px solid var(--line-soft)}
@@ -154,28 +154,28 @@
   @keyframes dsslide{from{left:3px}to{left:calc(100% - 27px)}}
   @keyframes dspop{0%,100%{transform:scale(.4);opacity:.5}50%{transform:scale(1);opacity:1}}
   @media(prefers-reduced-motion:reduce){ .ease-dot{animation:none!important} }
-  .dur-list{display:flex;gap:26px;flex-wrap:wrap;margin-top:4px}
+  .dur-list{display:flex;gap:var(--space-6);flex-wrap:wrap;margin-top:var(--space-1)}
   .dur-list div{font-size:.78rem}
-  .dur-list b{display:block;font-size:.68rem;color:var(--label);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px}
+  .dur-list b{display:block;font-size:.68rem;color:var(--label);text-transform:uppercase;letter-spacing:.08em;margin-bottom:var(--space-1)}
 
   /* Logo / Selo */
-  .dsrules{margin:2px 0 0;padding-left:20px;color:var(--stone-text);font-size:.82rem;line-height:1.7}
-  .dsrules li{margin:5px 0}
+  .dsrules{margin:var(--space-2xs) 0 0;padding-left:var(--space-5);color:var(--stone-text);font-size:.82rem;line-height:1.7}
+  .dsrules li{margin:var(--space-1) 0}
   .dsrules b{color:var(--ink);font-weight:600}
-  .seal-row{display:flex;flex-wrap:wrap;gap:32px;align-items:flex-end;margin-bottom:8px}
+  .seal-row{display:flex;flex-wrap:wrap;gap:var(--space-7);align-items:flex-end;margin-bottom:var(--space-2)}
   .seal-item{text-align:center}
-  .seal-item b{display:block;font-size:.72rem;margin-top:10px}
+  .seal-item b{display:block;font-size:.72rem;margin-top:var(--space-3)}
   .seal-item span{display:block;font-size:.64rem;color:var(--text-muted)}
   .clearspace{display:inline-block;border:1px dashed var(--line-strong);line-height:0}
-  .lockup-demo{display:flex;align-items:center;gap:12px}
+  .lockup-demo{display:flex;align-items:center;gap:var(--space-3)}
   .lockup-demo b{font-family:var(--serif);font-style:italic;font-weight:400;font-size:1.15rem;color:var(--ink)}
 
   /* Ícones */
-  .icon-row{display:flex;flex-wrap:wrap;gap:30px}
+  .icon-row{display:flex;flex-wrap:wrap;gap:var(--space-7)}
   .icon-item{text-align:center;color:var(--ink)}
   .icon-item svg{width:26px;height:26px;display:block;margin:0 auto}
-  .icon-item b{display:block;font-size:.68rem;margin-top:10px;font-weight:500;color:var(--text)}
-  .icon-status{display:flex;align-items:center;gap:8px;font-size:.82rem;margin-top:18px;padding:10px 14px;border-radius:var(--r-md)}
+  .icon-item b{display:block;font-size:.68rem;margin-top:var(--space-3);font-weight:500;color:var(--text)}
+  .icon-status{display:flex;align-items:center;gap:var(--space-2);font-size:.82rem;margin-top:var(--space-5);padding:var(--space-3) var(--space-4);border-radius:var(--r-md)}
   .icon-status svg{width:1.2em;height:1.2em;flex:0 0 auto}
 
 
@@ -184,7 +184,7 @@
      usados no restante do projeto (ver css/components.css) para preto/cinza de tinta. */
   @media print{
     body{background:var(--white);color:var(--print-ink)}
-    .dsbody{max-width:none;padding:0 18px}
+    .dsbody{max-width:none;padding:0 var(--space-5)}
     a{color:var(--print-ink);text-decoration:none}
     a[href^="#"]::after{content:""}
     nav.dstoc,.dsback,.toggle{display:none}
@@ -349,7 +349,7 @@
 
     <h3 class="dsgroup">Espaço livre — ¼ do diâmetro</h3>
     <p class="dsrule">Selo de 96px pede pelo menos 24px de respiro em cada lado (tracejado ilustra o limite — nunca desenhado na loja real).</p>
-    <div class="clearspace" style="padding:24px">
+    <div class="clearspace" style="padding:var(--space-6)">
       <svg class="seal" viewBox="0 0 1600 1600" aria-hidden="true" style="width:96px;height:96px;display:block">
         <circle cx="800" cy="800" r="774" fill="none" stroke="var(--ink)" stroke-width="52"/>
         <g fill="var(--ink)" transform="translate(800 800) scale(.74) translate(-800 -800)">
@@ -501,7 +501,7 @@
     <div class="comp-block">
       <h3>Checkout em acordeão — <code>.costep</code></h3>
       <p class="dsrule">Uma etapa aberta por vez (<code>.costep.open</code>). Etapa concluída (<code>.costep.done</code>) colapsa e passa a mostrar <code>.costep-sum</code> (resumo) + <code>.coedit</code> ("Editar") no lugar do conteúdo; o número (<code>.cn-n</code>) vira check (<code>.cn-ok</code>).</p>
-      <div class="demo" style="display:flex;flex-direction:column;gap:14px">
+      <div class="demo" style="display:flex;flex-direction:column;gap:var(--space-4)">
         <section class="costep done" data-step="1">
           <button type="button" class="cohd" data-tog="1">
             <span class="conum"><span class="cn-n">1</span><svg class="cn-ok" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
@@ -633,10 +633,10 @@
       <p class="dsrule">Mesma anatomia nas telas que podem ficar sem conteúdo (sacola vazia, busca sem resultado, lista filtrada sem match): ícone + <code>.sig</code> em destaque + frase de apoio + um único <code>.btn</code> de saída. Nunca deixa a pessoa num beco sem saída — sempre há uma ação a seguir.</p>
       <div class="demo" style="display:flex;justify-content:center">
         <div class="empty" style="max-width:360px">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:34px;height:34px;margin-bottom:14px"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:34px;height:34px;margin-bottom:var(--space-4)"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
           <span class="sig">Sua sacola está vazia.</span>
           Escolha uma peça pra começar a sua coleção.
-          <div style="margin-top:20px"><a class="btn" href="#">Ver produtos</a></div>
+          <div style="margin-top:var(--space-5)"><a class="btn" href="#">Ver produtos</a></div>
         </div>
       </div>
     </div>
@@ -644,8 +644,8 @@
     <div class="comp-block">
       <h3>Selos de preço &amp; promoção — <code>.offtag</code> · <code>.wasp</code> · <code>.pbadge.promo</code> · <code>.note</code> · <code>.couphint</code></h3>
       <p class="dsrule">Desconto sempre aparece nos dois lados do preço: <code>.wasp</code> risca o valor cheio, <code>.offtag</code> é a pílula "−X%" ao lado do preço atual (PDP, "Leve junto"). No card de listagem a mesma leitura vira selo sobre a imagem — <code>.pbadge.promo</code>, mesma família de cor de <code>.last</code>/<code>.presale</code>/<code>.soldout</code>. A faixa do topo (<code>.note</code>) mostra por padrão o aviso de frete grátis; com a promoção geral do site ativa (<code>SALE.active</code>), o mesmo elemento passa a exibir o texto da campanha — não existe uma classe própria de "faixa promo". <code>.couphint</code> dá o retorno do cupom digitado no checkout: neutro, <code>.err</code> (mesma cor de <code>.field-err</code>, não demonstrado aqui) ou <code>.ok</code>.</p>
-      <div class="demo" style="display:flex;flex-direction:column;gap:20px">
-        <div class="note" style="border-radius:12px">Promoção de verão — −20% em toda a coleção Bento &amp; Festa</div>
+      <div class="demo" style="display:flex;flex-direction:column;gap:var(--space-5)">
+        <div class="note" style="border-radius:var(--space-3)">Promoção de verão — −20% em toda a coleção Bento &amp; Festa</div>
         <div class="demo-row">
           <span style="font-size:1.05rem;font-weight:500"><s class="wasp">R$ 89,00</s>R$ 71,20<span class="offtag">−20%</span></span>
           <div class="pcard" style="max-width:64px"><div class="m" style="background:var(--sango-wash)"><span class="pbadge promo">−20%</span></div></div>

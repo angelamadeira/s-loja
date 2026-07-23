@@ -5,7 +5,8 @@
   "scripts": {
     "lint:css": "stylelint \"css/**/*.css\"",
     "lint:markup": "bash scripts/check-no-hardcoded-color.sh",
-    "lint": "npm run lint:css && npm run lint:markup",
+    "lint:space": "bash scripts/check-no-hardcoded-space.sh",
+    "lint": "npm run lint:css && npm run lint:markup && npm run lint:space",
     "prepare": "husky"
   },
   "devDependencies": {
