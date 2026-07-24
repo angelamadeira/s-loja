@@ -9,7 +9,6 @@ const MAX_ARQUIVO = 10 * 1024 * 1024; // 10 MB por anexo
 const MAX_ANEXOS = 12;
 const TIPOS_OK = ["image/", "application/pdf"];
 const CONSENT_VERSAO = "v1-2026-07"; // versão do texto de consentimento (LGPD)
-const BASE = "https://studiosuzu.com.br";
 
 export default {
   async fetch(request, env) {
@@ -73,7 +72,7 @@ async function handleOrcamento(request, env) {
 
     // 6. avisa o estúdio (não bloqueia o sucesso se falhar — o pedido já está salvo)
     try {
-      await avisaEstudio(env, { ref, nome, contato, brief, anexos, origem });
+      await avisaEstudio(env, { ref, nome, contato, brief, anexos, origem, base: new URL(request.url).origin });
     } catch (_) {
       // pedido já persistido no D1; o aviso pode ser recuperado do banco
     }
@@ -118,7 +117,7 @@ async function avisaEstudio(env, p) {
   const anexosLinhas = [];
   for (const a of p.anexos) {
     const tok = await assina(a.key, env.TURNSTILE_SECRET);
-    anexosLinhas.push("• " + a.name + " — " + BASE + "/api/anexo?k=" + encodeURIComponent(a.key) + "&t=" + tok);
+    anexosLinhas.push("• " + a.name + " — " + p.base + "/api/anexo?k=" + encodeURIComponent(a.key) + "&t=" + tok);
   }
 
   const linhas = [

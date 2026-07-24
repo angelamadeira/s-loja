@@ -22,3 +22,7 @@ wrangler.jsonc
 wrangler.toml
 schema.sql
 *.sql
+
+# cruft que não deve virar asset público
+.wrangler
+--version
