@@ -1038,8 +1038,20 @@ button.cohd{width:100%;border:0;background:none;font:inherit;color:inherit;text-
 .costep-cta .conext{width:100%;padding:var(--space-4);font-size:.78rem;letter-spacing:.05em;text-transform:uppercase}
 .coproc{position:fixed;inset:0;z-index:120;display:flex;align-items:center;justify-content:center;background:var(--surface);opacity:0;transition:opacity .35s ease}.coproc.show{opacity:1}.coproc[hidden]{display:none}.coproc-in{display:flex;flex-direction:column;align-items:center;gap:var(--space-5);padding:var(--space-7);text-align:center;max-width:340px}.coproc-ring{width:50px;height:50px;border-radius:var(--r-round);border:2.5px solid var(--line);border-top-color:var(--matcha);animation:coprocspin .9s linear infinite}@keyframes coprocspin{to{transform:rotate(360deg)}}.coproc-ico{width:50px;height:50px;color:var(--error-text)}.coproc-msg{font-size:1.05rem;color:var(--text);font-weight:400;letter-spacing:.01em;margin:0;min-height:1.4em;transition:opacity .25s ease}.coproc-sub{font-size:.82rem;color:var(--text-muted);font-weight:300;line-height:1.5;margin:0}.coproc-retry{margin-top:var(--space-1)}@media(prefers-reduced-motion:reduce){.coproc-ring{animation-duration:2.4s}.coproc{transition:none}}
 /* ===== VÍDEO DO PROCESSO = reel vertical 9:16 (mesmo formato das redes IG/TikTok).
-   Card retrato centralizado, com teto de largura pra não ficar gigante no desktop.
-   O vídeo (e a capa/poster, tb 9:16) preenchem sem corte via object-fit:cover. ===== */
-.recvid{aspect-ratio:9/16;height:auto;max-width:380px;margin-inline:auto}
-@media (min-width:860px){.recvid{height:auto;max-width:380px}}
+   MOBILE: empilha (vídeo full-width, depois info, depois passos).
+   DESKTOP: reel à esquerda + info (título/ingredientes) à direita — padrão TikTok/Reels/Shorts
+   no desktop (vídeo vertical + painel lateral); passo a passo em largura total abaixo. ===== */
+/* MOBILE: .rectop é bloco (empilha) — o vídeo se comporta como bloco normal e ocupa a
+   largura toda; NÃO usar flex aqui senão o flex-item colapsa a largura pro conteúdo. */
+.recvid{aspect-ratio:9/16;width:min(100%,380px);height:auto;margin-inline:auto}
+.recinfo{display:flex;flex-direction:column;gap:var(--space-6)}
+.rectop>.recinfo{margin-top:var(--space-6)}
+.recsteps{margin-top:var(--space-8)}
+@media (min-width:860px){
+  .rectop{display:grid;grid-template-columns:minmax(300px,360px) 1fr;gap:var(--space-9);align-items:start}
+  .rectop .recvid{width:100%;max-width:none;margin:0}
+  .rectop>.recinfo{margin-top:0;gap:var(--space-7)}
+  .recinfo .rechead{margin-top:0}
+  .recinfo .recside{flex:initial}
+}
 
