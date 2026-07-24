@@ -723,7 +723,7 @@
       '<div class="qsec"><h3 class="wztitle">Conte o seu projeto</h3><label class="cofield"><span>Detalhes <em class="opt">opcional</em></span><textarea name="brief" placeholder="Formato, tamanho, referência de estilo, prazo…" style="min-height:120px;resize:vertical"></textarea></label><div class="cofield"><span>Referências — imagens ou PDF <em class="opt">opcional</em></span><label class="filedrop" id="fileDrop"><input type="file" id="fileInput" multiple accept="image/*,application/pdf" hidden><svg viewBox="0 0 24 24"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/><polyline points="16 16 12 12 8 16"/></svg><b>Arraste aqui ou clique para anexar</b><small>JPG, PNG ou PDF · quantas quiser</small></label><div class="filelist" id="fileList"></div></div></div>'+
       '<div class="qsec"><h3 class="wztitle">Como falamos com você</h3><div class="tworow"><label class="cofield"><span>Nome <em class="opt">opcional</em></span><input name="nome" autocomplete="name" autocapitalize="words"></label><label class="cofield"><span>E-mail ou WhatsApp</span><input name="contato" inputmode="email" autocomplete="email" autocapitalize="off" autocorrect="off" spellcheck="false" aria-describedby="contatoErr"><small class="fielderr" id="contatoErr" data-err></small></label></div></div>'+
       '<label class="qconsent"><input type="checkbox" id="qConsent"><span>Li e concordo com a <a href="#/privacidade">Política de Privacidade</a> e autorizo o Studio Suzu a usar meus dados para responder este pedido.</span></label>'+
-      '<div class="qcheck"><div class="cf-turnstile" data-sitekey="0x4AAAAAAD86LbXrUnqLEIsI" data-language="pt-br" data-appearance="interaction-only"></div></div>'+
+      '<div class="qcheck"><div id="tsBox"></div></div>'+
       '<div class="qsubmit"><button type="submit" class="btn" id="quoteSend">Enviar pedido</button><small class="fielderr" id="quoteErr" data-err></small><p class="dnote">Resposta em até 3 dias úteis</p></div>'+
       '</form></div>';
   }
@@ -807,22 +807,33 @@
       function err(msg){var box=document.getElementById('contatoErr');if(box){box.textContent=msg||'';box.classList.toggle('show',!!msg);}if(c){c.classList.toggle('bad',!!msg);c.setAttribute('aria-invalid',msg?'true':'false');}}
       if(c){c.addEventListener('input',function(){if(c.classList.contains('bad'))err('');var f=c.value.trim().charAt(0);c.setAttribute('inputmode',(f&&/[0-9+]/.test(f))?'tel':'email');});
         c.addEventListener('blur',function(){if(c.value.trim()&&!okC(c.value))err('Confere o e-mail ou o WhatsApp?');});}
+      /* Turnstile — render explícito (loja é SPA: re-renderiza a cada visita ao form) +
+         execute no submit (token FRESCO a cada envio; sem token velho/gasto) */
+      var tsId=null,onToken=null;
+      function mountTs(){if(tsId!==null||!window.turnstile)return;var el=wf.querySelector('#tsBox');if(!el)return;try{tsId=turnstile.render(el,{sitekey:'0x4AAAAAAD86LbXrUnqLEIsI',language:'pt-br',execution:'execute',appearance:'interaction-only',callback:function(tok){var f=onToken;onToken=null;if(f)f(tok);},'error-callback':function(){var f=onToken;onToken=null;if(f)f('');}});}catch(_t){}}
+      if(window.turnstile){mountTs();}else{var _tiv=setInterval(function(){if(window.turnstile){clearInterval(_tiv);mountTs();}},150);setTimeout(function(){clearInterval(_tiv);},10000);}
       /* envio */
       wf.addEventListener('submit',function(e){e.preventDefault();
         if(!okC(c&&c.value)){err(c&&c.value.trim()?'Confere o e-mail ou o WhatsApp?':'Precisamos de um contato para te responder.');if(c){c.focus();c.scrollIntoView({block:'center',behavior:'smooth'});}return;}
         var btn=document.getElementById('quoteSend'),eb=document.getElementById('quoteErr'),cons=document.getElementById('qConsent');
         if(cons&&!cons.checked){if(eb){eb.textContent='Pra seguir, confirme que você concorda com a Política de Privacidade.';eb.classList.add('show');}try{cons.focus();}catch(_c){}return;}
         var files=(document.getElementById('fileList')||{})._files||[];
-        var ts=(wf.querySelector('[name=cf-turnstile-response]')||{}).value||'';
         var origem='direto';try{var us=new URLSearchParams(location.search).get('utm_source');var rf=document.referrer?new URL(document.referrer).hostname.replace(/^www\./,''):'';origem=us||rf||'direto';}catch(_o){}
-        var fd=new FormData();fd.append('contato',c?c.value.trim():'');fd.append('nome',n?n.value.trim():'');fd.append('brief',b?b.value:'');fd.append('consentiu','1');fd.append('origem',origem);if(ts)fd.append('cf-turnstile-response',ts);
-        files.forEach(function(f){fd.append('anexos',f,f.name);});
         var lbl=btn.textContent;btn.disabled=true;btn.textContent='Enviando…';if(eb)eb.classList.remove('show');
-        function fail(msg){btn.disabled=false;btn.textContent=lbl;if(eb){eb.textContent=msg||'Não conseguimos enviar agora. Tente de novo — ou fale com a gente no WhatsApp.';eb.classList.add('show');}if(window.turnstile){try{turnstile.reset();}catch(_e){}}}
-        fetch('/api/orcamento',{method:'POST',body:fd}).then(function(r){return r.json().catch(function(){return{ok:false};}).then(function(j){return{s:r.status,j:j};});}).then(function(res){
-          if(res.j&&res.j.ok){try{localStorage.removeItem(LS);}catch(e2){}wf.classList.add('quotedone');var nf=files.length;wf.innerHTML='<div class="wzdone"><div class="okseal"><svg class="okcheck" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><span class="sig oksig">Recebemos o seu projeto.</span><p class="oktext">Vamos analisar a viabilidade com carinho e voltamos com o orçamento em até 3 dias úteis'+(nf?', junto com '+(nf>1?'as '+nf+' referências':'a referência')+' que você anexou':'')+'. Enquanto isso, dá uma espiada nas nossas peças. ✿</p><a class="btn" href="#/produtos">Ver produtos</a></div>';var ok=wf.querySelector('.wzdone');if(ok)requestAnimationFrame(function(){ok.scrollIntoView({block:'center'});});}
-          else{fail(res.j&&res.j.error==='consentimento'?'Pra seguir, confirme que você concorda com a Política de Privacidade.':(res.j&&res.j.error==='turnstile'?'A verificação anti-spam não passou. Recarregue a página e tente de novo.':(res.j&&(res.j.error==='tipo'||res.j.error==='arquivo_grande')?'Algum anexo é grande demais ou de tipo não aceito (use JPG, PNG ou PDF, até 10 MB cada).':'')));}
-        }).catch(function(){fail();});
+        function fail(msg){btn.disabled=false;btn.textContent=lbl;if(eb){eb.textContent=msg||'Não conseguimos enviar agora. Tente de novo — ou fale com a gente no WhatsApp.';eb.classList.add('show');}}
+        function enviar(token){
+          if(!token){fail('A verificação anti-spam não passou. Tente de novo.');return;}
+          var fd=new FormData();fd.append('contato',c?c.value.trim():'');fd.append('nome',n?n.value.trim():'');fd.append('brief',b?b.value:'');fd.append('consentiu','1');fd.append('origem',origem);fd.append('cf-turnstile-response',token);
+          files.forEach(function(f){fd.append('anexos',f,f.name);});
+          fetch('/api/orcamento',{method:'POST',body:fd}).then(function(r){return r.json().catch(function(){return{ok:false};}).then(function(j){return{s:r.status,j:j};});}).then(function(res){
+            if(res.j&&res.j.ok){try{localStorage.removeItem(LS);}catch(e2){}wf.classList.add('quotedone');var nf=files.length;wf.innerHTML='<div class="wzdone"><div class="okseal"><svg class="okcheck" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><span class="sig oksig">Recebemos o seu projeto.</span><p class="oktext">Vamos analisar a viabilidade com carinho e voltamos com o orçamento em até 3 dias úteis'+(nf?', junto com '+(nf>1?'as '+nf+' referências':'a referência')+' que você anexou':'')+'. Enquanto isso, dá uma espiada nas nossas peças. ✿</p><a class="btn" href="#/produtos">Ver produtos</a></div>';var ok=wf.querySelector('.wzdone');if(ok)requestAnimationFrame(function(){ok.scrollIntoView({block:'center'});});}
+            else{fail(res.j&&res.j.error==='consentimento'?'Pra seguir, confirme que você concorda com a Política de Privacidade.':(res.j&&res.j.error==='turnstile'?'A verificação anti-spam não passou. Tente de novo.':(res.j&&(res.j.error==='tipo'||res.j.error==='arquivo_grande')?'Algum anexo é grande demais ou de tipo não aceito (use JPG, PNG ou PDF, até 10 MB cada).':'')));}
+          }).catch(function(){fail();});
+        }
+        if(tsId===null||!window.turnstile){fail('A verificação anti-spam não carregou. Recarregue a página e tente de novo.');return;}
+        onToken=enviar;
+        try{turnstile.reset(tsId);}catch(_r){}
+        try{turnstile.execute(tsId);}catch(_e){onToken=null;fail('A verificação anti-spam falhou. Recarregue a página e tente de novo.');}
       });
     })();
     initBuyCards();
@@ -1141,6 +1152,7 @@
     var count=0,sub=0;Object.keys(cart).forEach(k=>{count+=cart[k].qty;sub+=cart[k].qty*cart[k].price;});
     var b=document.getElementById('badge');b.textContent=count;b.classList.toggle('on',count>0);
     var _vs=document.getElementById('openCart2');if(_vs)_vs.classList.toggle('is-empty',count===0);
+    var _dock=document.querySelector('.dock');if(_dock)_dock.classList.toggle('is-hidden',count===0);document.body.classList.toggle('nodock',count===0);
     var s=cartSplit(),hasNow=s.now.length>0,q=shipQuote(SHIP.cep,s.subNow);
     var ship=!hasNow?0:(q?(q[0].free?0:q[0].price):null); /* null = ainda sem CEP calculado */
     document.getElementById('dockTotal').textContent=BRL(sub);
