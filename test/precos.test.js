@@ -8,6 +8,16 @@ test("subtotal soma preço do servidor, ignora preço do cliente", () => {
   expect(r.total).toBe(r.subtotal + r.frete - r.desconto);
 });
 
+test("ignora preço enviado pelo cliente (usa só o do servidor)", () => {
+  const limpo = recomputaTotal([{ id: "tablete", tam: "M", qtd: 1 }], { metodo: "cartao" });
+  const adulterado = recomputaTotal(
+    [{ id: "tablete", tam: "M", qtd: 1, preco: 1, precoCents: 1 }],
+    { metodo: "cartao" }
+  );
+  expect(adulterado.subtotal).toBe(limpo.subtotal);
+  expect(adulterado.subtotal).toBe(12300);
+});
+
 test("Pix aplica -5% sobre o subtotal", () => {
   const cartao = recomputaTotal([{ id: "tablete", tam: "M", qtd: 1 }], { metodo: "cartao" });
   const pix = recomputaTotal([{ id: "tablete", tam: "M", qtd: 1 }], { metodo: "pix" });
@@ -24,6 +34,19 @@ test("item inexistente => erro (não confia no cliente)", () => {
   expect(r.erro).toBe("item");
 });
 
+test("qtd inválida (0, negativa, fracionária) => erro qtd", () => {
+  for (const q of [0, -2, 1.5]) {
+    expect(recomputaTotal([{ id: "tablete", tam: "M", qtd: q }], { metodo: "pix" }).erro).toBe("qtd");
+  }
+});
+
+test("Pix e cupom empilham (aditivo) — regra a confirmar", () => {
+  const r = recomputaTotal([{ id: "tablete", tam: "M", qtd: 1 }], { metodo: "pix", cupom: "PRIMEIRA10" });
+  // subtotal 12300; pix 5% = 615; cupom 10% = 1230; desconto = 1845
+  expect(r.desconto).toBe(615 + 1230);
+  expect(r.total).toBe(12300 - 1845);
+});
+
 test("frete entra no total mas não no desconto de Pix", () => {
   const r = recomputaTotal([{ id: "tablete", tam: "M", qtd: 1 }], { metodo: "pix", freteCents: 1990 });
   expect(r.frete).toBe(1990);
@@ -33,4 +56,8 @@ test("frete entra no total mas não no desconto de Pix", () => {
 test("parcelas respeitam mínimo por parcela e teto", () => {
   expect(parcelasValidas(30000)).toEqual({ maxParcelas: 6, semJurosAte: 3 });
   expect(parcelasValidas(12000).maxParcelas).toBe(2); // 12000/5000 = 2.4 -> 2
+});
+
+test("total abaixo do mínimo por parcela => só à vista (1x)", () => {
+  expect(parcelasValidas(4000).maxParcelas).toBe(1); // R$40 < R$50 mínimo
 });
