@@ -821,8 +821,8 @@
         if(cons&&!cons.checked){if(eb){eb.textContent='Pra seguir, confirme que você concorda com a Política de Privacidade.';eb.classList.add('show');}try{cons.focus();}catch(_c){}return;}
         var files=(document.getElementById('fileList')||{})._files||[];
         var origem='direto';try{var us=new URLSearchParams(location.search).get('utm_source');var rf=document.referrer?new URL(document.referrer).hostname.replace(/^www\./,''):'';origem=us||rf||'direto';}catch(_o){}
-        var lbl=btn.textContent;btn.disabled=true;btn.textContent='Enviando…';if(eb)eb.classList.remove('show');
-        function fail(msg){btn.disabled=false;btn.textContent=lbl;if(eb){eb.textContent=msg||'Não conseguimos enviar agora. Tente de novo — ou fale com a gente no WhatsApp.';eb.classList.add('show');}}
+        var lbl=btn.textContent;btn.disabled=true;btn.classList.add('is-loading');btn.setAttribute('aria-busy','true');btn.innerHTML='Enviando<span class="bdots" aria-hidden="true"><i></i><i></i><i></i></span>';if(eb)eb.classList.remove('show');
+        function fail(msg){btn.disabled=false;btn.classList.remove('is-loading');btn.removeAttribute('aria-busy');btn.textContent=lbl;if(eb){eb.textContent=msg||'Não conseguimos enviar agora. Tente de novo — ou fale com a gente no WhatsApp.';eb.classList.add('show');}}
         function enviar(token){
           if(!token){fail('A verificação anti-spam não passou. Tente de novo.');return;}
           var fd=new FormData();fd.append('contato',c?c.value.trim():'');fd.append('nome',n?n.value.trim():'');fd.append('brief',b?b.value:'');fd.append('consentiu','1');fd.append('origem',origem);fd.append('cf-turnstile-response',token);
