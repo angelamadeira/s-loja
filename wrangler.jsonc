@@ -38,7 +38,28 @@
   // aviso de novo pedido — restrito ao destino verificado (caminho gratuito)
   "send_email": [
     { "name": "EMAIL", "destination_address": "somos.suzu@gmail.com" }
-  ]
+  ],
 
   // Segredo (NÃO fica aqui): TURNSTILE_SECRET → `wrangler secret put TURNSTILE_SECRET`
+  // (setar nos DOIS workers: produção e --env preview)
+
+  // Ambiente de PRÉVIA/staging — worker separado `s-loja-preview` com URL estável
+  // (s-loja-preview.<subdominio>.workers.dev). Testar aqui antes de promover pra prod.
+  // Compartilha os mesmos D1/R2 da produção; dados de teste são apagáveis.
+  "env": {
+    "preview": {
+      "name": "s-loja-preview",
+      "assets": { "directory": ".", "binding": "ASSETS", "run_worker_first": ["/api/*"] },
+      "vars": { "AVISO_TO": "somos.suzu@gmail.com", "AVISO_FROM": "pedidos@studiosuzu.com.br" },
+      "d1_databases": [
+        { "binding": "DB", "database_name": "suzu-pedidos", "database_id": "34e07a79-0dd1-4003-9763-4ea24c09d09a" }
+      ],
+      "r2_buckets": [
+        { "binding": "ANEXOS", "bucket_name": "suzu-anexos" }
+      ],
+      "send_email": [
+        { "name": "EMAIL", "destination_address": "somos.suzu@gmail.com" }
+      ]
+    }
+  }
 }
