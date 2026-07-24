@@ -3,6 +3,7 @@
 //   POST /api/orcamento  → recebe o formulário do Projeto Exclusivo
 //   GET  /api/anexo       → serve um anexo do R2 via link assinado (usado no e-mail)
 // Todo o resto é servido como asset estático (a loja) — ver wrangler.jsonc.
+import { EmailMessage } from "cloudflare:email";
 
 const MAX_ARQUIVO = 10 * 1024 * 1024; // 10 MB por anexo
 const MAX_ANEXOS = 12;
@@ -137,12 +138,38 @@ async function avisaEstudio(env, p) {
     .filter((x) => x !== null)
     .join("\n");
 
-  await env.EMAIL.send({
-    to: env.AVISO_TO,
-    from: env.AVISO_FROM,
-    subject: "Novo orçamento " + p.ref + " — " + (p.nome || p.contato),
-    text: linhas,
-  });
+  // Caminho GRÁTIS: binding send_email → destino verificado (somos.suzu@gmail),
+  // via cloudflare:email (não é o produto pago "Email Sending"). MIME montado à mão.
+  const subject = "Novo orçamento " + p.ref + " — " + (p.nome || p.contato);
+  const raw = [
+    "From: " + env.AVISO_FROM,
+    "To: " + env.AVISO_TO,
+    "Subject: =?UTF-8?B?" + b64(subject) + "?=",
+    "Message-ID: <" + crypto.randomUUID() + "@studiosuzu.com.br>",
+    "Date: " + new Date().toUTCString(),
+    "MIME-Version: 1.0",
+    'Content-Type: text/plain; charset="utf-8"',
+    "Content-Transfer-Encoding: base64",
+    "",
+    dobra(b64(linhas), 76),
+  ].join("\r\n");
+
+  await env.EMAIL.send(new EmailMessage(env.AVISO_FROM, env.AVISO_TO, raw));
+}
+
+// base64 de string UTF-8 (sem estourar em textos longos)
+function b64(texto) {
+  const bytes = new TextEncoder().encode(texto);
+  let bin = "";
+  for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+  return btoa(bin);
+}
+
+// dobra o base64 em linhas de n chars (RFC 2045)
+function dobra(s, n) {
+  const partes = [];
+  for (let i = 0; i < s.length; i += n) partes.push(s.slice(i, i + n));
+  return partes.join("\r\n");
 }
 
 // HMAC-SHA256(key) em base64url — assina os links de anexo (reusa a secret do Turnstile).
