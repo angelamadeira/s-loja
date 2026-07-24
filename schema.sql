@@ -19,3 +19,29 @@ CREATE TABLE IF NOT EXISTS pedidos (
 
 CREATE INDEX IF NOT EXISTS idx_pedidos_criado ON pedidos (criado_em DESC);
 CREATE INDEX IF NOT EXISTS idx_pedidos_status ON pedidos (status);
+
+-- Tabela de vendas (compras/pagamentos) — separada de pedidos (orçamentos)
+CREATE TABLE IF NOT EXISTS compras (
+  id            TEXT PRIMARY KEY,            -- uuid
+  ref           TEXT NOT NULL,               -- SUZU-XXXXXX amigável
+  criado_em     TEXT NOT NULL,               -- ISO 8601 UTC
+  itens         TEXT NOT NULL,               -- JSON [{id,nome,tam,qtd,preco_unit}]
+  subtotal      INTEGER NOT NULL,            -- centavos (fonte: servidor)
+  frete         INTEGER NOT NULL DEFAULT 0,  -- centavos (F4a: do frete simulado)
+  desconto      INTEGER NOT NULL DEFAULT 0,  -- centavos (Pix/cupom, servidor)
+  total         INTEGER NOT NULL,            -- centavos cobrados (servidor)
+  metodo        TEXT NOT NULL,               -- pix | cartao
+  parcelas      INTEGER NOT NULL DEFAULT 1,
+  contato_email TEXT NOT NULL,
+  contato_whats TEXT,
+  cpf           TEXT,                        -- só dígitos
+  endereco      TEXT,                        -- JSON (null p/ pré-venda)
+  status        TEXT NOT NULL DEFAULT 'iniciado', -- iniciado|pendente|aprovado|recusado|cancelado
+  mp_payment_id TEXT,
+  consentiu     INTEGER NOT NULL DEFAULT 0,
+  ip            TEXT
+);
+
+CREATE INDEX IF NOT EXISTS idx_compras_criado ON compras (criado_em DESC);
+CREATE INDEX IF NOT EXISTS idx_compras_status ON compras (status);
+CREATE INDEX IF NOT EXISTS idx_compras_mp ON compras (mp_payment_id);
