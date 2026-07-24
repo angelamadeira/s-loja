@@ -830,6 +830,11 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
 .pcard:hover,.rcard:hover,.rev:hover,.exstep:hover{transform:translateY(-4px)}
 .rev:hover,.exstep:hover{border-color:var(--line)}
 .exstep:hover{box-shadow:none}
+/* TOQUE: telas sem mouse "grudam" o :hover ao tocar/arrastar — o card subia sozinho ao
+   rolar o carrossel. Aqui neutralizamos a elevação (translateY) em qualquer aparelho de toque. */
+@media (hover:none){
+  .pcard:hover,.rcard:hover,.rev:hover,.exstep:hover{transform:none}
+}
 /* card de compra único em grade (Leve junto / forma da receita): sem margem extra entre eles */
 .csgrid .formacta{margin-top:0}
 /* tamanho ESGOTADO (card e PDP): esmaecido; ainda clicável p/ pedir aviso */
