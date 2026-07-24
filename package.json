@@ -7,11 +7,14 @@
     "lint:markup": "bash scripts/check-no-hardcoded-color.sh",
     "lint:space": "bash scripts/check-no-hardcoded-space.sh",
     "lint": "npm run lint:css && npm run lint:markup && npm run lint:space",
-    "prepare": "husky"
+    "prepare": "husky",
+    "test": "vitest run"
   },
   "devDependencies": {
+    "@cloudflare/vitest-pool-workers": "^0.18.8",
     "husky": "^9.1.6",
     "stylelint": "^16.10.0",
+    "vitest": "^4.1.10",
     "wrangler": "^4.114.0"
   }
 }
