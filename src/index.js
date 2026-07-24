@@ -4,6 +4,8 @@
 //   GET  /api/anexo       → serve um anexo do R2 via link assinado (usado no e-mail)
 // Todo o resto é servido como asset estático (a loja) — ver wrangler.jsonc.
 import { EmailMessage } from "cloudflare:email";
+import { recomputaTotal } from "./precos.js";
+import { criaPagamento } from "./mp.js";
 
 const MAX_ARQUIVO = 10 * 1024 * 1024; // 10 MB por anexo
 const MAX_ANEXOS = 12;
@@ -19,6 +21,10 @@ export default {
     }
     if (url.pathname === "/api/anexo") {
       return serveAnexo(url, env);
+    }
+    if (url.pathname === "/api/pagar") {
+      if (request.method !== "POST") return json({ ok: false, error: "metodo" }, 405);
+      return handlePagar(request, env);
     }
     // qualquer outra coisa → a loja (assets)
     return env.ASSETS.fetch(request);
@@ -80,6 +86,76 @@ async function handleOrcamento(request, env) {
     return json({ ok: true, ref });
   } catch (_) {
     return json({ ok: false, error: "servidor" }, 500);
+  }
+}
+
+// MP → interno (schema.sql: status = iniciado|pendente|aprovado|recusado|cancelado)
+const MP_STATUS = { approved: "aprovado", in_process: "pendente", rejected: "recusado" };
+
+// POST /api/pagar — hub da Fase 4a: recomputa o total no servidor (nunca confia
+// no preço do cliente), grava a compra ANTES de chamar o MP (resiliência —
+// se o MP/rede falhar, a linha não se perde), chama o MP e atualiza o status.
+async function handlePagar(request, env) {
+  try {
+    const body = await request.json();
+    const itens = Array.isArray(body.itens) ? body.itens : [];
+    const metodo = str(body.metodo);
+    const cupom = str(body.cupom);
+    const email = str(body.email);
+    const whats = str(body.whats);
+    const cpf = str(body.cpf).replace(/\D/g, "");
+    const endereco = body.endereco || null;
+    const freteCents = body.freteCents;
+    const parcelas = Number.isInteger(body.parcelas) ? body.parcelas : 1;
+    const consentiu = body.consentiu === true;
+    const ip = request.headers.get("CF-Connecting-IP") || "";
+
+    // 1. LGPD — sem consentimento não cobramos nem tratamos os dados
+    if (!consentiu) return json({ ok: false, erro: "consentimento" }, 400);
+    if (!email) return json({ ok: false, erro: "email" }, 400);
+    if (cpf.length !== 11) return json({ ok: false, erro: "cpf" }, 400);
+
+    // 2. o valor cobrado nasce AQUI — recomputado a partir de {id,tam,qtd},
+    //    ignorando qualquer preço que tenha vindo no payload do cliente
+    const calc = recomputaTotal(itens, { metodo, cupom, freteCents });
+    if (calc.erro) return json({ ok: false, erro: calc.erro }, 400);
+    const { subtotal, desconto, frete, total } = calc;
+
+    // 3. grava a compra ANTES de chamar o MP — se a rede/MP falhar, a venda
+    //    iniciada não se perde
+    const compraId = crypto.randomUUID();
+    const ref = "SUZU-" + compraId.replace(/-/g, "").slice(0, 6).toUpperCase();
+    await env.DB.prepare(
+      "INSERT INTO compras (id, ref, criado_em, itens, subtotal, frete, desconto, total, metodo, parcelas, contato_email, contato_whats, cpf, endereco, status, consentiu, ip) " +
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'iniciado', 1, ?)"
+    )
+      .bind(compraId, ref, new Date().toISOString(), JSON.stringify(itens), subtotal, frete, desconto, total, metodo, parcelas, email, whats || null, cpf, endereco ? JSON.stringify(endereco) : null, ip)
+      .run();
+
+    // 4. cobra no Mercado Pago
+    const resultado = await criaPagamento(env, {
+      totalCents: total,
+      metodo,
+      parcelas,
+      token: body.token,
+      paymentMethodId: body.paymentMethodId,
+      issuerId: body.issuerId,
+      cpf,
+      email,
+      ref,
+      descricao: "Pedido " + ref,
+    });
+
+    const status = MP_STATUS[resultado.status] || "pendente";
+
+    // 5. atualiza a compra com o resultado do MP
+    await env.DB.prepare("UPDATE compras SET status = ?, mp_payment_id = ? WHERE id = ?")
+      .bind(status, resultado.id != null ? String(resultado.id) : null, compraId)
+      .run();
+
+    return json({ ok: true, ref, status, pix: resultado.pix });
+  } catch (_) {
+    return json({ ok: false, erro: "servidor" }, 500);
   }
 }
 
