@@ -424,10 +424,10 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
    nem o modo como o navegador resolve a altura do SVG do molde — todo produto fica idêntico,
    nunca "comprido". Fotos preenchem o quadrado (cover); o molde (quadrado) encaixa certinho. */
 .mgframe{aspect-ratio:1/1}
-.mgal .mghcar{height:100%}
-.hcar .mgslide{width:100%;height:100%}
-.mgslide .m{border-radius:0;height:100%}
-.mgslide .mphoto{height:100%;object-fit:cover}
+.mgal .mghcar{height:100%;min-height:0}
+.hcar .mgslide{width:100%;height:100%;min-height:0}
+.mgslide .m{border-radius:0;width:100%;height:100%;object-fit:cover}
+.mgslide .mphoto{width:100%;height:100%;object-fit:cover}
 .mgal .cdots{display:flex;position:absolute;left:50%;bottom:20px;transform:translateX(-50%);margin:0;z-index:3;gap:var(--space-2);padding:0;background:none}
 .mgal .cdot{background:var(--veil-60);box-shadow:0 1px 2px var(--ink-dot)}
 .mgal .cdot.on{background:var(--surface)}
@@ -1037,6 +1037,23 @@ button.cohd{width:100%;border:0;background:none;font:inherit;color:inherit;text-
 .cofield select{-webkit-appearance:none;appearance:none;padding-right:var(--space-8);background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%23463C34'%20stroke-width='2'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpolyline%20points='6%209%2012%2015%2018%209'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;background-size:16px}
 .costep-cta .conext{width:100%;padding:var(--space-4);font-size:.78rem;letter-spacing:.05em;text-transform:uppercase}
 .coproc{position:fixed;inset:0;z-index:120;display:flex;align-items:center;justify-content:center;background:var(--surface);opacity:0;transition:opacity .35s ease}.coproc.show{opacity:1}.coproc[hidden]{display:none}.coproc-in{display:flex;flex-direction:column;align-items:center;gap:var(--space-5);padding:var(--space-7);text-align:center;max-width:340px}.coproc-ring{width:50px;height:50px;border-radius:var(--r-round);border:2.5px solid var(--line);border-top-color:var(--matcha);animation:coprocspin .9s linear infinite}@keyframes coprocspin{to{transform:rotate(360deg)}}.coproc-ico{width:50px;height:50px;color:var(--error-text)}.coproc-msg{font-size:1.05rem;color:var(--text);font-weight:400;letter-spacing:.01em;margin:0;min-height:1.4em;transition:opacity .25s ease}.coproc-sub{font-size:.82rem;color:var(--text-muted);font-weight:300;line-height:1.5;margin:0}.coproc-retry{margin-top:var(--space-1)}@media(prefers-reduced-motion:reduce){.coproc-ring{animation-duration:2.4s}.coproc{transition:none}}
+/* ===== VÍDEO DO PROCESSO = reel vertical 9:16 (mesmo formato das redes IG/TikTok).
+   MOBILE: empilha (vídeo full-width, depois info, depois passos).
+   DESKTOP: reel à esquerda + info (título/ingredientes) à direita — padrão TikTok/Reels/Shorts
+   no desktop (vídeo vertical + painel lateral); passo a passo em largura total abaixo. ===== */
+/* MOBILE: .rectop é bloco (empilha) — o vídeo se comporta como bloco normal e ocupa a
+   largura toda; NÃO usar flex aqui senão o flex-item colapsa a largura pro conteúdo. */
+.recvid{aspect-ratio:9/16;width:min(100%,380px);height:auto;margin-inline:auto}
+.recinfo{display:flex;flex-direction:column;gap:var(--space-6)}
+.rectop>.recinfo{margin-top:var(--space-6)}
+.recsteps{margin-top:var(--space-8)}
+@media (min-width:860px){
+  .rectop{display:grid;grid-template-columns:minmax(300px,360px) 1fr;gap:var(--space-9);align-items:start}
+  .rectop .recvid{width:100%;max-width:none;margin:0}
+  .rectop>.recinfo{margin-top:0;gap:var(--space-7)}
+  .recinfo .rechead{margin-top:0}
+  .recinfo .recside{flex:initial}
+}
 
 
 /* Fase 3 — espaço do widget anti-spam (Turnstile) no form de orçamento */

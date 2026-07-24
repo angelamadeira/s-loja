@@ -13,6 +13,14 @@ Esta loja segue o Brandbook Suzu (regra de ouro) e um design system tokenizado.
 ## Verificação
 `npm run lint` = stylelint (cor) + guarda de cor (HTML/JS) + guarda de espaçamento/raio (`check-no-hardcoded-space.sh`). O CI e o git hook rodam o mesmo.
 
+## Deploy — REGRA DE OURO (nunca pular)
+O worker `s-loja` **é produção** (serve `studiosuzu.com.br`). Portanto:
+- **NUNCA** rodar `wrangler deploy` direto na produção com mudança não-testada.
+- **SEMPRE** subir primeiro numa **PRÉVIA** e testar o fluxo real lá; só depois promover pra produção.
+  - Prévia: `wrangler versions upload` (URL versionada) **ou** um worker de staging estável `s-loja-preview` (`wrangler deploy --env preview`).
+- Só promover pra produção depois de conferir, na prévia, TUDO que a mudança afeta (ex. Fase 3: pedido → e-mail no `somos.suzu@gmail` → registro no D1 → anexo no R2 + link abrindo).
+- `npm run lint` verde é pré-requisito, não substitui o teste na prévia.
+
 ## Camadas de token (0.5a)
 - `css/tokens.css` tem 2 camadas: PALETA (bruta, nunca troca) e SEMÂNTICO (papéis).
 - Em componentes, use os SEMÂNTICOS para superfície/texto (`--surface`, `--raised`, `--text`, `--line`…), não os de paleta (`--white`, `--ink`) — é o que faz o tema escuro (0.5b) funcionar.
