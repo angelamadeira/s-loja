@@ -29,6 +29,11 @@ test("cupom inválido não desconta", () => {
   expect(r.desconto).toBe(0);
 });
 
+test("linhas carrega o preco_unit cobrado por item (registro financeiro)", () => {
+  const r = recomputaTotal([{ id: "tablete", tam: "M", qtd: 2 }], { metodo: "cartao" });
+  expect(r.linhas).toEqual([{ id: "tablete", tam: "M", qtd: 2, preco_unit: 12300 }]);
+});
+
 test("item inexistente => erro (não confia no cliente)", () => {
   const r = recomputaTotal([{ id: "hacker", tam: "M", qtd: 1 }], { metodo: "pix" });
   expect(r.erro).toBe("item");

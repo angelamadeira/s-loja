@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS compras (
   id            TEXT PRIMARY KEY,            -- uuid
   ref           TEXT NOT NULL,               -- SUZU-XXXXXX amigável
   criado_em     TEXT NOT NULL,               -- ISO 8601 UTC
-  itens         TEXT NOT NULL,               -- JSON [{id,nome,tam,qtd,preco_unit}]
+  itens         TEXT NOT NULL,               -- JSON [{id,tam,qtd,preco_unit}]
   subtotal      INTEGER NOT NULL,            -- centavos (fonte: servidor)
   frete         INTEGER NOT NULL DEFAULT 0,  -- centavos (F4a: do frete simulado)
   desconto      INTEGER NOT NULL DEFAULT 0,  -- centavos (Pix/cupom, servidor)

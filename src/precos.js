@@ -46,12 +46,14 @@ export function recomputaTotal(itens, opts) {
   const frete = Number.isFinite(freteCents) ? freteCents : 0;
 
   let subtotal = 0;
+  const linhas = [];
   for (const item of itens || []) {
     const { id, tam, qtd } = item || {};
     const precoTam = PRECOS[id] && PRECOS[id][tam];
     if (precoTam === undefined) return { erro: "item" };
     if (!Number.isInteger(qtd) || qtd <= 0) return { erro: "qtd" };
     subtotal += precoTam * qtd;
+    linhas.push({ id, tam, qtd, preco_unit: precoTam });
   }
 
   // Pix e cupom empilham (aditivo): os dois descontos se somam sobre o
@@ -67,7 +69,7 @@ export function recomputaTotal(itens, opts) {
 
   const total = Math.max(0, subtotal + frete - desconto);
 
-  return { subtotal, desconto, frete, total };
+  return { subtotal, desconto, frete, total, linhas };
 }
 
 export function parcelasValidas(totalCents) {

@@ -4,7 +4,7 @@
 //   GET  /api/anexo       → serve um anexo do R2 via link assinado (usado no e-mail)
 // Todo o resto é servido como asset estático (a loja) — ver wrangler.jsonc.
 import { EmailMessage } from "cloudflare:email";
-import { recomputaTotal } from "./precos.js";
+import { recomputaTotal, parcelasValidas } from "./precos.js";
 import { criaPagamento } from "./mp.js";
 
 const MAX_ARQUIVO = 10 * 1024 * 1024; // 10 MB por anexo
@@ -58,7 +58,7 @@ async function handleOrcamento(request, env) {
     const arquivos = form.getAll("anexos").filter((f) => typeof f !== "string" && f.size > 0);
     if (arquivos.length > MAX_ANEXOS) return json({ ok: false, error: "muitos" }, 400);
     const pedidoId = crypto.randomUUID();
-    const ref = "SUZU-" + pedidoId.replace(/-/g, "").slice(0, 6).toUpperCase();
+    const ref = gerarRef(pedidoId);
     const anexos = [];
     for (const f of arquivos) {
       if (f.size > MAX_ARQUIVO) return json({ ok: false, error: "arquivo_grande" }, 400);
@@ -92,6 +92,12 @@ async function handleOrcamento(request, env) {
 // MP → interno (schema.sql: status = iniciado|pendente|aprovado|recusado|cancelado)
 const MP_STATUS = { approved: "aprovado", in_process: "pendente", rejected: "recusado" };
 
+// Teto de frete aceito do cliente: R$1000 em centavos. F4a ainda recebe o
+// frete do cliente (frete real/calculado por CEP é F4b — servidor autoritativo
+// só pra frete vem depois); este teto + o floor em 0 fecham o buraco de
+// "pagar quase nada pelos produtos" mandando freteCents negativo.
+const FRETE_MAX_CENTS = 100000;
+
 // POST /api/pagar — hub da Fase 4a: recomputa o total no servidor (nunca confia
 // no preço do cliente), grava a compra ANTES de chamar o MP (resiliência —
 // se o MP/rede falhar, a linha não se perde), chama o MP e atualiza o status.
@@ -105,8 +111,9 @@ async function handlePagar(request, env) {
     const whats = str(body.whats);
     const cpf = str(body.cpf).replace(/\D/g, "");
     const endereco = body.endereco || null;
-    const freteCents = body.freteCents;
-    const parcelas = Number.isInteger(body.parcelas) ? body.parcelas : 1;
+    // freteCents é do cliente (F4a) — nunca confiar sem clamp: negativo
+    // zeraria o total junto com o subtotal recomputado.
+    const freteCents = Math.max(0, Math.min(Math.round(Number(body.freteCents) || 0), FRETE_MAX_CENTS));
     const consentiu = body.consentiu === true;
     const ip = request.headers.get("CF-Connecting-IP") || "";
 
@@ -114,22 +121,29 @@ async function handlePagar(request, env) {
     if (!consentiu) return json({ ok: false, erro: "consentimento" }, 400);
     if (!email) return json({ ok: false, erro: "email" }, 400);
     if (cpf.length !== 11) return json({ ok: false, erro: "cpf" }, 400);
+    if (!itens.length) return json({ ok: false, erro: "vazio" }, 400);
 
     // 2. o valor cobrado nasce AQUI — recomputado a partir de {id,tam,qtd},
-    //    ignorando qualquer preço que tenha vindo no payload do cliente
+    //    ignorando qualquer preço (e agora também qualquer frete fora do
+    //    teto) que tenha vindo no payload do cliente
     const calc = recomputaTotal(itens, { metodo, cupom, freteCents });
     if (calc.erro) return json({ ok: false, erro: calc.erro }, 400);
-    const { subtotal, desconto, frete, total } = calc;
+    const { subtotal, desconto, frete, total, linhas } = calc;
+
+    // parcelas: nunca confiar no valor do cliente — clampa em [1, máximo
+    // permitido pro total recomputado] (mesma regra de negócio de parcelasValidas)
+    const parcelas = Math.min(Math.max(1, Math.round(Number(body.parcelas) || 1)), parcelasValidas(total).maxParcelas);
 
     // 3. grava a compra ANTES de chamar o MP — se a rede/MP falhar, a venda
-    //    iniciada não se perde
+    //    iniciada não se perde. itens grava as linhas com o preco_unit
+    //    efetivamente cobrado (registro financeiro), não o payload cru do cliente.
     const compraId = crypto.randomUUID();
-    const ref = "SUZU-" + compraId.replace(/-/g, "").slice(0, 6).toUpperCase();
+    const ref = gerarRef(compraId);
     await env.DB.prepare(
       "INSERT INTO compras (id, ref, criado_em, itens, subtotal, frete, desconto, total, metodo, parcelas, contato_email, contato_whats, cpf, endereco, status, consentiu, ip) " +
         "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'iniciado', 1, ?)"
     )
-      .bind(compraId, ref, new Date().toISOString(), JSON.stringify(itens), subtotal, frete, desconto, total, metodo, parcelas, email, whats || null, cpf, endereco ? JSON.stringify(endereco) : null, ip)
+      .bind(compraId, ref, new Date().toISOString(), JSON.stringify(linhas), subtotal, frete, desconto, total, metodo, parcelas, email, whats || null, cpf, endereco ? JSON.stringify(endereco) : null, ip)
       .run();
 
     // 4. cobra no Mercado Pago
@@ -154,7 +168,8 @@ async function handlePagar(request, env) {
       .run();
 
     return json({ ok: true, ref, status, pix: resultado.pix });
-  } catch (_) {
+  } catch (e) {
+    console.error("pagar falhou", e);
     return json({ ok: false, erro: "servidor" }, 500);
   }
 }
@@ -265,6 +280,11 @@ async function assina(dado, secret) {
 
 function str(v) {
   return (v == null ? "" : String(v)).trim();
+}
+
+// nº amigável a partir de um uuid — mesmo padrão em pedidos e compras
+function gerarRef(id) {
+  return "SUZU-" + id.replace(/-/g, "").slice(0, 6).toUpperCase();
 }
 
 function sanitiza(nome) {
