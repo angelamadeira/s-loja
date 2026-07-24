@@ -420,8 +420,14 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
 /* Galeria PDP = carrossel (mesma mecânica arraste+dots+setas dos outros carrosséis, via initCarousel) */
 .mgal .hcar{padding:0;margin:0}   /* mantém gap:14 da base p/ o metrics do initCarousel bater (parseInt('0')||14 = 14) */
 .mgframe{position:relative;border:1px solid var(--line-soft);border-radius:var(--r-2xl);overflow:hidden;background:var(--raised)}
-.hcar .mgslide{width:100%}
-.mgslide .m{border-radius:0}
+/* Trava o hero do produto em 1:1 (padrão de mercado): a altura NÃO acompanha mais a foto
+   nem o modo como o navegador resolve a altura do SVG do molde — todo produto fica idêntico,
+   nunca "comprido". Fotos preenchem o quadrado (cover); o molde (quadrado) encaixa certinho. */
+.mgframe{aspect-ratio:1/1}
+.mgal .mghcar{height:100%}
+.hcar .mgslide{width:100%;height:100%}
+.mgslide .m{border-radius:0;height:100%}
+.mgslide .mphoto{height:100%;object-fit:cover}
 .mgal .cdots{display:flex;position:absolute;left:50%;bottom:20px;transform:translateX(-50%);margin:0;z-index:3;gap:var(--space-2);padding:0;background:none}
 .mgal .cdot{background:var(--veil-60);box-shadow:0 1px 2px var(--ink-dot)}
 .mgal .cdot.on{background:var(--surface)}
