@@ -231,6 +231,13 @@
   var PREVENDA=false;
   if(!PREVENDA)PRODUCTS.forEach(function(p){if(p.status==='presale')p.status='live';});
   var byId=id=>PRODUCTS.find(p=>p.id===id);
+  /* slug = nome "achatado" p/ a URL (sem acento, espaços viram hífen). Mantém URL sempre
+     alinhada ao nome, inclusive p/ itens novos. id continua sendo a chave interna estável. */
+  function slugify(s){return String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');}
+  function pslug(id){var p=byId(id);return p?slugify(p.name):id;}
+  function rslug(id){var r=RECIPES.find(function(x){return x.id===id;});return r?slugify(r.name):id;}
+  function pidBySlug(s){var p=PRODUCTS.find(function(x){return slugify(x.name)===s;});return p?p.id:null;}
+  function ridBySlug(s){var r=RECIPES.find(function(x){return slugify(x.name)===s;});return r?r.id:null;}
   var priceOf=(p,s)=>p.base+SIZES[s].add;
   var fromPrice=p=>p.base+Math.min.apply(null,p.sizes.map(s=>SIZES[s].add));
   /* ── PROMOÇÕES / DESCONTOS ──────────────────────────────────────────────
@@ -379,7 +386,7 @@
   function cardHTML(p){
     var st=statusMeta(p);
     var pr=p.status==='soldout'?'<div class="pr so">Esgotado</div>':(p.status==='presale'?'<div class="pr">reserva · a partir de <b>'+BRL(fromPrice(p))+'</b><small class="avail">disponível '+p.avail+'</small></div>':'<div class="pr">a partir de '+wasPrice(p,fromPrice(p))+'<b>'+BRL(fromNow(p))+'</b></div>');
-    return '<a class="pcard'+(p.status==='soldout'?' out':'')+'" href="/p/'+p.id+'" aria-label="'+p.name+'"><div class="m"><div class="pbadges"><span class="pbadge '+st.k+'">'+st.label+'</span>'+(saleP(p)?'<span class="pbadge promo">−'+saleP(p)+'%</span>':'')+'</div>'+coverHTML(p)+'</div><div class="b"><span class="use">'+p.use+'</span><h3>'+p.name+'</h3>'+pr+'</div></a>';
+    return '<a class="pcard'+(p.status==='soldout'?' out':'')+'" href="/p/'+pslug(p.id)+'" aria-label="'+p.name+'"><div class="m"><div class="pbadges"><span class="pbadge '+st.k+'">'+st.label+'</span>'+(saleP(p)?'<span class="pbadge promo">−'+saleP(p)+'%</span>':'')+'</div>'+coverHTML(p)+'</div><div class="b"><span class="use">'+p.use+'</span><h3>'+p.name+'</h3>'+pr+'</div></a>';
   }
 
   /* HERO */
@@ -387,7 +394,7 @@
   (function(){
     var feat=['tablete','coracao','esfera'], tints=['var(--mizu-wash)','var(--sakura-wash)','var(--matcha-wash)'];
     var html=feat.map(function(id,i){var p=byId(id),st=statusMeta(p);
-      return '<a class="slide'+(i===0?' on':'')+'" href="/p/'+id+'" style="--st:'+tints[i]+'"><div class="bg"></div><div class="piece">'+mold(p)+'</div><div class="copy"><span class="kick '+st.k+'">'+st.label+'</span><h2>'+p.name+'</h2><span class="pr">a partir de '+BRL(fromPrice(p))+'</span><span class="cta">'+(st.k==='presale'?'Reservar':'Garanta o seu')+'</span></div></a>';
+      return '<a class="slide'+(i===0?' on':'')+'" href="/p/'+pslug(id)+'" style="--st:'+tints[i]+'"><div class="bg"></div><div class="piece">'+mold(p)+'</div><div class="copy"><span class="kick '+st.k+'">'+st.label+'</span><h2>'+p.name+'</h2><span class="pr">a partir de '+BRL(fromPrice(p))+'</span><span class="cta">'+(st.k==='presale'?'Reservar':'Garanta o seu')+'</span></div></a>';
     }).join('');
     html+='<div class="dots">'+feat.map(function(_,i){return '<button class="dot'+(i===0?' on':'')+'" data-i="'+i+'" aria-label="Destaque '+(i+1)+'"></button>';}).join('')+'</div>';
     stage.innerHTML=html;
@@ -471,7 +478,7 @@
     var list=PRODUCTS.filter(p=>p.status==='presale');
     return backHome()+'<div class="listing"><h1>Pré-venda</h1><div class="grid" style="margin-top:var(--space-7)">'+list.map(cardHTML).join('')+'</div></div>';
   }
-  function recCard(r){return '<a class="rcard" href="/receita/'+r.id+'"><div class="rimg" style="background:var(--'+r.tint+'-wash)"><span class="rplay"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></span></div><h3>'+r.name+'</h3><span class="rmeta">'+r.time+' · '+r.level+'</span></a>';}
+  function recCard(r){return '<a class="rcard" href="/receita/'+rslug(r.id)+'"><div class="rimg" style="background:var(--'+r.tint+'-wash)"><span class="rplay"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></span></div><h3>'+r.name+'</h3><span class="rmeta">'+r.time+' · '+r.level+'</span></a>';}
   function faqView(topic){
     var KW={cuidados:'cuido',entrega:'prazo de entrega',trocas:'trocas e'},oi=0;
     if(topic&&KW[topic])for(var k=0;k<FAQ.length;k++){if(FAQ[k][0].toLowerCase().indexOf(KW[topic])>-1){oi=k;break;}}
@@ -525,7 +532,7 @@
     var sizes=(!full && p.sizes.length>1)?'<div class="fcsizes">'+p.sizes.map(function(s){var o=sizeOut(p,s);return '<button type="button" class="fcsz'+(o?' out':'')+'" data-s="'+s+'" aria-pressed="'+(s===def)+'">'+SIZES[s].name+' · '+SIZES[s].dim+'</button>';}).join('')+'</div>':'';
     var price=defOut?'<span class="fcprice so">Esgotado nesta tiragem</span>':'<span class="fcprice">'+wasPrice(p,priceOf(p,def))+BRL(priceNow(p,def))+offtag(p)+'<small>em até 6× · '+SIZES[def].name+'</small></span>';
     var btn='<button type="button" class="btn buybtn fcbtn">'+(defOut?'Avise-me quando voltar':'Adicionar à sacola')+'</button>';
-    return '<div class="formacta buycard" data-id="'+p.id+'" data-size="'+def+'"><a class="fcimg" href="/p/'+p.id+'" style="background:var(--'+tint+'-wash)">'+coverHTML(p)+'</a><div class="fctxt">'+(st.k!=='limited'?'<span class="pbadge '+st.k+'">'+st.label+'</span>':'')+'<a class="fcname" href="/p/'+p.id+'"><b>'+p.name+'</b></a><p>'+p.use+' · silicone platinum</p>'+sizes+'</div><div class="fcbuy">'+price+btn+'</div></div>';
+    return '<div class="formacta buycard" data-id="'+p.id+'" data-size="'+def+'"><a class="fcimg" href="/p/'+pslug(p.id)+'" style="background:var(--'+tint+'-wash)">'+coverHTML(p)+'</a><div class="fctxt">'+(st.k!=='limited'?'<span class="pbadge '+st.k+'">'+st.label+'</span>':'')+'<a class="fcname" href="/p/'+pslug(p.id)+'"><b>'+p.name+'</b></a><p>'+p.use+' · silicone platinum</p>'+sizes+'</div><div class="fcbuy">'+price+btn+'</div></div>';
   }
   /* liga os cards de compra: escolha de tamanho atualiza preço + botão; botão adapta ao tamanho (comprar ou avisar) */
   /* "Avise-me quando voltar" — captura contato (e-mail ou WhatsApp) antes de confirmar.
@@ -764,7 +771,7 @@
     /* PDP tamanho */
     var szgrid=document.getElementById('szgrid');
     if(szgrid){
-      var id=location.pathname.slice(3), p=byId(id), sel=allOut(p)?(p.sizes.indexOf('M')>-1?'M':p.sizes[0]):firstAvail(p), presale=p.status==='presale';
+      var id=pidBySlug(location.pathname.slice(3)), p=byId(id), sel=allOut(p)?(p.sizes.indexOf('M')>-1?'M':p.sizes[0]):firstAvail(p), presale=p.status==='presale';
       szgrid.querySelectorAll('.sz').forEach(function(b){b.onclick=function(){sel=b.dataset.s;szgrid.querySelectorAll('.sz').forEach(x=>x.setAttribute('aria-pressed','false'));b.setAttribute('aria-pressed','true');
         var o=sizeOut(p,sel),pp=document.getElementById('pdpPrice'),addb=document.getElementById('pdpAdd');
         if(o){if(pp){pp.className='price so';pp.innerHTML='Esgotado nesta tiragem';}if(addb)addb.textContent='Avise-me quando voltar';}
@@ -1084,8 +1091,8 @@
     var T={'/produtos':'Produtos','/exclusivo':'Projeto Exclusivo','/sobre':'Sobre o estúdio','/receitas':'Receitas','/atendimento':'Atendimento','/faq':'Perguntas frequentes','/privacidade':'Política de Privacidade','/termos':'Termos de Uso','/trocas':'Trocas & Devoluções','/entrega':'Entrega & Frete','/prevenda':'Pré-venda','/checkout':'Finalizar compra','/obrigado':'Recebemos o seu projeto','/pedido':'Pedido confirmado'};
     var base=T[p];
     if(!base){
-      if(p.indexOf('/p/')===0){var _p=byId(p.slice(3));base=_p?_p.name:'Produto';}
-      else if(p.indexOf('/receita/')===0){var _r=RECIPES.find(function(x){return x.id===p.slice(9);});base=_r?_r.name:'Receita';}
+      if(p.indexOf('/p/')===0){var _p=byId(pidBySlug(p.slice(3)));base=_p?_p.name:'Produto';}
+      else if(p.indexOf('/receita/')===0){var _ri=ridBySlug(p.slice(9));var _r=_ri?RECIPES.find(function(x){return x.id===_ri;}):null;base=_r?_r.name:'Receita';}
       else if(p.indexOf('/faq')===0){base='Perguntas frequentes';}
     }
     return base?base+' — Studio Suzu':'Studio Suzu — Formas autorais para confeitaria';
@@ -1097,13 +1104,13 @@
   }
   function router(){
     var p=location.pathname||'/', v=null;
-    if(p.indexOf('/p/')===0){v=productView(p.slice(3));if(!v){navigate('/produtos',true);return;}}
+    if(p.indexOf('/p/')===0){var _pi=pidBySlug(p.slice(3));v=_pi?productView(_pi):null;if(!v){navigate('/produtos',true);return;}}
     else if(p==='/produtos')v=produtosView();
     else if(p==='/prevenda'){if(PREVENDA){v=prevendaView();}else{navigate('/produtos',true);return;}}
     else if(p==='/exclusivo')v=exclusivoView();
     else if(p==='/sobre')v=sobreView();
     else if(p==='/atendimento')v=atendimentoView();
-    else if(p.indexOf('/receita/')===0){v=receitaView(p.slice(9));if(!v){navigate('/receitas',true);return;}}
+    else if(p.indexOf('/receita/')===0){var _ri=ridBySlug(p.slice(9));v=_ri?receitaView(_ri):null;if(!v){navigate('/receitas',true);return;}}
     else if(p==='/receitas')v=receitasView();
     else if(p.indexOf('/faq')===0){v=faqView(p.indexOf('/faq/')===0?p.slice(5):'');}
     else if(p==='/privacidade'||p==='/termos'||p==='/trocas'||p==='/entrega'){v=politicaView(p.slice(1));if(!v){navigate('/',true);return;}}
@@ -1237,8 +1244,8 @@
       var q=this.value.trim().toLowerCase();
       if(!q){res.innerHTML='';return;}
       var out=[];
-      PRODUCTS.forEach(function(p){if((p.name+' '+p.use+' '+p.coll).toLowerCase().indexOf(q)>-1)out.push('<a class="sresult" href="/p/'+p.id+'"><span class="th">'+mold(p)+'</span><span><b>'+p.name+'</b><small>'+p.use+'</small></span></a>');});
-      RECIPES.forEach(function(r){if((r.name+' '+r.tag).toLowerCase().indexOf(q)>-1)out.push('<a class="sresult" href="/receita/'+r.id+'"><span class="th" style="background:var(--'+r.tint+'-wash)"></span><span><b>'+r.name+'</b><small>Receita · '+r.tag+'</small></span></a>');});
+      PRODUCTS.forEach(function(p){if((p.name+' '+p.use+' '+p.coll).toLowerCase().indexOf(q)>-1)out.push('<a class="sresult" href="/p/'+pslug(p.id)+'"><span class="th">'+mold(p)+'</span><span><b>'+p.name+'</b><small>'+p.use+'</small></span></a>');});
+      RECIPES.forEach(function(r){if((r.name+' '+r.tag).toLowerCase().indexOf(q)>-1)out.push('<a class="sresult" href="/receita/'+rslug(r.id)+'"><span class="th" style="background:var(--'+r.tint+'-wash)"></span><span><b>'+r.name+'</b><small>Receita · '+r.tag+'</small></span></a>');});
       res.innerHTML=out.length?out.slice(0,8).join(''):'<p class="sempty">Nada encontrado.</p>';
       res.querySelectorAll('a').forEach(function(a){a.addEventListener('click',closeSb);});
     };
