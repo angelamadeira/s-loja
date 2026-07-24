@@ -56,6 +56,16 @@ test("cartão: não inclui campo pix na resposta", async () => {
   expect(r.pix).toBeUndefined();
 });
 
+test("cartão envia o payment_method_id e o token do Brick", async () => {
+  const calls = [];
+  const fake = async (url, opts) => { calls.push(JSON.parse(opts.body)); return new Response(JSON.stringify({ id: 7, status: "approved" }), { status: 201 }); };
+  await criaPagamento({ MP_ACCESS_TOKEN: "TEST-x" }, { totalCents: 12000, metodo: "cartao", paymentMethodId: "master", issuerId: "25", installments: 3, parcelas: 3, token: "tok_abc", email: "a@b.com", cpf: "12345678909", ref: "SUZU-CARD01", descricao: "Pedido" }, fake);
+  expect(calls[0].payment_method_id).toBe("master");
+  expect(calls[0].issuer_id).toBe("25");
+  expect(calls[0].token).toBe("tok_abc");
+  expect(calls[0].installments).toBe(3);
+});
+
 test("consultaPagamento faz GET em /v1/payments/{id} com Bearer token", async () => {
   const calls = [];
   const fake = vi.fn(async (url, opts) => {

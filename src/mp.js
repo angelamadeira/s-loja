@@ -17,6 +17,8 @@ export async function criaPagamento(env, params, fetchImpl = globalThis.fetch) {
     metodo,
     parcelas = 1,
     token,
+    paymentMethodId,
+    issuerId,
     cpf,
     email,
     ref,
@@ -26,7 +28,7 @@ export async function criaPagamento(env, params, fetchImpl = globalThis.fetch) {
   const body = {
     transaction_amount: totalCents / 100,
     description: descricao,
-    payment_method_id: metodo === "pix" ? "pix" : undefined,
+    payment_method_id: metodo === "pix" ? "pix" : paymentMethodId,
     installments: parcelas,
     payer: {
       email,
@@ -35,6 +37,9 @@ export async function criaPagamento(env, params, fetchImpl = globalThis.fetch) {
   };
   if (metodo !== "pix" && token) {
     body.token = token;
+  }
+  if (metodo !== "pix" && issuerId) {
+    body.issuer_id = issuerId;
   }
 
   const res = await fetchImpl(MP_BASE, {
