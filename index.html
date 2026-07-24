@@ -826,7 +826,7 @@
           var fd=new FormData();fd.append('contato',c?c.value.trim():'');fd.append('nome',n?n.value.trim():'');fd.append('brief',b?b.value:'');fd.append('consentiu','1');fd.append('origem',origem);fd.append('cf-turnstile-response',token);
           files.forEach(function(f){fd.append('anexos',f,f.name);});
           fetch('/api/orcamento',{method:'POST',body:fd}).then(function(r){return r.json().catch(function(){return{ok:false};}).then(function(j){return{s:r.status,j:j};});}).then(function(res){
-            if(res.j&&res.j.ok){try{localStorage.removeItem(LS);}catch(e2){}wf.classList.add('quotedone');var nf=files.length;wf.innerHTML='<div class="wzdone"><div class="okseal"><svg class="okcheck" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><span class="sig oksig">Recebemos o seu projeto.</span><p class="oktext">Vamos analisar a viabilidade com carinho e voltamos com o orçamento em até 3 dias úteis'+(nf?', junto com '+(nf>1?'as '+nf+' referências':'a referência')+' que você anexou':'')+'. Enquanto isso, dá uma espiada nas nossas peças. ✿</p><a class="btn" href="#/produtos">Ver produtos</a></div>';var ok=wf.querySelector('.wzdone');if(ok)requestAnimationFrame(function(){ok.scrollIntoView({block:'center'});});}
+            if(res.j&&res.j.ok){try{localStorage.removeItem(LS);}catch(e2){}try{sessionStorage.setItem('suzu_obrigado',JSON.stringify({nf:files.length}));}catch(e3){}location.hash='#/obrigado';}
             else{fail(res.j&&res.j.error==='consentimento'?'Pra seguir, confirme que você concorda com a Política de Privacidade.':(res.j&&res.j.error==='turnstile'?'A verificação anti-spam não passou. Tente de novo.':(res.j&&(res.j.error==='tipo'||res.j.error==='arquivo_grande')?'Algum anexo é grande demais ou de tipo não aceito (use JPG, PNG ou PDF, até 10 MB cada).':'')));}
           }).catch(function(){fail();});
         }
@@ -1072,6 +1072,10 @@
       +'<p class="okhelp">Dúvida sobre o pedido? <a href="#/atendimento">Fale com a gente</a>.</p>'
       +'</div></div>';
   }
+  function obrigadoView(ob){
+    var nf=(ob&&ob.nf)||0;
+    return '<div class="listing"><div class="obgpage"><div class="wzdone"><div class="okseal"><svg class="okcheck" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><span class="sig oksig">Recebemos o seu projeto.</span><p class="oktext">Vamos analisar a viabilidade com carinho e voltamos com o orçamento em até 3 dias úteis'+(nf?', junto com '+(nf>1?'as '+nf+' referências':'a referência')+' que você anexou':'')+'. Enquanto isso, dá uma espiada nas nossas peças. ✿</p><a class="btn" href="#/produtos">Ver produtos</a></div></div></div>';
+  }
   function router(){
     var h=location.hash,v=null;
     if(h.indexOf('#/p/')===0){v=productView(h.slice(4));if(!v){location.replace('#/produtos');return;}}
@@ -1086,6 +1090,7 @@
     else if(h==='#/privacidade'||h==='#/termos'||h==='#/trocas'||h==='#/entrega'){v=politicaView(h.slice(2));if(!v){location.replace('#/');return;}}
     else if(h==='#/checkout')v=checkoutView();
     else if(h==='#/pedido'){if(!CO.order){location.replace('#/');return;}v=pedidoView();}
+    else if(h==='#/obrigado'){var _ob=null;try{_ob=JSON.parse(sessionStorage.getItem('suzu_obrigado')||'null');}catch(_e){}if(!_ob){location.replace('#/exclusivo');return;}v=obrigadoView(_ob);}
     closeMenu(); setActiveNav(h);
     document.body.classList.toggle('co-mode', h==='#/checkout');
     document.body.classList.toggle('pedido-mode', h==='#/pedido');

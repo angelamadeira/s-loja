@@ -1072,3 +1072,6 @@ button.cohd{width:100%;border:0;background:none;font:inherit;color:inherit;text-
 /* barra de sacola some quando vazia (melhor prática: só aparece com item) */
 .dock.is-hidden{display:none}
 body.nodock{padding-bottom:0}
+
+/* página dedicada de "obrigado" (rota #/obrigado) */
+.obgpage{min-height:52vh;display:flex;align-items:center;justify-content:center;padding:var(--space-9) var(--space-4)}
