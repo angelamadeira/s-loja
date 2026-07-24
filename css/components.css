@@ -1035,3 +1035,8 @@ button.cohd{width:100%;border:0;background:none;font:inherit;color:inherit;text-
 
 /* Fase 3 — espaço do widget anti-spam (Turnstile) no form de orçamento */
 .qcheck{margin:var(--space-5) 0 var(--space-3)}
+
+/* Fase 3 — consentimento LGPD no form de orçamento */
+.qconsent{display:flex;gap:var(--space-2);align-items:flex-start;margin:var(--space-5) 0 var(--space-2);font-size:.82rem;color:var(--text-secondary);line-height:1.5;cursor:pointer}
+.qconsent input{margin-top:var(--space-2xs);flex:none;accent-color:var(--ink)}
+.qconsent a{color:var(--text);text-decoration:underline}
