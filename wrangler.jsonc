@@ -1,0 +1,44 @@
+{
+  // Loja Suzu — Worker + assets estáticos.
+  // A loja (index.html, css/...) é servida como asset; o Worker (src/index.js)
+  // atende só POST /api/orcamento. Ver MARKETPLACE/SETUP_Fase3_recursos.md.
+  "name": "s-loja",
+  "main": "src/index.js",
+  "compatibility_date": "2026-07-23",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": { "enabled": true },
+
+  // assets = a loja. run_worker_first faz /api/* cair no Worker; o resto vira asset.
+  "assets": {
+    "directory": ".",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/*"]
+  },
+
+  // valores públicos (não são segredo)
+  "vars": {
+    "AVISO_TO": "somos.suzu@gmail.com",
+    "AVISO_FROM": "pedidos@studiosuzu.com.br"
+  },
+
+  // banco dos pedidos — preencher database_id após criar o D1 (ver SETUP)
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "suzu-pedidos",
+      "database_id": "TODO_PREENCHER_APOS_CRIAR_D1"
+    }
+  ],
+
+  // bucket dos anexos (privado)
+  "r2_buckets": [
+    { "binding": "ANEXOS", "bucket_name": "suzu-anexos" }
+  ],
+
+  // aviso de novo pedido — restrito ao destino verificado (caminho gratuito)
+  "send_email": [
+    { "name": "EMAIL", "destination_address": "somos.suzu@gmail.com" }
+  ]
+
+  // Segredo (NÃO fica aqui): TURNSTILE_SECRET → `wrangler secret put TURNSTILE_SECRET`
+}

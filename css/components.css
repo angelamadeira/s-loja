@@ -1027,3 +1027,6 @@ button.cohd{width:100%;border:0;background:none;font:inherit;color:inherit;text-
 .costep-cta .conext{width:100%;padding:var(--space-4);font-size:.78rem;letter-spacing:.05em;text-transform:uppercase}
 .coproc{position:fixed;inset:0;z-index:120;display:flex;align-items:center;justify-content:center;background:var(--surface);opacity:0;transition:opacity .35s ease}.coproc.show{opacity:1}.coproc[hidden]{display:none}.coproc-in{display:flex;flex-direction:column;align-items:center;gap:var(--space-5);padding:var(--space-7);text-align:center;max-width:340px}.coproc-ring{width:50px;height:50px;border-radius:var(--r-round);border:2.5px solid var(--line);border-top-color:var(--matcha);animation:coprocspin .9s linear infinite}@keyframes coprocspin{to{transform:rotate(360deg)}}.coproc-ico{width:50px;height:50px;color:var(--error-text)}.coproc-msg{font-size:1.05rem;color:var(--text);font-weight:400;letter-spacing:.01em;margin:0;min-height:1.4em;transition:opacity .25s ease}.coproc-sub{font-size:.82rem;color:var(--text-muted);font-weight:300;line-height:1.5;margin:0}.coproc-retry{margin-top:var(--space-1)}@media(prefers-reduced-motion:reduce){.coproc-ring{animation-duration:2.4s}.coproc{transition:none}}
 
+
+/* Fase 3 — espaço do widget anti-spam (Turnstile) no form de orçamento */
+.qcheck{margin:var(--space-5) 0 var(--space-3)}

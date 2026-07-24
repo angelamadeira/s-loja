@@ -15,3 +15,10 @@ package-lock.json
 .stylelintrc.json
 .gitignore
 .assetsignore
+
+# código do Worker e config — NUNCA servir como asset público
+src
+wrangler.jsonc
+wrangler.toml
+schema.sql
+*.sql
