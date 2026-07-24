@@ -967,12 +967,14 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
 .cofoot .lock svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .cofoot a{color:var(--gold-text)}
 /* ===== bloco 2 (checkout/WhatsApp float) ===== */
-.wafloat{position:fixed;right:20px;bottom:88px;z-index:46;width:54px;height:54px;border-radius:var(--r-round);background:var(--ink);color:var(--white);display:grid;place-items:center;box-shadow:0 6px 20px var(--shadow-md);transition:transform .18s ease,box-shadow .18s ease}
+.wafloat{position:fixed;right:20px;bottom:88px;z-index:46;width:54px;height:54px;border-radius:var(--r-round);background:var(--ink);color:var(--white);display:grid;place-items:center;box-shadow:0 6px 20px var(--shadow-md);transition:transform .18s ease,box-shadow .18s ease,bottom .28s cubic-bezier(.32,.72,0,1)}
 .wafloat:hover{transform:translateY(-2px);box-shadow:0 10px 26px var(--shadow-lg)}
 .wafloat svg{width:28px;height:28px;fill:currentColor;stroke:none}
 .wafloat-tip{position:absolute;right:64px;white-space:nowrap;background:var(--ink);color:var(--white);font-size:.72rem;font-weight:400;padding:var(--space-2) var(--space-3);border-radius:var(--r-pill);opacity:0;transform:translateX(6px);transition:opacity .18s,transform .18s;pointer-events:none;box-shadow:0 4px 12px var(--line-strong)}
 .wafloat:hover .wafloat-tip{opacity:1;transform:translateX(0)}
-@media(max-width:560px){.wafloat{right:14px;bottom:82px;width:50px;height:50px}.wafloat-tip{display:none}}
+/* sem barra de sacola (sacola vazia): o WhatsApp desce; com a barra ativa, volta pra cima dela */
+body.nodock .wafloat{bottom:calc(24px + env(safe-area-inset-bottom))}
+@media(max-width:560px){.wafloat{right:14px;bottom:82px;width:50px;height:50px}.wafloat-tip{display:none}body.nodock .wafloat{bottom:calc(18px + env(safe-area-inset-bottom))}}
 /* Atendimento */
 .atcards{display:grid;gap:var(--space-3);margin-top:var(--space-6);max-width:520px}
 .atcard{display:flex;align-items:center;gap:var(--space-4);border:1px solid var(--line-soft);border-radius:var(--r-lg);padding:var(--space-4) var(--space-5);background:var(--surface);transition:border-color .18s,background .18s}
