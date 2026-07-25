@@ -94,7 +94,11 @@ export async function criaPagamento(env, params, fetchImpl = globalThis.fetch) {
   return resultado;
 }
 
-export async function consultaPagamento(env, id, fetchImpl = globalThis.fetch) {
+// GET /v1/payments/{id} com o QR/copia-e-cola do Pix, quando existir — usado por
+// GET /api/compra pra devolver o Pix atual de uma compra pendente numa tela
+// retornável (/pix/<ref>): a página pode ser recarregada/reaberta sem ter o QR
+// gerado no momento de /api/pagar, então precisa buscar de novo do MP.
+export async function consultaPagamentoFull(env, id, fetchImpl = globalThis.fetch) {
   const res = await fetchImpl(`${MP_BASE}/${id}`, {
     method: "GET",
     headers: {
@@ -104,5 +108,19 @@ export async function consultaPagamento(env, id, fetchImpl = globalThis.fetch) {
 
   const data = await res.json();
 
-  return { id: data.id, status: data.status };
+  const resultado = { id: data.id, status: data.status };
+  const txData = data.point_of_interaction && data.point_of_interaction.transaction_data;
+  if (txData) {
+    resultado.pix = {
+      qrBase64: txData.qr_code_base64,
+      copiaECola: txData.qr_code,
+    };
+  }
+  return resultado;
+}
+
+// Mantida por compatibilidade (usada pelo webhook) — só {id,status}, nunca pix.
+export async function consultaPagamento(env, id, fetchImpl = globalThis.fetch) {
+  const full = await consultaPagamentoFull(env, id, fetchImpl);
+  return { id: full.id, status: full.status };
 }

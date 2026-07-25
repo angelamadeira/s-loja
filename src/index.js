@@ -5,7 +5,7 @@
 // Todo o resto é servido como asset estático (a loja) — ver wrangler.jsonc.
 import { EmailMessage } from "cloudflare:email";
 import { recomputaTotal, parcelasValidas } from "./precos.js";
-import { criaPagamento, consultaPagamento } from "./mp.js";
+import { criaPagamento, consultaPagamento, consultaPagamentoFull } from "./mp.js";
 
 const MAX_ARQUIVO = 10 * 1024 * 1024; // 10 MB por anexo
 const MAX_ANEXOS = 12;
@@ -212,13 +212,33 @@ async function handlePagar(request, env) {
   }
 }
 
-// GET /api/compra?ref= — polling do estado do pagamento (usado pelo front enquanto
-// espera a confirmação do Pix). Só expõe o status, nada de dado financeiro/pessoal.
+// GET /api/compra?ref= — polling do estado do pagamento (usado pelo front na tela
+// /pix/<ref>, retornável, enquanto espera a confirmação do Pix — e no /checkout
+// antes de navegar pra lá). Só expõe status/QR do Pix, nada de dado financeiro
+// (total, itens, endereço, CPF) ou pessoal (e-mail, telefone).
+//
+// Compra pendente em Pix: reconsulta o MP (por mp_payment_id) e devolve o QR/
+// copia-e-cola atuais — a tela /pix/<ref> é retornável (pode ser recarregada ou
+// reaberta bem depois de /api/pagar ter respondido), então não dá pra confiar
+// num QR que só existiu na memória do primeiro request.
 async function handleCompra(url, env) {
   const ref = str(url.searchParams.get("ref"));
   if (!ref) return json({ status: "nao_encontrado" });
-  const row = await env.DB.prepare("SELECT status FROM compras WHERE ref = ?").bind(ref).first();
-  return json({ status: row ? row.status : "nao_encontrado" });
+  const row = await env.DB.prepare("SELECT status, metodo, mp_payment_id FROM compras WHERE ref = ?").bind(ref).first();
+  if (!row) return json({ status: "nao_encontrado" });
+
+  const resposta = { status: row.status };
+  if (row.status === "pendente" && row.metodo === "pix" && row.mp_payment_id) {
+    try {
+      const full = await consultaPagamentoFull(env, row.mp_payment_id);
+      if (full && full.pix) resposta.pix = full.pix;
+    } catch (e) {
+      // MP indisponível nesta rodada — devolve só o status; o polling do
+      // cliente tenta de novo em ~4s.
+      console.error("consultaPagamentoFull falhou", e);
+    }
+  }
+  return json(resposta);
 }
 
 // POST /api/mp-webhook — o MP notifica mudanças de status assíncronas
