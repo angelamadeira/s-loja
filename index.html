@@ -1336,6 +1336,7 @@
       +'<div class="okhead">'
         +'<span class="sig oksig" id="pixTitle">Aguardando o seu Pix…</span>'
         +'<p class="okhead-sub" id="pixSub">Escaneie o QR ou copie o código no app do seu banco. A gente confirma sozinho assim que cair.</p>'
+        +'<p class="pixamount" id="pixAmount" hidden>Valor a pagar<b id="pixAmountVal"></b></p>'
       +'</div>'
       +'<div class="okpanel" id="pixPanel"><div class="pixloading"><div class="coproc-ring" aria-hidden="true"></div></div></div>'
       +'<div class="okcta" id="pixCta"></div>'
@@ -1368,9 +1369,19 @@
     var wrap=document.getElementById('pixWrap'); if(!wrap)return;
     var ref=wrap.dataset.ref;
     var titleEl=document.getElementById('pixTitle'),subEl=document.getElementById('pixSub'),panel=document.getElementById('pixPanel'),cta=document.getElementById('pixCta');
+    var amountEl=document.getElementById('pixAmount'),amountVal=document.getElementById('pixAmountVal');
+    /* total (centavos) só existe enquanto a compra segue pendente em Pix — ver
+       GET /api/compra em src/index.js. Mostrado antes do QR pra o cliente conferir
+       o valor no app do banco antes de escanear (boa prática). */
+    function setAmount(total){
+      if(!amountEl||!amountVal||total==null)return;
+      amountVal.textContent=BRL(total/100);
+      amountEl.hidden=false;
+    }
     function setGone(msg,ctaHtml){
       stopPoll();
       if(subEl)subEl.textContent='';
+      if(amountEl)amountEl.hidden=true;
       if(panel)panel.innerHTML='<p class="pixgone">'+msg+'</p>';
       if(cta)cta.innerHTML=ctaHtml||'';
     }
@@ -1453,6 +1464,7 @@
       if(d.status==='aprovado'){handleApproved(d.order);return;}
       if(d.status==='recusado'||d.status==='cancelado'){setGone('O pagamento não foi concluído — nada foi cobrado.','<a class="btn" href="/checkout">Voltar ao checkout</a>');return;}
       if(d.status!=='pendente'||!d.pix){setGone('Esse código Pix não está mais disponível.','<a class="btn" href="/checkout">Voltar ao checkout</a>');return;}
+      setAmount(d.total);
       renderPix(d);
       poll();
     }).catch(function(){setGone('Não conseguimos carregar esse pedido agora. Tente recarregar a página.','<a class="btn ghost" href="/checkout">Voltar ao checkout</a>');});
