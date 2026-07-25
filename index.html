@@ -961,12 +961,17 @@
         .then(function(r){return r.json();})
         .then(function(d){
           var ah=document.getElementById('addrHint');
-          if(!d||d.erro){if(ah){ah.textContent='CEP não encontrado — preencha o endereço manualmente.';ah.className='cephint err';}return;}
+          /* Cidade/UF são derivadas do CEP (um CEP = uma cidade). Travar evita o
+             "endereço que briga com o CEP" (falha de entrega): cidade/UF do CEP,
+             rua/número/complemento livres. Falha do ViaCEP → destrava (preenche à mão). */
+          var lockCity=function(on){var cid=document.getElementById('coCidade'),lk=document.getElementById('coCidadeLock');if(cid){cid.readOnly=on;cid.classList.toggle('cep-locked',on);}if(lk)lk.hidden=!on;};
+          if(!d||d.erro){lockCity(false);if(ah){ah.textContent='CEP não encontrado — preencha o endereço manualmente.';ah.className='cephint err';}return;}
           if(ah){ah.textContent='';ah.className='cephint';}
           var fill=function(id,val){var el=document.getElementById(id);if(el&&val&&document.activeElement!==el){el.value=val;el.classList.remove('bad');}};
           fill('coRua',d.logradouro);
           fill('coBairro',d.bairro);
           fill('coCidade',d.localidade?d.localidade+(d.uf?' / '+d.uf:''):'');
+          lockCity(!!d.localidade);
         })
         .catch(function(){/* rede fora — deixa a pessoa preencher à mão, sem travar */});
     }
@@ -1544,7 +1549,7 @@
         +'<label class="cofield"><span>Nome completo</span><input type="text" id="coNome" autocomplete="name"></label>'
         +'<label class="cofield"><span>Endereço</span><input type="text" id="coRua" autocomplete="address-line1"></label>'
         +'<div class="tworow"><label class="cofield"><span>Número</span><input type="text" id="coNum"></label><label class="cofield"><span>Complemento</span><input type="text" id="coComp" placeholder="opcional"></label></div>'
-        +'<div class="tworow"><label class="cofield"><span>Bairro</span><input type="text" id="coBairro"></label><label class="cofield"><span>Cidade / UF</span><input type="text" id="coCidade"></label></div>'
+        +'<div class="tworow"><label class="cofield"><span>Bairro</span><input type="text" id="coBairro"></label><label class="cofield"><span>Cidade / UF <em class="opt lockednote" id="coCidadeLock" hidden>· definido pelo CEP</em></span><input type="text" id="coCidade"></label></div>'
         +'<p class="cephint" id="addrHint"></p>'
         +'</div>';
     var entrega='<section class="costep" data-step="2" id="cstep2">'+stepHead(2,'Entrega')+'<div class="costep-body">'+entregaBody

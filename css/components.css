@@ -213,6 +213,8 @@ section{padding:var(--space-9) 0}
 .qwa:hover{color:var(--text)}
 .cofield .opt{font-family:inherit;font-style:normal;text-transform:none;letter-spacing:normal;font-size:.66rem;color:var(--wood);margin-left:var(--space-1)}
 .cofield input.bad,.cofield textarea.bad,.cofield input.bad:focus{border-color:var(--error-text)}
+/* campo travado pelo CEP (cidade/UF) — aspecto read-only, derivado do CEP */
+.cofield input.cep-locked{background:var(--raised);color:var(--text-secondary);cursor:default}
 .fielderr{display:none;color:var(--error-text);font-size:.74rem;font-weight:400;margin-top:var(--space-2xs);text-transform:none;letter-spacing:normal}
 .fielderr.show{display:block}
 @media(max-width:560px){.qform{padding:var(--space-6) var(--space-5) var(--space-6)}.coform .tworow,.qform .tworow{grid-template-columns:1fr}.coform .addr{gap:var(--space-4)}.optcard{padding:var(--space-4) var(--space-3);gap:var(--space-3)}.optgrid{grid-template-columns:1fr}}
