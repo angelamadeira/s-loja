@@ -691,7 +691,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
 /* .paypix — forma Pix (CPF nosso + botão pílula .btn; sem Brick nenhum, o Pix é
    POST direto em /api/pagar). */
 .paypix{margin-top:var(--space-4)}
-.paypix .btn{display:block;width:100%;text-align:center;margin-top:var(--space-2)}
+.paypix .btn{display:block;width:100%;text-align:center;margin-top:var(--space-5)}
 /* .paybrick — envelope do cardPayment Brick do Mercado Pago, só pro Cartão
    (Fase 4a/dinâmico); o Brick em si é injetado pelo SDK dentro de #coCardBrick,
    esta casca só dá o acabamento (borda/raio/fundo) pra casar com os outros
