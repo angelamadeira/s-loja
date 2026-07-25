@@ -757,6 +757,8 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
 .cardbrick-loading[hidden],.cardbrick-fail[hidden]{display:none}
 .cardbrick-loading p{margin:0;font-size:.82rem;font-weight:300;color:var(--text-muted)}
 .coproc-ring.sm{width:24px;height:24px;border-width:2px}
+.cardbrick-fail-ico{display:flex;color:var(--text-tertiary)}
+.cardbrick-fail-ico svg{width:30px;height:30px}
 .cardbrick-fail p{margin:0;font-size:.86rem;font-weight:300;line-height:1.6;color:var(--text-secondary);max-width:36ch}
 .cardbrick-fail-cta{display:flex;flex-direction:column;align-items:center;gap:var(--space-3);width:100%;max-width:220px}
 .cardbrick-fail-cta .btn.ghost{width:100%;text-align:center}

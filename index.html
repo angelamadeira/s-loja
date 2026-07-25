@@ -1173,15 +1173,15 @@
          BIN já resolveu um payment_method_id (senão não dá pra montar o payload
          pro servidor) e não há envio em voo. */
       function updateSubmitEnabled(){if(cardBtn)cardBtn.disabled=!(fieldsReady()&&nameOk()&&cardCpfOk()&&!!st.paymentMethodId&&!submitting);}
-      function showLoading(){if(failBox)failBox.hidden=true;if(formBox)formBox.hidden=true;if(loadBox)loadBox.hidden=false;if(cardBtn)cardBtn.disabled=true;}
-      function hideLoading(){if(loadBox)loadBox.hidden=true;if(formBox)formBox.hidden=false;}
+      function showLoading(){if(failBox)failBox.hidden=true;if(formBox)formBox.hidden=true;if(loadBox)loadBox.hidden=false;if(cardBtn){cardBtn.disabled=true;cardBtn.hidden=true;}}
+      function hideLoading(){if(loadBox)loadBox.hidden=true;if(formBox)formBox.hidden=false;if(cardBtn)cardBtn.hidden=false;}
       /* Falha (timeout OU error de algum campo OU init quebrado): sempre a MESMA
          mensagem — menciona bloqueador de anúncios (causa nº1, mira os iframes
          de secure-fields.mercadopago.com) e a saída via Pix — com "Tentar de
          novo" (re-arma mountCardFields do zero) e um atalho pro Pix. */
       function showFail(){
         if(!isCurrent())return;
-        clearCardFieldsTimer();hideLoading();if(formBox)formBox.hidden=true;brickErr('');if(cardBtn)cardBtn.disabled=true;
+        clearCardFieldsTimer();hideLoading();if(formBox)formBox.hidden=true;brickErr('');if(cardBtn){cardBtn.disabled=true;cardBtn.hidden=true;}
         if(failMsg)failMsg.textContent=CARD_FAIL_MSG;
         if(failBox)failBox.hidden=false;
       }
@@ -1501,7 +1501,7 @@
             +'<label class="cofield"><span>Parcelas</span><select id="coCardParcelas"><option value="1">1× à vista</option></select></label>'
           +'</div>'
           +'<div class="cardbrick-loading" id="coCardLoading" hidden><div class="coproc-ring sm" aria-hidden="true"></div><p>Carregando o formulário de cartão…</p></div>'
-          +'<div class="cardbrick-fail" id="coCardFail" hidden><p id="coCardFailMsg"></p><div class="cardbrick-fail-cta"><button type="button" class="btn ghost" id="coCardRetry">Tentar de novo</button><button type="button" class="cardbrick-fail-link" id="coCardGoPix">Pagar com Pix em vez disso</button></div></div>'
+          +'<div class="cardbrick-fail" id="coCardFail" hidden><span class="cardbrick-fail-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg></span><p id="coCardFailMsg"></p><div class="cardbrick-fail-cta"><button type="button" class="btn ghost" id="coCardRetry">Tentar de novo</button><button type="button" class="cardbrick-fail-link" id="coCardGoPix">Pagar com Pix em vez disso</button></div></div>'
         +'</div><button type="button" class="btn" id="coCardBtn" disabled>Pagar</button><p class="paybrickerr" id="coCardErr" hidden></p></div>'
       +'</div>'
       +'<div class="cotrust"><span>Compra protegida</span><span><a href="/faq">Trocas em até 7 dias</a></span><span>Enviamos para todo o Brasil</span></div>'
