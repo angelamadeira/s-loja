@@ -1205,7 +1205,7 @@
          não validado) — um número incompleto habilitava o botão. */
       function updateSubmitEnabled(){if(cardBtn)cardBtn.disabled=!(st.numValid&&st.expValid&&st.cvvValid&&nameValid()&&cardCpfOk()&&!!st.paymentMethodId&&!submitting);}
       function showLoading(){if(failBox)failBox.hidden=true;if(formBox)formBox.hidden=true;if(loadBox)loadBox.hidden=false;if(cardBtn){cardBtn.disabled=true;cardBtn.hidden=true;}}
-      function hideLoading(){if(loadBox)loadBox.hidden=true;if(formBox)formBox.hidden=false;if(cardBtn)cardBtn.hidden=false;}
+      function hideLoading(){if(loadBox)loadBox.hidden=true;if(failBox)failBox.hidden=true;if(formBox)formBox.hidden=false;if(cardBtn)cardBtn.hidden=false;}
       /* Falha (timeout OU error de algum campo OU init quebrado): sempre a MESMA
          mensagem — menciona bloqueador de anúncios (causa nº1, mira os iframes
          de secure-fields.mercadopago.com) e a saída via Pix — com "Tentar de
