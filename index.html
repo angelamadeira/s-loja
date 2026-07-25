@@ -857,6 +857,32 @@
     (function(){var em=document.getElementById('coEmail');if(em)em.addEventListener('input',function(){if(em.classList.contains('bad'))emailErr('');});})();
     CO.ship=null;CO.pay='pix';CO.parc=1;CO.coupon=null;CO.cpf='';
     renderCoSummary();
+    /* RESUMO editável — um listener delegado só, no <aside id="coSummary">
+       (o elemento persiste entre chamadas de renderCoSummary(), que só troca
+       o innerHTML — não precisa re-wire a cada render). +/− mexem em
+       cart[k].qty; "Remover" (ou − no último) apaga o item. Depois de
+       QUALQUER edição: persiste (saveCart), atualiza o dock/badge (render) e,
+       se ainda sobrou algo na sacola, re-renderiza o Resumo + re-sincroniza
+       as parcelas do cartão com o novo total (syncCardBrickAmount — só age
+       se o Cartão estiver selecionado, ver sua definição). Se a sacola
+       esvaziou, volta pro próprio /checkout — que, sem itens, já renderiza
+       coEmptyView() (sacola vazia + link pra produtos) em vez de ficar com
+       um checkout quebrado. */
+    var coSummaryEl=document.getElementById('coSummary');
+    if(coSummaryEl)coSummaryEl.addEventListener('click',function(e){
+      var b=e.target.closest('button[data-qp],button[data-qm],button[data-rm]');
+      if(!b)return;
+      var k=b.dataset.qp||b.dataset.qm||b.dataset.rm;
+      if(!cart[k])return;
+      if('qp' in b.dataset)cart[k].qty++;
+      else if('qm' in b.dataset){if(cart[k].qty>1)cart[k].qty--;else delete cart[k];}
+      else delete cart[k];
+      saveCart();
+      render();
+      if(!Object.keys(cart).length){navigate('/checkout',true);return;}
+      renderCoSummary();
+      syncCardBrickAmount();
+    });
     /* CPF: campo nosso nos dois métodos — Pix (coCpf) e Cartão (coCardCpf, ver
        mountCardFields()) — cpfDigits/fmtCpf/cpfMsg são compartilhadas pelos dois
        (o Cartão usa o próprio coCardCpf, mas as mesmas funções de máscara/
@@ -1497,7 +1523,12 @@
   }
   function cartSplit(){
     var now=[],pre=[],subNow=0,subPre=0;
-    Object.keys(cart).forEach(function(k){var it=cart[k];if(it.p.status==='presale'){pre.push(it);subPre+=it.qty*it.price;}else{now.push(it);subNow+=it.qty*it.price;}});
+    /* it.k=k: chave do carrinho (cartKey) carregada em cada item — só assim o
+       RESUMO editável (renderCoSummary) consegue mirar cart[k] pros steppers
+       de quantidade/remover sem precisar recalcular a chave. Campo extra, não
+       mexe nos campos existentes — os outros consumidores de cartSplit()
+       (pixView/buildBaseCtx/pricing/render) seguem ignorando-o. */
+    Object.keys(cart).forEach(function(k){var it=cart[k];it.k=k;if(it.p.status==='presale'){pre.push(it);subPre+=it.qty*it.price;}else{now.push(it);subNow+=it.qty*it.price;}});
     return {now:now,pre:pre,subNow:subNow,subPre:subPre};
   }
   function coEmptyView(){return backHome()+'<div class="wrap cowrap"><div class="coempty"><span class="sig">Sua sacola está vazia.</span><p>Escolha um produto pra começar a sua coleção.</p><a class="btn" href="/produtos">Ver produtos</a></div></div>';}
@@ -1608,7 +1639,19 @@
     var payPixDisc=CO.pay==='pix'?pixDisc:0;
     var coupDisc=CO.coupon?Math.round(merch*CO.coupon.pct/100*100)/100:0;
     var total=merch+(ship||0)-coupDisc-payPixDisc;
-    var rows=s.now.concat(s.pre).map(function(it){return '<div class="okri"><div class="okri-img">'+mold(it.p)+(it.qty>1?'<span class="okri-qty">'+it.qty+'×</span>':'')+'</div><div class="okri-tx"><b>'+it.name+'</b>'+(it.sub?'<small>'+it.sub+'</small>':'')+'</div><div class="okri-pr">'+BRL(it.qty*it.price)+'</div></div>';}).join('');
+    /* RESUMO editável (Fase 4a-carrinho): cada linha ganha um stepper de
+       quantidade (−/n/+, mesmo par de ícones do stepper da sacola/.qty) e um
+       "Remover" — mira cart[it.k] (chave carregada por cartSplit()). Delegado
+       uma vez só em #coSummary (ver wireCheckout) — não precisa re-wire a
+       cada renderCoSummary(). Não mexe no <div class="okri"> puro/sem edição
+       usado por confirmView() (tela de sucesso, pós-pagamento). */
+    var rows=s.now.concat(s.pre).map(function(it){return '<div class="okri okri-ed"><div class="okri-img">'+mold(it.p)+'</div><div class="okri-tx"><b>'+it.name+'</b>'+(it.sub?'<small>'+it.sub+'</small>':'')
+      +'<div class="okqty" role="group" aria-label="Quantidade de '+it.name+'">'
+      +'<button type="button" class="okqty-b" data-qm="'+it.k+'" aria-label="Diminuir quantidade"><svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/></svg></button>'
+      +'<span class="okqty-n">'+it.qty+'</span>'
+      +'<button type="button" class="okqty-b" data-qp="'+it.k+'" aria-label="Aumentar quantidade"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>'
+      +'<button type="button" class="okri-rm" data-rm="'+it.k+'">Remover</button>'
+      +'</div></div><div class="okri-pr">'+BRL(it.qty*it.price)+'</div></div>';}).join('');
     var frete=s.now.length===0?'no lançamento':(CO.ship?(CO.ship.free?'Grátis':BRL(CO.ship.price)):'calcule no passo 2');
     var h='<h3>Resumo</h3><div class="ciList">'+rows+'</div><div class="cisep"></div>';
     h+='<div class="sumrow"><span>Subtotal</span><span>'+BRL(merch)+'</span></div>';

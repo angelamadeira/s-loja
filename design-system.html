@@ -661,6 +661,33 @@
     </div>
 
     <div class="comp-block">
+      <h3>Resumo editável — <code>.okri-ed</code>/<code>.okqty</code>/<code>.okri-rm</code></h3>
+      <p class="dsrule">Padrão de mercado "revisar e editar o carrinho no próprio checkout" (Fase 4a-carrinho): cada linha do Resumo (<code>#coSummary</code>, <code>renderCoSummary()</code>) ganha um stepper de quantidade (<code>.okqty</code>, mesmo par de ícones −/+ do stepper da sacola/<code>.qty</code>, só menor — 20px em vez de 29px) e um "Remover" (<code>.okri-rm</code>, texto sublinhado discreto, mesmo padrão de <code>.cardbrick-fail-link</code>) sem sair da tela. Um único listener delegado em <code>#coSummary</code> (montado uma vez em <code>wireCheckout()</code> — o <code>&lt;aside&gt;</code> persiste entre re-renders, só o innerHTML troca) resolve a chave do carrinho (<code>cartKey</code>, carregada em cada item por <code>cartSplit()</code> como <code>it.k</code>) e mexe direto em <code>cart[k]</code>: <b>+</b> incrementa; <b>−</b> decrementa, ou remove se já estiver em 1; <b>Remover</b> apaga na hora. Toda edição dispara os mesmos quatro passos: <code>saveCart()</code> (persiste), <code>render()</code> (dock/badge), <code>renderCoSummary()</code> (resumo + totais) e <code>syncCardBrickAmount()</code> (re-sincroniza as parcelas do cartão com o novo total, se o Cartão estiver aberto). Sacola esvaziada por uma remoção → <code>navigate('/checkout',true)</code>, que sem itens já renderiza <code>coEmptyView()</code> (sacola vazia + link pra produtos) em vez de deixar um checkout quebrado. Deliberadamente sutil: sem botão preenchido, sem cor de alerta em repouso — <code>.okri-rm</code> só fica <code>--error-text</code> no hover/foco.</p>
+      <div class="demo demo-row" style="align-items:flex-start">
+        <aside class="cosummary" style="flex:1 1 320px;position:static">
+          <h3>Resumo</h3>
+          <div class="ciList">
+            <div class="okri okri-ed">
+              <div class="okri-img" style="background:var(--surface)"></div>
+              <div class="okri-tx"><b>Tablete Seigaiha</b><small>M · 12 gomos</small>
+                <div class="okqty" role="group" aria-label="Quantidade">
+                  <button type="button" class="okqty-b" aria-label="Diminuir quantidade"><svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+                  <span class="okqty-n">2</span>
+                  <button type="button" class="okqty-b" aria-label="Aumentar quantidade"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+                  <button type="button" class="okri-rm">Remover</button>
+                </div>
+              </div>
+              <div class="okri-pr">R$ 178,00</div>
+            </div>
+          </div>
+          <div class="cisep"></div>
+          <div class="sumrow"><span>Subtotal</span><span>R$ 178,00</span></div>
+          <div class="sumrow tot"><span>Total</span><b>R$ 178,00</b></div>
+        </aside>
+      </div>
+    </div>
+
+    <div class="comp-block">
       <h3>Overlay de processamento de pagamento — <code>.coproc</code></h3>
       <p class="dsrule">Cobre a tela inteira só no instante de chamar <code>/api/pagar</code> — trava a interação até o PSP responder a essa chamada específica (nunca mais o Pix inteiro: o QR não vive mais aqui, ver <code>/pix/&lt;ref&gt;</code> abaixo). Só spinner + texto: <b>confirmando</b> — <code>.coproc-ring</code> gira com <code>.coproc-msg</code> genérico ("Confirmando…", cartão) ou específico ("Gerando o seu código Pix…", clique em Pagar com Pix); <b>aprovado</b> — fecha direto pro sucesso (<code>/pedido</code>); <b>pendente</b> (Pix) — fecha e navega pra <code>/pix/&lt;ref&gt;</code>, a tela retornável de verdade; <b>recusado</b> — <code>.coproc-ico</code> (erro) + mensagem + botão explícito <code>#coProcBack</code> ("Voltar ao checkout") — sem fechar sozinho, a sacola nunca é limpa nesse caso.</p>
       <div class="demo demo-stage">

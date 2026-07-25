@@ -810,6 +810,16 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
 .sumrow.tot b{font-weight:600}
 .sumnote{font-size:.76rem;color:var(--text-muted);font-weight:300;margin-top:var(--space-2);line-height:1.55}
 .sumnote.pre{background:var(--surface);border-radius:var(--r-md);padding:var(--space-3) var(--space-3);margin-top:var(--space-3)}
+/* RESUMO editável do checkout (Fase 4a-carrinho): stepper de quantidade +
+   "Remover" por linha — sutil e discreto (o Resumo é um resumo calmo, não
+   uma sacola cheia de botão). Só aparece dentro de .okri-ed (renderCoSummary);
+   o .okri puro da tela de sucesso/confirmação não ganha esses controles. */
+.okqty{display:flex;align-items:center;gap:var(--space-2);margin-top:var(--space-2)}
+.okqty-b{width:20px;height:20px;flex:0 0 auto;border-radius:var(--r-round);border:1px solid var(--line-strong);background:var(--surface);color:var(--text);display:grid;place-items:center;cursor:pointer}
+.okqty-b svg{width:9px;height:9px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;display:block}
+.okqty-n{min-width:14px;text-align:center;font-variant-numeric:tabular-nums;font-size:.76rem;color:var(--text)}
+.okri-rm{margin-left:var(--space-2);background:none;border:none;padding:0;font-family:inherit;font-size:.7rem;font-weight:300;color:var(--text-muted);text-decoration:underline;text-underline-offset:2px;cursor:pointer}
+.okri-rm:hover,.okri-rm:focus-visible{color:var(--error-text)}
 .coempty{text-align:center;padding:var(--space-9) var(--space-5);max-width:440px;margin:0 auto}
 .coempty .sig{font-size:1.4rem;display:block;margin-bottom:var(--space-3)}
 .coempty p{color:var(--text-muted);font-weight:300;margin-bottom:var(--space-5)}
