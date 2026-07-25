@@ -646,8 +646,14 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
 .cofield input,.cofield select,.cofield textarea{border:1px solid var(--line);border-radius:var(--r-md);padding:var(--space-3) var(--space-3);font-size:.95rem;font-family:inherit;color:var(--text);background:var(--surface);outline:none;width:100%}
 .cofield input:focus,.cofield select:focus{border-color:var(--stone)}
 .tworow{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-3)}
-.cocheck{display:flex;align-items:center;gap:var(--space-2);font-size:.85rem;color:var(--text);font-weight:300;margin-top:var(--space-2xs)}
-.cocheck input{width:16px;height:16px;accent-color:var(--text)}
+/* Checkbox unificado — usado no checkout (.co-check), no modal "avise-me"
+   (.nf-check) e no consentimento LGPD do orçamento (.consent-check). O core
+   (caixa/rótulo/alinhamento) é sempre o mesmo; só a margem externa varia por
+   contexto via classe modificadora. */
+.check{display:flex;align-items:flex-start;gap:var(--space-2);font-size:.82rem;line-height:1.5;color:var(--text-secondary);cursor:pointer;user-select:none}
+.check input{flex:0 0 auto;width:16px;height:16px;margin-top:var(--space-2xs);accent-color:var(--text)}
+.check a{color:var(--text);text-decoration:underline}
+.check.co-check{margin-top:var(--space-2xs)}
 .coguest{font-size:.78rem;color:var(--text-muted);font-weight:300;margin-top:var(--space-3)}
 .coinfo{background:var(--mizu-wash);border-radius:var(--r-md);padding:var(--space-4) var(--space-4);font-size:.86rem;font-weight:300;color:var(--ink);line-height:1.55}
 .ceprow{display:flex;gap:var(--space-3);align-items:flex-end}
@@ -958,8 +964,8 @@ body.nodock .wafloat{bottom:calc(24px + env(safe-area-inset-bottom))}
 .nfmodal .nfsub b{font-weight:500;color:var(--text)}
 .nfin{width:100%;box-sizing:border-box;border:1px solid var(--line);border-radius:var(--r-md);padding:var(--space-3) var(--space-4);font-family:inherit;font-size:.92rem;color:var(--text);background:var(--surface)}
 .nfin:focus{outline:none;border-color:var(--wood)}
-.nfopt{display:flex;align-items:flex-start;gap:var(--space-2);margin:var(--space-4) var(--space-2xs) var(--space-2xs);font-size:.78rem;line-height:1.45;color:var(--stone);cursor:pointer;user-select:none}
-.nfopt input{margin:var(--space-2xs) 0 0;flex:0 0 auto;accent-color:var(--text);width:15px;height:15px}
+/* checkbox: ver .check em componentes de checkout — .nf-check só ajusta a margem */
+.check.nf-check{margin:var(--space-4) var(--space-2xs) var(--space-2xs)}
 .nfmodal .nfgo{width:100%;margin-top:var(--space-4);padding:var(--space-4)}
 .nfmodal .nfhint{font-size:.76rem;color:var(--text-muted);font-weight:300;margin:var(--space-3) var(--space-2xs) 0;min-height:1em}
 .nfmodal .nfhint.err{color:var(--error-text)}
@@ -1015,10 +1021,8 @@ button.cohd{width:100%;border:0;background:none;font:inherit;color:inherit;text-
 /* Fase 3 — espaço do widget anti-spam (Turnstile) no form de orçamento */
 .qcheck{margin:var(--space-5) 0 var(--space-3)}
 
-/* Fase 3 — consentimento LGPD no form de orçamento */
-.qconsent{display:flex;gap:var(--space-2);align-items:flex-start;margin:var(--space-5) 0 var(--space-2);font-size:.82rem;color:var(--text-secondary);line-height:1.5;cursor:pointer}
-.qconsent input{margin-top:var(--space-2xs);flex:none;accent-color:var(--ink)}
-.qconsent a{color:var(--text);text-decoration:underline}
+/* Fase 3 — consentimento LGPD no form de orçamento (checkbox: ver .check) */
+.check.consent-check{margin:var(--space-5) 0 var(--space-2)}
 
 /* Fase 3 — polimento do form de orçamento */
 .qcheck{display:flex;justify-content:center}

@@ -501,6 +501,15 @@
     </div>
 
     <div class="comp-block">
+      <h3>Checkbox — <code>.check</code></h3>
+      <p class="dsrule">Componente único para todo checkbox opt-in da loja (antigos <code>.nfopt</code>, <code>.qconsent</code> e <code>.cocheck</code> foram unificados). Caixa de 16×16 alinhada ao topo (<code>align-items:flex-start</code>) com uma margem-top mínima no <code>input</code> — assim ela fica ótica-alinhada com a primeira linha do texto, inclusive em rótulos de duas linhas. Margem externa varia por contexto via modificador (<code>.nf-check</code>, <code>.consent-check</code>, <code>.co-check</code>) — nunca mexendo no core.</p>
+      <div class="demo" style="display:flex;flex-direction:column;gap:var(--space-4);align-items:flex-start">
+        <label class="check"><input type="checkbox"><span>Quero receber avisos de lançamentos e pré-vendas.</span></label>
+        <label class="check"><input type="checkbox"><span>Li e concordo com a <a href="#">Política de Privacidade</a> e autorizo o Studio Suzu a usar meus dados para responder este pedido.</span></label>
+      </div>
+    </div>
+
+    <div class="comp-block">
       <h3>Checkout em acordeão — <code>.costep</code></h3>
       <p class="dsrule">Uma etapa aberta por vez (<code>.costep.open</code>). Etapa concluída (<code>.costep.done</code>) colapsa e passa a mostrar <code>.costep-sum</code> (resumo) + <code>.coedit</code> ("Editar") no lugar do conteúdo; o número (<code>.cn-n</code>) vira check (<code>.cn-ok</code>).</p>
       <div class="demo" style="display:flex;flex-direction:column;gap:var(--space-4)">
@@ -648,7 +657,7 @@
           </div>
           <form novalidate>
             <input type="text" class="nfin" placeholder="E-mail ou WhatsApp" aria-label="Seu e-mail ou WhatsApp">
-            <label class="nfopt"><input type="checkbox"><span>Quero receber lançamentos e novidades do Studio Suzu também.</span></label>
+            <label class="check nf-check"><input type="checkbox"><span>Quero receber lançamentos e novidades do Studio Suzu também.</span></label>
             <button type="submit" class="btn nfgo">Quero receber o aviso</button>
             <p class="nfhint"></p>
           </form>
