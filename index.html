@@ -949,8 +949,8 @@
         qr:document.getElementById('coProcQr'),copia:document.getElementById('coProcCopia'),copiaBtn:document.getElementById('coProcCopiaBtn'),
         expiry:document.getElementById('coProcExpiry')};
     }
-    var pollTimer=null,pixTimer=null;
-    function stopPoll(){if(pollTimer){clearInterval(pollTimer);pollTimer=null;}if(pixTimer){clearInterval(pixTimer);pixTimer=null;}}
+    /* pollTimer/pixTimer/stopPoll ficam no escopo do app (perto de CO) — o router()
+       precisa chamar stopPoll() ao sair do /checkout, e não alcança o escopo daqui. */
     /* Contagem regressiva do Pix — só visual: /api/pagar não devolve a expiração real
        do código (o PSP não manda esse campo hoje), então 30 min é uma aproximação
        segura do padrão do Pix. Se o back-end passar a devolver a expiração real,
@@ -1120,6 +1120,9 @@
     }
   }
   var CO={ship:null,pay:'pix',parc:1};
+  /* Timers do checkout no escopo do app: o router() chama stopPoll() ao sair do /checkout. */
+  var pollTimer=null,pixTimer=null;
+  function stopPoll(){if(pollTimer){clearInterval(pollTimer);pollTimer=null;}if(pixTimer){clearInterval(pixTimer);pixTimer=null;}}
   function cartSplit(){
     var now=[],pre=[],subNow=0,subPre=0;
     Object.keys(cart).forEach(function(k){var it=cart[k];if(it.p.status==='presale'){pre.push(it);subPre+=it.qty*it.price;}else{now.push(it);subNow+=it.qty*it.price;}});
