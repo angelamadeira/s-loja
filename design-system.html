@@ -538,17 +538,46 @@
             <span class="coedit">Editar</span>
           </button>
           <div class="costep-body">
-            <div class="paybrick"><p class="dsplaceholder">Payment Brick do Mercado Pago (injetado em runtime por <code>#coBrickContainer</code> — precisa da chave pública real, não renderiza aqui). Coleta e-mail (pré-preenchido com o da etapa 1), CPF e dados de pagamento — sem campos duplicados nossos.</p></div>
+            <div class="paymethods">
+              <label class="paymethod sel" data-pay="pix"><input type="radio" name="dsPay1" checked><span class="pmb"><b>Pix</b><small>Aprovação na hora</small></span><span class="pmbadge">−5%</span></label>
+              <label class="paymethod" data-pay="cartao"><input type="radio" name="dsPay1"><span class="pmb"><b>Cartão de crédito</b><small>Em até 6×</small></span></label>
+            </div>
+            <div class="paypix">
+              <label class="cofield"><span>CPF</span><input inputmode="numeric" placeholder="000.000.000-00" maxlength="14"></label>
+              <button type="button" class="btn">Pagar com Pix</button>
+            </div>
           </div>
         </section>
       </div>
     </div>
 
     <div class="comp-block">
-      <h3>Payment Brick — <code>.paybrick</code></h3>
-      <p class="dsrule">O passo Pagamento do checkout (Fase 4a): só o Payment Brick do Mercado Pago, montado via SDK dentro do envelope <code>.paybrick</code> (borda/raio/fundo dos tokens Suzu; o conteúdo do Brick em si — e-mail, CPF, cartão, Pix, parcelas — é do MP, estilizado via <code>customVariables</code>, inclusive o botão de pagar via <code>buttonTextColor</code>/<code>borderRadiusFull</code>). O Brick só monta depois que a etapa 1 confirma o e-mail, pra poder pré-preencher <code>initialization.payer.email</code> — evita pedir o e-mail duas vezes. CPF vem de <code>formData.payer.identification.number</code> no <code>onSubmit</code>, não de um campo nosso. Erros de carregamento aparecem em <code>.paybrickerr</code>, mesma cor de <code>.fielderr</code>.</p>
+      <h3>Rádios de pagamento — <code>.paymethods</code>/<code>.paymethod</code></h3>
+      <p class="dsrule">Checkout dinâmico (Fase 4a): Pix e Cartão são rádios nossos (mesmo padrão visual de <code>.shipopt</code>, o cartão-rádio do frete), não mais um único Payment Brick que só revelava o método no fim. Escolher um rádio troca <code>CO.pay</code> na hora, re-renderiza o Resumo (o Total já sai com o desconto Pix aplicado quando é o método escolhido) e troca qual forma aparece embaixo. O rádio selecionado ganha <code>.paymethod.sel</code> (borda <code>--stone</code> + fundo <code>--raised</code>). O selo <code>−5%</code> (<code>.pmbadge</code>) usa a mesma cor de desconto de <code>.sumrow.disc</code>/<code>.couphint.ok</code> (<code>--success-text</code>/<code>--success-surface</code>) — é um benefício, não um alerta.</p>
+      <div class="demo demo-row" style="align-items:flex-start;flex-direction:column;gap:var(--space-4)">
+        <div class="paymethods" style="width:100%">
+          <label class="paymethod sel" data-pay="pix"><input type="radio" name="dsPay2" checked><span class="pmb"><b>Pix</b><small>Aprovação na hora</small></span><span class="pmbadge">−5%</span></label>
+          <label class="paymethod" data-pay="cartao"><input type="radio" name="dsPay2"><span class="pmb"><b>Cartão de crédito</b><small>Em até 6×</small></span></label>
+        </div>
+      </div>
+    </div>
+
+    <div class="comp-block">
+      <h3>Pix — <code>.paypix</code></h3>
+      <p class="dsrule">Método padrão (mais barato — nudge de margem). Sem Brick nenhum: CPF é campo nosso (<code>#coCpf</code>, máscara live <code>000.000.000-00</code>, validado em 11 dígitos antes do clique) e o botão "Pagar com Pix" é o botão pílula <code>.btn</code> do site — o primeiro botão de pagar de verdade que é nosso, não do MP. No clique: valida CPF → valida e-mail/endereço (<code>buildBaseCtx()</code>, compartilhado com o Cartão) → <code>POST /api/pagar</code> direto, com <code>metodo:'pix'</code> e sem <code>token</code>.</p>
       <div class="demo demo-row" style="align-items:flex-start">
-        <div class="paybrick" style="flex:1 1 260px"><p class="dsplaceholder">Payment Brick (runtime)</p></div>
+        <div class="paypix" style="flex:1 1 260px;margin-top:0">
+          <label class="cofield"><span>CPF</span><input inputmode="numeric" placeholder="000.000.000-00" maxlength="14"></label>
+          <button type="button" class="btn">Pagar com Pix</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="comp-block">
+      <h3>Cartão — cardPayment Brick — <code>.paybrick</code></h3>
+      <p class="dsrule">Selecionado o rádio Cartão, monta (uma única vez) o <code>cardPayment</code> Brick do Mercado Pago — cartão-only, sem Pix/boleto — dentro do envelope <code>.paybrick</code> (borda/raio/fundo dos tokens Suzu; o conteúdo do Brick em si — número, validade, CVV, CPF, parcelas — é do MP, estilizado via <code>customVariables</code>, inclusive o botão de pagar via <code>buttonTextColor</code>/<code>borderRadiusFull</code>). O <code>amount</code> passado ao Brick é sempre o total CHEIO (o cartão nunca ganha o desconto Pix, mesma regra do servidor). CPF vem de <code>formData.payer.identification.number</code> no <code>onSubmit</code>, não de um campo nosso. Erros de carregamento aparecem em <code>.paybrickerr</code>, mesma cor de <code>.fielderr</code>.</p>
+      <div class="demo demo-row" style="align-items:flex-start">
+        <div class="paybrick" style="flex:1 1 260px"><p class="dsplaceholder">cardPayment Brick (runtime, injetado em <code>#coCardBrick</code> — precisa da chave pública real, não renderiza aqui)</p></div>
       </div>
     </div>
 

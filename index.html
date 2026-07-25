@@ -856,27 +856,36 @@
     (function(){var em=document.getElementById('coEmail');if(em)em.addEventListener('input',function(){if(em.classList.contains('bad'))emailErr('');});})();
     CO.ship=null;CO.pay='pix';CO.parc=1;CO.coupon=null;CO.cpf='';
     renderCoSummary();
-    /* CPF: coletado pelo próprio Payment Brick (ele precisa do documento pra tokenizar
-       de qualquer forma) — ler de formData.payer.identification.number no onSubmit em
-       vez de duplicar o campo aqui evita pedir o CPF duas vezes. */
-    /* estimativa exibida no Brick — o valor cobrado de verdade nasce no servidor (/api/pagar) */
-    var brickCtl=null;
-    /* SEM desconto Pix aqui de propósito: a forma de pagamento só é escolhida
-       DENTRO do Brick (no onSubmit), então CO.pay ainda não reflete a escolha
-       real do cliente neste ponto — aplicar o desconto de Pix incondicionalmente
-       faria o Brick cobrar (e o Total mostrar) menos do que o servidor cobra
-       de quem paga no cartão. O cupom, ao contrário, vale pra qualquer método
-       (recomputaTotal em src/precos.js aplica os dois de forma independente),
-       então esse desconto pode entrar aqui com segurança. Total mostrado deve
-       ser sempre >= o que qualquer método cobra; só o Pix sai mais barato (grata
-       surpresa na hora de pagar). */
+    /* CPF: no Pix é campo nosso (coCpf, validado abaixo — o método não passa
+       pelo Brick nenhum, então o documento precisa ser coletado aqui); no
+       Cartão continua vindo do cardPayment Brick (formData.payer.identification.number),
+       que precisa do documento de qualquer forma pra tokenizar — sem duplicar campo. */
+    var cpfEl=document.getElementById('coCpf');
+    function cpfDigits(v){return (v||'').replace(/\D/g,'').slice(0,11);}
+    function fmtCpf(d){if(d.length<=3)return d;if(d.length<=6)return d.slice(0,3)+'.'+d.slice(3);if(d.length<=9)return d.slice(0,3)+'.'+d.slice(3,6)+'.'+d.slice(6);return d.slice(0,3)+'.'+d.slice(3,6)+'.'+d.slice(6,9)+'-'+d.slice(9);}
+    function cpfMsg(){return 'Precisamos do CPF pra processar o pagamento e emitir a nota.';}
+    function cpfErr(msg){var b=document.getElementById('coCpfErr');if(b){b.textContent=msg||'';b.classList.toggle('show',!!msg);}if(cpfEl){cpfEl.classList.toggle('bad',!!msg);cpfEl.setAttribute('aria-invalid',msg?'true':'false');}}
+    if(cpfEl)cpfEl.addEventListener('input',function(){cpfEl.value=fmtCpf(cpfDigits(cpfEl.value));if(cpfEl.classList.contains('bad'))cpfErr('');});
+    /* estimativa exibida no cardPayment Brick — o valor cobrado de verdade nasce no
+       servidor (/api/pagar). Ao contrário da versão anterior (Brick único, onde o
+       método só era conhecido no onSubmit), agora CO.pay já reflete a escolha real
+       ANTES do pagamento — os rádios nossos setam CO.pay na hora do clique — então
+       o desconto Pix pode entrar aqui com segurança quando metodo=pix. O cardPayment
+       Brick só existe/atualiza quando CO.pay==='cartao' (ver syncCardBrickAmount),
+       então ele nunca recebe o total com desconto Pix — mesma regra do servidor
+       (recomputaTotal em src/precos.js: desconto de 5% só com metodo:'pix'). */
+    var cardBrickCtl=null;
     function estTotalReais(){
       var sp=cartSplit(),merch=sp.subNow+sp.subPre;
       var shp=sp.now.length===0?0:(CO.ship?(CO.ship.free?0:CO.ship.price):0);
+      var pixD=CO.pay==='pix'?Math.round(merch*0.05*100)/100:0;
       var coupD=CO.coupon?Math.round(merch*CO.coupon.pct/100*100)/100:0;
-      return Math.max(1,Math.round((merch+shp-coupD)*100)/100);
+      return Math.max(1,Math.round((merch+shp-pixD-coupD)*100)/100);
     }
-    function syncBrickAmount(){if(brickCtl&&brickCtl.update){brickCtl.update({amount:estTotalReais()}).catch(function(){});}}
+    /* guard CO.pay==='cartao': evita empurrar pro Brick (escondido, quando o
+       Pix está selecionado) um amount já descontado — o Brick de cartão nunca
+       pode mostrar/cobrar o desconto que só o Pix tem direito. */
+    function syncCardBrickAmount(){if(CO.pay==='cartao'&&cardBrickCtl&&cardBrickCtl.update){cardBrickCtl.update({amount:estTotalReais()}).catch(function(){});}}
     var coupBtn=document.getElementById('coCoupBtn'),coupIn=document.getElementById('coCoupon'),coupHint=document.getElementById('coCoupHint');
     /* Progressive disclosure (Baymard): o campo de cupom começa escondido atrás de um
        link discreto — um campo vazio sempre visível faz quem não tem código sair
@@ -887,10 +896,10 @@
       coupRow.hidden=false;if(coupIn)coupIn.focus();
     };}
     if(coupBtn){var applyCoup=function(){var code=(coupIn.value||'').trim().toUpperCase();
-        if(!code){CO.coupon=null;coupHint.textContent='';coupHint.className='couphint';renderCoSummary();syncBrickAmount();return;}
+        if(!code){CO.coupon=null;coupHint.textContent='';coupHint.className='couphint';renderCoSummary();syncCardBrickAmount();return;}
         if(COUPONS[code]){CO.coupon={code:code,pct:COUPONS[code]};coupHint.textContent='Cupom aplicado: −'+COUPONS[code]+'%.';coupHint.className='couphint ok';}
         else{CO.coupon=null;coupHint.textContent='Cupom inválido.';coupHint.className='couphint err';}
-        renderCoSummary();syncBrickAmount();};
+        renderCoSummary();syncCardBrickAmount();};
       coupBtn.onclick=applyCoup;coupIn.onkeydown=function(e){if(e.key==='Enter'){e.preventDefault();applyCoup();}};}
     var cep=document.getElementById('coCep');
     if(cep)cep.oninput=function(){var d=this.value.replace(/\D/g,'').slice(0,8);this.value=d.length>5?d.slice(0,5)+'-'+d.slice(5):d;};
@@ -904,9 +913,9 @@
       document.getElementById('addrFields').hidden=false;
       var box=document.getElementById('shipOpts');box.hidden=false;
       box.innerHTML=data.map(function(o,i){return '<label class="shipopt'+(i===0?' sel':'')+'"><input type="radio" name="ship" '+(i===0?'checked':'')+'><span class="shb"><b>'+o.label+'</b><small>'+o.days+'</small></span><span class="shp">'+(o.free?'Grátis':BRL(o.price))+'</span></label>';}).join('');
-      CO.ship=data[0];renderCoSummary();syncBrickAmount();
+      CO.ship=data[0];renderCoSummary();syncCardBrickAmount();
       var opts=box.querySelectorAll('.shipopt');
-      opts.forEach(function(l,i){l.onclick=function(){opts.forEach(function(x){x.classList.remove('sel');});l.classList.add('sel');l.querySelector('input').checked=true;CO.ship=data[i];renderCoSummary();syncBrickAmount();};});
+      opts.forEach(function(l,i){l.onclick=function(){opts.forEach(function(x){x.classList.remove('sel');});l.classList.add('sel');l.querySelector('input').checked=true;CO.ship=data[i];renderCoSummary();syncCardBrickAmount();};});
       if(data[0].free){hint.textContent='Frete Econômico grátis nesta compra (acima de R$ 150).';}
     }
     if(cepBtn)cepBtn.onclick=runCoCep;
@@ -938,15 +947,21 @@
         return '';
       }
       cof.querySelectorAll('.conext').forEach(function(b){b.onclick=function(){var n=+b.dataset.next;if(!validStep(n))return;markDone(n);
-        if(n===1)mountBrick();
         var nx=n+1;while(nx<3 && document.getElementById('cstep'+nx).classList.contains('done'))nx++;openStep(nx);};});
       ['coNome','coRua','coNum','coBairro','coCidade'].forEach(function(id){var el=document.getElementById(id);if(el)el.addEventListener('input',function(){el.classList.remove('bad');var ah=document.getElementById('addrHint');if(ah&&!cof.querySelector('#addrFields .bad')){ah.textContent='';ah.className='cephint';}});});
       cof.querySelectorAll('button.cohd').forEach(function(h){h.onclick=function(){var sec=h.closest('.costep');if(sec.classList.contains('done'))openStep(+sec.dataset.step);};});
     })();
-    /* o pagamento acontece pelo botão do próprio Payment Brick (onSubmit abaixo) —
-       este form não tem mais botão submit próprio, então isto é só uma rede de segurança. */
+    /* o pagamento acontece pelo botão "Pagar com Pix" (nosso) ou pelo botão do
+       cardPayment Brick (Cartão) — este form não tem botão submit próprio, então
+       isto é só uma rede de segurança (Enter em algum campo, etc). */
     cof.onsubmit=function(e){e.preventDefault();};
-    /* ===== Payment Brick do Mercado Pago (Task 8) + os 3 estados do loader (Task 9) ===== */
+    /* ===== Pagamento — rádios Pix/Cartão + cardPayment Brick do Mercado Pago só
+       pro Cartão + os 3 estados do loader (aprovado/Pix pendente/recusado) =====
+       O Pix não passa pelo MP Brick nenhum: é POST direto em /api/pagar com
+       metodo:'pix' e sem token (o servidor cobra puro Pix, sem cartão). Só o
+       Cartão precisa do SDK do MP pra tokenizar o número do cartão (nunca passa
+       pelo nosso servidor em texto puro) — daí o cardPayment Brick, montado só
+       quando o método Cartão é selecionado. */
     function fillRecap(ref){
       var sp=cartSplit(),merch=sp.subNow+sp.subPre;
       var shp=sp.now.length===0?0:(CO.ship?(CO.ship.free?0:CO.ship.price):0);
@@ -1039,15 +1054,89 @@
         showRecusado();
       }
     }
-    var brickMountStarted=false;
-    /* o Brick só é montado depois que o passo 1 (Contato) confirma o e-mail — assim
-       CO.email já existe e pode ser passado em initialization.payer.email (o Brick então
-       pré-preenche/esconde o próprio campo de e-mail, evitando pedir duas vezes). O
-       controller.update() do MP só aceita {amount:...} depois de montado, não payer, então
-       montar mais tarde (em vez de montar-e-depois-atualizar) é a única forma de pré-preencher. */
-    function mountBrick(){
-      if(brickMountStarted)return;brickMountStarted=true;
-      var brickBox=document.getElementById('coBrickContainer'),errBox=document.getElementById('coBrickErr');
+    /* validações + coleta de dados COMUNS aos dois métodos (endereço/e-mail/itens/frete)
+       — mesma lógica que antes vivia dentro do onSubmit único do Payment Brick; agora
+       é compartilhada pelo botão Pix e pelo onSubmit do cardPayment Brick, pra não
+       duplicar. Devolve null (e já mostra o erro/foco certo) se algo faltar. */
+    function buildBaseCtx(){
+      var email=document.getElementById('coEmail');
+      if(!email||!email.value||email.value.indexOf('@')<1){emailErr(emailMsg(email));if(email)email.focus();return null;}
+      emailErr('');
+      var sp=cartSplit();
+      if(sp.now.length&&!CO.ship){var hint=document.getElementById('cepHint');if(hint){hint.textContent='Calcule o frete para continuar.';hint.className='cephint err';}return null;}
+      if(sp.now.length){
+        var _rq=['coNome','coRua','coNum','coBairro','coCidade'],_bad=null;
+        _rq.forEach(function(id){var el=document.getElementById(id);if(el&&!el.value.trim()){el.classList.add('bad');if(!_bad)_bad=el;}});
+        if(_bad){var _ah=document.getElementById('addrHint');if(_ah){_ah.textContent='Preencha os campos destacados do endereço.';_ah.className='cephint err';}return null;}
+      }
+      var _w=document.getElementById('coWhats');CO.whats=_w?_w.value.trim():'';
+      CO.hadPre=sp.pre.length>0;CO.email=email.value;
+      var _n=document.getElementById('coNome');CO.name=_n?_n.value.trim():'';
+      var _fv=function(id){var e2=document.getElementById(id);return e2?e2.value.trim():'';};
+      var endereco=null;
+      if(sp.now.length){
+        var _rua=_fv('coRua'),_num=_fv('coNum'),_comp=_fv('coComp'),_bairro=_fv('coBairro'),_cid=_fv('coCidade'),_cep=_fv('coCep');
+        CO.addr1=_rua+(_num?', '+_num:'')+(_comp?' · '+_comp:'');
+        CO.addr2=[_bairro,_cid].filter(Boolean).join(' · ')+(_cep?' · CEP '+_cep:'');
+        endereco={rua:_rua,numero:_num,complemento:_comp,bairro:_bairro,cidade:_cid,cep:_cep};
+      }else{CO.addr1='';CO.addr2='';}
+      /* ATENÇÃO — PRÉ-VENDA (sinal 30%) NÃO é modelada no servidor: itens de
+         reserva (sp.pre) entram aqui como {id,tam,qtd} igual aos itens normais,
+         e /api/pagar recomputa o total pelo preço CHEIO (src/precos.js), cobrando
+         100% em vez do sinal de 30% mostrado na sacola. Manter PREVENDA=false
+         (~L232) até a F4-pré-venda implementar o sinal server-side — senão a
+         primeira reserva cobra 3.3× a mais. */
+      var itens=sp.now.concat(sp.pre).map(function(it){return {id:it.p.id,tam:it.size,qtd:it.qty};});
+      var freteCents=sp.now.length===0?0:(CO.ship?(CO.ship.free?0:Math.round(CO.ship.price*100)):0);
+      return {itens:itens,endereco:endereco,freteCents:freteCents};
+    }
+    /* ===== rádios Pix/Cartão: trocam CO.pay, mostram a forma certa e re-renderizam
+       o resumo (Total muda com o método — ver renderCoSummary) ===== */
+    var payRadios=[].slice.call(document.querySelectorAll('#coPayMethods input[name="paymethod"]'));
+    var payMethodEls=[].slice.call(document.querySelectorAll('.paymethod'));
+    var payPixBox=document.getElementById('coPayPix'),payCardBox=document.getElementById('coPayCartao');
+    function selectPay(v){
+      CO.pay=v;
+      payMethodEls.forEach(function(l){l.classList.toggle('sel',l.dataset.pay===v);});
+      if(payPixBox)payPixBox.hidden=v!=='pix';
+      if(payCardBox)payCardBox.hidden=v!=='cartao';
+      renderCoSummary();
+      if(v==='cartao'){mountCardBrick();syncCardBrickAmount();}
+    }
+    payRadios.forEach(function(r){r.addEventListener('change',function(){if(r.checked)selectPay(r.value);});});
+    /* ===== Pix: botão nosso (pílula .btn) — POST direto em /api/pagar, sem Brick
+       nenhum e sem token (o servidor cobra puro Pix a partir do CPF). ===== */
+    var pixBtn=document.getElementById('coPixBtn');
+    function pixErr(msg){var b=document.getElementById('coPixErr');if(b){b.textContent=msg||'';b.hidden=!msg;}}
+    if(pixBtn)pixBtn.onclick=function(){
+      var cpfD=cpfDigits((cpfEl||{}).value);
+      if(cpfD.length!==11){cpfErr(cpfMsg());if(cpfEl)cpfEl.focus();return;}
+      cpfErr('');
+      var ctx=buildBaseCtx();
+      if(!ctx)return;
+      pixErr('');
+      CO.pay='pix';CO.parc=1;CO.cpf=cpfD;
+      var payload={
+        itens:ctx.itens,metodo:'pix',
+        cupom:CO.coupon?CO.coupon.code:undefined,
+        cpf:cpfD,email:CO.email,whats:CO.whats,
+        endereco:ctx.endereco,freteCents:ctx.freteCents,consentiu:true
+      };
+      var lbl=pixBtn.textContent;pixBtn.disabled=true;pixBtn.classList.add('is-loading');pixBtn.setAttribute('aria-busy','true');pixBtn.innerHTML='Processando<span class="bdots" aria-hidden="true"><i></i><i></i><i></i></span>';
+      function restore(){pixBtn.disabled=false;pixBtn.classList.remove('is-loading');pixBtn.removeAttribute('aria-busy');pixBtn.textContent=lbl;}
+      showAguardando();
+      fetch('/api/pagar',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(payload)})
+        .then(function(r){return r.json();})
+        .then(function(j){restore();if(!j||!j.ok){showRecusado();return;}handlePagarResult(j);})
+        .catch(function(){restore();showRecusado();});
+    };
+    /* ===== Cartão: cardPayment Brick do Mercado Pago (só o cartão — tokeniza o
+       número, nunca passa em texto puro pelo nosso servidor). Montado só quando
+       o método Cartão é selecionado pela 1ª vez (não precisa do SDK pro Pix). ===== */
+    var cardBrickMountStarted=false;
+    function mountCardBrick(){
+      if(cardBrickMountStarted)return;cardBrickMountStarted=true;
+      var brickBox=document.getElementById('coCardBrick'),errBox=document.getElementById('coCardErr');
       if(!brickBox)return;
       function brickErr(msg){if(!errBox)return;errBox.textContent=msg||'';errBox.hidden=!msg;}
       function mpTok(name){var v=getComputedStyle(document.documentElement).getPropertyValue(name);return v?v.trim():'';}
@@ -1056,10 +1145,10 @@
           if(!cfg||!cfg.mpKey||typeof MercadoPago==='undefined')throw new Error('mp indisponível');
           var mp=new MercadoPago(cfg.mpKey,{locale:'pt-BR'});
           var bricks=mp.bricks();
-          return bricks.create('payment','coBrickContainer',{
+          return bricks.create('cardPayment','coCardBrick',{
             initialization:{amount:estTotalReais(),payer:{email:CO.email||''}},
             customization:{
-              paymentMethods:{creditCard:'all',bankTransfer:['pix'],maxInstallments:6},
+              paymentMethods:{maxInstallments:6},
               /* customVariables oficiais do MP Bricks (confirmadas no SDK: mercadopago/sdk-js,
                  docs/bricks/payment-guest.md), mapeadas pros tokens Suzu. Lidas via mpTok()
                  (getComputedStyle das custom properties) em vez de hex cru — respeita a regra
@@ -1091,48 +1180,20 @@
               onReady:function(){brickErr('');},
               onError:function(err){console.error('MP Brick',err);brickErr('Não conseguimos carregar o pagamento agora. Recarregue a página ou tente de novo em instantes.');},
               onSubmit:function(data){
-                var selectedPaymentMethod=(data&&data.selectedPaymentMethod)||'',formData=(data&&data.formData)||{};
+                var formData=(data&&data.formData)||{};
                 return new Promise(function(resolve,reject){
-                  var email=document.getElementById('coEmail');
-                  if(!email||!email.value||email.value.indexOf('@')<1){emailErr(emailMsg(email));if(email)email.focus();reject();return;}
-                  emailErr('');
-                  var sp=cartSplit();
-                  if(sp.now.length&&!CO.ship){var hint=document.getElementById('cepHint');if(hint){hint.textContent='Calcule o frete para continuar.';hint.className='cephint err';}reject();return;}
-                  if(sp.now.length){
-                    var _rq=['coNome','coRua','coNum','coBairro','coCidade'],_bad=null;
-                    _rq.forEach(function(id){var el=document.getElementById(id);if(el&&!el.value.trim()){el.classList.add('bad');if(!_bad)_bad=el;}});
-                    if(_bad){var _ah=document.getElementById('addrHint');if(_ah){_ah.textContent='Preencha os campos destacados do endereço.';_ah.className='cephint err';}reject();return;}
-                  }
+                  var ctx=buildBaseCtx();
+                  if(!ctx){reject();return;}
                   var _ident=(formData.payer&&formData.payer.identification)||{};
                   var cpfD=(_ident.number||'').replace(/\D/g,'');
                   if(!cpfD){brickErr('Confirme o CPF no formulário de pagamento.');reject();return;}
-                  brickErr('');CO.cpf=cpfD;
-                  var _w=document.getElementById('coWhats');CO.whats=_w?_w.value.trim():'';
-                  CO.hadPre=sp.pre.length>0;CO.email=email.value;
-                  var _n=document.getElementById('coNome');CO.name=_n?_n.value.trim():'';
-                  var _fv=function(id){var e2=document.getElementById(id);return e2?e2.value.trim():'';};
-                  var endereco=null;
-                  if(sp.now.length){
-                    var _rua=_fv('coRua'),_num=_fv('coNum'),_comp=_fv('coComp'),_bairro=_fv('coBairro'),_cid=_fv('coCidade'),_cep=_fv('coCep');
-                    CO.addr1=_rua+(_num?', '+_num:'')+(_comp?' · '+_comp:'');
-                    CO.addr2=[_bairro,_cid].filter(Boolean).join(' · ')+(_cep?' · CEP '+_cep:'');
-                    endereco={rua:_rua,numero:_num,complemento:_comp,bairro:_bairro,cidade:_cid,cep:_cep};
-                  }else{CO.addr1='';CO.addr2='';}
-                  CO.pay=selectedPaymentMethod==='credit_card'?'cartao':'pix';
-                  CO.parc=formData.installments||1;
-                  /* ATENÇÃO — PRÉ-VENDA (sinal 30%) NÃO é modelada no servidor: itens de
-                     reserva (sp.pre) entram aqui como {id,tam,qtd} igual aos itens normais,
-                     e /api/pagar recomputa o total pelo preço CHEIO (src/precos.js), cobrando
-                     100% em vez do sinal de 30% mostrado na sacola. Manter PREVENDA=false
-                     (~L232) até a F4-pré-venda implementar o sinal server-side — senão a
-                     primeira reserva cobra 3.3× a mais. */
-                  var itens=sp.now.concat(sp.pre).map(function(it){return {id:it.p.id,tam:it.size,qtd:it.qty};});
-                  var freteCents=sp.now.length===0?0:(CO.ship?(CO.ship.free?0:Math.round(CO.ship.price*100)):0);
+                  brickErr('');
+                  CO.pay='cartao';CO.parc=formData.installments||1;CO.cpf=cpfD;
                   var payload={
-                    itens:itens,metodo:CO.pay,parcelas:CO.parc,
+                    itens:ctx.itens,metodo:'cartao',parcelas:CO.parc,
                     cupom:CO.coupon?CO.coupon.code:undefined,
                     cpf:cpfD,email:CO.email,whats:CO.whats,
-                    endereco:endereco,freteCents:freteCents,consentiu:true,
+                    endereco:ctx.endereco,freteCents:ctx.freteCents,consentiu:true,
                     token:formData.token,paymentMethodId:formData.payment_method_id,issuerId:formData.issuer_id
                   };
                   showAguardando();
@@ -1144,7 +1205,7 @@
               }
             }
           });
-        }).then(function(ctl){brickCtl=ctl;}).catch(function(err){console.error('MP init',err);brickErr('Não conseguimos carregar o pagamento agora. Recarregue a página.');});
+        }).then(function(ctl){cardBrickCtl=ctl;}).catch(function(err){console.error('MP init',err);brickErr('Não conseguimos carregar o pagamento agora. Recarregue a página.');});
       }
       if(window.MercadoPago){go();}
       else{var tries=0,iv=setInterval(function(){if(window.MercadoPago){clearInterval(iv);go();}else if(++tries>40){clearInterval(iv);brickErr('Não conseguimos carregar o pagamento agora. Recarregue a página.');}},150);}
@@ -1169,13 +1230,15 @@
         Trocar por https://viacep.com.br/ws/CEP/json/ e preencher rua/bairro/cidade/UF.
      2. Frete real (Correios / Melhor Envio): substituir a fórmula de shipQuote()
         por cotação real por CEP + peso/dimensão da peça.
-     3. CPF: FEITO (Fase 4a) — coletado pelo próprio Payment Brick (não duplicamos
-        campo nosso); lido de formData.payer.identification.number no onSubmit e
-        enviado no payload de /api/pagar.
-     4. Pix/cartão de verdade: FEITO (Fase 4a) — Payment Brick do Mercado Pago no
-        passo Pagamento; POST /api/pagar cobra de verdade e os 3 estados (aprovado/
-        Pix pendente/recusado) dirigem o loader #coProc. Boleto não é mais oferecido
-        (servidor só suporta metodo pix|cartao).
+     3. CPF: FEITO (Fase 4a/dinâmico) — no Pix é campo nosso (coCpf, validado no
+        clique de "Pagar com Pix"); no Cartão vem do cardPayment Brick, lido de
+        formData.payer.identification.number no onSubmit.
+     4. Pix/cartão de verdade: FEITO (Fase 4a/dinâmico) — rádios Pix/Cartão nossos
+        no passo Pagamento (resumo re-renderiza por método); Pix é POST direto em
+        /api/pagar (sem Brick, sem token); Cartão usa o cardPayment Brick do Mercado
+        Pago (só tokeniza o cartão). POST /api/pagar cobra de verdade e os 3 estados
+        (aprovado/Pix pendente/recusado) dirigem o loader #coProc. Boleto não é mais
+        oferecido (servidor só suporta metodo pix|cartao).
      5. Persistir o pedido e disparar o e-mail de confirmação de verdade (o texto já
         existe em pedidoView) — falta o e-mail de confirmação da COMPRA (o de
         orçamento/Projeto Exclusivo já existe).
@@ -1216,7 +1279,16 @@
       +'<section class="costep" data-step="3" id="cstep3">'+stepHead(3,'Pagamento')+'<div class="costep-body">'
       +'<button type="button" class="couptoggle" id="coCoupToggle" aria-expanded="false" aria-controls="coCoupRow">Tem um cupom de desconto?</button>'
       +'<div class="couprow" id="coCoupRow" hidden><input type="text" id="coCoupon" placeholder="Cupom de desconto" autocomplete="off"><button type="button" class="btn ghost" id="coCoupBtn">Aplicar</button></div><p class="couphint" id="coCoupHint"></p>'
-      +'<div class="paybrick"><div id="coBrickContainer"></div><p class="paybrickerr" id="coBrickErr" hidden></p></div>'
+      +'<div class="paymethods" id="coPayMethods">'
+        +'<label class="paymethod sel" data-pay="pix"><input type="radio" name="paymethod" value="pix" checked><span class="pmb"><b>Pix</b><small>Aprovação na hora</small></span><span class="pmbadge">−5%</span></label>'
+        +'<label class="paymethod" data-pay="cartao"><input type="radio" name="paymethod" value="cartao"><span class="pmb"><b>Cartão de crédito</b><small>Em até 6×</small></span></label>'
+      +'</div>'
+      +'<div class="paypix" id="coPayPix">'
+        +'<label class="cofield"><span>CPF</span><input inputmode="numeric" id="coCpf" autocomplete="off" placeholder="000.000.000-00" maxlength="14" aria-describedby="coCpfErr"><small class="fielderr" id="coCpfErr" data-err></small></label>'
+        +'<button type="button" class="btn" id="coPixBtn">Pagar com Pix</button>'
+        +'<p class="paybrickerr" id="coPixErr" hidden></p>'
+      +'</div>'
+      +'<div class="paybrick" id="coPayCartao" hidden><div id="coCardBrick"></div><p class="paybrickerr" id="coCardErr" hidden></p></div>'
       +'<div class="cotrust"><span>Compra protegida</span><span><a href="/faq">Trocas em até 7 dias</a></span><span>Enviamos para todo o Brasil</span></div>'
       +'<p class="cohelp">Dúvida antes de finalizar? <a href="https://wa.me/5511912345678?text='+encodeURIComponent('Olá! Estou finalizando uma compra na loja Studio Suzu e queria tirar uma dúvida.')+'" target="_blank" rel="noopener">Fale com a gente no WhatsApp</a>.</p>'
       +'<p class="cosafe">Ambiente seguro · protótipo de demonstração</p>'
@@ -1227,22 +1299,24 @@
     var el=document.getElementById('coSummary'); if(!el)return;
     var s=cartSplit(), merch=s.subNow+s.subPre;
     var ship=s.now.length===0?0:(CO.ship?(CO.ship.free?0:CO.ship.price):null);
-    /* pixDisc é só INFORMATIVO — a forma de pagamento só é escolhida dentro do
-       Brick (CO.pay não reflete a escolha real até o onSubmit), então o Total
-       abaixo NUNCA subtrai o desconto Pix (senão mostraria menos do que o
-       cartão de fato cobra). O cupom vale pra qualquer método, então esse
-       desconto entra no Total normalmente. Ver estTotalReais() acima. */
+    /* Total muda com CO.pay (chamado de novo a cada troca de rádio Pix/Cartão):
+       no Pix o desconto de 5% já entra no Total mostrado — é exatamente o que
+       /api/pagar cobra pra metodo:'pix' (recomputaTotal em src/precos.js); no
+       Cartão o Total é sempre o cheio (cartão nunca ganha o desconto Pix), só
+       com uma sugestão discreta de quanto sairia no Pix. */
     var pixDisc=Math.round(merch*0.05*100)/100;
+    var payPixDisc=CO.pay==='pix'?pixDisc:0;
     var coupDisc=CO.coupon?Math.round(merch*CO.coupon.pct/100*100)/100:0;
-    var total=merch+(ship||0)-coupDisc;
+    var total=merch+(ship||0)-coupDisc-payPixDisc;
     var rows=s.now.concat(s.pre).map(function(it){return '<div class="okri"><div class="okri-img">'+mold(it.p)+(it.qty>1?'<span class="okri-qty">'+it.qty+'×</span>':'')+'</div><div class="okri-tx"><b>'+it.name+'</b>'+(it.sub?'<small>'+it.sub+'</small>':'')+'</div><div class="okri-pr">'+BRL(it.qty*it.price)+'</div></div>';}).join('');
     var frete=s.now.length===0?'no lançamento':(CO.ship?(CO.ship.free?'Grátis':BRL(CO.ship.price)):'calcule no passo 2');
     var h='<h3>Resumo</h3><div class="ciList">'+rows+'</div><div class="cisep"></div>';
     h+='<div class="sumrow"><span>Subtotal</span><span>'+BRL(merch)+'</span></div>';
     h+='<div class="sumrow"><span>Frete</span><span>'+frete+'</span></div>';
     if(coupDisc>0)h+='<div class="sumrow disc"><span>Cupom '+CO.coupon.code+'</span><span>−'+BRL(coupDisc)+'</span></div>';
+    if(payPixDisc>0)h+='<div class="sumrow disc"><span>Desconto Pix</span><span>−'+BRL(payPixDisc)+'</span></div>';
     h+='<div class="sumrow tot"><span>Total</span><b>'+BRL(total)+'</b></div>';
-    if(pixDisc>0)h+='<div class="sumrow disc"><span>−5% se pagar no Pix</span><span>−'+BRL(pixDisc)+'</span></div>';
+    if(CO.pay!=='pix'&&pixDisc>0)h+='<div class="sumrow disc"><span>−5% se pagar no Pix</span><span>−'+BRL(pixDisc)+'</span></div>';
     if(s.pre.length)h+='<p class="sumnote pre">Nos itens de reserva você paga só o <b>sinal</b> agora. O restante e o frete são cobrados quando a peça lança.</p>';
     el.innerHTML=h;
   }
