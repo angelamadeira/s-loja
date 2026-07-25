@@ -856,7 +856,7 @@
     function emailErr(msg){var b=document.getElementById('coEmailErr'),em=document.getElementById('coEmail');if(b){b.textContent=msg||'';b.classList.toggle('show',!!msg);}if(em){em.classList.toggle('bad',!!msg);em.setAttribute('aria-invalid',msg?'true':'false');em.style.borderColor=msg?'var(--error-text)':'';}}
     function emailMsg(em){return !em.value.trim()?'Precisamos do seu e-mail pra enviar a confirmação.':'Confere o seu e-mail? Parece que falta algo.';}
     (function(){var em=document.getElementById('coEmail');if(em)em.addEventListener('input',function(){if(em.classList.contains('bad'))emailErr('');});})();
-    CO.ship=null;CO.pay='pix';CO.parc=1;CO.coupon=null;CO.cpf='';
+    CO.ship=null;CO.pay=null;CO.parc=1;CO.coupon=null;CO.cpf='';/* nenhuma forma pré-selecionada: desconto Pix só entra ao escolher Pix */
     renderCoSummary();
     /* Resumo do checkout é só leitura — a edição de quantidade fica na sacola
        (drawer), não aqui. Sem steppers, não há listener a montar. */
@@ -1674,8 +1674,8 @@
       +'<button type="button" class="couptoggle" id="coCoupToggle" aria-expanded="false" aria-controls="coCoupRow">Tem um cupom de desconto?</button>'
       +'<div class="couprow" id="coCoupRow" hidden><input type="text" id="coCoupon" placeholder="Cupom de desconto" autocomplete="off"><button type="button" class="btn ghost" id="coCoupBtn">Aplicar</button></div><p class="couphint" id="coCoupHint"></p>'
       +'<div class="paymethods" id="coPayMethods">'
-        +'<label class="paymethod sel" data-pay="pix"><input type="radio" name="paymethod" value="pix" checked><span class="pmb"><b>Pix</b><small>Aprovação na hora</small></span><span class="pmbadge">−5%</span></label>'
-        +'<div class="paypix" id="coPayPix">'
+        +'<label class="paymethod" data-pay="pix"><input type="radio" name="paymethod" value="pix"><span class="pmb"><b>Pix</b><small>Aprovação na hora</small></span><span class="pmbadge">−5%</span></label>'
+        +'<div class="paypix" id="coPayPix" hidden>'
           +'<label class="cofield"><span>CPF</span><div class="fieldwrap"><input inputmode="numeric" id="coCpf" autocomplete="off" placeholder="000.000.000-00" maxlength="14" aria-describedby="coCpfErr"><span class="fieldcheck" id="coCpfCheck" aria-hidden="true"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span></div><small class="fielderr" id="coCpfErr" data-err></small></label>'
           +'<button type="button" class="btn" id="coPixBtn">Pagar com Pix</button>'
           +'<p class="paybrickerr" id="coPixErr" hidden></p>'
