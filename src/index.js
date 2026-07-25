@@ -5,7 +5,7 @@
 // Todo o resto é servido como asset estático (a loja) — ver wrangler.jsonc.
 import { EmailMessage } from "cloudflare:email";
 import { recomputaTotal, parcelasValidas } from "./precos.js";
-import { criaPagamento } from "./mp.js";
+import { criaPagamento, consultaPagamento } from "./mp.js";
 
 const MAX_ARQUIVO = 10 * 1024 * 1024; // 10 MB por anexo
 const MAX_ANEXOS = 12;
@@ -25,6 +25,11 @@ export default {
     if (url.pathname === "/api/pagar") {
       if (request.method !== "POST") return json({ ok: false, error: "metodo" }, 405);
       return handlePagar(request, env);
+    }
+    if (url.pathname === "/api/mp-webhook") {
+      // Sempre 200 aqui dentro (mesmo em método errado) — o MP reenvia pra
+      // sempre qualquer coisa != 200, então não queremos abrir esse buraco.
+      return handleMpWebhook(request, env);
     }
     // qualquer outra coisa → a loja (assets)
     return env.ASSETS.fetch(request);
@@ -89,8 +94,19 @@ async function handleOrcamento(request, env) {
   }
 }
 
-// MP → interno (schema.sql: status = iniciado|pendente|aprovado|recusado|cancelado)
-const MP_STATUS = { approved: "aprovado", in_process: "pendente", rejected: "recusado" };
+// MP → interno (schema.sql: status = iniciado|pendente|aprovado|recusado|cancelado).
+// Compartilhado entre /api/pagar e /api/mp-webhook — status desconhecido
+// retorna undefined (cada chamador decide o que fazer com isso).
+const MP_STATUS = {
+  approved: "aprovado",
+  in_process: "pendente",
+  pending: "pendente",
+  rejected: "recusado",
+  cancelled: "cancelado",
+};
+function mapStatusMp(mpStatus) {
+  return MP_STATUS[mpStatus];
+}
 
 // Teto de frete aceito do cliente: R$1000 em centavos. F4a ainda recebe o
 // frete do cliente (frete real/calculado por CEP é F4b — servidor autoritativo
@@ -160,7 +176,7 @@ async function handlePagar(request, env) {
       descricao: "Pedido " + ref,
     });
 
-    const status = MP_STATUS[resultado.status] || "pendente";
+    const status = mapStatusMp(resultado.status) || "pendente";
 
     // 5. atualiza a compra com o resultado do MP
     await env.DB.prepare("UPDATE compras SET status = ?, mp_payment_id = ? WHERE id = ?")
@@ -172,6 +188,33 @@ async function handlePagar(request, env) {
     console.error("pagar falhou", e);
     return json({ ok: false, erro: "servidor" }, 500);
   }
+}
+
+// POST /api/mp-webhook — o MP notifica mudanças de status assíncronas
+// (essencial pro Pix, que confirma depois do fato). Sempre responde 200:
+// o MP reenvia pra sempre qualquer coisa != 200, e um erro nosso não pode
+// virar reenvio infinito. Idempotente por natureza: o UPDATE por
+// mp_payment_id sempre converge pro mesmo estado, processar o mesmo evento
+// 2x não muda o resultado. Evento sem compra correspondente (WHERE não bate
+// nenhuma linha) e tipo de evento desconhecido são no-op, não erro.
+async function handleMpWebhook(request, env) {
+  try {
+    const body = await request.json();
+    if (body && body.type === "payment" && body.data && body.data.id != null) {
+      const resultado = await consultaPagamento(env, body.data.id);
+      const status = mapStatusMp(resultado.status);
+      // status MP não mapeado (ex.: authorized, in_mediation) → não sobrescreve
+      // o status atual da compra em vez de arriscar um default errado.
+      if (status) {
+        await env.DB.prepare("UPDATE compras SET status = ? WHERE mp_payment_id = ?")
+          .bind(status, String(body.data.id))
+          .run();
+      }
+    }
+  } catch (e) {
+    console.error("mp-webhook falhou", e);
+  }
+  return json({ ok: true }, 200);
 }
 
 // Serve um anexo do R2 se o link (assinado) for válido — usado nos links do e-mail.
