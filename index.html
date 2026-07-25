@@ -875,7 +875,7 @@
       var k=b.dataset.qp||b.dataset.qm;
       if(!cart[k])return;
       if('qp' in b.dataset)cart[k].qty++;
-      else{if(cart[k].qty>1)cart[k].qty--;else{offerUndo(k,cart[k]);delete cart[k];}}
+      else{if(cart[k].qty>1)cart[k].qty--;else delete cart[k];}
       saveCart();
       render();
       if(!Object.keys(cart).length){navigate('/checkout',true);return;}
@@ -1514,27 +1514,6 @@
      ver wirePixView()). */
   var pollTimer=null,pixTimer=null;
   function stopPoll(){if(pollTimer){clearInterval(pollTimer);pollTimer=null;}if(pixTimer){clearInterval(pixTimer);pixTimer=null;}}
-  /* Desfazer a remoção de um item do checkout (o "−" na quantidade 1 apaga o
-     item; padrão Baymard = deletar na hora + "Desfazer", sem modal). Um toast
-     no <body> (não dentro da view do checkout) sobrevive ao re-render e até à
-     ida pra tela de sacola vazia. Some sozinho em 6s. */
-  var undoTimer=null;
-  function offerUndo(k,item){
-    var bar=document.getElementById('undoBar');
-    if(!bar){bar=document.createElement('div');bar.id='undoBar';bar.className='snackbar';bar.setAttribute('role','status');
-      bar.innerHTML='<span class="snackbar-tx"></span><button type="button" class="snackbar-act">Desfazer</button>';
-      document.body.appendChild(bar);}
-    bar.querySelector('.snackbar-tx').textContent=(item.name||'Item')+' removido';
-    bar.classList.add('show');
-    clearTimeout(undoTimer);undoTimer=setTimeout(function(){bar.classList.remove('show');},6000);
-    bar.querySelector('.snackbar-act').onclick=function(){
-      clearTimeout(undoTimer);bar.classList.remove('show');
-      if(cart[k])return;
-      cart[k]=item;saveCart();render();
-      if(document.getElementById('coSummary')){renderCoSummary();syncCardBrickAmount();}
-      else navigate('/checkout',true);
-    };
-  }
   /* Preenche CO com o recibo do pedido (itens/total/frete/pagamento) a partir
      do carrinho ATUAL — chamado por handlePagarResult (Pix aprovado na hora,
      ou pendente indo pra /pix/<ref>) e por wirePixView() quando o polling da
@@ -1674,11 +1653,10 @@
        quantidade (−/n/+, mesmo par de ícones do stepper da sacola/.qty) — mira
        cart[it.k] (chave carregada por cartSplit()). NÃO tem botão "Remover"
        dedicado (padrão Baymard: no checkout o resumo é pra conferir, não pra
-       editar pesado); remover é o "−" na quantidade 1, que apaga o item e
-       oferece "Desfazer" (offerUndo) — sem exclusão silenciosa. Delegado uma
-       vez só em #coSummary (ver wireCheckout) — não precisa re-wire a cada
-       renderCoSummary(). Não mexe no <div class="okri"> puro/sem edição usado
-       por confirmView() (tela de sucesso, pós-pagamento). */
+       editar pesado); remover é o "−" na quantidade 1, que apaga o item.
+       Delegado uma vez só em #coSummary (ver wireCheckout) — não precisa
+       re-wire a cada renderCoSummary(). Não mexe no <div class="okri"> puro/sem
+       edição usado por confirmView() (tela de sucesso, pós-pagamento). */
     var rows=s.now.concat(s.pre).map(function(it){return '<div class="okri okri-ed"><div class="okri-img">'+mold(it.p)+'</div><div class="okri-tx"><b>'+it.name+'</b>'+(it.sub?'<small>'+it.sub+'</small>':'')
       +'<div class="okqty" role="group" aria-label="Quantidade de '+it.name+'">'
       +'<button type="button" class="okqty-b" data-qm="'+it.k+'" aria-label="Diminuir quantidade"><svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/></svg></button>'
