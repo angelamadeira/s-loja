@@ -176,7 +176,7 @@
 
 <div class="dock"><div class="dock-in"><div class="sum"><b id="dockTotal">R$ 0,00</b><small id="dockCount">sua sacola está vazia</small></div><button class="btn" id="openCart2">Ver sacola</button></div></div>
 <div class="overlay" id="overlay"></div>
-<div class="coproc" id="coProc" hidden role="alertdialog" aria-live="polite" aria-label="Processando pedido"><div class="coproc-in"><div class="coproc-ring" id="coProcRing"></div><svg class="coproc-ico" id="coProcIco" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" hidden><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg><p class="coproc-msg" id="coProcMsg">Confirmando…</p><p class="coproc-sub" id="coProcSub" hidden></p><div class="coproc-pix" id="coProcPix" hidden><img class="coproc-qr" id="coProcQr" alt="QR Code Pix"><div class="coproc-copia"><code class="coproc-code" id="coProcCopia"></code><button type="button" class="btn ghost" id="coProcCopiaBtn">Copiar código</button></div><p class="coproc-expiry" id="coProcExpiry" aria-live="polite"></p></div></div></div>
+<div class="coproc" id="coProc" hidden role="alertdialog" aria-live="polite" aria-label="Processando pedido"><div class="coproc-in"><div class="coproc-ring" id="coProcRing"></div><svg class="coproc-ico" id="coProcIco" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" hidden><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg><p class="coproc-msg" id="coProcMsg">Confirmando…</p><p class="coproc-sub" id="coProcSub" hidden></p><button type="button" class="btn ghost" id="coProcBack" hidden>Voltar ao checkout</button></div></div>
 <a class="wafloat" href="https://wa.me/5511912345678?text=Ol%C3%A1!%20Vim%20pela%20loja%20Studio%20Suzu%20e%20queria%20tirar%20uma%20d%C3%BAvida." target="_blank" rel="noopener" aria-label="Falar no WhatsApp"><svg viewBox="0 0 24 24"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.86 9.86 0 0 0 4.79 1.22h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2zm0 18.13h-.01c-1.53 0-3.03-.41-4.34-1.19l-.31-.18-3.22.84.86-3.14-.2-.32a8.19 8.19 0 0 1-1.26-4.37c0-4.54 3.7-8.23 8.24-8.23 2.2 0 4.27.86 5.82 2.42a8.18 8.18 0 0 1 2.41 5.83c0 4.54-3.7 8.24-8.23 8.24zm4.52-6.16c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.12-.16.25-.64.81-.78.97-.14.17-.29.19-.54.06-.25-.12-1.05-.39-1.99-1.23-.74-.66-1.23-1.47-1.38-1.72-.14-.25-.02-.38.11-.51.11-.11.25-.29.37-.43.12-.14.16-.25.25-.41.08-.17.04-.31-.02-.43-.06-.12-.56-1.35-.77-1.84-.2-.48-.41-.42-.56-.42h-.48c-.17 0-.43.06-.66.31-.23.25-.87.85-.87 2.07 0 1.22.89 2.4 1.02 2.56.12.17 1.75 2.67 4.23 3.74.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.68-1.18.21-.58.21-1.07.14-1.18-.06-.11-.22-.17-.47-.29z"/></svg></a>
 <div class="nfov" id="nfov"></div>
 <div class="nfmodal" id="nfmodal" role="dialog" aria-modal="true" aria-labelledby="nftitle" aria-hidden="true">
@@ -848,6 +848,7 @@
     })();
     initBuyCards();
     wireCheckout();
+    wirePixView();
   }
   function wireCheckout(){
     var cof=document.getElementById('coForm'); if(!cof)return;
@@ -962,43 +963,15 @@
        Cartão precisa do SDK do MP pra tokenizar o número do cartão (nunca passa
        pelo nosso servidor em texto puro) — daí o cardPayment Brick, montado só
        quando o método Cartão é selecionado. */
-    function fillRecap(ref){
-      var sp=cartSplit(),merch=sp.subNow+sp.subPre;
-      var shp=sp.now.length===0?0:(CO.ship?(CO.ship.free?0:CO.ship.price):0);
-      var pixD=CO.pay==='pix'?Math.round(merch*0.05*100)/100:0;
-      var coupD=CO.coupon?Math.round(merch*CO.coupon.pct/100*100)/100:0;
-      CO.paidTotal=merch+shp-pixD-coupD;
-      CO.items=sp.now.concat(sp.pre).map(function(it){return {q:it.qty,name:it.name,price:it.qty*it.price,mold:mold(it.p),sub:it.sub||''};});
-      CO.payLabel=CO.pay==='pix'?'Pix (à vista)':((CO.parc||1)+'× no cartão');
-      CO.shipLabel=sp.now.length===0?'no lançamento':(CO.ship?(CO.ship.free?'Frete grátis':BRL(CO.ship.price)):'—');
-      CO.eta=(sp.now.length&&CO.ship)?CO.ship.days:'';
-      CO.order=ref;
-    }
     function procEls(){
       return {ov:document.getElementById('coProc'),msg:document.getElementById('coProcMsg'),sub:document.getElementById('coProcSub'),
-        ring:document.getElementById('coProcRing'),ico:document.getElementById('coProcIco'),pix:document.getElementById('coProcPix'),
-        qr:document.getElementById('coProcQr'),copia:document.getElementById('coProcCopia'),copiaBtn:document.getElementById('coProcCopiaBtn'),
-        expiry:document.getElementById('coProcExpiry')};
+        ring:document.getElementById('coProcRing'),ico:document.getElementById('coProcIco'),back:document.getElementById('coProcBack')};
     }
     /* pollTimer/pixTimer/stopPoll ficam no escopo do app (perto de CO) — o router()
-       precisa chamar stopPoll() ao sair do /checkout, e não alcança o escopo daqui. */
-    /* Contagem regressiva do Pix — só visual: /api/pagar não devolve a expiração real
-       do código (o PSP não manda esse campo hoje), então 30 min é uma aproximação
-       segura do padrão do Pix. Se o back-end passar a devolver a expiração real,
-       trocar o startSecs abaixo por ela. */
-    function startPixExpiry(el){
-      if(!el.expiry)return;
-      el.expiry.classList.remove('expired');
-      var secs=30*60;
-      function tick(){
-        if(secs<=0){el.expiry.textContent='O código expirou — gere um novo pedido.';el.expiry.classList.add('expired');if(pixTimer){clearInterval(pixTimer);pixTimer=null;}return;}
-        var m=Math.floor(secs/60),s=secs%60;
-        el.expiry.textContent='Expira em '+(m<10?'0':'')+m+':'+(s<10?'0':'')+s;
-        secs--;
-      }
-      tick();
-      pixTimer=setInterval(tick,1000);
-    }
+       precisa chamar stopPoll() ao sair do /checkout e do /pix/<ref>, e não alcança
+       o escopo daqui. fillRecap()/pixView()/wirePixView() também vivem no escopo do
+       app (perto de CO) pelo mesmo motivo — a tela de Pix é uma rota própria, não
+       mais este overlay. */
     function openProc(){var el=procEls();if(!el.ov)return null;el.ov.hidden=false;requestAnimationFrame(function(){el.ov.classList.add('show');});return el;}
     function closeProc(after){
       var el=procEls();stopPoll();
@@ -1006,42 +979,20 @@
       el.ov.classList.remove('show');
       setTimeout(function(){el.ov.hidden=true;if(after)after();},340);
     }
-    function showAguardando(){
+    /* Overlay = SÓ spinner + texto agora (nunca mais mostra QR — isso vive em
+       /pix/<ref>, ver pixView()/wirePixView()). msg default 'Confirmando…'
+       (cartão); o clique em "Pagar com Pix" passa 'Gerando o seu código Pix…'. */
+    function showAguardando(msg){
       var el=openProc();if(!el)return;
-      el.ring.style.display='';el.ico.style.display='none';el.sub.hidden=true;el.pix.hidden=true;
-      el.msg.style.opacity=1;el.msg.textContent='Confirmando o seu pagamento…';
-    }
-    function showPixPendente(j){
-      var el=openProc();if(!el)return;
-      el.ring.style.display='none';el.ico.style.display='none';
-      el.msg.style.opacity=1;el.msg.textContent='Aguardando o seu Pix…';
-      el.sub.hidden=false;el.sub.textContent='Escaneie o QR Code ou copie o código no app do seu banco. A gente confirma automaticamente assim que cair.';
-      el.pix.hidden=false;
-      if(j.pix&&j.pix.qrBase64)el.qr.src='data:image/png;base64,'+j.pix.qrBase64;
-      if(j.pix&&j.pix.copiaECola)el.copia.textContent=j.pix.copiaECola;
-      if(el.copiaBtn){el.copiaBtn.textContent='Copiar código';el.copiaBtn.onclick=function(){
-        var txt=(j.pix&&j.pix.copiaECola)||'';if(!txt)return;
-        var done=function(){el.copiaBtn.textContent='Copiado!';setTimeout(function(){el.copiaBtn.textContent='Copiar código';},2000);};
-        if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(txt).then(done,done);else done();
-      };}
-      stopPoll();
-      startPixExpiry(el);
-      pollTimer=setInterval(function(){
-        fetch('/api/compra?ref='+encodeURIComponent(j.ref)).then(function(r){return r.json();}).then(function(d){
-          if(d&&d.status==='aprovado'){
-            stopPoll();fillRecap(j.ref);
-            Object.keys(cart).forEach(function(k){delete cart[k];});render();
-            closeProc(function(){navigate('/pedido',true);});
-          }
-        }).catch(function(){/* próxima rodada tenta de novo */});
-      },4000);
+      el.ring.style.display='';el.ico.style.display='none';el.sub.hidden=true;if(el.back)el.back.hidden=true;
+      el.msg.style.opacity=1;el.msg.textContent=msg||'Confirmando…';
     }
     function showRecusado(){
       var el=openProc();if(!el)return;
-      el.ring.style.display='none';el.ico.style.display='block';el.pix.hidden=true;
+      el.ring.style.display='none';el.ico.style.display='block';
       el.msg.style.opacity=1;el.msg.textContent='Pagamento não concluído';
-      el.sub.hidden=false;el.sub.textContent='Nada foi cobrado — voltando ao checkout.';
-      setTimeout(function(){closeProc();},1800);
+      el.sub.hidden=false;el.sub.textContent='Nada foi cobrado.';
+      if(el.back){el.back.hidden=false;el.back.onclick=function(){closeProc();};}
     }
     function handlePagarResult(j){
       if(j.status==='aprovado'){
@@ -1049,7 +1000,8 @@
         Object.keys(cart).forEach(function(k){delete cart[k];});render();
         closeProc(function(){navigate('/pedido',true);});
       }else if(j.status==='pendente'){
-        showPixPendente(j);
+        fillRecap(j.ref);
+        closeProc(function(){navigate('/pix/'+encodeURIComponent(j.ref));});
       }else{
         showRecusado();
       }
@@ -1124,7 +1076,7 @@
       };
       var lbl=pixBtn.textContent;pixBtn.disabled=true;pixBtn.classList.add('is-loading');pixBtn.setAttribute('aria-busy','true');pixBtn.innerHTML='Processando<span class="bdots" aria-hidden="true"><i></i><i></i><i></i></span>';
       function restore(){pixBtn.disabled=false;pixBtn.classList.remove('is-loading');pixBtn.removeAttribute('aria-busy');pixBtn.textContent=lbl;}
-      showAguardando();
+      showAguardando('Gerando o seu código Pix…');
       fetch('/api/pagar',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(payload)})
         .then(function(r){return r.json();})
         .then(function(j){restore();if(!j||!j.ok){showRecusado();return;}handlePagarResult(j);})
@@ -1212,9 +1164,28 @@
     }
   }
   var CO={ship:null,pay:'pix',parc:1};
-  /* Timers do checkout no escopo do app: o router() chama stopPoll() ao sair do /checkout. */
+  /* Timers do checkout/Pix no escopo do app: router() chama stopPoll() ao sair
+     do /checkout E do /pix/<ref> (a tela de Pix tem o próprio polling agora —
+     ver wirePixView()). */
   var pollTimer=null,pixTimer=null;
   function stopPoll(){if(pollTimer){clearInterval(pollTimer);pollTimer=null;}if(pixTimer){clearInterval(pixTimer);pixTimer=null;}}
+  /* Preenche CO com o recibo do pedido (itens/total/frete/pagamento) a partir
+     do carrinho ATUAL — chamado por handlePagarResult (Pix aprovado na hora,
+     ou pendente indo pra /pix/<ref>) e por wirePixView() quando o polling da
+     tela de Pix detecta aprovação. Escopo do app (não dentro de wireCheckout)
+     porque as duas rotas (/checkout e /pix/<ref>) precisam dele. */
+  function fillRecap(ref){
+    var sp=cartSplit(),merch=sp.subNow+sp.subPre;
+    var shp=sp.now.length===0?0:(CO.ship?(CO.ship.free?0:CO.ship.price):0);
+    var pixD=CO.pay==='pix'?Math.round(merch*0.05*100)/100:0;
+    var coupD=CO.coupon?Math.round(merch*CO.coupon.pct/100*100)/100:0;
+    CO.paidTotal=merch+shp-pixD-coupD;
+    CO.items=sp.now.concat(sp.pre).map(function(it){return {q:it.qty,name:it.name,price:it.qty*it.price,mold:mold(it.p),sub:it.sub||''};});
+    CO.payLabel=CO.pay==='pix'?'Pix (à vista)':((CO.parc||1)+'× no cartão');
+    CO.shipLabel=sp.now.length===0?'no lançamento':(CO.ship?(CO.ship.free?'Frete grátis':BRL(CO.ship.price)):'—');
+    CO.eta=(sp.now.length&&CO.ship)?CO.ship.days:'';
+    CO.order=ref;
+  }
   function cartSplit(){
     var now=[],pre=[],subNow=0,subPre=0;
     Object.keys(cart).forEach(function(k){var it=cart[k];if(it.p.status==='presale'){pre.push(it);subPre+=it.qty*it.price;}else{now.push(it);subNow+=it.qty*it.price;}});
@@ -1345,6 +1316,110 @@
       +'<p class="okhelp">Dúvida sobre o pedido? <a href="/atendimento">Fale com a gente</a>.</p>'
       +'</div></div>';
   }
+  /* ===== /pix/<ref> — tela DE VERDADE (não overlay), retornável: o usuário pode
+     recarregar ou reabrir o link e ela busca o estado atual em GET /api/compra?ref=
+     em vez de depender do CO em memória (que se perde ao fechar a aba). Segue o
+     mesmo padrão .okwrap/.okhead/.okpanel das outras telas de feedback (pedidoView);
+     o título usa .sig/.oksig, igual "Deu tudo certo!" — não o texto fraco que a
+     msg do overlay tinha antes. */
+  function pixView(ref){
+    return '<div class="wrap cowrap"><div class="okwrap" id="pixWrap" data-ref="'+ref+'">'
+      +'<div class="okhead">'
+        +'<span class="sig oksig" id="pixTitle">Aguardando o seu Pix…</span>'
+        +'<p class="okhead-sub" id="pixSub">Escaneie o QR ou copie o código no app do seu banco. A gente confirma sozinho assim que cair.</p>'
+      +'</div>'
+      +'<div class="okpanel" id="pixPanel"><div class="pixloading"><div class="coproc-ring" aria-hidden="true"></div></div></div>'
+      +'<div class="okcta" id="pixCta"></div>'
+      +'</div></div>';
+  }
+  /* Contagem regressiva do Pix — só visual: /api/pagar não devolve a expiração real
+     do código (o PSP não manda esse campo hoje), então 30 min é uma aproximação
+     segura do padrão do Pix. Se o back-end passar a devolver a expiração real,
+     trocar o startSecs abaixo por ela. Usa o pixTimer do escopo do app (mesmo
+     var que o overlay usava antes) — stopPoll() limpa os dois. */
+  function startPixExpiry(expiryEl,onExpire){
+    if(!expiryEl)return;
+    expiryEl.classList.remove('expired');
+    var secs=30*60;
+    function tick(){
+      if(secs<=0){expiryEl.textContent='O código expirou.';expiryEl.classList.add('expired');if(pixTimer){clearInterval(pixTimer);pixTimer=null;}if(onExpire)onExpire();return;}
+      var m=Math.floor(secs/60),s=secs%60;
+      expiryEl.textContent='Expira em '+(m<10?'0':'')+m+':'+(s<10?'0':'')+s;
+      secs--;
+    }
+    tick();
+    pixTimer=setInterval(tick,1000);
+  }
+  /* Wiring da tela de Pix — chamada por wireDetail() em toda rota (é um no-op se
+     #pixWrap não existir). Busca o estado ATUAL no servidor (não confia no CO —
+     ver comentário em pixView()) e só então decide o que mostrar; nunca some com
+     itens do carrinho de outra sessão/pedido (só limpa o carrinho quando o pedido
+     aprovado é o mesmo que esta aba estava pagando, CO.order===ref). */
+  function wirePixView(){
+    var wrap=document.getElementById('pixWrap'); if(!wrap)return;
+    var ref=wrap.dataset.ref;
+    var titleEl=document.getElementById('pixTitle'),subEl=document.getElementById('pixSub'),panel=document.getElementById('pixPanel'),cta=document.getElementById('pixCta');
+    function setGone(msg,ctaHtml){
+      stopPoll();
+      if(subEl)subEl.textContent='';
+      if(panel)panel.innerHTML='<p class="pixgone">'+msg+'</p>';
+      if(cta)cta.innerHTML=ctaHtml||'';
+    }
+    function setApproved(){
+      stopPoll();
+      if(titleEl)titleEl.textContent='Pagamento confirmado!';
+      if(subEl)subEl.textContent='A confirmação foi enviada para o seu e-mail.';
+      if(panel)panel.innerHTML='';
+      if(cta)cta.innerHTML='<a class="btn" href="/produtos">Continuar comprando</a>';
+    }
+    function handleApproved(){
+      stopPoll();
+      /* o pedido pago sempre sai do carrinho, mesmo numa aba "retornada" sem CO —
+         só NÃO navega pro recibo (/pedido) se o CO desta aba não é o desta compra
+         (ex.: reabriu o link depois de fechar a aba) — nesse caso não há recibo
+         completo pra montar (itens/total/frete vêm do CO), então mostra a
+         confirmação aqui mesmo. */
+      Object.keys(cart).forEach(function(k){delete cart[k];});render();
+      if(CO.order===ref){navigate('/pedido',true);}else{setApproved();}
+    }
+    function renderPix(d){
+      if(!panel)return;
+      panel.innerHTML='<div class="pixbox"><img class="pixqr" id="pixQr" alt="QR Code Pix"><div class="pixcopia"><code class="pixcode" id="pixCode"></code><button type="button" class="btn ghost" id="pixCopyBtn">Copiar código</button></div><p class="pixexpiry" id="pixExpiry" aria-live="polite"></p></div>';
+      if(cta)cta.innerHTML='';
+      var qr=document.getElementById('pixQr'),code=document.getElementById('pixCode'),copyBtn=document.getElementById('pixCopyBtn'),expiryEl=document.getElementById('pixExpiry');
+      if(d.pix&&d.pix.qrBase64&&qr)qr.src='data:image/png;base64,'+d.pix.qrBase64;
+      var copia=(d.pix&&d.pix.copiaECola)||'';
+      if(code)code.textContent=copia;
+      if(copyBtn)copyBtn.onclick=function(){
+        if(!copia)return;
+        var done=function(){copyBtn.textContent='Copiado!';setTimeout(function(){copyBtn.textContent='Copiar código';},2000);};
+        if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(copia).then(done,done);else done();
+      };
+      startPixExpiry(expiryEl,function(){
+        stopPoll();
+        setGone('O código expirou — refaça o pedido para gerar um novo Pix.','<a class="btn" href="/checkout">Voltar ao checkout</a>');
+      });
+    }
+    function poll(){
+      stopPoll();
+      pollTimer=setInterval(function(){
+        fetch('/api/compra?ref='+encodeURIComponent(ref)).then(function(r){return r.json();}).then(function(d){
+          if(!d)return;
+          if(d.status==='aprovado'){handleApproved();}
+          else if(d.status==='recusado'||d.status==='cancelado'){stopPoll();setGone('O pagamento não foi concluído — nada foi cobrado.','<a class="btn" href="/checkout">Voltar ao checkout</a>');}
+          /* pendente: continua esperando, a próxima rodada tenta de novo */
+        }).catch(function(){/* rede falhou nessa rodada — a próxima tenta de novo */});
+      },4000);
+    }
+    fetch('/api/compra?ref='+encodeURIComponent(ref)).then(function(r){return r.json();}).then(function(d){
+      if(!d||d.status==='nao_encontrado'){setGone('Não encontramos esse pedido.','<a class="btn" href="/produtos">Ver produtos</a><a class="btn ghost" href="/checkout">Voltar ao checkout</a>');return;}
+      if(d.status==='aprovado'){handleApproved();return;}
+      if(d.status==='recusado'||d.status==='cancelado'){setGone('O pagamento não foi concluído — nada foi cobrado.','<a class="btn" href="/checkout">Voltar ao checkout</a>');return;}
+      if(d.status!=='pendente'||!d.pix){setGone('Esse código Pix não está mais disponível.','<a class="btn" href="/checkout">Voltar ao checkout</a>');return;}
+      renderPix(d);
+      poll();
+    }).catch(function(){setGone('Não conseguimos carregar esse pedido agora. Tente recarregar a página.','<a class="btn ghost" href="/checkout">Voltar ao checkout</a>');});
+  }
   function obrigadoView(ob){
     var nf=(ob&&ob.nf)||0;
     return '<div class="listing"><div class="obgpage"><div class="wzdone"><div class="okseal"><svg class="okcheck" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><span class="sig oksig">Recebemos o seu projeto.</span><p class="oktext">Vamos analisar a viabilidade com carinho e voltamos com o orçamento em até 3 dias úteis'+(nf?', junto com '+(nf>1?'as '+nf+' referências':'a referência')+' que você anexou':'')+'. Enquanto isso, dá uma espiada nas nossas peças. ✿</p><a class="btn" href="/produtos">Ver produtos</a></div></div></div>';
@@ -1358,6 +1433,7 @@
       if(p.indexOf('/p/')===0){var _p=byId(pidBySlug(p.slice(3)));base=_p?_p.name:'Produto';}
       else if(p.indexOf('/receita/')===0){var _ri=ridBySlug(p.slice(9));var _r=_ri?RECIPES.find(function(x){return x.id===_ri;}):null;base=_r?_r.name:'Receita';}
       else if(p.indexOf('/faq')===0){base='Perguntas frequentes';}
+      else if(p.indexOf('/pix/')===0){base='Aguardando o seu Pix';}
     }
     return base?base+' — Studio Suzu':'Studio Suzu — Formas autorais para confeitaria';
   }
@@ -1368,9 +1444,11 @@
   }
   function router(){
     var p=location.pathname||'/', v=null;
-    /* sai do /checkout com Pix pendente na tela: encerra o polling de /api/compra
-       pra não ficar batendo a API pra sempre depois que o usuário navegou embora. */
-    if(p!=='/checkout')stopPoll();
+    /* sai do /checkout OU do /pix/<ref> sem terminar de pagar: encerra o polling
+       de /api/compra pra não ficar batendo a API pra sempre depois que o usuário
+       navegou embora. A tela de Pix (/pix/<ref>) tem o próprio polling agora
+       (wirePixView()), então ela também precisa ficar de fora deste stopPoll(). */
+    if(p!=='/checkout'&&p.indexOf('/pix/')!==0)stopPoll();
     if(p.indexOf('/p/')===0){var _pi=pidBySlug(p.slice(3));v=_pi?productView(_pi):null;if(!v){navigate('/produtos',true);return;}}
     else if(p==='/produtos')v=produtosView();
     else if(p==='/prevenda'){if(PREVENDA){v=prevendaView();}else{navigate('/produtos',true);return;}}
@@ -1382,11 +1460,17 @@
     else if(p.indexOf('/faq')===0){v=faqView(p.indexOf('/faq/')===0?p.slice(5):'');}
     else if(p==='/privacidade'||p==='/termos'||p==='/trocas'||p==='/entrega'){v=politicaView(p.slice(1));if(!v){navigate('/',true);return;}}
     else if(p==='/checkout')v=checkoutView();
+    else if(p.indexOf('/pix/')===0){var _pixRef='';try{_pixRef=decodeURIComponent(p.slice(5));}catch(_e){}
+      /* ref só tem letras/dígitos/hífen (gerarRef() no servidor: "SUZU-XXXXXX") — valida
+         ANTES de interpolar em data-ref="" (pixView()) pra nunca deixar o path da URL
+         (controlado pelo usuário) virar HTML/atributo cru. */
+      if(!_pixRef||!/^[A-Za-z0-9_-]+$/.test(_pixRef)){navigate('/checkout',true);return;}v=pixView(_pixRef);}
     else if(p==='/pedido'){if(!CO.order){navigate('/',true);return;}v=pedidoView();}
     else if(p==='/obrigado'){var _ob=null;try{_ob=JSON.parse(sessionStorage.getItem('suzu_obrigado')||'null');}catch(_e){}if(!_ob){navigate('/exclusivo',true);return;}v=obrigadoView(_ob);}
     closeMenu(); setActiveNav(p); setSeo(p);
     document.body.classList.toggle('co-mode', p==='/checkout');
     document.body.classList.toggle('pedido-mode', p==='/pedido');
+    document.body.classList.toggle('pix-mode', p.indexOf('/pix/')===0);
     var _wa=document.querySelector('.wafloat');if(_wa){var _help=(p==='/'||p.indexOf('/faq')===0||p==='/atendimento'||p==='/trocas'||p==='/entrega');_wa.style.display=_help?'':'none';}
     if(v!==null){detail.innerHTML=v;home.style.display='none';detail.style.display='block';window.scrollTo(0,0);wireDetail();if(p.indexOf('/faq/')===0){var _od=detail.querySelector('details[open]');if(_od)_od.scrollIntoView({block:'center'});}}
     else{home.style.display='';detail.style.display='none';detail.innerHTML='';}

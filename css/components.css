@@ -992,9 +992,22 @@ button.cohd{width:100%;border:0;background:none;font:inherit;color:inherit;text-
 #addrHint:empty{display:none}
 .cofield select{-webkit-appearance:none;appearance:none;padding-right:var(--space-8);background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%23463C34'%20stroke-width='2'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpolyline%20points='6%209%2012%2015%2018%209'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;background-size:16px}
 .costep-cta .conext{width:100%;padding:var(--space-4);font-size:.78rem;letter-spacing:.05em;text-transform:uppercase}
-.coproc{position:fixed;inset:0;z-index:120;display:flex;align-items:center;justify-content:center;background:var(--surface);opacity:0;transition:opacity .35s ease}.coproc.show{opacity:1}.coproc[hidden]{display:none}.coproc-in{display:flex;flex-direction:column;align-items:center;gap:var(--space-5);padding:var(--space-7);text-align:center;max-width:340px}.coproc-ring{width:50px;height:50px;border-radius:var(--r-round);border:2.5px solid var(--line);border-top-color:var(--matcha);animation:coprocspin .9s linear infinite}@keyframes coprocspin{to{transform:rotate(360deg)}}.coproc-ico{width:50px;height:50px;color:var(--error-text)}.coproc-msg{font-size:1.05rem;color:var(--text);font-weight:400;letter-spacing:.01em;margin:0;min-height:1.4em;transition:opacity .25s ease}.coproc-sub{font-size:.82rem;color:var(--text-muted);font-weight:300;line-height:1.5;margin:0}.coproc-pix{display:flex;flex-direction:column;align-items:center;gap:var(--space-4);width:100%}.coproc-qr{width:180px;height:180px;border:1px solid var(--line);border-radius:var(--r-md);background:var(--surface)}.coproc-copia{display:flex;flex-direction:column;align-items:center;gap:var(--space-2);width:100%}.coproc-code{display:block;width:100%;padding:var(--space-3);border:1px solid var(--line);border-radius:var(--r-md);background:var(--raised);font-family:inherit;font-size:.72rem;color:var(--text-muted);word-break:break-all;text-align:center}
-.coproc-expiry{margin:0;font-size:.72rem;font-weight:300;color:var(--text-muted);font-variant-numeric:tabular-nums}.coproc-expiry:empty{display:none}.coproc-expiry.expired{color:var(--error-text)}
+.coproc{position:fixed;inset:0;z-index:120;display:flex;align-items:center;justify-content:center;background:var(--surface);opacity:0;transition:opacity .35s ease}.coproc.show{opacity:1}.coproc[hidden]{display:none}.coproc-in{display:flex;flex-direction:column;align-items:center;gap:var(--space-5);padding:var(--space-7);text-align:center;max-width:340px}.coproc-ring{width:50px;height:50px;border-radius:var(--r-round);border:2.5px solid var(--line);border-top-color:var(--matcha);animation:coprocspin .9s linear infinite}@keyframes coprocspin{to{transform:rotate(360deg)}}.coproc-ico{width:50px;height:50px;color:var(--error-text)}.coproc-msg{font-size:1.05rem;color:var(--text);font-weight:400;letter-spacing:.01em;margin:0;min-height:1.4em;transition:opacity .25s ease}.coproc-sub{font-size:.82rem;color:var(--text-muted);font-weight:300;line-height:1.5;margin:0}
 @media(prefers-reduced-motion:reduce){.coproc-ring{animation-duration:2.4s}.coproc{transition:none}}
+/* Tela /pix/<ref> (pixView/wirePixView em index.html) — QR/copia-e-cola/contagem
+   regressiva, dentro do mesmo .okpanel das telas de feedback (não mais no overlay
+   .coproc). .pixbox é um cartão (fundo --raised, mesma linguagem de .okrecap). */
+.pixloading{display:flex;align-items:center;justify-content:center;padding:var(--space-9) 0}
+.pixbox{display:flex;flex-direction:column;align-items:center;gap:var(--space-4);width:100%;max-width:340px;margin:0 auto;background:var(--raised);border:1px solid var(--line-soft);border-radius:var(--r-lg);padding:var(--space-5)}
+.pixqr{width:200px;height:200px;border:1px solid var(--line);border-radius:var(--r-md);background:var(--surface)}
+.pixcopia{display:flex;flex-direction:column;align-items:center;gap:var(--space-2);width:100%}
+.pixcode{display:block;width:100%;padding:var(--space-3);border:1px solid var(--line);border-radius:var(--r-md);background:var(--surface);font-family:inherit;font-size:.72rem;color:var(--text-muted);word-break:break-all;text-align:center}
+.pixexpiry{margin:0;font-size:.78rem;font-weight:400;color:var(--text-muted);font-variant-numeric:tabular-nums}
+.pixexpiry:empty{display:none}
+.pixexpiry.expired{color:var(--error-text)}
+.pixgone{font-size:.92rem;color:var(--text-secondary);font-weight:300;line-height:1.6;text-align:center;margin:var(--space-4) 0}
+.pix-mode .dock{display:none}
+@media(prefers-reduced-motion:reduce){.pixloading .coproc-ring{animation-duration:2.4s}}
 
 
 /* Fase 3 — espaço do widget anti-spam (Turnstile) no form de orçamento */
