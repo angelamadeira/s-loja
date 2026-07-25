@@ -1467,6 +1467,7 @@
     }
     function setApproved(order){
       stopPoll();
+      document.body.classList.add('pix-done'); /* confirmação: rodapé volta (cross-sell ok) */
       /* com o `order` completo do servidor, mostra o MESMO recap de /pedido (confirmView) —
          não o texto mínimo. Sem `order` (resposta antiga/inesperada), cai pro texto mínimo. */
       if(order){detail.innerHTML=confirmView(mapServerOrder(order));return;}
@@ -1575,6 +1576,7 @@
     document.body.classList.toggle('co-mode', p==='/checkout');
     document.body.classList.toggle('pedido-mode', p==='/pedido');
     document.body.classList.toggle('pix-mode', p.indexOf('/pix/')===0);
+    document.body.classList.remove('pix-done'); /* reset; setApproved() readiciona se a compra já estiver aprovada */
     var _wa=document.querySelector('.wafloat');if(_wa){var _help=(p==='/'||p.indexOf('/faq')===0||p==='/atendimento'||p==='/trocas'||p==='/entrega');_wa.style.display=_help?'':'none';}
     if(v!==null){detail.innerHTML=v;home.style.display='none';detail.style.display='block';window.scrollTo(0,0);wireDetail();if(p.indexOf('/faq/')===0){var _od=detail.querySelector('details[open]');if(_od)_od.scrollIntoView({block:'center'});}}
     else{home.style.display='';detail.style.display='none';detail.innerHTML='';}
