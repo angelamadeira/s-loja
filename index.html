@@ -26,6 +26,7 @@
 <link rel="stylesheet" href="/css/tokens.css">
 <link rel="stylesheet" href="/css/components.css">
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+<script src="https://sdk.mercadopago.com/js/v2" defer></script>
 
 <svg width=0 height=0 style="position:absolute"><defs>
     <path id="p-suzu" d="M77.9990234375 130.9993896484375 36.2003173828125 107.2003173828125Q45.60009765625 78.2001953125 67.4998779296875 51.20013427734375Q89.399658203125 24.2000732421875 124.799560546875 7.10003662109375Q160.199462890625 -10.0 208.1995849609375 -10.0Q274.3992919921875 -10.0 315.4991455078125 27.599853515625Q356.5989990234375 65.19970703125 356.5989990234375 124.7996826171875Q356.5989990234375 163.799560546875 337.4990234375 188.99951171875Q318.3990478515625 214.199462890625 286.79913330078125 231.29937744140625Q255.19921875 248.3992919921875 217.9993896484375 261.59912109375Q189.59912109375 271.59912109375 164.99896240234375 282.79913330078125Q140.3988037109375 293.9991455078125 125.19873046875 311.39935302734375Q109.9986572265625 328.799560546875 109.9986572265625 356.0001220703125Q109.9986572265625 389.4007568359375 133.5989990234375 406.0010986328125Q157.1993408203125 422.6014404296875 190.599853515625 422.6014404296875Q236.6004638671875 422.6014404296875 265.70050048828125 401.00115966796875Q294.800537109375 379.40087890625 311.400390625 349.400634765625L353.799072265625 375.19970703125Q341.7991943359375 401.19970703125 319.79937744140625 422.19976806640625Q297.799560546875 443.1998291015625 266.899658203125 456.19989013671875Q235.999755859375 469.199951171875 196.599609375 469.199951171875Q161.19970703125 469.199951171875 129.69989013671875 456.39996337890625Q98.2000732421875 443.5999755859375 78.7001953125 417.800048828125Q59.2003173828125 392.0001220703125 59.2003173828125 353.000244140625Q59.2003173828125 311.8001708984375 78.500244140625 286.30023193359375Q97.8001708984375 260.80029296875 127.900146484375 245.70037841796875Q158.0001220703125 230.6004638671875 190.4002685546875 219.00048828125Q220.200439453125 209.00048828125 246.00054931640625 196.50042724609375Q271.8006591796875 184.0003662109375 287.90069580078125 165.500244140625Q304.000732421875 147.0001220703125 304.000732421875 119.39990234375Q304.000732421875 80.7991943359375 278.30035400390625 59.298828125Q252.5999755859375 37.7984619140625 210.5994873046875 37.7984619140625Q174.9990234375 37.7984619140625 148.6988525390625 50.6986083984375Q122.398681640625 63.5987548828125 105.19873046875 84.99896240234375Q87.998779296875 106.399169921875 77.9990234375 130.9993896484375ZM813.99853515625 167.999267578125V460.0H762.000244140625V161.99951171875Q762.000244140625 83.19970703125 800.199951171875 36.599853515625Q838.399658203125 -10.0 909.9996337890625 -10.0Q961.5999755859375 -10.0 999.8002319335938 18.1004638671875Q1038.00048828125 46.200927734375 1057.000244140625 96.00146484375V0.0H1108.99853515625V460.0H1057.000244140625V180.0Q1057.000244140625 140.7996826171875 1039.7000732421875 108.79931640625Q1022.39990234375 76.7989501953125 991.899658203125 58.09869384765625Q961.3994140625 39.3984375 921.9991455078125 39.3984375Q866.398681640625 39.3984375 840.1986083984375 73.59869384765625Q813.99853515625 107.7989501953125 813.99853515625 167.999267578125ZM1799.6019287109375 411.0015869140625 1485.0001220703125 0.0H1886.9996337890625V48.9984130859375H1580.3970947265625L1894.9989013671875 460.0H1510.9998779296875V411.0015869140625ZM2326.99853515625 167.999267578125V460.0H2275.000244140625V161.99951171875Q2275.000244140625 83.19970703125 2313.199951171875 36.599853515625Q2351.399658203125 -10.0 2422.9996337890625 -10.0Q2474.5999755859375 -10.0 2512.8002319335938 18.1004638671875Q2551.00048828125 46.200927734375 2570.000244140625 96.00146484375V0.0H2621.99853515625V460.0H2570.000244140625V180.0Q2570.000244140625 140.7996826171875 2552.7000732421875 108.79931640625Q2535.39990234375 76.7989501953125 2504.899658203125 58.09869384765625Q2474.3994140625 39.3984375 2434.9991455078125 39.3984375Q2379.398681640625 39.3984375 2353.1986083984375 73.59869384765625Q2326.99853515625 107.7989501953125 2326.99853515625 167.999267578125Z"/>
@@ -175,7 +176,7 @@
 
 <div class="dock"><div class="dock-in"><div class="sum"><b id="dockTotal">R$ 0,00</b><small id="dockCount">sua sacola está vazia</small></div><button class="btn" id="openCart2">Ver sacola</button></div></div>
 <div class="overlay" id="overlay"></div>
-<div class="coproc" id="coProc" hidden role="alertdialog" aria-live="polite" aria-label="Processando pedido"><div class="coproc-in"><div class="coproc-ring" id="coProcRing"></div><svg class="coproc-ico" id="coProcIco" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" hidden><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg><p class="coproc-msg" id="coProcMsg">Confirmando…</p><p class="coproc-sub" id="coProcSub" hidden></p><button type="button" class="btn coproc-retry" id="coProcRetry" hidden>Tentar de novo</button></div></div>
+<div class="coproc" id="coProc" hidden role="alertdialog" aria-live="polite" aria-label="Processando pedido"><div class="coproc-in"><div class="coproc-ring" id="coProcRing"></div><svg class="coproc-ico" id="coProcIco" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" hidden><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg><p class="coproc-msg" id="coProcMsg">Confirmando…</p><p class="coproc-sub" id="coProcSub" hidden></p><div class="coproc-pix" id="coProcPix" hidden><img class="coproc-qr" id="coProcQr" alt="QR Code Pix"><div class="coproc-copia"><code class="coproc-code" id="coProcCopia"></code><button type="button" class="btn ghost" id="coProcCopiaBtn">Copiar código</button></div></div></div></div>
 <a class="wafloat" href="https://wa.me/5511912345678?text=Ol%C3%A1!%20Vim%20pela%20loja%20Studio%20Suzu%20e%20queria%20tirar%20uma%20d%C3%BAvida." target="_blank" rel="noopener" aria-label="Falar no WhatsApp"><svg viewBox="0 0 24 24"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.86 9.86 0 0 0 4.79 1.22h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2zm0 18.13h-.01c-1.53 0-3.03-.41-4.34-1.19l-.31-.18-3.22.84.86-3.14-.2-.32a8.19 8.19 0 0 1-1.26-4.37c0-4.54 3.7-8.23 8.24-8.23 2.2 0 4.27.86 5.82 2.42a8.18 8.18 0 0 1 2.41 5.83c0 4.54-3.7 8.24-8.23 8.24zm4.52-6.16c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.12-.16.25-.64.81-.78.97-.14.17-.29.19-.54.06-.25-.12-1.05-.39-1.99-1.23-.74-.66-1.23-1.47-1.38-1.72-.14-.25-.02-.38.11-.51.11-.11.25-.29.37-.43.12-.14.16-.25.25-.41.08-.17.04-.31-.02-.43-.06-.12-.56-1.35-.77-1.84-.2-.48-.41-.42-.56-.42h-.48c-.17 0-.43.06-.66.31-.23.25-.87.85-.87 2.07 0 1.22.89 2.4 1.02 2.56.12.17 1.75 2.67 4.23 3.74.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.68-1.18.21-.58.21-1.07.14-1.18-.06-.11-.22-.17-.47-.29z"/></svg></a>
 <div class="nfov" id="nfov"></div>
 <div class="nfmodal" id="nfmodal" role="dialog" aria-modal="true" aria-labelledby="nftitle" aria-hidden="true">
@@ -672,7 +673,7 @@
       '<p class="docnote">Rascunho — revisar com apoio jurídico. Campos entre [colchetes] a preencher.</p>'
       +'<p>Ao usar o site do Studio Suzu ([Razão Social], CNPJ [00.000.000/0001-00]) e realizar compras, você concorda com estes termos.</p>'
       +'<h3>Produtos e disponibilidade</h3><p>Trabalhamos com tiragens pequenas; peças podem esgotar sem reposição. Preços e disponibilidade podem mudar sem aviso.</p>'
-      +'<h3>Pedidos e pagamento</h3><p>O pedido é confirmado após a aprovação do pagamento (Pix, cartão ou boleto). Você recebe a confirmação por e-mail.</p>'
+      +'<h3>Pedidos e pagamento</h3><p>O pedido é confirmado após a aprovação do pagamento (Pix ou cartão de crédito). Você recebe a confirmação por e-mail.</p>'
       +'<h3>Propriedade intelectual</h3><p>As formas, desenhos, textos e imagens são autorais do Studio Suzu. É proibida a cópia ou reprodução sem autorização.</p>'
       +'<h3>Direito de arrependimento</h3><p>Compras online podem ser canceladas em até 7 dias corridos após o recebimento (CDC, art. 49). Veja a página de Trocas & Devoluções.</p>'
       +'<h3>Contato e foro</h3><p>Dúvidas: [contato@studiosuzu.com]. Fica eleito o foro de [cidade/UF] para eventuais questões.</p>'
@@ -853,14 +854,30 @@
     function emailErr(msg){var b=document.getElementById('coEmailErr'),em=document.getElementById('coEmail');if(b){b.textContent=msg||'';b.classList.toggle('show',!!msg);}if(em){em.classList.toggle('bad',!!msg);em.setAttribute('aria-invalid',msg?'true':'false');em.style.borderColor=msg?'var(--error-text)':'';}}
     function emailMsg(em){return !em.value.trim()?'Precisamos do seu e-mail pra enviar a confirmação.':'Confere o seu e-mail? Parece que falta algo.';}
     (function(){var em=document.getElementById('coEmail');if(em)em.addEventListener('input',function(){if(em.classList.contains('bad'))emailErr('');});})();
-    CO.ship=null;CO.pay='pix';CO.parc=1;CO.coupon=null;
+    CO.ship=null;CO.pay='pix';CO.parc=1;CO.coupon=null;CO.cpf='';
     renderCoSummary();
+    var cpfEl=document.getElementById('coCpf');
+    function cpfDigits(v){return (v||'').replace(/\D/g,'').slice(0,11);}
+    function fmtCpf(d){if(d.length<=3)return d;if(d.length<=6)return d.slice(0,3)+'.'+d.slice(3);if(d.length<=9)return d.slice(0,3)+'.'+d.slice(3,6)+'.'+d.slice(6);return d.slice(0,3)+'.'+d.slice(3,6)+'.'+d.slice(6,9)+'-'+d.slice(9);}
+    function cpfMsg(){return 'Precisamos do CPF pra processar o pagamento e emitir a nota.';}
+    function cpfErr(msg){var b=document.getElementById('coCpfErr');if(b){b.textContent=msg||'';b.classList.toggle('show',!!msg);}if(cpfEl){cpfEl.classList.toggle('bad',!!msg);cpfEl.setAttribute('aria-invalid',msg?'true':'false');}}
+    if(cpfEl)cpfEl.addEventListener('input',function(){cpfEl.value=fmtCpf(cpfDigits(cpfEl.value));if(cpfEl.classList.contains('bad'))cpfErr('');});
+    /* estimativa exibida no Brick — o valor cobrado de verdade nasce no servidor (/api/pagar) */
+    var brickCtl=null;
+    function estTotalReais(){
+      var sp=cartSplit(),merch=sp.subNow+sp.subPre;
+      var shp=sp.now.length===0?0:(CO.ship?(CO.ship.free?0:CO.ship.price):0);
+      var pixD=Math.round(merch*0.05*100)/100;
+      var coupD=CO.coupon?Math.round(merch*CO.coupon.pct/100*100)/100:0;
+      return Math.max(1,Math.round((merch+shp-pixD-coupD)*100)/100);
+    }
+    function syncBrickAmount(){if(brickCtl&&brickCtl.update){brickCtl.update({amount:estTotalReais()}).catch(function(){});}}
     var coupBtn=document.getElementById('coCoupBtn'),coupIn=document.getElementById('coCoupon'),coupHint=document.getElementById('coCoupHint');
     if(coupBtn){var applyCoup=function(){var code=(coupIn.value||'').trim().toUpperCase();
-        if(!code){CO.coupon=null;coupHint.textContent='';coupHint.className='couphint';renderCoSummary();return;}
+        if(!code){CO.coupon=null;coupHint.textContent='';coupHint.className='couphint';renderCoSummary();syncBrickAmount();return;}
         if(COUPONS[code]){CO.coupon={code:code,pct:COUPONS[code]};coupHint.textContent='Cupom aplicado: −'+COUPONS[code]+'%.';coupHint.className='couphint ok';}
         else{CO.coupon=null;coupHint.textContent='Cupom inválido.';coupHint.className='couphint err';}
-        renderCoSummary();};
+        renderCoSummary();syncBrickAmount();};
       coupBtn.onclick=applyCoup;coupIn.onkeydown=function(e){if(e.key==='Enter'){e.preventDefault();applyCoup();}};}
     var cep=document.getElementById('coCep');
     if(cep)cep.oninput=function(){var d=this.value.replace(/\D/g,'').slice(0,8);this.value=d.length>5?d.slice(0,5)+'-'+d.slice(5):d;};
@@ -874,17 +891,14 @@
       document.getElementById('addrFields').hidden=false;
       var box=document.getElementById('shipOpts');box.hidden=false;
       box.innerHTML=data.map(function(o,i){return '<label class="shipopt'+(i===0?' sel':'')+'"><input type="radio" name="ship" '+(i===0?'checked':'')+'><span class="shb"><b>'+o.label+'</b><small>'+o.days+'</small></span><span class="shp">'+(o.free?'Grátis':BRL(o.price))+'</span></label>';}).join('');
-      CO.ship=data[0];renderCoSummary();
+      CO.ship=data[0];renderCoSummary();syncBrickAmount();
       var opts=box.querySelectorAll('.shipopt');
-      opts.forEach(function(l,i){l.onclick=function(){opts.forEach(function(x){x.classList.remove('sel');});l.classList.add('sel');l.querySelector('input').checked=true;CO.ship=data[i];renderCoSummary();};});
+      opts.forEach(function(l,i){l.onclick=function(){opts.forEach(function(x){x.classList.remove('sel');});l.classList.add('sel');l.querySelector('input').checked=true;CO.ship=data[i];renderCoSummary();syncBrickAmount();};});
       if(data[0].free){hint.textContent='Frete Econômico grátis nesta compra (acima de R$ 150).';}
     }
     if(cepBtn)cepBtn.onclick=runCoCep;
     if(cep){cep.onkeydown=function(e){if(e.key==='Enter'){e.preventDefault();runCoCep();}};
       if(SHIP.cep&&SHIP.cep.replace(/\D/g,'').length===8)runCoCep();}
-    cof.querySelectorAll('.payopt').forEach(function(l){l.onclick=function(){cof.querySelectorAll('.payopt').forEach(function(x){x.classList.remove('sel');});l.classList.add('sel');l.querySelector('input').checked=true;CO.pay=l.dataset.pay;document.getElementById('parcBox').hidden=(CO.pay!=='cartao');renderCoSummary();};});
-    var parc=document.getElementById('coParc');
-    if(parc){var o='';for(var n=1;n<=6;n++)o+='<option value="'+n+'">'+n+'×</option>';parc.innerHTML=o;parc.onchange=function(){CO.parc=parseInt(this.value,10)||1;renderCoSummary();};}
     /* ===== Acordeão: avançar/validar/editar por etapa ===== */
     (function(){
       var steps=[].slice.call(cof.querySelectorAll('.costep'));
@@ -915,55 +929,165 @@
       ['coNome','coRua','coNum','coBairro','coCidade'].forEach(function(id){var el=document.getElementById(id);if(el)el.addEventListener('input',function(){el.classList.remove('bad');var ah=document.getElementById('addrHint');if(ah&&!cof.querySelector('#addrFields .bad')){ah.textContent='';ah.className='cephint';}});});
       cof.querySelectorAll('button.cohd').forEach(function(h){h.onclick=function(){var sec=h.closest('.costep');if(sec.classList.contains('done'))openStep(+sec.dataset.step);};});
     })();
-    cof.onsubmit=function(e){e.preventDefault();
-      var email=document.getElementById('coEmail');
-      if(!email.value||email.value.indexOf('@')<1){emailErr(emailMsg(email));email.focus();return;}
-      emailErr('');
-      var s=cartSplit();
-      if(s.now.length && !CO.ship){var hint=document.getElementById('cepHint');if(hint){hint.textContent='Calcule o frete para continuar.';hint.className='cephint err';}if(cep)cep.focus();return;}
-      if(s.now.length){var _rq=['coNome','coRua','coNum','coBairro','coCidade'],_bad=null;_rq.forEach(function(id){var el=document.getElementById(id);if(el&&!el.value.trim()){el.classList.add('bad');if(!_bad)_bad=el;}});if(_bad){var _ah=document.getElementById('addrHint');if(_ah){_ah.textContent='Preencha os campos destacados do endereço.';_ah.className='cephint err';}_bad.focus();return;}}
-      var _w=document.getElementById('coWhats');CO.whats=_w?_w.value.trim():'';
-      CO.hadPre=s.pre.length>0;CO.email=email.value;
-      var _n=document.getElementById('coNome');CO.name=_n?_n.value.trim():'';
-      var _fv=function(id){var e=document.getElementById(id);return e?e.value.trim():'';};
-      if(s.now.length){var _rua=_fv('coRua'),_num=_fv('coNum'),_comp=_fv('coComp'),_bairro=_fv('coBairro'),_cid=_fv('coCidade'),_cep=_fv('coCep');CO.addr1=_rua+(_num?', '+_num:'')+(_comp?' · '+_comp:'');CO.addr2=[_bairro,_cid].filter(Boolean).join(' · ')+(_cep?' · CEP '+_cep:'');}else{CO.addr1='';CO.addr2='';}
-      runProcessing();
-    };
-    function runProcessing(){
-      var ov=document.getElementById('coProc');
-      if(!ov){CO.order='SUZU-'+Math.floor(100000+Math.random()*900000);Object.keys(cart).forEach(function(k){delete cart[k];});render();navigate('/pedido',true);return;}
-      var msg=document.getElementById('coProcMsg'),sub=document.getElementById('coProcSub'),ring=document.getElementById('coProcRing'),ico=document.getElementById('coProcIco'),retry=document.getElementById('coProcRetry');
-      var msgs=['Finalizando o seu pedido com carinho\u2026'];
-      ring.style.display='';ico.style.display='none';sub.hidden=true;retry.hidden=true;msg.style.opacity=1;msg.textContent=msgs[0];
-      ov.hidden=false;requestAnimationFrame(function(){ov.classList.add('show');});
-      var i=0,pend=null,done=false,cyc=setInterval(function(){i++;if(i<msgs.length){msg.style.opacity=0;pend=setTimeout(function(){if(done)return;msg.textContent=msgs[i];msg.style.opacity=1;},220);}},900);
-      var willFail=/[?&]fail=1/.test(location.search);
-      setTimeout(function(){
-        done=true;clearInterval(cyc);if(pend)clearTimeout(pend);
-        if(willFail){
-          ring.style.display='none';ico.style.display='block';msg.style.opacity=1;
-          msg.textContent='N\u00e3o conseguimos confirmar o pagamento';
-          sub.textContent='Deu um probleminha ao processar. Nada foi cobrado \u2014 \u00e9 s\u00f3 tentar de novo.';sub.hidden=false;
-          retry.hidden=false;retry.focus();
-          return;
-        }
-        (function(){var sp=cartSplit(),merch=sp.subNow+sp.subPre;
-          var shp=sp.now.length===0?0:(CO.ship?(CO.ship.free?0:CO.ship.price):0);
-          var pixD=CO.pay==='pix'?Math.round(merch*0.05*100)/100:0;
-          var coupD=CO.coupon?Math.round(merch*CO.coupon.pct/100*100)/100:0;
-          CO.paidTotal=merch+shp-pixD-coupD;
-          CO.items=sp.now.concat(sp.pre).map(function(it){return {q:it.qty,name:it.name,price:it.qty*it.price,mold:mold(it.p),sub:it.sub||''};});
-          CO.payLabel=CO.pay==='pix'?'Pix (à vista)':(CO.pay==='cartao'?((CO.parc||1)+'× no cartão'):'Boleto');
-          CO.shipLabel=sp.now.length===0?'no lançamento':(CO.ship?(CO.ship.free?'Frete grátis':BRL(CO.ship.price)):'—');
-          CO.eta=(sp.now.length&&CO.ship)?CO.ship.days:'';
-        })();
-        CO.order='SUZU-'+Math.floor(100000+Math.random()*900000);
-        Object.keys(cart).forEach(function(k){delete cart[k];});render();
-        ov.classList.remove('show');
-        setTimeout(function(){ov.hidden=true;navigate('/pedido',true);},340);
-      }, willFail?1700:1500);
-      retry.onclick=function(){ov.classList.remove('show');setTimeout(function(){ov.hidden=true;},320);};
+    /* o pagamento acontece pelo botão do próprio Payment Brick (onSubmit abaixo) —
+       este form não tem mais botão submit próprio, então isto é só uma rede de segurança. */
+    cof.onsubmit=function(e){e.preventDefault();};
+    /* ===== Payment Brick do Mercado Pago (Task 8) + os 3 estados do loader (Task 9) ===== */
+    function fillRecap(ref){
+      var sp=cartSplit(),merch=sp.subNow+sp.subPre;
+      var shp=sp.now.length===0?0:(CO.ship?(CO.ship.free?0:CO.ship.price):0);
+      var pixD=CO.pay==='pix'?Math.round(merch*0.05*100)/100:0;
+      var coupD=CO.coupon?Math.round(merch*CO.coupon.pct/100*100)/100:0;
+      CO.paidTotal=merch+shp-pixD-coupD;
+      CO.items=sp.now.concat(sp.pre).map(function(it){return {q:it.qty,name:it.name,price:it.qty*it.price,mold:mold(it.p),sub:it.sub||''};});
+      CO.payLabel=CO.pay==='pix'?'Pix (à vista)':((CO.parc||1)+'× no cartão');
+      CO.shipLabel=sp.now.length===0?'no lançamento':(CO.ship?(CO.ship.free?'Frete grátis':BRL(CO.ship.price)):'—');
+      CO.eta=(sp.now.length&&CO.ship)?CO.ship.days:'';
+      CO.order=ref;
     }
+    function procEls(){
+      return {ov:document.getElementById('coProc'),msg:document.getElementById('coProcMsg'),sub:document.getElementById('coProcSub'),
+        ring:document.getElementById('coProcRing'),ico:document.getElementById('coProcIco'),pix:document.getElementById('coProcPix'),
+        qr:document.getElementById('coProcQr'),copia:document.getElementById('coProcCopia'),copiaBtn:document.getElementById('coProcCopiaBtn')};
+    }
+    var pollTimer=null;
+    function stopPoll(){if(pollTimer){clearInterval(pollTimer);pollTimer=null;}}
+    function openProc(){var el=procEls();if(!el.ov)return null;el.ov.hidden=false;requestAnimationFrame(function(){el.ov.classList.add('show');});return el;}
+    function closeProc(after){
+      var el=procEls();stopPoll();
+      if(!el.ov){if(after)after();return;}
+      el.ov.classList.remove('show');
+      setTimeout(function(){el.ov.hidden=true;if(after)after();},340);
+    }
+    function showAguardando(){
+      var el=openProc();if(!el)return;
+      el.ring.style.display='';el.ico.style.display='none';el.sub.hidden=true;el.pix.hidden=true;
+      el.msg.style.opacity=1;el.msg.textContent='Confirmando o seu pagamento…';
+    }
+    function showPixPendente(j){
+      var el=openProc();if(!el)return;
+      el.ring.style.display='none';el.ico.style.display='none';
+      el.msg.style.opacity=1;el.msg.textContent='Aguardando o seu Pix…';
+      el.sub.hidden=false;el.sub.textContent='Escaneie o QR Code ou copie o código no app do seu banco. A gente confirma automaticamente assim que cair.';
+      el.pix.hidden=false;
+      if(j.pix&&j.pix.qrBase64)el.qr.src='data:image/png;base64,'+j.pix.qrBase64;
+      if(j.pix&&j.pix.copiaECola)el.copia.textContent=j.pix.copiaECola;
+      if(el.copiaBtn){el.copiaBtn.textContent='Copiar código';el.copiaBtn.onclick=function(){
+        var txt=(j.pix&&j.pix.copiaECola)||'';if(!txt)return;
+        var done=function(){el.copiaBtn.textContent='Copiado!';setTimeout(function(){el.copiaBtn.textContent='Copiar código';},2000);};
+        if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(txt).then(done,done);else done();
+      };}
+      stopPoll();
+      pollTimer=setInterval(function(){
+        fetch('/api/compra?ref='+encodeURIComponent(j.ref)).then(function(r){return r.json();}).then(function(d){
+          if(d&&d.status==='aprovado'){
+            stopPoll();fillRecap(j.ref);
+            Object.keys(cart).forEach(function(k){delete cart[k];});render();
+            closeProc(function(){navigate('/pedido',true);});
+          }
+        }).catch(function(){/* próxima rodada tenta de novo */});
+      },4000);
+    }
+    function showRecusado(){
+      var el=openProc();if(!el)return;
+      el.ring.style.display='none';el.ico.style.display='block';el.pix.hidden=true;
+      el.msg.style.opacity=1;el.msg.textContent='Pagamento não concluído';
+      el.sub.hidden=false;el.sub.textContent='Nada foi cobrado — voltando ao checkout.';
+      setTimeout(function(){closeProc();},1800);
+    }
+    function handlePagarResult(j){
+      if(j.status==='aprovado'){
+        fillRecap(j.ref);
+        Object.keys(cart).forEach(function(k){delete cart[k];});render();
+        closeProc(function(){navigate('/pedido',true);});
+      }else if(j.status==='pendente'){
+        showPixPendente(j);
+      }else{
+        showRecusado();
+      }
+    }
+    (function mountBrick(){
+      var brickBox=document.getElementById('coBrickContainer'),errBox=document.getElementById('coBrickErr');
+      if(!brickBox)return;
+      function brickErr(msg){if(!errBox)return;errBox.textContent=msg||'';errBox.hidden=!msg;}
+      function mpTok(name){var v=getComputedStyle(document.documentElement).getPropertyValue(name);return v?v.trim():'';}
+      function go(){
+        fetch('/api/config').then(function(r){return r.json();}).then(function(cfg){
+          if(!cfg||!cfg.mpKey||typeof MercadoPago==='undefined')throw new Error('mp indisponível');
+          var mp=new MercadoPago(cfg.mpKey,{locale:'pt-BR'});
+          var bricks=mp.bricks();
+          return bricks.create('payment','coBrickContainer',{
+            initialization:{amount:estTotalReais()},
+            customization:{
+              paymentMethods:{creditCard:'all',bankTransfer:['pix'],maxInstallments:6},
+              /* customVariables casa o Brick com os tokens Suzu — nomes reconstruídos da API
+                 pública do MP (não fornecidos no shape da task); se algum nome estiver errado
+                 o Brick apenas ignora a chave (sem quebrar o pagamento). Ver relatório. */
+              visual:{style:{theme:'default',customVariables:{
+                formBackgroundColor:mpTok('--surface'),
+                baseColor:mpTok('--ink')||mpTok('--text'),
+                textPrimaryColor:mpTok('--text'),
+                textSecondaryColor:mpTok('--text-muted'),
+                inputBackgroundColor:mpTok('--surface'),
+                errorColor:mpTok('--error-text'),
+                successColor:mpTok('--success-text')
+              }}}
+            },
+            callbacks:{
+              onReady:function(){brickErr('');},
+              onError:function(err){console.error('MP Brick',err);brickErr('Não conseguimos carregar o pagamento agora. Recarregue a página ou tente de novo em instantes.');},
+              onSubmit:function(data){
+                var selectedPaymentMethod=(data&&data.selectedPaymentMethod)||'',formData=(data&&data.formData)||{};
+                return new Promise(function(resolve,reject){
+                  var email=document.getElementById('coEmail');
+                  if(!email||!email.value||email.value.indexOf('@')<1){emailErr(emailMsg(email));if(email)email.focus();reject();return;}
+                  emailErr('');
+                  var sp=cartSplit();
+                  if(sp.now.length&&!CO.ship){var hint=document.getElementById('cepHint');if(hint){hint.textContent='Calcule o frete para continuar.';hint.className='cephint err';}reject();return;}
+                  if(sp.now.length){
+                    var _rq=['coNome','coRua','coNum','coBairro','coCidade'],_bad=null;
+                    _rq.forEach(function(id){var el=document.getElementById(id);if(el&&!el.value.trim()){el.classList.add('bad');if(!_bad)_bad=el;}});
+                    if(_bad){var _ah=document.getElementById('addrHint');if(_ah){_ah.textContent='Preencha os campos destacados do endereço.';_ah.className='cephint err';}reject();return;}
+                  }
+                  var cpfD=cpfDigits((cpfEl||{}).value);
+                  if(cpfD.length!==11){cpfErr(cpfMsg());if(cpfEl)cpfEl.focus();reject();return;}
+                  cpfErr('');CO.cpf=cpfD;
+                  var _w=document.getElementById('coWhats');CO.whats=_w?_w.value.trim():'';
+                  CO.hadPre=sp.pre.length>0;CO.email=email.value;
+                  var _n=document.getElementById('coNome');CO.name=_n?_n.value.trim():'';
+                  var _fv=function(id){var e2=document.getElementById(id);return e2?e2.value.trim():'';};
+                  var endereco=null;
+                  if(sp.now.length){
+                    var _rua=_fv('coRua'),_num=_fv('coNum'),_comp=_fv('coComp'),_bairro=_fv('coBairro'),_cid=_fv('coCidade'),_cep=_fv('coCep');
+                    CO.addr1=_rua+(_num?', '+_num:'')+(_comp?' · '+_comp:'');
+                    CO.addr2=[_bairro,_cid].filter(Boolean).join(' · ')+(_cep?' · CEP '+_cep:'');
+                    endereco={rua:_rua,numero:_num,complemento:_comp,bairro:_bairro,cidade:_cid,cep:_cep};
+                  }else{CO.addr1='';CO.addr2='';}
+                  CO.pay=selectedPaymentMethod==='credit_card'?'cartao':'pix';
+                  CO.parc=formData.installments||1;
+                  var itens=sp.now.concat(sp.pre).map(function(it){return {id:it.p.id,tam:it.size,qtd:it.qty};});
+                  var freteCents=sp.now.length===0?0:(CO.ship?(CO.ship.free?0:Math.round(CO.ship.price*100)):0);
+                  var payload={
+                    itens:itens,metodo:CO.pay,parcelas:CO.parc,
+                    cupom:CO.coupon?CO.coupon.code:undefined,
+                    cpf:cpfD,email:CO.email,whats:CO.whats,
+                    endereco:endereco,freteCents:freteCents,consentiu:true,
+                    token:formData.token,paymentMethodId:formData.payment_method_id,issuerId:formData.issuer_id
+                  };
+                  showAguardando();
+                  fetch('/api/pagar',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(payload)})
+                    .then(function(r){return r.json();})
+                    .then(function(j){resolve();if(!j||!j.ok){showRecusado();return;}handlePagarResult(j);})
+                    .catch(function(){resolve();showRecusado();});
+                });
+              }
+            }
+          });
+        }).then(function(ctl){brickCtl=ctl;}).catch(function(err){console.error('MP init',err);brickErr('Não conseguimos carregar o pagamento agora. Recarregue a página.');});
+      }
+      if(window.MercadoPago){go();}
+      else{var tries=0,iv=setInterval(function(){if(window.MercadoPago){clearInterval(iv);go();}else if(++tries>40){clearInterval(iv);brickErr('Não conseguimos carregar o pagamento agora. Recarregue a página.');}},150);}
+    })();
   }
   var CO={ship:null,pay:'pix',parc:1};
   function cartSplit(){
@@ -981,13 +1105,15 @@
         Trocar por https://viacep.com.br/ws/CEP/json/ e preencher rua/bairro/cidade/UF.
      2. Frete real (Correios / Melhor Envio): substituir a fórmula de shipQuote()
         por cotação real por CEP + peso/dimensão da peça.
-     3. CPF: adicionar campo obrigatório no passo Contato — necessário para Pix,
-        boleto e emissão de nota fiscal.
-     4. Pix de verdade: após "Concluir pedido", gerar QR Code + copia-e-cola e
-        confirmar via webhook do PSP (Mercado Pago / Pagar.me / etc.). Hoje o submit
-        só limpa o carrinho e vai para #/pedido.
+     3. CPF: FEITO (Fase 4a) — campo obrigatório no passo Pagamento, validado (11
+        dígitos) e enviado no payload de /api/pagar.
+     4. Pix/cartão de verdade: FEITO (Fase 4a) — Payment Brick do Mercado Pago no
+        passo Pagamento; POST /api/pagar cobra de verdade e os 3 estados (aprovado/
+        Pix pendente/recusado) dirigem o loader #coProc. Boleto não é mais oferecido
+        (servidor só suporta metodo pix|cartao).
      5. Persistir o pedido e disparar o e-mail de confirmação de verdade (o texto já
-        existe em pedidoView).
+        existe em pedidoView) — falta o e-mail de confirmação da COMPRA (o de
+        orçamento/Projeto Exclusivo já existe).
      6. Recuperação de carrinho: usar o e-mail/WhatsApp capturados para a sequência
         1h / 24h / 48h (recupera ~8–15% das vendas perdidas).
      7. Anexos do briefing (projeto exclusivo) e vídeos das receitas: upload real.
@@ -1022,14 +1148,10 @@
       +'<p class="coguest">Compra como convidado — sem precisar criar conta. Avisamos cada etapa por e-mail; se você deixar o WhatsApp, falamos por lá também.</p>'
       +'<div class="costep-cta"><button type="button" class="btn conext" data-next="1">Continuar</button></div></div></section>'
       +entrega
-      +'<section class="costep" data-step="3" id="cstep3">'+stepHead(3,'Pagamento')+'<div class="costep-body"><div class="paylist">'
-      +'<label class="payopt sel" data-pay="pix"><input type="radio" name="pay" value="pix" checked><span class="payb"><b>Pix</b><small>5% de desconto · aprovação na hora</small></span><span class="paytag">-5%</span></label>'
-      +'<label class="payopt" data-pay="cartao"><input type="radio" name="pay" value="cartao"><span class="payb"><b>Cartão de crédito</b><small>em até 6× sem juros</small></span></label>'
-      +'<div class="parcbox" id="parcBox" hidden><label class="cofield"><span>Parcelas</span><select id="coParc"></select></label></div>'
-      +'<label class="payopt" data-pay="boleto"><input type="radio" name="pay" value="boleto"><span class="payb"><b>Boleto bancário</b><small>à vista · compensa em até 2 dias úteis</small></span></label>'
-      +'</div>'
+      +'<section class="costep" data-step="3" id="cstep3">'+stepHead(3,'Pagamento')+'<div class="costep-body">'
+      +'<label class="cofield"><span>CPF</span><input inputmode="numeric" id="coCpf" autocomplete="off" placeholder="000.000.000-00" maxlength="14" aria-describedby="coCpfErr"><small class="fielderr" id="coCpfErr" data-err></small></label>'
       +'<div class="couprow"><input type="text" id="coCoupon" placeholder="Cupom de desconto" autocomplete="off"><button type="button" class="btn ghost" id="coCoupBtn">Aplicar</button></div><p class="couphint" id="coCoupHint"></p>'
-      +'<button type="submit" class="btn cofinish" id="coFinish">Concluir pedido</button>'
+      +'<div class="paybrick"><div id="coBrickContainer"></div><p class="paybrickerr" id="coBrickErr" hidden></p></div>'
       +'<div class="cotrust"><span>Compra protegida</span><span><a href="/faq">Trocas em até 7 dias</a></span><span>Enviamos para todo o Brasil</span></div>'
       +'<p class="cohelp">Dúvida antes de finalizar? <a href="https://wa.me/5511912345678?text='+encodeURIComponent('Olá! Estou finalizando uma compra na loja Studio Suzu e queria tirar uma dúvida.')+'" target="_blank" rel="noopener">Fale com a gente no WhatsApp</a>.</p>'
       +'<p class="cosafe">Ambiente seguro · protótipo de demonstração</p>'

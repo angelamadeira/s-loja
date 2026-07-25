@@ -60,6 +60,8 @@
   h3.dsgroup:first-of-type{margin-top:0}
   p.dsrule{color:var(--stone-text);font-size:.78rem;max-width:66ch;margin:var(--space-1) 0 var(--space-4);line-height:1.55}
   p.dsrule b{color:var(--ink);font-weight:600}
+  /* placeholder de conteúdo injetado em runtime (ex.: Payment Brick do MP) — só no design-system */
+  p.dsplaceholder{color:var(--text-muted);font-size:.78rem;font-style:italic;text-align:center;margin:0;padding:var(--space-4) 0}
 
   /* Divisor de parte — só na seção Cores, separa "Do Brandbook" de "Adições do site". */
   h3.dspart{font-family:var(--serif);font-style:italic;font-weight:400;font-size:1.2rem;color:var(--wood-text);margin:var(--space-8) 0 var(--space-2);padding-top:var(--space-6);border-top:2px solid var(--line-strong)}
@@ -528,17 +530,53 @@
             <div class="costep-cta"><button type="button" class="btn conext">Continuar</button></div>
           </div>
         </section>
+        <section class="costep open" data-step="3">
+          <button type="button" class="cohd" data-tog="3">
+            <span class="conum"><span class="cn-n">3</span><svg class="cn-ok" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
+            <h2 role="presentation">Pagamento</h2>
+            <span class="costep-sum"></span>
+            <span class="coedit">Editar</span>
+          </button>
+          <div class="costep-body">
+            <label class="cofield"><span>CPF</span><input inputmode="numeric" placeholder="000.000.000-00" maxlength="14"></label>
+            <div class="paybrick"><p class="dsplaceholder">Payment Brick do Mercado Pago (injetado em runtime por <code>#coBrickContainer</code> — precisa da chave pública real, não renderiza aqui)</p></div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <div class="comp-block">
+      <h3>Campo CPF + Payment Brick — <code>.paybrick</code></h3>
+      <p class="dsrule">O passo Pagamento do checkout (Fase 4a): CPF (<code>.cofield</code>, mesmo padrão de erro) + o Payment Brick do Mercado Pago, montado via SDK dentro do envelope <code>.paybrick</code> (borda/raio/fundo dos tokens Suzu; o conteúdo do Brick em si — cartão, Pix, parcelas — é do MP, estilizado via <code>customVariables</code>). Erros de carregamento do Brick aparecem em <code>.paybrickerr</code>, mesma cor de <code>.fielderr</code>.</p>
+      <div class="demo demo-row" style="align-items:flex-start">
+        <label class="cofield" style="flex:1 1 220px"><span>CPF</span><input inputmode="numeric" placeholder="000.000.000-00" maxlength="14"></label>
+        <div class="paybrick" style="flex:1 1 260px"><p class="dsplaceholder">Payment Brick (runtime)</p></div>
       </div>
     </div>
 
     <div class="comp-block">
       <h3>Overlay de processamento de pagamento — <code>.coproc</code></h3>
-      <p class="dsrule">Cobre a tela inteira ao confirmar o pedido — trava a interação até o PSP responder. <code>.coproc-ring</code> gira enquanto aguarda; em erro, some e dá lugar a <code>.coproc-ico</code> + <code>.coproc-retry</code> (não demonstrado aqui — só o estado padrão de espera).</p>
+      <p class="dsrule">Cobre a tela inteira ao confirmar o pedido — trava a interação até o PSP responder. Três estados dirigidos pela resposta de <code>/api/pagar</code> (Fase 4a): <b>aprovado</b> — <code>.coproc-ring</code> gira, depois vai direto pro sucesso; <b>Pix pendente</b> — QR + copia-e-cola em <code>.coproc-pix</code>/<code>.coproc-qr</code>/<code>.coproc-code</code>, sem botão de repetir (a sacola só limpa quando o Pix confirma, via polling); <b>recusado</b> — <code>.coproc-ico</code> (erro) + mensagem, fecha sozinho de volta pro checkout (a sacola nunca é limpa nesse caso — o retry de cartão acontece dentro do próprio Brick).</p>
       <div class="demo demo-stage">
         <div class="coproc show" style="position:absolute">
           <div class="coproc-in">
             <div class="coproc-ring"></div>
             <p class="coproc-msg">Confirmando pagamento…</p>
+          </div>
+        </div>
+      </div>
+      <div class="demo demo-stage" style="margin-top:var(--space-4);height:420px">
+        <div class="coproc show" style="position:absolute">
+          <div class="coproc-in">
+            <p class="coproc-msg">Aguardando o seu Pix…</p>
+            <p class="coproc-sub">Escaneie o QR Code ou copie o código no app do seu banco.</p>
+            <div class="coproc-pix">
+              <div class="coproc-qr" role="img" aria-label="QR Code Pix (exemplo)"></div>
+              <div class="coproc-copia">
+                <code class="coproc-code">00020126580014BR.GOV.BCB.PIX...</code>
+                <button type="button" class="btn ghost">Copiar código</button>
+              </div>
+            </div>
           </div>
         </div>
       </div>

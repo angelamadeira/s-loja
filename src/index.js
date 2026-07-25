@@ -26,6 +26,10 @@ export default {
       if (request.method !== "POST") return json({ ok: false, error: "metodo" }, 405);
       return handlePagar(request, env);
     }
+    if (url.pathname === "/api/compra") {
+      if (request.method !== "GET") return json({ ok: false, error: "metodo" }, 405);
+      return handleCompra(url, env);
+    }
     if (url.pathname === "/api/mp-webhook") {
       // Sempre 200 aqui dentro (mesmo em método errado) — o MP reenvia pra
       // sempre qualquer coisa != 200, então não queremos abrir esse buraco.
@@ -192,6 +196,15 @@ async function handlePagar(request, env) {
     console.error("pagar falhou", e);
     return json({ ok: false, erro: "servidor" }, 500);
   }
+}
+
+// GET /api/compra?ref= — polling do estado do pagamento (usado pelo front enquanto
+// espera a confirmação do Pix). Só expõe o status, nada de dado financeiro/pessoal.
+async function handleCompra(url, env) {
+  const ref = str(url.searchParams.get("ref"));
+  if (!ref) return json({ status: "nao_encontrado" });
+  const row = await env.DB.prepare("SELECT status FROM compras WHERE ref = ?").bind(ref).first();
+  return json({ status: row ? row.status : "nao_encontrado" });
 }
 
 // POST /api/mp-webhook — o MP notifica mudanças de status assíncronas

@@ -667,17 +667,18 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
 .cotrust span:first-child{padding-left:0}
 .cotrust span:not(:first-child)::before{content:'·';position:absolute;left:5px;opacity:.7}
 .shipopts,.addr{margin-top:var(--space-4);display:flex;flex-direction:column;gap:var(--space-3)}
-.shipopt,.payopt{display:flex;align-items:center;gap:var(--space-3);border:1px solid var(--line);border-radius:var(--r-md);padding:var(--space-3) var(--space-4);cursor:pointer}
-.shipopt.sel,.payopt.sel{border-color:var(--stone);background:var(--raised)}
-.shipopt input,.payopt input{width:16px;height:16px;accent-color:var(--text);flex:0 0 auto}
-.shb,.payb{flex:1;display:flex;flex-direction:column;gap:var(--space-2xs)}
-.shb b,.payb b{font-weight:500;font-size:.92rem}
-.shb small,.payb small{font-size:.76rem;color:var(--text-muted);font-weight:300}
+.shipopt{display:flex;align-items:center;gap:var(--space-3);border:1px solid var(--line);border-radius:var(--r-md);padding:var(--space-3) var(--space-4);cursor:pointer}
+.shipopt.sel{border-color:var(--stone);background:var(--raised)}
+.shipopt input{width:16px;height:16px;accent-color:var(--text);flex:0 0 auto}
+.shb{flex:1;display:flex;flex-direction:column;gap:var(--space-2xs)}
+.shb b{font-weight:500;font-size:.92rem}
+.shb small{font-size:.76rem;color:var(--text-muted);font-weight:300}
 .shp{font-weight:500;font-size:.9rem}
-.paytag{background:var(--mizu);color:var(--ink);font-size:.68rem;font-weight:600;padding:var(--space-1) var(--space-2);border-radius:var(--r-pill)}
-.paylist{display:flex;flex-direction:column;gap:var(--space-3)}
-.parcbox{padding:var(--space-2xs)}
-.cofinish{width:100%;padding:var(--space-4);font-size:.8rem;letter-spacing:.06em;text-transform:uppercase}
+/* .paybrick — envelope do Payment Brick do Mercado Pago (Fase 4a); o Brick em si
+   é injetado pelo SDK do MP dentro de #coBrickContainer, esta casca só dá o
+   acabamento (borda/raio/fundo) pra casar com os outros campos do checkout. */
+.paybrick{border:1px solid var(--line);border-radius:var(--r-md);padding:var(--space-4);background:var(--surface);margin-top:var(--space-2);margin-bottom:var(--space-4)}
+.paybrickerr{color:var(--error-text);font-size:.82rem;margin-top:var(--space-3)}
 .cosafe{text-align:center;font-size:.74rem;color:var(--text-muted);font-weight:300;margin-top:var(--space-3)}
 .cosummary{border:1px solid var(--line-soft);border-radius:var(--r-xl);padding:var(--space-6) var(--space-5);background:var(--raised);order:-1}
 @media(min-width:860px){.cosummary{position:sticky;top:88px;order:0}}
@@ -972,7 +973,7 @@ button.cohd{width:100%;border:0;background:none;font:inherit;color:inherit;text-
 #addrHint:empty{display:none}
 .cofield select{-webkit-appearance:none;appearance:none;padding-right:var(--space-8);background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%23463C34'%20stroke-width='2'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpolyline%20points='6%209%2012%2015%2018%209'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;background-size:16px}
 .costep-cta .conext{width:100%;padding:var(--space-4);font-size:.78rem;letter-spacing:.05em;text-transform:uppercase}
-.coproc{position:fixed;inset:0;z-index:120;display:flex;align-items:center;justify-content:center;background:var(--surface);opacity:0;transition:opacity .35s ease}.coproc.show{opacity:1}.coproc[hidden]{display:none}.coproc-in{display:flex;flex-direction:column;align-items:center;gap:var(--space-5);padding:var(--space-7);text-align:center;max-width:340px}.coproc-ring{width:50px;height:50px;border-radius:var(--r-round);border:2.5px solid var(--line);border-top-color:var(--matcha);animation:coprocspin .9s linear infinite}@keyframes coprocspin{to{transform:rotate(360deg)}}.coproc-ico{width:50px;height:50px;color:var(--error-text)}.coproc-msg{font-size:1.05rem;color:var(--text);font-weight:400;letter-spacing:.01em;margin:0;min-height:1.4em;transition:opacity .25s ease}.coproc-sub{font-size:.82rem;color:var(--text-muted);font-weight:300;line-height:1.5;margin:0}.coproc-retry{margin-top:var(--space-1)}@media(prefers-reduced-motion:reduce){.coproc-ring{animation-duration:2.4s}.coproc{transition:none}}
+.coproc{position:fixed;inset:0;z-index:120;display:flex;align-items:center;justify-content:center;background:var(--surface);opacity:0;transition:opacity .35s ease}.coproc.show{opacity:1}.coproc[hidden]{display:none}.coproc-in{display:flex;flex-direction:column;align-items:center;gap:var(--space-5);padding:var(--space-7);text-align:center;max-width:340px}.coproc-ring{width:50px;height:50px;border-radius:var(--r-round);border:2.5px solid var(--line);border-top-color:var(--matcha);animation:coprocspin .9s linear infinite}@keyframes coprocspin{to{transform:rotate(360deg)}}.coproc-ico{width:50px;height:50px;color:var(--error-text)}.coproc-msg{font-size:1.05rem;color:var(--text);font-weight:400;letter-spacing:.01em;margin:0;min-height:1.4em;transition:opacity .25s ease}.coproc-sub{font-size:.82rem;color:var(--text-muted);font-weight:300;line-height:1.5;margin:0}.coproc-pix{display:flex;flex-direction:column;align-items:center;gap:var(--space-4);width:100%}.coproc-qr{width:180px;height:180px;border:1px solid var(--line);border-radius:var(--r-md);background:var(--surface)}.coproc-copia{display:flex;flex-direction:column;align-items:center;gap:var(--space-2);width:100%}.coproc-code{display:block;width:100%;padding:var(--space-3);border:1px solid var(--line);border-radius:var(--r-md);background:var(--raised);font-family:inherit;font-size:.72rem;color:var(--text-muted);word-break:break-all;text-align:center}@media(prefers-reduced-motion:reduce){.coproc-ring{animation-duration:2.4s}.coproc{transition:none}}
 
 
 /* Fase 3 — espaço do widget anti-spam (Turnstile) no form de orçamento */
