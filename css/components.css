@@ -686,6 +686,10 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
 .cotrust span:first-child{padding-left:0}
 .cotrust span:not(:first-child)::before{content:'·';position:absolute;left:5px;opacity:.7}
 .shipopts,.addr{margin-top:var(--space-4);display:flex;flex-direction:column;gap:var(--space-3)}
+/* "alterar" — destrava os campos que o CEP preencheu (link discreto, mesmo
+   padrão de .couptoggle/.cardbrick-fail-link); só aparece quando algo travou. */
+.addr-edit{align-self:flex-start;background:none;border:none;padding:0;font-family:inherit;font-size:.78rem;font-weight:300;color:var(--text-muted);text-decoration:underline;text-underline-offset:2px;cursor:pointer}
+.addr-edit:hover,.addr-edit:focus-visible{color:var(--text)}
 .shipopt{display:flex;align-items:center;gap:var(--space-3);border:1px solid var(--line);border-radius:var(--r-md);padding:var(--space-3) var(--space-4);cursor:pointer}
 .shipopt.sel{border-color:var(--stone);background:var(--raised)}
 .shipopt input{width:16px;height:16px;accent-color:var(--text);flex:0 0 auto}
@@ -1079,9 +1083,16 @@ body.nodock .wafloat{bottom:calc(24px + env(safe-area-inset-bottom))}
 /* ===== bloco 4 (checkout acordeão) ===== */
 /* ===== Checkout acordeão ===== */
 button.cohd{width:100%;border:0;background:none;font:inherit;color:inherit;text-align:left;padding:0}
-.costep.open>button.cohd{cursor:default}
-.costep.done>button.cohd{cursor:pointer}
-.costep:not(.open):not(.done)>button.cohd{cursor:default}
+/* Clicabilidade dirigida por JS (.can-open, setada em refreshNav): um passo é
+   clicável quando está fechado E já concluído OU alcançável (todos os anteriores
+   feitos) — inclui o Pagamento, que nunca fica ".done". Só aí aparece cursor de
+   mão + realce no hover, deixando óbvio o que dá pra abrir. */
+.costep{transition:background .15s ease,border-color .15s ease}
+.costep>button.cohd{cursor:default}
+.costep.can-open>button.cohd{cursor:pointer}
+.costep.can-open:hover{background:var(--raised);border-color:var(--line)}
+.costep.can-open:hover h2{color:var(--text)}
+.costep.can-open:hover .coedit{text-decoration:underline;text-underline-offset:2px}
 .costep:not(.open)>.cohd{margin-bottom:0}
 .costep:not(.open){padding-top:var(--space-4);padding-bottom:var(--space-4)}
 .costep+.costep{margin-top:0}

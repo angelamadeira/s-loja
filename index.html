@@ -879,6 +879,7 @@
       saveCart();
       render();
       if(!Object.keys(cart).length){navigate('/checkout',true);return;}
+      renderShip();   /* re-cota o frete: mudar a qtd pode cruzar o limite de grátis (R$150) */
       renderCoSummary();
       syncCardBrickAmount();
     });
@@ -979,6 +980,20 @@
        mão; só CEP não encontrado (erro:true) ganha uma dica em #addrHint, rede
        fora fica silenciosa (não é um erro do CEP em si). Nunca sobrescreve um
        campo que a pessoa está editando na hora (document.activeElement). */
+    /* Trava/destrava um campo de endereço preenchido pelo CEP (readOnly + visual
+       .cep-locked + nota "· definido pelo CEP"). Compartilhado por viaCepFillAddr
+       (trava só o que veio preenchido) e por unlockCepAddr (o "alterar"). */
+    function setCepLock(fieldId,noteId,on){
+      var el=document.getElementById(fieldId),nt=noteId?document.getElementById(noteId):null;
+      if(el){el.readOnly=on;el.classList.toggle('cep-locked',on);}
+      if(nt)nt.hidden=!on;
+    }
+    function unlockCepAddr(){
+      setCepLock('coRua','coRuaLock',false);
+      setCepLock('coBairro','coBairroLock',false);
+      setCepLock('coCidade','coCidadeLock',false);
+      var ed=document.getElementById('coAddrEdit');if(ed)ed.hidden=true;
+    }
     function viaCepFillAddr(cepMasked){
       var digits=(cepMasked||'').replace(/\D/g,'');
       if(digits.length!==8)return;
@@ -986,35 +1001,58 @@
         .then(function(r){return r.json();})
         .then(function(d){
           var ah=document.getElementById('addrHint');
-          /* Cidade/UF são derivadas do CEP (um CEP = uma cidade). Travar evita o
-             "endereço que briga com o CEP" (falha de entrega): cidade/UF do CEP,
-             rua/número/complemento livres. Falha do ViaCEP → destrava (preenche à mão). */
-          var lockCity=function(on){var cid=document.getElementById('coCidade'),lk=document.getElementById('coCidadeLock');if(cid){cid.readOnly=on;cid.classList.toggle('cep-locked',on);}if(lk)lk.hidden=!on;};
-          if(!d||d.erro){lockCity(false);if(ah){ah.textContent='CEP não encontrado — preencha o endereço manualmente.';ah.className='cephint err';}return;}
+          /* Rua/Bairro/Cidade vêm do CEP → travados pra não "brigar com o CEP"
+             (falha de entrega). Padrão de mercado (ML/Amazon BR): trava com saída
+             — o link "alterar" (#coAddrEdit → unlockCepAddr) destrava se o dado do
+             ViaCEP estiver errado. Só trava o campo que veio PREENCHIDO: em CEP
+             único (cidade pequena) logradouro/bairro vêm vazios e seguem livres.
+             Número/complemento nunca travam. Falha do ViaCEP → destrava tudo. */
+          if(!d||d.erro){unlockCepAddr();if(ah){ah.textContent='CEP não encontrado — preencha o endereço manualmente.';ah.className='cephint err';}return;}
           if(ah){ah.textContent='';ah.className='cephint';}
           var fill=function(id,val){var el=document.getElementById(id);if(el&&val&&document.activeElement!==el){el.value=val;el.classList.remove('bad');}};
           fill('coRua',d.logradouro);
           fill('coBairro',d.bairro);
           fill('coCidade',d.localidade?d.localidade+(d.uf?' / '+d.uf:''):'');
-          lockCity(!!d.localidade);
+          setCepLock('coRua','coRuaLock',!!d.logradouro);
+          setCepLock('coBairro','coBairroLock',!!d.bairro);
+          setCepLock('coCidade','coCidadeLock',!!d.localidade);
+          var ed=document.getElementById('coAddrEdit');if(ed)ed.hidden=!(d.logradouro||d.bairro||d.localidade);
         })
         .catch(function(){/* rede fora — deixa a pessoa preencher à mão, sem travar */});
     }
+    /* Cota e desenha as opções de frete a partir do CEP salvo + subtotal ATUAL,
+       preservando a opção que a pessoa já tinha escolhido (por rótulo). Reusada
+       pelo runCoCep (1ª cotação) e pela edição de quantidade no carrinho — o
+       frete grátis é `subNow>=150`, então mexer no carrinho pode cruzar o limite
+       e precisa re-cotar. Só roda com um CEP válido já calculado (box visível). */
+    function renderShip(){
+      var box=document.getElementById('shipOpts');
+      if(!box||(SHIP.cep||'').replace(/\D/g,'').length!==8)return null;
+      var data=shipQuote(SHIP.cep,cartSplit().subNow);
+      if(!data)return null;
+      var cur=CO.ship?CO.ship.label:null,idx=0;
+      for(var k=0;k<data.length;k++){if(data[k].label===cur){idx=k;break;}}
+      box.hidden=false;
+      box.innerHTML=data.map(function(o,i){return '<label class="shipopt'+(i===idx?' sel':'')+'"><input type="radio" name="ship" '+(i===idx?'checked':'')+'><span class="shb"><b>'+o.label+'</b><small>'+o.days+'</small></span><span class="shp">'+(o.free?'Grátis':BRL(o.price))+'</span></label>';}).join('');
+      CO.ship=data[idx];
+      var opts=box.querySelectorAll('.shipopt');
+      opts.forEach(function(l,i){l.onclick=function(){opts.forEach(function(x){x.classList.remove('sel');});l.classList.add('sel');l.querySelector('input').checked=true;CO.ship=data[i];renderCoSummary();syncCardBrickAmount();};});
+      var hint=document.getElementById('cepHint');
+      if(hint&&hint.className.indexOf('err')<0){hint.textContent=data[0].free?'Frete Econômico grátis nesta compra (acima de R$ 150).':'';hint.className='cephint';}
+      return data;
+    }
     function runCoCep(){
       var hint=document.getElementById('cepHint');
-      var data=shipQuote(cep.value,cartSplit().subNow);
-      if(!data){hint.textContent='Digite um CEP válido (8 dígitos).';hint.className='cephint err';return;}
+      if(!shipQuote(cep.value,cartSplit().subNow)){hint.textContent='Digite um CEP válido (8 dígitos).';hint.className='cephint err';return;}
       saveCep(cep.value);cep.value=SHIP.cep;
       hint.textContent='';hint.className='cephint';
       document.getElementById('addrFields').hidden=false;
-      var box=document.getElementById('shipOpts');box.hidden=false;
-      box.innerHTML=data.map(function(o,i){return '<label class="shipopt'+(i===0?' sel':'')+'"><input type="radio" name="ship" '+(i===0?'checked':'')+'><span class="shb"><b>'+o.label+'</b><small>'+o.days+'</small></span><span class="shp">'+(o.free?'Grátis':BRL(o.price))+'</span></label>';}).join('');
-      CO.ship=data[0];renderCoSummary();syncCardBrickAmount();
-      var opts=box.querySelectorAll('.shipopt');
-      opts.forEach(function(l,i){l.onclick=function(){opts.forEach(function(x){x.classList.remove('sel');});l.classList.add('sel');l.querySelector('input').checked=true;CO.ship=data[i];renderCoSummary();syncCardBrickAmount();};});
-      if(data[0].free){hint.textContent='Frete Econômico grátis nesta compra (acima de R$ 150).';}
+      renderShip();
+      renderCoSummary();syncCardBrickAmount();
       viaCepFillAddr(SHIP.cep);
     }
+    var addrEdit=document.getElementById('coAddrEdit');
+    if(addrEdit)addrEdit.onclick=function(){unlockCepAddr();var r=document.getElementById('coRua');if(r)r.focus();};
     if(cepBtn)cepBtn.onclick=runCoCep;
     if(cep){cep.onkeydown=function(e){if(e.key==='Enter'){e.preventDefault();runCoCep();}};
       cep.addEventListener('blur',function(){if(cep.value.replace(/\D/g,'').length===8)runCoCep();});
@@ -1023,8 +1061,16 @@
     (function(){
       var steps=[].slice.call(cof.querySelectorAll('.costep'));
       if(!steps.length)return;
-      function openStep(n,focus){steps.forEach(function(sec){sec.classList.toggle('open',+sec.dataset.step===n);});var el=document.getElementById('cstep'+n);if(el)el.scrollIntoView({block:'nearest',behavior:'smooth'});if(focus&&el){var f=el.querySelector('.costep-body input:not([readonly]):not([type=hidden]),.costep-body select:not([disabled])');if(f)try{f.focus();}catch(_){}}}
-      function markDone(n){var el=document.getElementById('cstep'+n);if(el)el.classList.add('done');var sum=document.getElementById('sum'+n);if(sum)sum.textContent=sumFor(n);}
+      function openStep(n,focus){steps.forEach(function(sec){sec.classList.toggle('open',+sec.dataset.step===n);});var el=document.getElementById('cstep'+n);
+        /* Rótulo do CTA reflete a ação (prática de mercado): "Salvar" ao reabrir
+           um passo já concluído (edição), "Continuar" na primeira passagem. */
+        if(el){var b=el.querySelector('.conext');if(b)b.textContent=el.classList.contains('done')?'Salvar':'Continuar';}
+        if(el)el.scrollIntoView({block:'nearest',behavior:'smooth'});if(focus&&el){var f=el.querySelector('.costep-body input:not([readonly]):not([type=hidden]),.costep-body select:not([disabled])');if(f)try{f.focus();}catch(_){}}refreshNav();}
+      function markDone(n){var el=document.getElementById('cstep'+n);if(el)el.classList.add('done');var sum=document.getElementById('sum'+n);if(sum)sum.textContent=sumFor(n);refreshNav();}
+      /* Marca .can-open nos passos clicáveis (fechado E concluído OU alcançável —
+         inclui o Pagamento). O CSS pendura nisso o cursor de mão + hover, deixando
+         claro o que dá pra abrir. Rodar a cada mudança de estado (open/done). */
+      function refreshNav(){steps.forEach(function(sec){var n=+sec.dataset.step,reach=true;for(var i=1;i<n;i++){if(!document.getElementById('cstep'+i).classList.contains('done')){reach=false;break;}}sec.classList.toggle('can-open',!sec.classList.contains('open')&&(sec.classList.contains('done')||reach));});}
       function validStep(n){
         if(n===1){var em=document.getElementById('coEmail');if(!em.value||em.value.indexOf('@')<1){emailErr(emailMsg(em));em.focus();return false;}emailErr('');CO.email=em.value.trim();return true;}
         if(n===2){var sp=cartSplit();
@@ -1058,7 +1104,14 @@
         var btn=sec.querySelector('.conext');if(!btn)return;
         e.preventDefault();advance(+btn.dataset.next);});
       ['coNome','coRua','coNum','coBairro','coCidade'].forEach(function(id){var el=document.getElementById(id);if(el)el.addEventListener('input',function(){el.classList.remove('bad');var ah=document.getElementById('addrHint');if(ah&&!cof.querySelector('#addrFields .bad')){ah.textContent='';ah.className='cephint';}});});
-      cof.querySelectorAll('button.cohd').forEach(function(h){h.onclick=function(){var sec=h.closest('.costep');if(sec.classList.contains('done'))openStep(+sec.dataset.step);};});
+      cof.querySelectorAll('button.cohd').forEach(function(h){h.onclick=function(){var sec=h.closest('.costep');var n=+sec.dataset.step;
+        /* Abre no clique do cabeçalho se o passo já está concluído OU se todos os
+           anteriores estão (alcançável): deixa voltar a qualquer passo feito e,
+           feitos Contato+Entrega, pular direto pro Pagamento — que nunca fica
+           "done" (só conclui ao pagar), então antes disso o header dele era morto. */
+        var reachable=true;for(var i=1;i<n;i++){if(!document.getElementById('cstep'+i).classList.contains('done')){reachable=false;break;}}
+        if(sec.classList.contains('done')||reachable)openStep(n);};});
+      refreshNav();
     })();
     /* o pagamento acontece pelo botão "Pagar com Pix" (nosso) ou pelo botão do
        formulário de Cartão/Secure Fields (nosso, #coCardBtn) — este form não tem
@@ -1588,9 +1641,10 @@
         +'<div id="shipOpts" class="shipopts" hidden></div>'
         +'<div id="addrFields" class="addr" hidden>'
         +'<label class="cofield"><span>Nome completo</span><input type="text" id="coNome" autocomplete="name"></label>'
-        +'<label class="cofield"><span>Endereço</span><input type="text" id="coRua" autocomplete="address-line1"></label>'
+        +'<label class="cofield"><span>Endereço <em class="opt lockednote" id="coRuaLock" hidden>· definido pelo CEP</em></span><input type="text" id="coRua" autocomplete="address-line1"></label>'
         +'<div class="tworow"><label class="cofield"><span>Número</span><input type="text" id="coNum"></label><label class="cofield"><span>Complemento</span><input type="text" id="coComp" placeholder="opcional"></label></div>'
-        +'<div class="tworow"><label class="cofield"><span>Bairro</span><input type="text" id="coBairro"></label><label class="cofield"><span>Cidade / UF <em class="opt lockednote" id="coCidadeLock" hidden>· definido pelo CEP</em></span><input type="text" id="coCidade"></label></div>'
+        +'<div class="tworow"><label class="cofield"><span>Bairro <em class="opt lockednote" id="coBairroLock" hidden>· definido pelo CEP</em></span><input type="text" id="coBairro"></label><label class="cofield"><span>Cidade / UF <em class="opt lockednote" id="coCidadeLock" hidden>· definido pelo CEP</em></span><input type="text" id="coCidade"></label></div>'
+        +'<button type="button" class="addr-edit" id="coAddrEdit" hidden>Endereço preenchido pelo CEP · alterar</button>'
         +'<p class="cephint" id="addrHint"></p>'
         +'</div>';
     var entrega='<section class="costep" data-step="2" id="cstep2">'+stepHead(2,'Entrega')+'<div class="costep-body">'+entregaBody
