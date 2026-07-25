@@ -103,6 +103,7 @@ test("compra pendente em pix inclui QR/copia-e-cola consultado no MP", async () 
   const j = await res.json();
   expect(res.status).toBe(200);
   expect(j.status).toBe("pendente");
+  expect(j.total).toBe(11685);
   expect(j.pix).toEqual({ qrBase64: "BASE64IMG", copiaECola: "COPIA-COLA" });
   expect(consultaPagamentoFull).toHaveBeenCalledWith(expect.anything(), "12345");
 });

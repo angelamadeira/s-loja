@@ -242,14 +242,21 @@ async function handleCompra(url, env) {
   if (!row) return json({ status: "nao_encontrado" });
 
   const resposta = { status: row.status };
-  if (row.status === "pendente" && row.metodo === "pix" && row.mp_payment_id) {
-    try {
-      const full = await consultaPagamentoFull(env, row.mp_payment_id);
-      if (full && full.pix) resposta.pix = full.pix;
-    } catch (e) {
-      // MP indisponível nesta rodada — devolve só o status; o polling do
-      // cliente tenta de novo em ~4s.
-      console.error("consultaPagamentoFull falhou", e);
+  if (row.status === "pendente" && row.metodo === "pix") {
+    // `total` (centavos) é o único dado financeiro exposto no estado pendente —
+    // não é sensível: já está embutido no código copia-e-cola/QR que o cliente
+    // vê no app do banco. Mostrar na tela /pix/<ref> antes de escanear é boa
+    // prática; itens/endereço/cpf continuam reservados pro estado aprovado.
+    resposta.total = row.total;
+    if (row.mp_payment_id) {
+      try {
+        const full = await consultaPagamentoFull(env, row.mp_payment_id);
+        if (full && full.pix) resposta.pix = full.pix;
+      } catch (e) {
+        // MP indisponível nesta rodada — devolve só o status; o polling do
+        // cliente tenta de novo em ~4s.
+        console.error("consultaPagamentoFull falhou", e);
+      }
     }
   }
   if (row.status === "aprovado") {
