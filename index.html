@@ -870,13 +870,12 @@
        um checkout quebrado. */
     var coSummaryEl=document.getElementById('coSummary');
     if(coSummaryEl)coSummaryEl.addEventListener('click',function(e){
-      var b=e.target.closest('button[data-qp],button[data-qm],button[data-rm]');
+      var b=e.target.closest('button[data-qp],button[data-qm]');
       if(!b)return;
-      var k=b.dataset.qp||b.dataset.qm||b.dataset.rm;
+      var k=b.dataset.qp||b.dataset.qm;
       if(!cart[k])return;
       if('qp' in b.dataset)cart[k].qty++;
-      else if('qm' in b.dataset){if(cart[k].qty>1)cart[k].qty--;else delete cart[k];}
-      else delete cart[k];
+      else{if(cart[k].qty>1)cart[k].qty--;else{offerUndo(k,cart[k]);delete cart[k];}}
       saveCart();
       render();
       if(!Object.keys(cart).length){navigate('/checkout',true);return;}
@@ -1024,7 +1023,7 @@
     (function(){
       var steps=[].slice.call(cof.querySelectorAll('.costep'));
       if(!steps.length)return;
-      function openStep(n){steps.forEach(function(sec){sec.classList.toggle('open',+sec.dataset.step===n);});var el=document.getElementById('cstep'+n);if(el)el.scrollIntoView({block:'nearest',behavior:'smooth'});}
+      function openStep(n,focus){steps.forEach(function(sec){sec.classList.toggle('open',+sec.dataset.step===n);});var el=document.getElementById('cstep'+n);if(el)el.scrollIntoView({block:'nearest',behavior:'smooth'});if(focus&&el){var f=el.querySelector('.costep-body input:not([readonly]):not([type=hidden]),.costep-body select:not([disabled])');if(f)try{f.focus();}catch(_){}}}
       function markDone(n){var el=document.getElementById('cstep'+n);if(el)el.classList.add('done');var sum=document.getElementById('sum'+n);if(sum)sum.textContent=sumFor(n);}
       function validStep(n){
         if(n===1){var em=document.getElementById('coEmail');if(!em.value||em.value.indexOf('@')<1){emailErr(emailMsg(em));em.focus();return false;}emailErr('');CO.email=em.value.trim();return true;}
@@ -1045,8 +1044,19 @@
         if(n===2){var sp=cartSplit();if(!sp.now.length)return 'Reserva · endereço confirmado no envio';if(CO.ship)return (SHIP.cep||'')+' · '+CO.ship.label+' '+(CO.ship.free?'grátis':BRL(CO.ship.price));return '';}
         return '';
       }
-      cof.querySelectorAll('.conext').forEach(function(b){b.onclick=function(){var n=+b.dataset.next;if(!validStep(n))return;markDone(n);
-        var nx=n+1;while(nx<3 && document.getElementById('cstep'+nx).classList.contains('done'))nx++;openStep(nx);};});
+      function advance(n){if(!validStep(n))return;markDone(n);
+        var nx=n+1;while(nx<3 && document.getElementById('cstep'+nx).classList.contains('done'))nx++;openStep(nx,true);}
+      cof.querySelectorAll('.conext').forEach(function(b){b.onclick=function(){advance(+b.dataset.next);};});
+      /* Enter em qualquer campo do passo avança (mesma validação do botão).
+         #coCep (calcular frete) e #coCoupon (aplicar cupom) já tratam Enter
+         com ação própria — pulá-los aqui evita disparar as duas coisas. */
+      cof.addEventListener('keydown',function(e){
+        if(e.key!=='Enter'||e.isComposing)return;
+        var t=e.target;if(!t||t.tagName==='TEXTAREA'||t.tagName==='BUTTON')return;
+        if(t.id==='coCep'||t.id==='coCoupon')return;
+        var sec=t.closest&&t.closest('.costep');if(!sec)return;
+        var btn=sec.querySelector('.conext');if(!btn)return;
+        e.preventDefault();advance(+btn.dataset.next);});
       ['coNome','coRua','coNum','coBairro','coCidade'].forEach(function(id){var el=document.getElementById(id);if(el)el.addEventListener('input',function(){el.classList.remove('bad');var ah=document.getElementById('addrHint');if(ah&&!cof.querySelector('#addrFields .bad')){ah.textContent='';ah.className='cephint';}});});
       cof.querySelectorAll('button.cohd').forEach(function(h){h.onclick=function(){var sec=h.closest('.costep');if(sec.classList.contains('done'))openStep(+sec.dataset.step);};});
     })();
@@ -1504,6 +1514,27 @@
      ver wirePixView()). */
   var pollTimer=null,pixTimer=null;
   function stopPoll(){if(pollTimer){clearInterval(pollTimer);pollTimer=null;}if(pixTimer){clearInterval(pixTimer);pixTimer=null;}}
+  /* Desfazer a remoção de um item do checkout (o "−" na quantidade 1 apaga o
+     item; padrão Baymard = deletar na hora + "Desfazer", sem modal). Um toast
+     no <body> (não dentro da view do checkout) sobrevive ao re-render e até à
+     ida pra tela de sacola vazia. Some sozinho em 6s. */
+  var undoTimer=null;
+  function offerUndo(k,item){
+    var bar=document.getElementById('undoBar');
+    if(!bar){bar=document.createElement('div');bar.id='undoBar';bar.className='snackbar';bar.setAttribute('role','status');
+      bar.innerHTML='<span class="snackbar-tx"></span><button type="button" class="snackbar-act">Desfazer</button>';
+      document.body.appendChild(bar);}
+    bar.querySelector('.snackbar-tx').textContent=(item.name||'Item')+' removido';
+    bar.classList.add('show');
+    clearTimeout(undoTimer);undoTimer=setTimeout(function(){bar.classList.remove('show');},6000);
+    bar.querySelector('.snackbar-act').onclick=function(){
+      clearTimeout(undoTimer);bar.classList.remove('show');
+      if(cart[k])return;
+      cart[k]=item;saveCart();render();
+      if(document.getElementById('coSummary')){renderCoSummary();syncCardBrickAmount();}
+      else navigate('/checkout',true);
+    };
+  }
   /* Preenche CO com o recibo do pedido (itens/total/frete/pagamento) a partir
      do carrinho ATUAL — chamado por handlePagarResult (Pix aprovado na hora,
      ou pendente indo pra /pix/<ref>) e por wirePixView() quando o polling da
@@ -1640,17 +1671,19 @@
     var coupDisc=CO.coupon?Math.round(merch*CO.coupon.pct/100*100)/100:0;
     var total=merch+(ship||0)-coupDisc-payPixDisc;
     /* RESUMO editável (Fase 4a-carrinho): cada linha ganha um stepper de
-       quantidade (−/n/+, mesmo par de ícones do stepper da sacola/.qty) e um
-       "Remover" — mira cart[it.k] (chave carregada por cartSplit()). Delegado
-       uma vez só em #coSummary (ver wireCheckout) — não precisa re-wire a
-       cada renderCoSummary(). Não mexe no <div class="okri"> puro/sem edição
-       usado por confirmView() (tela de sucesso, pós-pagamento). */
+       quantidade (−/n/+, mesmo par de ícones do stepper da sacola/.qty) — mira
+       cart[it.k] (chave carregada por cartSplit()). NÃO tem botão "Remover"
+       dedicado (padrão Baymard: no checkout o resumo é pra conferir, não pra
+       editar pesado); remover é o "−" na quantidade 1, que apaga o item e
+       oferece "Desfazer" (offerUndo) — sem exclusão silenciosa. Delegado uma
+       vez só em #coSummary (ver wireCheckout) — não precisa re-wire a cada
+       renderCoSummary(). Não mexe no <div class="okri"> puro/sem edição usado
+       por confirmView() (tela de sucesso, pós-pagamento). */
     var rows=s.now.concat(s.pre).map(function(it){return '<div class="okri okri-ed"><div class="okri-img">'+mold(it.p)+'</div><div class="okri-tx"><b>'+it.name+'</b>'+(it.sub?'<small>'+it.sub+'</small>':'')
       +'<div class="okqty" role="group" aria-label="Quantidade de '+it.name+'">'
       +'<button type="button" class="okqty-b" data-qm="'+it.k+'" aria-label="Diminuir quantidade"><svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/></svg></button>'
       +'<span class="okqty-n">'+it.qty+'</span>'
       +'<button type="button" class="okqty-b" data-qp="'+it.k+'" aria-label="Aumentar quantidade"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>'
-      +'<button type="button" class="okri-rm" data-rm="'+it.k+'">Remover</button>'
       +'</div></div><div class="okri-pr">'+BRL(it.qty*it.price)+'</div></div>';}).join('');
     var frete=s.now.length===0?'no lançamento':(CO.ship?(CO.ship.free?'Grátis':BRL(CO.ship.price)):'calcule no passo 2');
     var h='<h3>Resumo</h3><div class="ciList">'+rows+'</div><div class="cisep"></div>';

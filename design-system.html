@@ -661,8 +661,9 @@
     </div>
 
     <div class="comp-block">
-      <h3>Resumo editável — <code>.okri-ed</code>/<code>.okqty</code>/<code>.okri-rm</code></h3>
-      <p class="dsrule">Padrão de mercado "revisar e editar o carrinho no próprio checkout" (Fase 4a-carrinho): cada linha do Resumo (<code>#coSummary</code>, <code>renderCoSummary()</code>) ganha um stepper de quantidade (<code>.okqty</code>, mesmo par de ícones −/+ do stepper da sacola/<code>.qty</code>, só menor — 20px em vez de 29px) e um "Remover" (<code>.okri-rm</code>, texto sublinhado discreto, mesmo padrão de <code>.cardbrick-fail-link</code>) sem sair da tela. Um único listener delegado em <code>#coSummary</code> (montado uma vez em <code>wireCheckout()</code> — o <code>&lt;aside&gt;</code> persiste entre re-renders, só o innerHTML troca) resolve a chave do carrinho (<code>cartKey</code>, carregada em cada item por <code>cartSplit()</code> como <code>it.k</code>) e mexe direto em <code>cart[k]</code>: <b>+</b> incrementa; <b>−</b> decrementa, ou remove se já estiver em 1; <b>Remover</b> apaga na hora. Toda edição dispara os mesmos quatro passos: <code>saveCart()</code> (persiste), <code>render()</code> (dock/badge), <code>renderCoSummary()</code> (resumo + totais) e <code>syncCardBrickAmount()</code> (re-sincroniza as parcelas do cartão com o novo total, se o Cartão estiver aberto). Sacola esvaziada por uma remoção → <code>navigate('/checkout',true)</code>, que sem itens já renderiza <code>coEmptyView()</code> (sacola vazia + link pra produtos) em vez de deixar um checkout quebrado. Deliberadamente sutil: sem botão preenchido, sem cor de alerta em repouso — <code>.okri-rm</code> só fica <code>--error-text</code> no hover/foco.</p>
+      <h3>Resumo editável — <code>.okri-ed</code>/<code>.okqty</code> + <code>.snackbar</code></h3>
+      <p class="dsrule">Padrão de mercado "revisar e editar o carrinho no próprio checkout" (Fase 4a-carrinho): cada linha do Resumo (<code>#coSummary</code>, <code>renderCoSummary()</code>) ganha um stepper de quantidade (<code>.okqty</code>, mesmo par de ícones −/+ do stepper da sacola/<code>.qty</code>, só menor — 20px em vez de 29px). <b>Não há botão "Remover" dedicado</b> (padrão Baymard: no checkout o resumo é pra conferir, não pra editar pesado — botão de remover a mais polui e convida à saída). Um único listener delegado em <code>#coSummary</code> (montado uma vez em <code>wireCheckout()</code> — o <code>&lt;aside&gt;</code> persiste entre re-renders, só o innerHTML troca) resolve a chave do carrinho (<code>cartKey</code>, carregada em cada item por <code>cartSplit()</code> como <code>it.k</code>) e mexe direto em <code>cart[k]</code>: <b>+</b> incrementa; <b>−</b> decrementa, ou <b>remove o item quando já está em 1</b>. Toda edição dispara os mesmos quatro passos: <code>saveCart()</code> (persiste), <code>render()</code> (dock/badge), <code>renderCoSummary()</code> (resumo + totais) e <code>syncCardBrickAmount()</code> (re-sincroniza as parcelas do cartão com o novo total, se o Cartão estiver aberto). Sacola esvaziada por uma remoção → <code>navigate('/checkout',true)</code>, que sem itens já renderiza <code>coEmptyView()</code> (sacola vazia + link pra produtos) em vez de deixar um checkout quebrado.</p>
+      <p class="dsrule"><b>Nunca exclusão silenciosa</b> (padrão Baymard = deletar na hora + "Desfazer", sem modal "tem certeza?"): quando o "−" apaga um item, <code>offerUndo()</code> mostra um <code>.snackbar</code> — toast fixo no rodapé, na mesma linguagem inversa do <code>.btn</code> (fundo <code>--text</code>, texto <code>--bg</code>), com "Item removido · Desfazer". Fica no <code>&lt;body&gt;</code> (não dentro da view do checkout), então sobrevive ao re-render do resumo <b>e</b> à ida pra tela de sacola vazia. Some sozinho em 6s; "Desfazer" repõe <code>cart[k]</code> e re-renderiza (ou volta pra <code>/checkout</code> se a sacola tinha esvaziado). É o mesmo componente pra qualquer "ação reversível de baixo risco" no futuro.</p>
       <div class="demo demo-row" style="align-items:flex-start">
         <aside class="cosummary" style="flex:1 1 320px;position:static">
           <h3>Resumo</h3>
@@ -674,7 +675,6 @@
                   <button type="button" class="okqty-b" aria-label="Diminuir quantidade"><svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
                   <span class="okqty-n">2</span>
                   <button type="button" class="okqty-b" aria-label="Aumentar quantidade"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
-                  <button type="button" class="okri-rm">Remover</button>
                 </div>
               </div>
               <div class="okri-pr">R$ 178,00</div>
@@ -684,6 +684,10 @@
           <div class="sumrow"><span>Subtotal</span><span>R$ 178,00</span></div>
           <div class="sumrow tot"><span>Total</span><b>R$ 178,00</b></div>
         </aside>
+      </div>
+      <p class="dsrule">O toast <code>.snackbar</code> abaixo está fixado em <code>position:static</code> e <code>.show</code> só para demonstração — na loja real é <code>position:fixed</code> no rodapé, escondido até <code>offerUndo()</code> disparar.</p>
+      <div class="demo">
+        <div class="snackbar show" role="status" style="position:static;transform:none"><span class="snackbar-tx">Tablete Seigaiha removido</span><button type="button" class="snackbar-act">Desfazer</button></div>
       </div>
     </div>
 
