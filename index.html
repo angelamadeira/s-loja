@@ -876,6 +876,15 @@
        então ele nunca recebe o total com desconto Pix — mesma regra do servidor
        (recomputaTotal em src/precos.js: desconto de 5% só com metodo:'pix'). */
     var cardBrickCtl=null;
+    /* Timeout de carregamento do cardPayment Brick (Fase 4a-UX): os iframes de
+       secure-fields do MP (secure-fields.mercadopago.com) são o alvo #1 de
+       bloqueadores de anúncio/extensões de privacidade — quando bloqueados ou
+       lentos, o SDK não erra, só nunca chama onReady, e o usuário via uma caixa
+       vazia sem feedback nenhum. cardBrickTimer é compartilhado entre
+       mountCardBrick() (que o arma a cada tentativa) e selectPay() (que o limpa
+       ao trocar pra Pix, pra não disparar a falha "por trás" de uma aba escondida). */
+    var cardBrickTimer=null;
+    function clearCardBrickTimer(){if(cardBrickTimer){clearTimeout(cardBrickTimer);cardBrickTimer=null;}}
     function estTotalReais(){
       var sp=cartSplit(),merch=sp.subNow+sp.subPre;
       var shp=sp.now.length===0?0:(CO.ship?(CO.ship.free?0:CO.ship.price):0);
@@ -1054,6 +1063,7 @@
       if(payCardBox)payCardBox.hidden=v!=='cartao';
       renderCoSummary();
       if(v==='cartao'){mountCardBrick();syncCardBrickAmount();}
+      else{clearCardBrickTimer();}
     }
     payRadios.forEach(function(r){r.addEventListener('change',function(){if(r.checked)selectPay(r.value);});});
     /* ===== Pix: botão nosso (pílula .btn) — POST direto em /api/pagar, sem Brick
@@ -1085,13 +1095,48 @@
     /* ===== Cartão: cardPayment Brick do Mercado Pago (só o cartão — tokeniza o
        número, nunca passa em texto puro pelo nosso servidor). Montado só quando
        o método Cartão é selecionado pela 1ª vez (não precisa do SDK pro Pix). ===== */
-    var cardBrickMountStarted=false;
+    var cardBrickMountStarted=false,cardBrickMountGen=0;
+    var CARD_FAIL_MSG='Não conseguimos carregar o formulário de cartão. Se você usa um bloqueador de anúncios ou extensão de privacidade, desative para este site e recarregue — ou pague com Pix, que não precisa de cartão.';
     function mountCardBrick(){
       if(cardBrickMountStarted)return;cardBrickMountStarted=true;
+      /* myGen isola esta tentativa de montagem das anteriores: se o usuário clicar
+         "Tentar de novo" (retryMount), uma nova geração começa, e os callbacks da
+         tentativa velha (onReady/onError/o .then do bricks.create — que pode
+         resolver bem depois, já que não dá pra cancelar a Promise do SDK) viram
+         no-op via isCurrent(), em vez de pisar no estado da tentativa nova. */
+      var myGen=++cardBrickMountGen;
+      function isCurrent(){return myGen===cardBrickMountGen;}
       var brickBox=document.getElementById('coCardBrick'),errBox=document.getElementById('coCardErr');
+      var loadBox=document.getElementById('coCardLoading'),failBox=document.getElementById('coCardFail'),failMsg=document.getElementById('coCardFailMsg');
+      var retryBtn=document.getElementById('coCardRetry'),goPixBtn=document.getElementById('coCardGoPix');
       if(!brickBox)return;
       function brickErr(msg){if(!errBox)return;errBox.textContent=msg||'';errBox.hidden=!msg;}
       function mpTok(name){var v=getComputedStyle(document.documentElement).getPropertyValue(name);return v?v.trim():'';}
+      function showLoading(){if(failBox)failBox.hidden=true;if(loadBox)loadBox.hidden=false;}
+      function hideLoading(){if(loadBox)loadBox.hidden=true;}
+      /* Falha (timeout OU onError OU init quebrado): sempre a MESMA mensagem —
+         menciona bloqueador de anúncios (causa nº1) e a saída via Pix — com
+         "Tentar de novo" (re-arma mountCardBrick do zero) e um atalho pro Pix. */
+      function showFail(){
+        if(!isCurrent())return;
+        clearCardBrickTimer();hideLoading();brickErr('');
+        if(failMsg)failMsg.textContent=CARD_FAIL_MSG;
+        if(failBox)failBox.hidden=false;
+      }
+      function retryMount(){
+        clearCardBrickTimer();
+        if(cardBrickCtl&&typeof cardBrickCtl.unmount==='function'){try{cardBrickCtl.unmount();}catch(e){}}
+        cardBrickCtl=null;
+        brickBox.innerHTML='';
+        if(failBox)failBox.hidden=true;
+        cardBrickMountStarted=false;
+        mountCardBrick();
+      }
+      if(retryBtn)retryBtn.onclick=function(){retryMount();};
+      if(goPixBtn)goPixBtn.onclick=function(){var r=document.querySelector('#coPayMethods input[value="pix"]');if(r){r.checked=true;selectPay('pix');}};
+      showLoading();
+      clearCardBrickTimer();
+      cardBrickTimer=setTimeout(showFail,12000);
       function go(){
         fetch('/api/config').then(function(r){return r.json();}).then(function(cfg){
           if(!cfg||!cfg.mpKey||typeof MercadoPago==='undefined')throw new Error('mp indisponível');
@@ -1129,8 +1174,8 @@
               }}}
             },
             callbacks:{
-              onReady:function(){brickErr('');},
-              onError:function(err){console.error('MP Brick',err);brickErr('Não conseguimos carregar o pagamento agora. Recarregue a página ou tente de novo em instantes.');},
+              onReady:function(){if(!isCurrent())return;clearCardBrickTimer();hideLoading();if(failBox)failBox.hidden=true;brickErr('');},
+              onError:function(err){if(!isCurrent())return;console.error('MP Brick',err);showFail();},
               onSubmit:function(data){
                 var formData=(data&&data.formData)||{};
                 return new Promise(function(resolve,reject){
@@ -1157,10 +1202,17 @@
               }
             }
           });
-        }).then(function(ctl){cardBrickCtl=ctl;}).catch(function(err){console.error('MP init',err);brickErr('Não conseguimos carregar o pagamento agora. Recarregue a página.');});
+        }).then(function(ctl){
+          if(!isCurrent()){if(ctl&&typeof ctl.unmount==='function'){try{ctl.unmount();}catch(e){}}return;}
+          cardBrickCtl=ctl;
+        }).catch(function(err){if(!isCurrent())return;console.error('MP init',err);showFail();});
       }
       if(window.MercadoPago){go();}
-      else{var tries=0,iv=setInterval(function(){if(window.MercadoPago){clearInterval(iv);go();}else if(++tries>40){clearInterval(iv);brickErr('Não conseguimos carregar o pagamento agora. Recarregue a página.');}},150);}
+      /* Se o SDK (script sdk.mercadopago.com) em si ainda nem carregou, espera até
+         40×150ms=6s por window.MercadoPago antes de desistir — sem mostrar erro
+         aqui: o cardBrickTimer (12s, armado acima) é a única fonte da falha
+         visível, pra não ter duas mensagens brigando. */
+      else{var tries=0,iv=setInterval(function(){if(window.MercadoPago){clearInterval(iv);go();}else if(++tries>40){clearInterval(iv);}},150);}
     }
   }
   var CO={ship:null,pay:'pix',parc:1};
@@ -1259,7 +1311,10 @@
         +'<button type="button" class="btn" id="coPixBtn">Pagar com Pix</button>'
         +'<p class="paybrickerr" id="coPixErr" hidden></p>'
       +'</div>'
-      +'<div class="paybrick" id="coPayCartao" hidden><div id="coCardBrick"></div><p class="paybrickerr" id="coCardErr" hidden></p></div>'
+      +'<div class="paybrick" id="coPayCartao" hidden><div class="cardbrick-wrap" id="coCardWrap"><div id="coCardBrick"></div>'
+        +'<div class="cardbrick-loading" id="coCardLoading" hidden><div class="coproc-ring sm" aria-hidden="true"></div><p>Carregando o formulário de cartão…</p></div>'
+        +'<div class="cardbrick-fail" id="coCardFail" hidden><p id="coCardFailMsg"></p><div class="cardbrick-fail-cta"><button type="button" class="btn ghost" id="coCardRetry">Tentar de novo</button><button type="button" class="cardbrick-fail-link" id="coCardGoPix">Pagar com Pix em vez disso</button></div></div>'
+      +'</div><p class="paybrickerr" id="coCardErr" hidden></p></div>'
       +'<div class="cotrust"><span>Compra protegida</span><span><a href="/faq">Trocas em até 7 dias</a></span><span>Enviamos para todo o Brasil</span></div>'
       +'<p class="cohelp">Dúvida antes de finalizar? <a href="https://wa.me/5511912345678?text='+encodeURIComponent('Olá! Estou finalizando uma compra na loja Studio Suzu e queria tirar uma dúvida.')+'" target="_blank" rel="noopener">Fale com a gente no WhatsApp</a>.</p>'
       +'<p class="cosafe">Ambiente seguro · protótipo de demonstração</p>'

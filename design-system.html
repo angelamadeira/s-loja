@@ -591,6 +591,32 @@
     </div>
 
     <div class="comp-block">
+      <h3>Cartão — carregando/falha do Brick — <code>.cardbrick-wrap</code></h3>
+      <p class="dsrule">Os iframes de secure-fields do Mercado Pago (<code>secure-fields.mercadopago.com</code>) são o alvo nº1 de bloqueadores de anúncio/extensões de privacidade — quando bloqueados ou lentos, o SDK não erra, só nunca chama <code>onReady</code>, e sem essa tela o usuário via uma caixa vazia. <code>.cardbrick-wrap</code> (dentro de <code>.paybrick</code>) reserva altura mínima (190px) pra não pular o layout, e sobrepõe dois estados como overlays absolutos — nunca escrevem dentro de <code>#coCardBrick</code>, que é território exclusivo do SDK do MP. <b>Carregando</b> (<code>.cardbrick-loading</code>): <code>.coproc-ring.sm</code> (a mesma animação do overlay de pagamento, só menor) + "Carregando o formulário de cartão…", mostrado assim que <code>mountCardBrick()</code> começa. <b>Falha</b> (<code>.cardbrick-fail</code>): dispara se <code>onReady</code> não chegou em 12s (<code>cardBrickTimer</code>, o caso comum de bloqueador), ou por <code>onError</code>/init quebrado — mesma mensagem nos 3 casos, mencionando o bloqueador e a saída via Pix, com "Tentar de novo" (<code>#coCardRetry</code>, re-arma <code>mountCardBrick()</code> — desmonta o Brick antigo se existir, limpa <code>#coCardBrick</code> e monta de novo) e um link discreto pro Pix (<code>#coCardGoPix</code>, troca o rádio de pagamento). O timer é cancelado se o usuário sai da aba Cartão antes de vencer.</p>
+      <div class="demo demo-row" style="align-items:flex-start;gap:var(--space-6);flex-wrap:wrap">
+        <div class="paybrick" style="flex:1 1 260px">
+          <div class="cardbrick-wrap">
+            <div class="cardbrick-loading">
+              <div class="coproc-ring sm" aria-hidden="true"></div>
+              <p>Carregando o formulário de cartão…</p>
+            </div>
+          </div>
+        </div>
+        <div class="paybrick" style="flex:1 1 260px">
+          <div class="cardbrick-wrap">
+            <div class="cardbrick-fail">
+              <p>Não conseguimos carregar o formulário de cartão. Se você usa um bloqueador de anúncios ou extensão de privacidade, desative para este site e recarregue — ou pague com Pix, que não precisa de cartão.</p>
+              <div class="cardbrick-fail-cta">
+                <button type="button" class="btn ghost">Tentar de novo</button>
+                <button type="button" class="cardbrick-fail-link">Pagar com Pix em vez disso</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="comp-block">
       <h3>Overlay de processamento de pagamento — <code>.coproc</code></h3>
       <p class="dsrule">Cobre a tela inteira só no instante de chamar <code>/api/pagar</code> — trava a interação até o PSP responder a essa chamada específica (nunca mais o Pix inteiro: o QR não vive mais aqui, ver <code>/pix/&lt;ref&gt;</code> abaixo). Só spinner + texto: <b>confirmando</b> — <code>.coproc-ring</code> gira com <code>.coproc-msg</code> genérico ("Confirmando…", cartão) ou específico ("Gerando o seu código Pix…", clique em Pagar com Pix); <b>aprovado</b> — fecha direto pro sucesso (<code>/pedido</code>); <b>pendente</b> (Pix) — fecha e navega pra <code>/pix/&lt;ref&gt;</code>, a tela retornável de verdade; <b>recusado</b> — <code>.coproc-ico</code> (erro) + mensagem + botão explícito <code>#coProcBack</code> ("Voltar ao checkout") — sem fechar sozinho, a sacola nunca é limpa nesse caso.</p>
       <div class="demo demo-stage">

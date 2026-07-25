@@ -704,6 +704,25 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
    campos do checkout. */
 .paybrick{border:1px solid var(--line);border-radius:var(--r-md);padding:var(--space-4);background:var(--surface);margin-top:var(--space-4);margin-bottom:var(--space-4)}
 .paybrickerr{color:var(--error-text);font-size:.82rem;margin-top:var(--space-3)}
+/* .cardbrick-wrap — envelope do #coCardBrick (Fase 4a-UX): reserva altura mínima
+   pra não pular o layout enquanto os iframes de secure-fields do MP carregam, e
+   sobrepõe .cardbrick-loading/.cardbrick-fail como overlays absolutos — nunca
+   tocam o innerHTML de #coCardBrick, que é território exclusivo do SDK do MP
+   (o Brick assume o próprio container; escrever ali por cima seria apagado ou
+   brigaria com o SDK). O #coCardBrick some por baixo (mesmo --surface) até o
+   Brick de fato desenhar campos nele. */
+.cardbrick-wrap{position:relative;min-height:190px}
+.cardbrick-loading,.cardbrick-fail{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--space-3);background:var(--surface);text-align:center;padding:var(--space-5) var(--space-3)}
+.cardbrick-loading[hidden],.cardbrick-fail[hidden]{display:none}
+.cardbrick-loading p{margin:0;font-size:.82rem;font-weight:300;color:var(--text-muted)}
+.coproc-ring.sm{width:24px;height:24px;border-width:2px}
+.cardbrick-fail p{margin:0;font-size:.86rem;font-weight:300;line-height:1.6;color:var(--text-secondary);max-width:36ch}
+.cardbrick-fail-cta{display:flex;flex-direction:column;align-items:center;gap:var(--space-3);width:100%;max-width:220px}
+.cardbrick-fail-cta .btn.ghost{width:100%;text-align:center}
+.cardbrick-fail-link{background:none;border:none;padding:0;font-family:inherit;font-size:.82rem;font-weight:300;color:var(--text-muted);text-decoration:underline;text-underline-offset:2px;cursor:pointer}
+.cardbrick-fail-link:hover,.cardbrick-fail-link:focus-visible{color:var(--text)}
+/* .coproc-ring.sm herda a animação/redução de movimento de .coproc-ring (regra
+   global em @media(prefers-reduced-motion:reduce), mais abaixo neste arquivo). */
 .cosafe{text-align:center;font-size:.74rem;color:var(--text-muted);font-weight:300;margin-top:var(--space-3)}
 .cosummary{border:1px solid var(--line-soft);border-radius:var(--r-xl);padding:var(--space-6) var(--space-5);background:var(--raised);order:-1}
 @media(min-width:860px){.cosummary{position:sticky;top:88px;order:0}}
