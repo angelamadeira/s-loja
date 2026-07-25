@@ -704,7 +704,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
 .pmbadge{flex:0 0 auto;font-size:.72rem;font-weight:600;color:var(--success-text);background:var(--success-surface);border-radius:var(--r-pill);padding:var(--space-1) var(--space-3)}
 /* .paypix — forma Pix (CPF nosso + botão pílula .btn; sem Brick nenhum, o Pix é
    POST direto em /api/pagar). */
-.paypix{border:1px solid var(--line);border-radius:var(--r-md);padding:var(--space-4);background:var(--surface);margin-top:var(--space-4);margin-bottom:var(--space-4)}
+.paypix{border:1px solid var(--line);border-radius:var(--r-md);padding:var(--space-4);background:var(--surface)}
 .paypix .btn{display:block;width:100%;text-align:center;margin-top:var(--space-5)}
 /* .paybrick — envelope do formulário de Cartão (Fase 4a-securefields, MP Secure
    Fields SDK JS V2), só pro Cartão; esta casca dá o acabamento (borda/raio/
@@ -714,7 +714,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
    pílula do Pix, mesma largura/alinhamento via a regra abaixo) fica disabled
    até os 3 campos seguros ficarem prontos (evento 'ready' de cada um) — ver
    mountCardFields() no JS. */
-.paybrick{border:1px solid var(--line);border-radius:var(--r-md);padding:var(--space-4);background:var(--surface);margin-top:var(--space-4);margin-bottom:var(--space-4)}
+.paybrick{border:1px solid var(--line);border-radius:var(--r-md);padding:var(--space-4);background:var(--surface)}
 .paybrick .btn{display:block;width:100%;text-align:center;margin-top:var(--space-5)}
 .paybrickerr{color:var(--error-text);font-size:.82rem;margin-top:var(--space-3)}
 /* .cardform — os campos do Cartão, na ordem Suzu (nº → validade/CVV → nome →
