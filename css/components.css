@@ -648,6 +648,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
 .freeship.done .freeship-bar span{background:var(--success-text)}
 .freeship.done .freeship-tx,.freeship.done .freeship-tx b{color:var(--success-text)}
 .drow{display:flex;justify-content:space-between;font-size:.84rem;color:var(--text-tertiary);margin-bottom:var(--space-2);font-weight:300}
+.drow.disc{color:var(--success-text)}
 .drow.tot{font-size:1.05rem;color:var(--text);margin:var(--space-3) 0 var(--space-4);font-weight:400}
 .drow.tot b{font-weight:500;font-variant-numeric:tabular-nums}
 .checkout{width:100%;background:var(--text);color:var(--bg);border:none;padding:var(--space-4);border-radius:var(--r-pill);font-size:.76rem;font-weight:500;letter-spacing:.08em;text-transform:uppercase}

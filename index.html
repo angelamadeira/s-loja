@@ -206,6 +206,7 @@
     <div class="cepmini"><input type="text" id="drCep" inputmode="numeric" placeholder="Seu CEP" maxlength="9" autocomplete="postal-code"><button type="button" class="btn ghost" id="drCepBtn">Calcular frete</button></div>
     <p class="cephint" id="drCepHint"></p>
     <div class="drow"><span>Subtotal</span><span id="sub">R$ 0,00</span></div>
+    <div class="drow disc" id="drDiscRow" hidden><span>Desconto</span><span id="drDisc">—</span></div>
     <div class="drow"><span>Frete</span><span id="ship">—</span></div>
     <div class="drow tot"><span>Total</span><b id="tot">R$ 0,00</b></div>
     <div id="freeShipSlot"></div>
@@ -1715,6 +1716,13 @@
     var payPixDisc=CO.pay==='pix'?pixDisc:0;
     var coupDisc=CO.coupon?Math.round(merch*CO.coupon.pct/100*100)/100:0;
     var total=merch+(ship||0)-coupDisc-payPixDisc;
+    /* Desconto do produto explícito: Subtotal vira o CHEIO e a economia aparece
+       numa linha "Desconto" (padrão de mercado — deixa a economia visível em vez
+       de escondida no subtotal). Reserva fica de fora (preço é o sinal de 30%).
+       Total não muda: merch já é o subtotal com desconto. */
+    var prodDisc=s.now.concat(s.pre).reduce(function(a,it){return a+(it.presale?0:(priceOf(it.p,it.size)-it.price)*it.qty);},0);
+    prodDisc=Math.round(prodDisc*100)/100;
+    var fullSub=Math.round((merch+prodDisc)*100)/100;
     /* RESUMO editável (Fase 4a-carrinho): cada linha ganha um stepper de
        quantidade (−/n/+, mesmo par de ícones do stepper da sacola/.qty) — mira
        cart[it.k] (chave carregada por cartSplit()). NÃO tem botão "Remover"
@@ -1729,7 +1737,8 @@
     var rows=s.now.concat(s.pre).map(function(it){var was=it.presale?'':wasPrice(it.p,priceOf(it.p,it.size)*it.qty);return '<div class="okri"><div class="okri-img">'+mold(it.p)+(it.qty>1?'<span class="okri-qty">'+it.qty+'×</span>':'')+'</div><div class="okri-tx"><b>'+it.name+'</b>'+(it.sub?'<small>'+it.sub+'</small>':'')+'</div><div class="okri-pr'+(was?' hasdisc':'')+'">'+was+BRL(it.qty*it.price)+'</div></div>';}).join('');
     var frete=s.now.length===0?'no lançamento':(CO.ship?(CO.ship.free?'Grátis':BRL(CO.ship.price)):'calcule no passo 2');
     var h='<h3>Resumo</h3><div class="ciList">'+rows+'</div><div class="cisep"></div>';
-    h+='<div class="sumrow"><span>Subtotal</span><span>'+BRL(merch)+'</span></div>';
+    h+='<div class="sumrow"><span>Subtotal</span><span>'+BRL(fullSub)+'</span></div>';
+    if(prodDisc>0)h+='<div class="sumrow disc"><span>Desconto</span><span>−'+BRL(prodDisc)+'</span></div>';
     h+='<div class="sumrow"><span>Frete</span><span>'+frete+'</span></div>';
     if(coupDisc>0)h+='<div class="sumrow disc"><span>Cupom '+CO.coupon.code+'</span><span>−'+BRL(coupDisc)+'</span></div>';
     if(payPixDisc>0)h+='<div class="sumrow disc"><span>Desconto Pix</span><span>−'+BRL(payPixDisc)+'</span></div>';
@@ -2090,7 +2099,13 @@
     var ship=!hasNow?0:(q?(q[0].free?0:q[0].price):null); /* null = ainda sem CEP calculado */
     document.getElementById('dockTotal').textContent=BRL(sub);
     document.getElementById('dockCount').textContent=count?(count+(count>1?' itens':' item')+' na sacola'):'sua sacola está vazia';
-    document.getElementById('sub').textContent=BRL(sub);
+    /* desconto do produto explícito: Subtotal cheio + linha "Desconto" (reserva
+       fora — preço é o sinal). O Total (#tot) usa `sub` com desconto, não muda. */
+    var prodDisc=Object.keys(cart).reduce(function(a,k){var it=cart[k];return a+(it.presale?0:(priceOf(it.p,it.size)-it.price)*it.qty);},0);
+    prodDisc=Math.round(prodDisc*100)/100;
+    document.getElementById('sub').textContent=BRL(Math.round((sub+prodDisc)*100)/100);
+    var _dr=document.getElementById('drDiscRow'),_dd=document.getElementById('drDisc');
+    if(_dr){_dr.hidden=prodDisc<=0;if(_dd)_dd.textContent='−'+BRL(prodDisc);}
     var _sh=document.getElementById('ship');
     if(sub===0)_sh.textContent='—';
     else if(!hasNow)_sh.textContent='no lançamento';
