@@ -1291,30 +1291,39 @@
     if(s.pre.length)h+='<p class="sumnote pre">Nos itens de reserva você paga só o <b>sinal</b> agora. O restante e o frete são cobrados quando a peça lança.</p>';
     el.innerHTML=h;
   }
-  function pedidoView(){
-    if(!CO.order) return coEmptyView();
-    var _pnome=(CO.name||'').trim().split(/\s+/)[0];
-    var items=(CO.items||[]).map(function(it){return '<div class="okri"><div class="okri-img">'+(it.mold||'')+(it.q>1?'<span class="okri-qty">'+it.q+'×</span>':'')+'</div><div class="okri-tx"><b>'+it.name+'</b>'+(it.sub?'<small>'+it.sub+'</small>':'')+'</div><div class="okri-pr">'+BRL(it.price)+'</div></div>';}).join('');
-    var lancamento=CO.shipLabel==='no lançamento';
-    var entrega=lancamento?'combinamos no lançamento':((CO.shipLabel||'—')+(CO.eta?(' · '+CO.eta):''));
+  /* Recap de confirmação (.okwrap/.okhead/.okseal/.oksig/.okpanel/.okrecap) — extraído de
+     pedidoView() pra ser reusável pelo /pix/<ref> retornável (ver setApproved() em
+     wirePixView()), que não tem CO em memória e monta o mesmo `order` a partir da resposta
+     do servidor. `order` é um objeto puro (não precisa ser o CO): {order,name,items
+     ([{q,name,price,mold,sub}]),paidTotal,payLabel,shipLabel,eta,addr1,addr2,email,whats,hadPre}.
+     Todo campo é opcional/degrada bem quando ausente — mesma tolerância que o CO já tinha. */
+  function confirmView(order){
+    var _pnome=(order.name||'').trim().split(/\s+/)[0];
+    var items=(order.items||[]).map(function(it){return '<div class="okri"><div class="okri-img">'+(it.mold||'')+(it.q>1?'<span class="okri-qty">'+it.q+'×</span>':'')+'</div><div class="okri-tx"><b>'+it.name+'</b>'+(it.sub?'<small>'+it.sub+'</small>':'')+'</div><div class="okri-pr">'+BRL(it.price)+'</div></div>';}).join('');
+    var lancamento=order.shipLabel==='no lançamento';
+    var entrega=lancamento?'combinamos no lançamento':((order.shipLabel||'—')+(order.eta?(' · '+order.eta):''));
     return '<div class="wrap cowrap"><div class="okwrap">'
       +'<div class="okhead"><div class="okseal"><svg class="okcheck" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>'
         +'<span class="sig oksig">Deu tudo certo'+(_pnome?', '+_pnome:'')+'!</span>'
         +'<p class="okhead-sub">Agora é a nossa vez: vamos moldar as suas pequenas alegrias com todo o cuidado.</p>'
-        +'<p class="okmail">A confirmação foi para <b>'+(CO.email||'seu e-mail')+'</b> — é por lá que a gente avisa cada passo, do preparo ao envio'+(CO.whats?', e um oi no seu WhatsApp se precisar':'')+'.</p></div>'
+        +'<p class="okmail">A confirmação foi para <b>'+(order.email||'seu e-mail')+'</b> — é por lá que a gente avisa cada passo, do preparo ao envio'+(order.whats?', e um oi no seu WhatsApp se precisar':'')+'.</p></div>'
       +'<div class="okpanel"><div class="okrecap">'
-        +'<div class="okrecap-hd">'+(CO.eta&&!lancamento?'<span class="okrecap-eta">Chega em <b>'+CO.eta+'</b></span>':'<span class="okrecap-eta">'+entrega+'</span>')+'<span class="okrecap-n">Nº '+CO.order+'</span></div>'
+        +'<div class="okrecap-hd">'+(order.eta&&!lancamento?'<span class="okrecap-eta">Chega em <b>'+order.eta+'</b></span>':'<span class="okrecap-eta">'+entrega+'</span>')+'<span class="okrecap-n">Nº '+order.order+'</span></div>'
         +(items?'<div class="okrilist">'+items+'</div>':'')
         +'<div class="okrisep"></div>'
-        +(!lancamento&&CO.addr1?'<div class="okrto"><span class="okrto-lb">Entrega para</span><span class="okrto-ad">'+(CO.name?'<b>'+CO.name+'</b> · ':'')+CO.addr1+(CO.addr2?'<br>'+CO.addr2:'')+'</span></div><div class="okrisep"></div>':'')
-        +'<div class="okrrow okrrow-total"><span>Total pago</span><b>'+BRL(CO.paidTotal||0)+'</b></div>'
-        +'<div class="okrrow sub"><span>Pagamento</span><span>'+(CO.payLabel||'—')+'</span></div>'
-        +(lancamento?'':'<div class="okrrow sub"><span>Frete</span><span>'+(CO.shipLabel||'—')+'</span></div>')
-        +(CO.hadPre?'<p class="okpre">Os itens de reserva ficam guardados com o seu nome; avisamos e cobramos o restante quando a peça é lançada.</p>':'')
+        +(!lancamento&&order.addr1?'<div class="okrto"><span class="okrto-lb">Entrega para</span><span class="okrto-ad">'+(order.name?'<b>'+order.name+'</b> · ':'')+order.addr1+(order.addr2?'<br>'+order.addr2:'')+'</span></div><div class="okrisep"></div>':'')
+        +'<div class="okrrow okrrow-total"><span>Total pago</span><b>'+BRL(order.paidTotal||0)+'</b></div>'
+        +'<div class="okrrow sub"><span>Pagamento</span><span>'+(order.payLabel||'—')+'</span></div>'
+        +(lancamento?'':'<div class="okrrow sub"><span>Frete</span><span>'+(order.shipLabel||'—')+'</span></div>')
+        +(order.hadPre?'<p class="okpre">Os itens de reserva ficam guardados com o seu nome; avisamos e cobramos o restante quando a peça é lançada.</p>':'')
         +'<p class="okterms">Trocas e devoluções em até <b>7 dias</b> após o recebimento. <a href="/trocas">Como funciona</a>.</p></div></div>'
       +'<div class="okcta"><a class="btn" href="/produtos">Continuar comprando</a></div>'
       +'<p class="okhelp">Dúvida sobre o pedido? <a href="/atendimento">Fale com a gente</a>.</p>'
       +'</div></div>';
+  }
+  function pedidoView(){
+    if(!CO.order) return coEmptyView();
+    return confirmView(CO);
   }
   /* ===== /pix/<ref> — tela DE VERDADE (não overlay), retornável: o usuário pode
      recarregar ou reabrir o link e ela busca o estado atual em GET /api/compra?ref=
@@ -1365,22 +1374,50 @@
       if(panel)panel.innerHTML='<p class="pixgone">'+msg+'</p>';
       if(cta)cta.innerHTML=ctaHtml||'';
     }
-    function setApproved(){
+    /* Mapeia o `order` que GET /api/compra devolve (compra aprovada, ver src/index.js
+       handleCompra) pro shape que confirmView() espera. O servidor não guarda nome (só
+       e-mail/whats) nem ETA — ambos ficam vazios e confirmView() já degrada bem pra isso
+       (mesmas checagens de truthiness que o CO já usava). */
+    function mapServerOrder(order){
+      var end=order.endereco||{};
+      var items=(order.itens||[]).map(function(it){
+        var p=byId(it.id);
+        return {q:it.qtd,name:p?p.name:it.id,price:it.qtd*it.preco_unit/100,mold:p?mold(p):'',sub:SIZES[it.tam]?SIZES[it.tam].name:it.tam};
+      });
+      return {
+        order:order.ref||ref,
+        name:'',
+        items:items,
+        paidTotal:(order.total||0)/100,
+        payLabel:order.metodo==='pix'?'Pix (à vista)':((order.parcelas||1)+'× no cartão'),
+        shipLabel:order.frete>0?BRL(order.frete/100):'Grátis',
+        eta:'',
+        addr1:end.rua?(end.rua+(end.numero?', '+end.numero:'')+(end.complemento?' · '+end.complemento:'')):'',
+        addr2:[end.bairro,end.cidade].filter(Boolean).join(' · ')+(end.cep?' · CEP '+end.cep:''),
+        email:order.contato_email||'',
+        whats:order.contato_whats||'',
+        hadPre:false
+      };
+    }
+    function setApproved(order){
       stopPoll();
+      /* com o `order` completo do servidor, mostra o MESMO recap de /pedido (confirmView) —
+         não o texto mínimo. Sem `order` (resposta antiga/inesperada), cai pro texto mínimo. */
+      if(order){detail.innerHTML=confirmView(mapServerOrder(order));return;}
       if(titleEl)titleEl.textContent='Pagamento confirmado!';
       if(subEl)subEl.textContent='A confirmação foi enviada para o seu e-mail.';
       if(panel)panel.innerHTML='';
       if(cta)cta.innerHTML='<a class="btn" href="/produtos">Continuar comprando</a>';
     }
-    function handleApproved(){
+    function handleApproved(order){
       stopPoll();
       /* o pedido pago sempre sai do carrinho, mesmo numa aba "retornada" sem CO —
          só NÃO navega pro recibo (/pedido) se o CO desta aba não é o desta compra
-         (ex.: reabriu o link depois de fechar a aba) — nesse caso não há recibo
-         completo pra montar (itens/total/frete vêm do CO), então mostra a
-         confirmação aqui mesmo. */
+         (ex.: reabriu o link depois de fechar a aba) — nesse caso não há CO completo
+         pra montar via pedidoView(), então monta o mesmo recap aqui a partir do
+         `order` que o servidor devolveu (ver mapServerOrder/setApproved acima). */
       Object.keys(cart).forEach(function(k){delete cart[k];});render();
-      if(CO.order===ref){navigate('/pedido',true);}else{setApproved();}
+      if(CO.order===ref){navigate('/pedido',true);}else{setApproved(order);}
     }
     function renderPix(d){
       if(!panel)return;
@@ -1405,7 +1442,7 @@
       pollTimer=setInterval(function(){
         fetch('/api/compra?ref='+encodeURIComponent(ref)).then(function(r){return r.json();}).then(function(d){
           if(!d)return;
-          if(d.status==='aprovado'){handleApproved();}
+          if(d.status==='aprovado'){handleApproved(d.order);}
           else if(d.status==='recusado'||d.status==='cancelado'){stopPoll();setGone('O pagamento não foi concluído — nada foi cobrado.','<a class="btn" href="/checkout">Voltar ao checkout</a>');}
           /* pendente: continua esperando, a próxima rodada tenta de novo */
         }).catch(function(){/* rede falhou nessa rodada — a próxima tenta de novo */});
@@ -1413,7 +1450,7 @@
     }
     fetch('/api/compra?ref='+encodeURIComponent(ref)).then(function(r){return r.json();}).then(function(d){
       if(!d||d.status==='nao_encontrado'){setGone('Não encontramos esse pedido.','<a class="btn" href="/produtos">Ver produtos</a><a class="btn ghost" href="/checkout">Voltar ao checkout</a>');return;}
-      if(d.status==='aprovado'){handleApproved();return;}
+      if(d.status==='aprovado'){handleApproved(d.order);return;}
       if(d.status==='recusado'||d.status==='cancelado'){setGone('O pagamento não foi concluído — nada foi cobrado.','<a class="btn" href="/checkout">Voltar ao checkout</a>');return;}
       if(d.status!=='pendente'||!d.pix){setGone('Esse código Pix não está mais disponível.','<a class="btn" href="/checkout">Voltar ao checkout</a>');return;}
       renderPix(d);

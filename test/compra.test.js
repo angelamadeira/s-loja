@@ -23,10 +23,28 @@ beforeEach(async () => {
 async function seedCompra(ref, status, opts) {
   opts = opts || {};
   await env.DB.prepare(
-    "INSERT INTO compras (id, ref, criado_em, itens, subtotal, frete, desconto, total, metodo, parcelas, contato_email, cpf, status, mp_payment_id, consentiu) " +
-      "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+    "INSERT INTO compras (id, ref, criado_em, itens, subtotal, frete, desconto, total, metodo, parcelas, contato_email, contato_whats, cpf, endereco, status, mp_payment_id, consentiu) " +
+      "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
   )
-    .bind(crypto.randomUUID(), ref, new Date().toISOString(), "[]", 12300, 0, 615, 11685, opts.metodo || "pix", 1, "a@b.com", "12345678909", status, opts.mpId || null, 1)
+    .bind(
+      crypto.randomUUID(),
+      ref,
+      new Date().toISOString(),
+      opts.itens || "[]",
+      12300,
+      opts.frete != null ? opts.frete : 0,
+      615,
+      11685,
+      opts.metodo || "pix",
+      opts.parcelas || 1,
+      "a@b.com",
+      opts.whats || null,
+      "12345678909",
+      opts.endereco || null,
+      status,
+      opts.mpId || null,
+      1
+    )
     .run();
 }
 
@@ -132,4 +150,37 @@ test("falha do MP ao reconsultar não derruba o endpoint — devolve só o statu
   expect(res.status).toBe(200);
   expect(j.status).toBe("pendente");
   expect(j.pix).toBeUndefined();
+});
+
+// Tela /pix/<ref> aprovada (retornável, sem CO em memória): o front precisa do
+// `order` completo pra montar o mesmo recap de /pedido (confirmView, index.html).
+test("compra aprovada em pix inclui order com itens/total e NÃO expõe cpf nem mp_payment_id", async () => {
+  const itens = JSON.stringify([{ id: "tablete", tam: "M", qtd: 2, preco_unit: 12300 }]);
+  const endereco = JSON.stringify({ rua: "Rua das Flores", numero: "10", complemento: "", bairro: "Centro", cidade: "São Paulo", cep: "01000-000" });
+  await seedCompra("SUZU-OK0001", "aprovado", {
+    metodo: "pix",
+    mpId: "555",
+    itens,
+    endereco,
+    frete: 1500,
+    whats: "11999999999",
+  });
+  const ctx = createExecutionContext();
+  const res = await worker.fetch(get("?ref=SUZU-OK0001"), env, ctx);
+  await waitOnExecutionContext(ctx);
+  const j = await res.json();
+  expect(res.status).toBe(200);
+  expect(j.status).toBe("aprovado");
+  expect(j.order).toBeTruthy();
+  expect(j.order.ref).toBe("SUZU-OK0001");
+  expect(j.order.itens).toEqual([{ id: "tablete", tam: "M", qtd: 2, preco_unit: 12300 }]);
+  expect(j.order.total).toBe(11685);
+  expect(j.order.frete).toBe(1500);
+  expect(j.order.metodo).toBe("pix");
+  expect(j.order.endereco).toEqual({ rua: "Rua das Flores", numero: "10", complemento: "", bairro: "Centro", cidade: "São Paulo", cep: "01000-000" });
+  expect(j.order.contato_email).toBe("a@b.com");
+  expect(j.order.contato_whats).toBe("11999999999");
+  expect(j.order.cpf).toBeUndefined();
+  expect(j.order.mp_payment_id).toBeUndefined();
+  expect(JSON.stringify(j.order)).not.toContain("12345678909"); // cpf usado no seed, nunca deve vazar
 });

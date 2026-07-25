@@ -214,17 +214,31 @@ async function handlePagar(request, env) {
 
 // GET /api/compra?ref= — polling do estado do pagamento (usado pelo front na tela
 // /pix/<ref>, retornável, enquanto espera a confirmação do Pix — e no /checkout
-// antes de navegar pra lá). Só expõe status/QR do Pix, nada de dado financeiro
-// (total, itens, endereço, CPF) ou pessoal (e-mail, telefone).
+// antes de navegar pra lá). Pendente só expõe status/QR do Pix, nada de dado
+// financeiro (total, itens, endereço) ou pessoal (e-mail, telefone) — mas uma
+// compra APROVADA inclui `order` (itens/total/frete/endereço/contato), pra
+// /pix/<ref> conseguir montar o mesmo recap de /pedido (confirmView, ver
+// index.html) mesmo numa aba "retornada" sem CO em memória.
 //
 // Compra pendente em Pix: reconsulta o MP (por mp_payment_id) e devolve o QR/
 // copia-e-cola atuais — a tela /pix/<ref> é retornável (pode ser recarregada ou
 // reaberta bem depois de /api/pagar ter respondido), então não dá pra confiar
 // num QR que só existiu na memória do primeiro request.
+//
+// PRIVACIDADE (pré-lançamento, endereçar antes de produção pra valer): `ref`
+// tem só 6 chars hex (gerarRef()) — alguém que adivinhasse/força-brutasse um
+// ref alheio veria o pedido completo (itens, total, endereço). Aceitável
+// agora (loja ainda não lançou pra valer), mas antes de ir ao ar de verdade
+// isso precisa de um token mais longo (ou exigir e-mail pra liberar `order`).
 async function handleCompra(url, env) {
   const ref = str(url.searchParams.get("ref"));
   if (!ref) return json({ status: "nao_encontrado" });
-  const row = await env.DB.prepare("SELECT status, metodo, mp_payment_id FROM compras WHERE ref = ?").bind(ref).first();
+  const row = await env.DB.prepare(
+    "SELECT ref, status, metodo, mp_payment_id, itens, total, frete, desconto, parcelas, endereco, contato_email, contato_whats, criado_em " +
+      "FROM compras WHERE ref = ?"
+  )
+    .bind(ref)
+    .first();
   if (!row) return json({ status: "nao_encontrado" });
 
   const resposta = { status: row.status };
@@ -237,6 +251,22 @@ async function handleCompra(url, env) {
       // cliente tenta de novo em ~4s.
       console.error("consultaPagamentoFull falhou", e);
     }
+  }
+  if (row.status === "aprovado") {
+    // nunca inclui cpf nem mp_payment_id aqui — só o que o recap precisa mostrar.
+    resposta.order = {
+      ref: row.ref,
+      itens: JSON.parse(row.itens || "[]"),
+      total: row.total,
+      frete: row.frete,
+      desconto: row.desconto,
+      metodo: row.metodo,
+      parcelas: row.parcelas,
+      endereco: row.endereco ? JSON.parse(row.endereco) : null,
+      contato_email: row.contato_email,
+      contato_whats: row.contato_whats,
+      criado_em: row.criado_em,
+    };
   }
   return json(resposta);
 }
