@@ -31,6 +31,10 @@ export default {
       // sempre qualquer coisa != 200, então não queremos abrir esse buraco.
       return handleMpWebhook(request, env);
     }
+    if (url.pathname === "/api/config") {
+      if (request.method !== "GET") return json({ ok: false, error: "metodo" }, 405);
+      return json({ mpKey: env.MP_PUBLIC_KEY });
+    }
     // qualquer outra coisa → a loja (assets)
     return env.ASSETS.fetch(request);
   },
