@@ -538,25 +538,23 @@
             <span class="coedit">Editar</span>
           </button>
           <div class="costep-body">
-            <label class="cofield"><span>CPF</span><input inputmode="numeric" placeholder="000.000.000-00" maxlength="14"></label>
-            <div class="paybrick"><p class="dsplaceholder">Payment Brick do Mercado Pago (injetado em runtime por <code>#coBrickContainer</code> — precisa da chave pública real, não renderiza aqui)</p></div>
+            <div class="paybrick"><p class="dsplaceholder">Payment Brick do Mercado Pago (injetado em runtime por <code>#coBrickContainer</code> — precisa da chave pública real, não renderiza aqui). Coleta e-mail (pré-preenchido com o da etapa 1), CPF e dados de pagamento — sem campos duplicados nossos.</p></div>
           </div>
         </section>
       </div>
     </div>
 
     <div class="comp-block">
-      <h3>Campo CPF + Payment Brick — <code>.paybrick</code></h3>
-      <p class="dsrule">O passo Pagamento do checkout (Fase 4a): CPF (<code>.cofield</code>, mesmo padrão de erro) + o Payment Brick do Mercado Pago, montado via SDK dentro do envelope <code>.paybrick</code> (borda/raio/fundo dos tokens Suzu; o conteúdo do Brick em si — cartão, Pix, parcelas — é do MP, estilizado via <code>customVariables</code>). Erros de carregamento do Brick aparecem em <code>.paybrickerr</code>, mesma cor de <code>.fielderr</code>.</p>
+      <h3>Payment Brick — <code>.paybrick</code></h3>
+      <p class="dsrule">O passo Pagamento do checkout (Fase 4a): só o Payment Brick do Mercado Pago, montado via SDK dentro do envelope <code>.paybrick</code> (borda/raio/fundo dos tokens Suzu; o conteúdo do Brick em si — e-mail, CPF, cartão, Pix, parcelas — é do MP, estilizado via <code>customVariables</code>, inclusive o botão de pagar via <code>buttonTextColor</code>/<code>borderRadiusFull</code>). O Brick só monta depois que a etapa 1 confirma o e-mail, pra poder pré-preencher <code>initialization.payer.email</code> — evita pedir o e-mail duas vezes. CPF vem de <code>formData.payer.identification.number</code> no <code>onSubmit</code>, não de um campo nosso. Erros de carregamento aparecem em <code>.paybrickerr</code>, mesma cor de <code>.fielderr</code>.</p>
       <div class="demo demo-row" style="align-items:flex-start">
-        <label class="cofield" style="flex:1 1 220px"><span>CPF</span><input inputmode="numeric" placeholder="000.000.000-00" maxlength="14"></label>
         <div class="paybrick" style="flex:1 1 260px"><p class="dsplaceholder">Payment Brick (runtime)</p></div>
       </div>
     </div>
 
     <div class="comp-block">
       <h3>Overlay de processamento de pagamento — <code>.coproc</code></h3>
-      <p class="dsrule">Cobre a tela inteira ao confirmar o pedido — trava a interação até o PSP responder. Três estados dirigidos pela resposta de <code>/api/pagar</code> (Fase 4a): <b>aprovado</b> — <code>.coproc-ring</code> gira, depois vai direto pro sucesso; <b>Pix pendente</b> — QR + copia-e-cola em <code>.coproc-pix</code>/<code>.coproc-qr</code>/<code>.coproc-code</code>, sem botão de repetir (a sacola só limpa quando o Pix confirma, via polling); <b>recusado</b> — <code>.coproc-ico</code> (erro) + mensagem, fecha sozinho de volta pro checkout (a sacola nunca é limpa nesse caso — o retry de cartão acontece dentro do próprio Brick).</p>
+      <p class="dsrule">Cobre a tela inteira ao confirmar o pedido — trava a interação até o PSP responder. Três estados dirigidos pela resposta de <code>/api/pagar</code> (Fase 4a): <b>aprovado</b> — <code>.coproc-ring</code> gira, depois vai direto pro sucesso; <b>Pix pendente</b> — QR + copia-e-cola em <code>.coproc-pix</code>/<code>.coproc-qr</code>/<code>.coproc-code</code>, com contagem regressiva em <code>.coproc-expiry</code> (30min, só visual — o back-end não devolve a expiração real do Pix; ao chegar a zero vira <code>.coproc-expiry.expired</code>), sem botão de repetir (a sacola só limpa quando o Pix confirma, via polling); <b>recusado</b> — <code>.coproc-ico</code> (erro) + mensagem, fecha sozinho de volta pro checkout (a sacola nunca é limpa nesse caso — o retry de cartão acontece dentro do próprio Brick).</p>
       <div class="demo demo-stage">
         <div class="coproc show" style="position:absolute">
           <div class="coproc-in">
@@ -576,7 +574,16 @@
                 <code class="coproc-code">00020126580014BR.GOV.BCB.PIX...</code>
                 <button type="button" class="btn ghost">Copiar código</button>
               </div>
+              <p class="coproc-expiry">Expira em 29:41</p>
             </div>
+          </div>
+        </div>
+      </div>
+      <div class="demo demo-stage" style="margin-top:var(--space-4);height:200px">
+        <div class="coproc show" style="position:absolute">
+          <div class="coproc-in">
+            <p class="coproc-msg">Aguardando o seu Pix…</p>
+            <p class="coproc-expiry expired">O código expirou — gere um novo pedido.</p>
           </div>
         </div>
       </div>

@@ -176,7 +176,7 @@
 
 <div class="dock"><div class="dock-in"><div class="sum"><b id="dockTotal">R$ 0,00</b><small id="dockCount">sua sacola está vazia</small></div><button class="btn" id="openCart2">Ver sacola</button></div></div>
 <div class="overlay" id="overlay"></div>
-<div class="coproc" id="coProc" hidden role="alertdialog" aria-live="polite" aria-label="Processando pedido"><div class="coproc-in"><div class="coproc-ring" id="coProcRing"></div><svg class="coproc-ico" id="coProcIco" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" hidden><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg><p class="coproc-msg" id="coProcMsg">Confirmando…</p><p class="coproc-sub" id="coProcSub" hidden></p><div class="coproc-pix" id="coProcPix" hidden><img class="coproc-qr" id="coProcQr" alt="QR Code Pix"><div class="coproc-copia"><code class="coproc-code" id="coProcCopia"></code><button type="button" class="btn ghost" id="coProcCopiaBtn">Copiar código</button></div></div></div></div>
+<div class="coproc" id="coProc" hidden role="alertdialog" aria-live="polite" aria-label="Processando pedido"><div class="coproc-in"><div class="coproc-ring" id="coProcRing"></div><svg class="coproc-ico" id="coProcIco" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" hidden><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg><p class="coproc-msg" id="coProcMsg">Confirmando…</p><p class="coproc-sub" id="coProcSub" hidden></p><div class="coproc-pix" id="coProcPix" hidden><img class="coproc-qr" id="coProcQr" alt="QR Code Pix"><div class="coproc-copia"><code class="coproc-code" id="coProcCopia"></code><button type="button" class="btn ghost" id="coProcCopiaBtn">Copiar código</button></div><p class="coproc-expiry" id="coProcExpiry" aria-live="polite"></p></div></div></div>
 <a class="wafloat" href="https://wa.me/5511912345678?text=Ol%C3%A1!%20Vim%20pela%20loja%20Studio%20Suzu%20e%20queria%20tirar%20uma%20d%C3%BAvida." target="_blank" rel="noopener" aria-label="Falar no WhatsApp"><svg viewBox="0 0 24 24"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.86 9.86 0 0 0 4.79 1.22h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2zm0 18.13h-.01c-1.53 0-3.03-.41-4.34-1.19l-.31-.18-3.22.84.86-3.14-.2-.32a8.19 8.19 0 0 1-1.26-4.37c0-4.54 3.7-8.23 8.24-8.23 2.2 0 4.27.86 5.82 2.42a8.18 8.18 0 0 1 2.41 5.83c0 4.54-3.7 8.24-8.23 8.24zm4.52-6.16c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.12-.16.25-.64.81-.78.97-.14.17-.29.19-.54.06-.25-.12-1.05-.39-1.99-1.23-.74-.66-1.23-1.47-1.38-1.72-.14-.25-.02-.38.11-.51.11-.11.25-.29.37-.43.12-.14.16-.25.25-.41.08-.17.04-.31-.02-.43-.06-.12-.56-1.35-.77-1.84-.2-.48-.41-.42-.56-.42h-.48c-.17 0-.43.06-.66.31-.23.25-.87.85-.87 2.07 0 1.22.89 2.4 1.02 2.56.12.17 1.75 2.67 4.23 3.74.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.68-1.18.21-.58.21-1.07.14-1.18-.06-.11-.22-.17-.47-.29z"/></svg></a>
 <div class="nfov" id="nfov"></div>
 <div class="nfmodal" id="nfmodal" role="dialog" aria-modal="true" aria-labelledby="nftitle" aria-hidden="true">
@@ -856,12 +856,9 @@
     (function(){var em=document.getElementById('coEmail');if(em)em.addEventListener('input',function(){if(em.classList.contains('bad'))emailErr('');});})();
     CO.ship=null;CO.pay='pix';CO.parc=1;CO.coupon=null;CO.cpf='';
     renderCoSummary();
-    var cpfEl=document.getElementById('coCpf');
-    function cpfDigits(v){return (v||'').replace(/\D/g,'').slice(0,11);}
-    function fmtCpf(d){if(d.length<=3)return d;if(d.length<=6)return d.slice(0,3)+'.'+d.slice(3);if(d.length<=9)return d.slice(0,3)+'.'+d.slice(3,6)+'.'+d.slice(6);return d.slice(0,3)+'.'+d.slice(3,6)+'.'+d.slice(6,9)+'-'+d.slice(9);}
-    function cpfMsg(){return 'Precisamos do CPF pra processar o pagamento e emitir a nota.';}
-    function cpfErr(msg){var b=document.getElementById('coCpfErr');if(b){b.textContent=msg||'';b.classList.toggle('show',!!msg);}if(cpfEl){cpfEl.classList.toggle('bad',!!msg);cpfEl.setAttribute('aria-invalid',msg?'true':'false');}}
-    if(cpfEl)cpfEl.addEventListener('input',function(){cpfEl.value=fmtCpf(cpfDigits(cpfEl.value));if(cpfEl.classList.contains('bad'))cpfErr('');});
+    /* CPF: coletado pelo próprio Payment Brick (ele precisa do documento pra tokenizar
+       de qualquer forma) — ler de formData.payer.identification.number no onSubmit em
+       vez de duplicar o campo aqui evita pedir o CPF duas vezes. */
     /* estimativa exibida no Brick — o valor cobrado de verdade nasce no servidor (/api/pagar) */
     var brickCtl=null;
     function estTotalReais(){
@@ -906,7 +903,7 @@
       function openStep(n){steps.forEach(function(sec){sec.classList.toggle('open',+sec.dataset.step===n);});var el=document.getElementById('cstep'+n);if(el)el.scrollIntoView({block:'nearest',behavior:'smooth'});}
       function markDone(n){var el=document.getElementById('cstep'+n);if(el)el.classList.add('done');var sum=document.getElementById('sum'+n);if(sum)sum.textContent=sumFor(n);}
       function validStep(n){
-        if(n===1){var em=document.getElementById('coEmail');if(!em.value||em.value.indexOf('@')<1){emailErr(emailMsg(em));em.focus();return false;}emailErr('');return true;}
+        if(n===1){var em=document.getElementById('coEmail');if(!em.value||em.value.indexOf('@')<1){emailErr(emailMsg(em));em.focus();return false;}emailErr('');CO.email=em.value.trim();return true;}
         if(n===2){var sp=cartSplit();
           if(sp.now.length){
             if(!CO.ship){var h=document.getElementById('cepHint');if(h){h.textContent='Calcule o frete para continuar.';h.className='cephint err';}var c=document.getElementById('coCep');if(c)c.focus();return false;}
@@ -925,6 +922,7 @@
         return '';
       }
       cof.querySelectorAll('.conext').forEach(function(b){b.onclick=function(){var n=+b.dataset.next;if(!validStep(n))return;markDone(n);
+        if(n===1)mountBrick();
         var nx=n+1;while(nx<3 && document.getElementById('cstep'+nx).classList.contains('done'))nx++;openStep(nx);};});
       ['coNome','coRua','coNum','coBairro','coCidade'].forEach(function(id){var el=document.getElementById(id);if(el)el.addEventListener('input',function(){el.classList.remove('bad');var ah=document.getElementById('addrHint');if(ah&&!cof.querySelector('#addrFields .bad')){ah.textContent='';ah.className='cephint';}});});
       cof.querySelectorAll('button.cohd').forEach(function(h){h.onclick=function(){var sec=h.closest('.costep');if(sec.classList.contains('done'))openStep(+sec.dataset.step);};});
@@ -948,10 +946,28 @@
     function procEls(){
       return {ov:document.getElementById('coProc'),msg:document.getElementById('coProcMsg'),sub:document.getElementById('coProcSub'),
         ring:document.getElementById('coProcRing'),ico:document.getElementById('coProcIco'),pix:document.getElementById('coProcPix'),
-        qr:document.getElementById('coProcQr'),copia:document.getElementById('coProcCopia'),copiaBtn:document.getElementById('coProcCopiaBtn')};
+        qr:document.getElementById('coProcQr'),copia:document.getElementById('coProcCopia'),copiaBtn:document.getElementById('coProcCopiaBtn'),
+        expiry:document.getElementById('coProcExpiry')};
     }
-    var pollTimer=null;
-    function stopPoll(){if(pollTimer){clearInterval(pollTimer);pollTimer=null;}}
+    var pollTimer=null,pixTimer=null;
+    function stopPoll(){if(pollTimer){clearInterval(pollTimer);pollTimer=null;}if(pixTimer){clearInterval(pixTimer);pixTimer=null;}}
+    /* Contagem regressiva do Pix — só visual: /api/pagar não devolve a expiração real
+       do código (o PSP não manda esse campo hoje), então 30 min é uma aproximação
+       segura do padrão do Pix. Se o back-end passar a devolver a expiração real,
+       trocar o startSecs abaixo por ela. */
+    function startPixExpiry(el){
+      if(!el.expiry)return;
+      el.expiry.classList.remove('expired');
+      var secs=30*60;
+      function tick(){
+        if(secs<=0){el.expiry.textContent='O código expirou — gere um novo pedido.';el.expiry.classList.add('expired');if(pixTimer){clearInterval(pixTimer);pixTimer=null;}return;}
+        var m=Math.floor(secs/60),s=secs%60;
+        el.expiry.textContent='Expira em '+(m<10?'0':'')+m+':'+(s<10?'0':'')+s;
+        secs--;
+      }
+      tick();
+      pixTimer=setInterval(tick,1000);
+    }
     function openProc(){var el=procEls();if(!el.ov)return null;el.ov.hidden=false;requestAnimationFrame(function(){el.ov.classList.add('show');});return el;}
     function closeProc(after){
       var el=procEls();stopPoll();
@@ -978,6 +994,7 @@
         if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(txt).then(done,done);else done();
       };}
       stopPoll();
+      startPixExpiry(el);
       pollTimer=setInterval(function(){
         fetch('/api/compra?ref='+encodeURIComponent(j.ref)).then(function(r){return r.json();}).then(function(d){
           if(d&&d.status==='aprovado'){
@@ -1006,7 +1023,14 @@
         showRecusado();
       }
     }
-    (function mountBrick(){
+    var brickMountStarted=false;
+    /* o Brick só é montado depois que o passo 1 (Contato) confirma o e-mail — assim
+       CO.email já existe e pode ser passado em initialization.payer.email (o Brick então
+       pré-preenche/esconde o próprio campo de e-mail, evitando pedir duas vezes). O
+       controller.update() do MP só aceita {amount:...} depois de montado, não payer, então
+       montar mais tarde (em vez de montar-e-depois-atualizar) é a única forma de pré-preencher. */
+    function mountBrick(){
+      if(brickMountStarted)return;brickMountStarted=true;
       var brickBox=document.getElementById('coBrickContainer'),errBox=document.getElementById('coBrickErr');
       if(!brickBox)return;
       function brickErr(msg){if(!errBox)return;errBox.textContent=msg||'';errBox.hidden=!msg;}
@@ -1017,7 +1041,7 @@
           var mp=new MercadoPago(cfg.mpKey,{locale:'pt-BR'});
           var bricks=mp.bricks();
           return bricks.create('payment','coBrickContainer',{
-            initialization:{amount:estTotalReais()},
+            initialization:{amount:estTotalReais(),payer:{email:CO.email||''}},
             customization:{
               paymentMethods:{creditCard:'all',bankTransfer:['pix'],maxInstallments:6},
               /* customVariables oficiais do MP Bricks (confirmadas no SDK: mercadopago/sdk-js,
@@ -1032,6 +1056,8 @@
                 inputBackgroundColor:mpTok('--surface'),
                 borderRadiusMedium:mpTok('--r-md'),
                 borderRadiusLarge:mpTok('--r-lg'),
+                borderRadiusFull:mpTok('--r-pill'),
+                buttonTextColor:mpTok('--surface'),
                 errorColor:mpTok('--error-text'),
                 successColor:mpTok('--success-text')
               }}}
@@ -1052,9 +1078,10 @@
                     _rq.forEach(function(id){var el=document.getElementById(id);if(el&&!el.value.trim()){el.classList.add('bad');if(!_bad)_bad=el;}});
                     if(_bad){var _ah=document.getElementById('addrHint');if(_ah){_ah.textContent='Preencha os campos destacados do endereço.';_ah.className='cephint err';}reject();return;}
                   }
-                  var cpfD=cpfDigits((cpfEl||{}).value);
-                  if(cpfD.length!==11){cpfErr(cpfMsg());if(cpfEl)cpfEl.focus();reject();return;}
-                  cpfErr('');CO.cpf=cpfD;
+                  var _ident=(formData.payer&&formData.payer.identification)||{};
+                  var cpfD=(_ident.number||'').replace(/\D/g,'');
+                  if(!cpfD){brickErr('Confirme o CPF no formulário de pagamento.');reject();return;}
+                  brickErr('');CO.cpf=cpfD;
                   var _w=document.getElementById('coWhats');CO.whats=_w?_w.value.trim():'';
                   CO.hadPre=sp.pre.length>0;CO.email=email.value;
                   var _n=document.getElementById('coNome');CO.name=_n?_n.value.trim():'';
@@ -1090,7 +1117,7 @@
       }
       if(window.MercadoPago){go();}
       else{var tries=0,iv=setInterval(function(){if(window.MercadoPago){clearInterval(iv);go();}else if(++tries>40){clearInterval(iv);brickErr('Não conseguimos carregar o pagamento agora. Recarregue a página.');}},150);}
-    })();
+    }
   }
   var CO={ship:null,pay:'pix',parc:1};
   function cartSplit(){
@@ -1108,8 +1135,9 @@
         Trocar por https://viacep.com.br/ws/CEP/json/ e preencher rua/bairro/cidade/UF.
      2. Frete real (Correios / Melhor Envio): substituir a fórmula de shipQuote()
         por cotação real por CEP + peso/dimensão da peça.
-     3. CPF: FEITO (Fase 4a) — campo obrigatório no passo Pagamento, validado (11
-        dígitos) e enviado no payload de /api/pagar.
+     3. CPF: FEITO (Fase 4a) — coletado pelo próprio Payment Brick (não duplicamos
+        campo nosso); lido de formData.payer.identification.number no onSubmit e
+        enviado no payload de /api/pagar.
      4. Pix/cartão de verdade: FEITO (Fase 4a) — Payment Brick do Mercado Pago no
         passo Pagamento; POST /api/pagar cobra de verdade e os 3 estados (aprovado/
         Pix pendente/recusado) dirigem o loader #coProc. Boleto não é mais oferecido
@@ -1152,7 +1180,6 @@
       +'<div class="costep-cta"><button type="button" class="btn conext" data-next="1">Continuar</button></div></div></section>'
       +entrega
       +'<section class="costep" data-step="3" id="cstep3">'+stepHead(3,'Pagamento')+'<div class="costep-body">'
-      +'<label class="cofield"><span>CPF</span><input inputmode="numeric" id="coCpf" autocomplete="off" placeholder="000.000.000-00" maxlength="14" aria-describedby="coCpfErr"><small class="fielderr" id="coCpfErr" data-err></small></label>'
       +'<div class="couprow"><input type="text" id="coCoupon" placeholder="Cupom de desconto" autocomplete="off"><button type="button" class="btn ghost" id="coCoupBtn">Aplicar</button></div><p class="couphint" id="coCoupHint"></p>'
       +'<div class="paybrick"><div id="coBrickContainer"></div><p class="paybrickerr" id="coBrickErr" hidden></p></div>'
       +'<div class="cotrust"><span>Compra protegida</span><span><a href="/faq">Trocas em até 7 dias</a></span><span>Enviamos para todo o Brasil</span></div>'
