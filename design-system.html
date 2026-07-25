@@ -486,15 +486,23 @@
 
     <div class="comp-block">
       <h3>Campo de formulário — <code>.cofield</code></h3>
-      <p class="dsrule">Rótulo sempre acima, sempre maiúsculo pequeno. Erro é <code>.field-err</code> na borda + <code>.fielderr.show</code> no texto de apoio — nunca só cor, sempre com mensagem.</p>
+      <p class="dsrule">Visual único (borda/raio/padding/fonte/cor/fundo/foco) num só seletor agrupado em <code>components.css</code>, compartilhado por <code>input</code>, <code>select</code> e <code>textarea</code> de <code>.cofield</code> e também por <code>.nfin</code> (modal "avise-me"), <code>.cepmini input</code> (CEP) e <code>.couprow input</code> (cupom) — mudar o campo muda em todos de uma vez. Rótulo sempre acima, sempre maiúsculo pequeno. Erro é <code>.bad</code> na borda + <code>.fielderr.show</code> no texto de apoio — nunca só cor, sempre com mensagem.</p>
       <div class="demo demo-row" style="align-items:flex-start">
         <label class="cofield" style="flex:1 1 220px">
           <span>Nome completo</span>
           <input type="text" placeholder="Seu nome">
         </label>
         <label class="cofield" style="flex:1 1 220px">
+          <span>Estado</span>
+          <select>
+            <option>São Paulo</option>
+            <option>Rio de Janeiro</option>
+            <option>Minas Gerais</option>
+          </select>
+        </label>
+        <label class="cofield" style="flex:1 1 220px">
           <span>E-mail ou WhatsApp</span>
-          <input type="text" class="field-err" value="angela@" aria-describedby="dsErr">
+          <input type="text" class="bad" value="angela@" aria-describedby="dsErr">
           <small class="fielderr show" id="dsErr">Confira o e-mail — parece incompleto.</small>
         </label>
       </div>

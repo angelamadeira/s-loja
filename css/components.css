@@ -471,15 +471,13 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
 .couptoggle:hover,.couptoggle:focus-visible{color:var(--text)}
 .couprow{display:flex;gap:var(--space-2);margin-top:var(--space-6);padding-top:var(--space-5);border-top:1px solid var(--line-soft)}
 .couprow[hidden]{display:none}
-.couprow input{flex:1;min-width:0;border:1px solid var(--line);border-radius:var(--r-md);padding:var(--space-3) var(--space-3);font-size:.95rem;font-family:inherit;color:var(--text);background:var(--surface);outline:none;text-transform:uppercase;letter-spacing:.04em}
-.couprow input:focus{border-color:var(--stone)}
+.couprow input{flex:1;min-width:0;text-transform:uppercase;letter-spacing:.04em}
 .couphint{font-size:.74rem;color:var(--text-muted);font-weight:300;margin:var(--space-2) 0 0;min-height:1em}
 .couphint.err{color:var(--error-text)}
 .couphint.ok{color:var(--success-text)}
 .notifybox{margin-top:var(--space-3)}
 .notifyform{display:flex;gap:var(--space-2)}
-.notifyin{flex:1;min-width:0;border:1px solid var(--line);border-radius:var(--r-md);padding:var(--space-3) var(--space-3);font-size:.9rem;font-family:inherit;color:var(--text);background:var(--surface);outline:none}
-.notifyin:focus{border-color:var(--stone)}
+.notifyin{flex:1;min-width:0}
 .notifygo{white-space:nowrap;padding:var(--space-3) var(--space-4)}
 .nfhint{font-size:.74rem;color:var(--text-muted);font-weight:300;margin:var(--space-2) 0 0;min-height:1em}
 .nfhint.err{color:var(--error-text)}
@@ -643,8 +641,14 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
 .cohd h2{font-size:1.02rem;font-weight:500;margin:0}
 .cofield{display:flex;flex-direction:column;gap:var(--space-2);margin-bottom:var(--space-3)}
 .cofield span{font-size:.7rem;letter-spacing:.05em;color:var(--text-muted);text-transform:uppercase}
-.cofield input,.cofield select,.cofield textarea{border:1px solid var(--line);border-radius:var(--r-md);padding:var(--space-3) var(--space-3);font-size:.95rem;font-family:inherit;color:var(--text);background:var(--surface);outline:none;width:100%}
-.cofield input:focus,.cofield select:focus{border-color:var(--stone)}
+/* Campo de formulário — visual canônico único para todo input/select/textarea
+   de formulário do site (checkout, cupom, CEP, modal "avise-me"). Mudar o
+   visual do campo (borda/raio/padding/fonte/cor/fundo/foco) é mudar aqui;
+   cada seletor abaixo só guarda o que é genuinamente seu (layout flex, largura
+   100%, uppercase do cupom etc.). */
+.cofield input,.cofield select,.cofield textarea,.nfin,.cepmini input,.couprow input,.notifyin{border:1px solid var(--line);border-radius:var(--r-md);padding:var(--space-3) var(--space-3);font-size:.95rem;font-family:inherit;color:var(--text);background:var(--surface);outline:none}
+.cofield input:focus,.cofield select:focus,.nfin:focus,.cepmini input:focus,.couprow input:focus,.notifyin:focus{border-color:var(--stone)}
+.cofield input,.cofield select,.cofield textarea,.nfin{width:100%}
 .tworow{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-3)}
 /* Checkbox unificado — usado no checkout (.co-check), no modal "avise-me"
    (.nf-check) e no consentimento LGPD do orçamento (.consent-check). O core
@@ -662,8 +666,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
 .cephint{font-size:.76rem;color:var(--text-muted);font-weight:300;margin-top:var(--space-2);min-height:1em}
 .cephint.err{color:var(--error-text)}
 .cepmini{display:flex;gap:var(--space-2);margin-bottom:var(--space-2)}
-.cepmini input{flex:1;min-width:0;border:1px solid var(--line);border-radius:var(--r-md);padding:var(--space-3) var(--space-3);font-size:.9rem;font-family:inherit;color:var(--text);background:var(--surface);outline:none}
-.cepmini input:focus{border-color:var(--stone)}
+.cepmini input{flex:1;min-width:0}
 .cepmini .btn.ghost{padding:var(--space-3) var(--space-4)}
 .dfoot .cephint{margin-top:0;margin-bottom:var(--space-3)}
 .pdpship{margin-top:var(--space-6)}
@@ -981,8 +984,9 @@ body.nodock .wafloat{bottom:calc(24px + env(safe-area-inset-bottom))}
 .nfmodal .nftitle{font-family:var(--sans);font-weight:400;font-size:1.3rem;line-height:1.25;color:var(--text);margin:0 0 var(--space-2)}
 .nfmodal .nfsub{font-size:.86rem;line-height:1.55;color:var(--stone);margin:0 0 var(--space-5)}
 .nfmodal .nfsub b{font-weight:500;color:var(--text)}
-.nfin{width:100%;box-sizing:border-box;border:1px solid var(--line);border-radius:var(--r-md);padding:var(--space-3) var(--space-4);font-family:inherit;font-size:.92rem;color:var(--text);background:var(--surface)}
-.nfin:focus{outline:none;border-color:var(--wood)}
+/* .nfin: visual canônico (borda/raio/padding/fonte/cor/fundo/foco/largura)
+   vem do seletor agrupado junto de .cofield input em ~L646 — nada de próprio
+   aqui além do que já é herdado do reset global (*{box-sizing:border-box}). */
 /* checkbox: ver .check em componentes de checkout — .nf-check só ajusta a margem */
 .check.nf-check{margin:var(--space-4) var(--space-2xs) var(--space-2xs)}
 .nfmodal .nfgo{width:100%;margin-top:var(--space-4);padding:var(--space-4)}
