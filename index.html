@@ -208,8 +208,9 @@
     <div class="drow"><span>Subtotal</span><span id="sub">R$ 0,00</span></div>
     <div class="drow"><span>Frete</span><span id="ship">—</span></div>
     <div class="drow tot"><span>Total</span><b id="tot">R$ 0,00</b></div>
+    <div id="freeShipSlot"></div>
     <button class="checkout">Finalizar compra</button>
-    <p class="dnote">Frete grátis acima de R$ 150 · em até 6×</p>
+    <p class="dnote">Parcele em até 6× no cartão</p>
   </div>
 </aside>
 
@@ -1736,6 +1737,7 @@
     h+='<div class="sumrow tot"><span>Total</span><b>'+BRL(total)+'</b></div>';
     if(CO.pay!=='pix'&&pixDisc>0)h+='<div class="sumrow disc"><span>−5% se pagar no Pix</span><span>−'+BRL(pixDisc)+'</span></div>';
     if(s.pre.length)h+='<p class="sumnote pre">Nos itens de reserva você paga só o <b>sinal</b> agora. O restante e o frete são cobrados quando a peça lança.</p>';
+    h+=freeShipHtml(s.subNow,s.now.length>0,true); /* checkout: só a confirmação positiva de frete grátis */
     el.innerHTML=h;
   }
   /* Recap de confirmação (.okwrap/.okhead/.okseal/.oksig/.okpanel/.okrecap) — extraído de
@@ -2062,6 +2064,21 @@
   function saveCart(){try{localStorage.setItem('suzu_cart',JSON.stringify(Object.keys(cart).map(function(k){var it=cart[k];return {id:it.p.id,size:it.size,presale:it.presale,qty:it.qty};})));}catch(e){}}
   function restoreCart(){try{JSON.parse(localStorage.getItem('suzu_cart')||'[]').forEach(function(o){var p=byId(o.id);if(!p||!o.qty)return;var it=cartItem(p,o.size,o.presale);it.qty=o.qty;cart[cartKey(o.id,o.size,o.presale)]=it;});}catch(e){}}
   function addProduct(id,size,presale){var p=byId(id);if(!p)return;var k=cartKey(id,size,presale);if(cart[k])cart[k].qty++;else cart[k]=cartItem(p,size,presale);render();open();}
+  /* Nudge "faltam R$X pra frete grátis" — só conta itens de pronta-entrega
+     (subNow; reserva/pré-venda não zera frete). O limite 150 tem que casar com
+     o `subNow>=150` do shipQuote(). Devolve '' quando não se aplica (sem itens
+     de pronta-entrega). Usado na sacola (render) e no Resumo do checkout. */
+  var FRETE_GRATIS_MIN=150;
+  function freeShipHtml(subNow,hasNow,positiveOnly){
+    if(!hasNow||subNow<=0)return '';
+    if(subNow>=FRETE_GRATIS_MIN)return '<div class="freeship done"><p class="freeship-tx"><b>Frete grátis</b> garantido nesta compra</p><div class="freeship-bar"><span style="width:100%"></span></div></div>';
+    /* positiveOnly (checkout): não mostra "faltam X" — no clímax da compra o
+       carrinho é só leitura, então seria um beco sem saída/distração (Baymard).
+       Na sacola (positiveOnly falso) o nudge completo incentiva adicionar. */
+    if(positiveOnly)return '';
+    var falta=FRETE_GRATIS_MIN-subNow,pct=Math.max(4,Math.round(subNow/FRETE_GRATIS_MIN*100));
+    return '<div class="freeship"><p class="freeship-tx">Faltam <b>'+BRL(falta)+'</b> para o frete grátis</p><div class="freeship-bar"><span style="width:'+pct+'%"></span></div></div>';
+  }
   function render(){
     saveCart();
     var count=0,sub=0;Object.keys(cart).forEach(k=>{count+=cart[k].qty;sub+=cart[k].qty*cart[k].price;});
@@ -2079,6 +2096,7 @@
     else if(ship===null)_sh.textContent='calcule o CEP';
     else _sh.textContent=ship===0?'Grátis':BRL(ship);
     document.getElementById('tot').textContent=BRL(sub+(ship||0));
+    var _fs=document.getElementById('freeShipSlot');if(_fs)_fs.innerHTML=freeShipHtml(s.subNow,hasNow);
     syncDrawerCep(s,q);
     var box=document.getElementById('items'),keys=Object.keys(cart);
     if(!keys.length){box.innerHTML='<p class="empty"><span class="sig">Sua sacola está vazia.</span>Escolha uma peça pra começar a sua coleção.</p>';return;}

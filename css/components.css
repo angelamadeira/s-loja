@@ -637,6 +637,16 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
 .empty{padding:var(--space-10) var(--space-5);text-align:center;color:var(--text-muted);font-weight:300}
 .empty .sig{display:block;font-size:1.2rem;margin-bottom:var(--space-2);color:var(--stone-text)}
 .dfoot{padding:var(--space-5);border-top:1px solid var(--line-soft)}
+/* Nudge "faltam R$X pra frete grátis" (Baymard: barra de progresso até o limite
+   sobe o ticket médio). Tom japandi: texto discreto + barra fina em --matcha;
+   ao atingir, vira --success-text (mesma cor de benefício de .couphint.ok). */
+.freeship{display:flex;flex-direction:column;gap:var(--space-2);margin:var(--space-2) 0 var(--space-4)}
+.freeship-tx{margin:0;text-align:center;font-size:.8rem;font-weight:300;color:var(--text-secondary)}
+.freeship-tx b{font-weight:600;color:var(--text)}
+.freeship-bar{height:4px;border-radius:var(--r-pill);background:var(--line-soft);overflow:hidden}
+.freeship-bar span{display:block;height:100%;border-radius:var(--r-pill);background:var(--matcha);transition:width .35s ease}
+.freeship.done .freeship-bar span{background:var(--success-text)}
+.freeship.done .freeship-tx,.freeship.done .freeship-tx b{color:var(--success-text)}
 .drow{display:flex;justify-content:space-between;font-size:.84rem;color:var(--text-tertiary);margin-bottom:var(--space-2);font-weight:300}
 .drow.tot{font-size:1.05rem;color:var(--text);margin:var(--space-3) 0 var(--space-4);font-weight:400}
 .drow.tot b{font-weight:500;font-variant-numeric:tabular-nums}
