@@ -18,6 +18,10 @@ input,textarea{font-family:inherit}
 .btn:hover{background:var(--ink-hover)}
 .btn.ghost{background:transparent;color:var(--text);border-color:var(--line-strong)}
 .btn.ghost:hover{border-color:var(--text)}
+/* disabled = ex. #coCardBtn antes do cardPayment Brick avisar onReady (não dá
+   pra tokenizar o cartão sem os campos do MP carregados) — opacidade reduzida +
+   pointer-events:none (também impede :hover de disparar), pra não parecer clicável. */
+.btn:disabled{opacity:.45;cursor:not-allowed;pointer-events:none}
 
 .note{background:var(--ink);color:var(--warm);text-align:center;padding:var(--space-2) var(--space-6);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;font-weight:500}
 
@@ -704,8 +708,13 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
 /* .paybrick — envelope do cardPayment Brick do Mercado Pago, só pro Cartão
    (Fase 4a/dinâmico); o Brick em si é injetado pelo SDK dentro de #coCardBrick,
    esta casca só dá o acabamento (borda/raio/fundo) pra casar com os outros
-   campos do checkout. */
+   campos do checkout. O Brick roda com customization.visual.hidePaymentButton:true
+   — o botão "Pagar" que aparece é NOSSO (#coCardBtn, mesmo .btn pílula do Pix,
+   mesma largura/alinhamento via a regra abaixo), não o botão default do MP (que
+   não dava pra estilizar). Fica disabled até onReady do Brick confirmar que os
+   campos carregaram — ver mountCardBrick(). */
 .paybrick{border:1px solid var(--line);border-radius:var(--r-md);padding:var(--space-4);background:var(--surface);margin-top:var(--space-4);margin-bottom:var(--space-4)}
+.paybrick .btn{display:block;width:100%;text-align:center;margin-top:var(--space-5)}
 .paybrickerr{color:var(--error-text);font-size:.82rem;margin-top:var(--space-3)}
 /* .cardbrick-wrap — envelope do #coCardBrick (Fase 4a-UX): reserva altura mínima
    pra não pular o layout enquanto os iframes de secure-fields do MP carregam, e

@@ -1109,17 +1109,22 @@
       var brickBox=document.getElementById('coCardBrick'),errBox=document.getElementById('coCardErr');
       var loadBox=document.getElementById('coCardLoading'),failBox=document.getElementById('coCardFail'),failMsg=document.getElementById('coCardFailMsg');
       var retryBtn=document.getElementById('coCardRetry'),goPixBtn=document.getElementById('coCardGoPix');
+      var cardBtn=document.getElementById('coCardBtn');
       if(!brickBox)return;
       function brickErr(msg){if(!errBox)return;errBox.textContent=msg||'';errBox.hidden=!msg;}
       function mpTok(name){var v=getComputedStyle(document.documentElement).getPropertyValue(name);return v?v.trim():'';}
-      function showLoading(){if(failBox)failBox.hidden=true;if(loadBox)loadBox.hidden=false;}
+      /* #coCardBtn (nosso botão pílula, ver .paybrick .btn) só pode ser clicado
+         depois que onReady confirmar que os campos do Brick carregaram — antes
+         disso (ou em falha) getFormData() não teria o que tokenizar. */
+      function setCardBtnEnabled(b){if(cardBtn)cardBtn.disabled=!b;}
+      function showLoading(){if(failBox)failBox.hidden=true;if(loadBox)loadBox.hidden=false;setCardBtnEnabled(false);}
       function hideLoading(){if(loadBox)loadBox.hidden=true;}
       /* Falha (timeout OU onError OU init quebrado): sempre a MESMA mensagem —
          menciona bloqueador de anúncios (causa nº1) e a saída via Pix — com
          "Tentar de novo" (re-arma mountCardBrick do zero) e um atalho pro Pix. */
       function showFail(){
         if(!isCurrent())return;
-        clearCardBrickTimer();hideLoading();brickErr('');
+        clearCardBrickTimer();hideLoading();brickErr('');setCardBtnEnabled(false);
         if(failMsg)failMsg.textContent=CARD_FAIL_MSG;
         if(failBox)failBox.hidden=false;
       }
@@ -1134,6 +1139,50 @@
       }
       if(retryBtn)retryBtn.onclick=function(){retryMount();};
       if(goPixBtn)goPixBtn.onclick=function(){var r=document.querySelector('#coPayMethods input[value="pix"]');if(r){r.checked=true;selectPay('pix');}};
+      /* ===== Cartão: botão nosso (pílula .btn, igual ao Pix) — ÚNICO caminho de
+         envio do Cartão. No clique: getFormData() tokeniza o cartão e devolve
+         { token, payment_method_id, issuer_id, installments, payer:{identification:{number}} }
+         (rejeita/mostra os campos inválidos direto no Brick se algo estiver
+         errado — não submetemos nesse caso). Com sucesso, mesmo payload/mesmo
+         handlePagarResult do onSubmit antigo — sem duplicar lógica. Guard de
+         duplo envio: disabled+is-loading enquanto getFormData()+/api/pagar
+         estão em voo, igual ao #coPixBtn. */
+      if(cardBtn)cardBtn.onclick=function(){
+        if(cardBtn.disabled||!cardBrickCtl||typeof cardBrickCtl.getFormData!=='function')return;
+        brickErr('');
+        var lbl=cardBtn.textContent;
+        cardBtn.disabled=true;cardBtn.classList.add('is-loading');cardBtn.setAttribute('aria-busy','true');
+        cardBtn.innerHTML='Processando<span class="bdots" aria-hidden="true"><i></i><i></i><i></i></span>';
+        function restore(){cardBtn.disabled=false;cardBtn.classList.remove('is-loading');cardBtn.removeAttribute('aria-busy');cardBtn.textContent=lbl;}
+        cardBrickCtl.getFormData().then(function(formData){
+          formData=formData||{};
+          if(!formData.token){restore();brickErr('Revise os dados do cartão.');return;}
+          var ctx=buildBaseCtx();
+          if(!ctx){restore();return;}
+          var _ident=(formData.payer&&formData.payer.identification)||{};
+          var cpfD=(_ident.number||'').replace(/\D/g,'');
+          if(!cpfD){restore();brickErr('Confirme o CPF no formulário de pagamento.');return;}
+          brickErr('');
+          CO.pay='cartao';CO.parc=formData.installments||1;CO.cpf=cpfD;
+          var payload={
+            itens:ctx.itens,metodo:'cartao',parcelas:CO.parc,
+            cupom:CO.coupon?CO.coupon.code:undefined,
+            cpf:cpfD,email:CO.email,whats:CO.whats,
+            endereco:ctx.endereco,freteCents:ctx.freteCents,consentiu:true,
+            token:formData.token,paymentMethodId:formData.payment_method_id,issuerId:formData.issuer_id
+          };
+          showAguardando();
+          fetch('/api/pagar',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(payload)})
+            .then(function(r){return r.json();})
+            .then(function(j){restore();if(!j||!j.ok){showRecusado();return;}handlePagarResult(j);})
+            .catch(function(){restore();showRecusado();});
+        }).catch(function(){
+          /* getFormData() rejeitou — o Brick já destaca os campos inválidos
+             (número/validade/CVV) por conta própria; só damos um empurrão gentil. */
+          restore();
+          brickErr('Revise os dados do cartão.');
+        });
+      };
       showLoading();
       clearCardBrickTimer();
       cardBrickTimer=setTimeout(showFail,12000);
@@ -1158,7 +1207,11 @@
                  input) pros campos do formulário, e Small ganha um raio pequeno pra não
                  esquisitar elementos menores (chips/checkboxes). CONFIRMAR VISUALMENTE: só
                  dá pra saber se o botão realmente virou pílula olhando o Brick renderizado. */
-              visual:{style:{theme:'default',customVariables:{
+              /* hidePaymentButton:true — o botão "Pagar" do próprio Brick some (não dava
+                 pra estilizar em pílula Suzu); o botão nosso (#coCardBtn, mesmo .btn do
+                 Pix) chama cardBrickCtl.getFormData() no clique — ver wiring logo abaixo
+                 do bricks.create(). */
+              visual:{hidePaymentButton:true,style:{theme:'default',customVariables:{
                 baseColor:mpTok('--ink'),
                 textPrimaryColor:mpTok('--text'),
                 textSecondaryColor:mpTok('--text-secondary'),
@@ -1174,32 +1227,14 @@
               }}}
             },
             callbacks:{
-              onReady:function(){if(!isCurrent())return;clearCardBrickTimer();hideLoading();if(failBox)failBox.hidden=true;brickErr('');},
+              onReady:function(){if(!isCurrent())return;clearCardBrickTimer();hideLoading();if(failBox)failBox.hidden=true;brickErr('');setCardBtnEnabled(true);},
               onError:function(err){if(!isCurrent())return;console.error('MP Brick',err);showFail();},
-              onSubmit:function(data){
-                var formData=(data&&data.formData)||{};
-                return new Promise(function(resolve,reject){
-                  var ctx=buildBaseCtx();
-                  if(!ctx){reject();return;}
-                  var _ident=(formData.payer&&formData.payer.identification)||{};
-                  var cpfD=(_ident.number||'').replace(/\D/g,'');
-                  if(!cpfD){brickErr('Confirme o CPF no formulário de pagamento.');reject();return;}
-                  brickErr('');
-                  CO.pay='cartao';CO.parc=formData.installments||1;CO.cpf=cpfD;
-                  var payload={
-                    itens:ctx.itens,metodo:'cartao',parcelas:CO.parc,
-                    cupom:CO.coupon?CO.coupon.code:undefined,
-                    cpf:cpfD,email:CO.email,whats:CO.whats,
-                    endereco:ctx.endereco,freteCents:ctx.freteCents,consentiu:true,
-                    token:formData.token,paymentMethodId:formData.payment_method_id,issuerId:formData.issuer_id
-                  };
-                  showAguardando();
-                  fetch('/api/pagar',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(payload)})
-                    .then(function(r){return r.json();})
-                    .then(function(j){resolve();if(!j||!j.ok){showRecusado();return;}handlePagarResult(j);})
-                    .catch(function(){resolve();showRecusado();});
-                });
-              }
+              /* onSubmit é exigido pelo schema do cardPayment Brick, mas com
+                 hidePaymentButton:true o botão interno do MP nem existe — nada
+                 dispara este callback. O único caminho de envio do Cartão é o
+                 nosso botão (#coCardBtn) chamando cardBrickCtl.getFormData()
+                 diretamente (wiring logo abaixo). Mantido como no-op inofensivo. */
+              onSubmit:function(){return Promise.resolve();}
             }
           });
         }).then(function(ctl){
@@ -1255,13 +1290,14 @@
         por cotação real por CEP + peso/dimensão da peça.
      3. CPF: FEITO (Fase 4a/dinâmico) — no Pix é campo nosso (coCpf, validado no
         clique de "Pagar com Pix"); no Cartão vem do cardPayment Brick, lido de
-        formData.payer.identification.number no onSubmit.
+        formData.payer.identification.number a partir de getFormData().
      4. Pix/cartão de verdade: FEITO (Fase 4a/dinâmico) — rádios Pix/Cartão nossos
         no passo Pagamento (resumo re-renderiza por método); Pix é POST direto em
         /api/pagar (sem Brick, sem token); Cartão usa o cardPayment Brick do Mercado
-        Pago (só tokeniza o cartão). POST /api/pagar cobra de verdade e os 3 estados
-        (aprovado/Pix pendente/recusado) dirigem o loader #coProc. Boleto não é mais
-        oferecido (servidor só suporta metodo pix|cartao).
+        Pago (só tokeniza o cartão, com hidePaymentButton:true — o botão "Pagar" é
+        nosso, #coCardBtn, chamando getFormData() no clique). POST /api/pagar cobra
+        de verdade e os 3 estados (aprovado/Pix pendente/recusado) dirigem o loader
+        #coProc. Boleto não é mais oferecido (servidor só suporta metodo pix|cartao).
      5. Persistir o pedido e disparar o e-mail de confirmação de verdade (o texto já
         existe em pedidoView) — falta o e-mail de confirmação da COMPRA (o de
         orçamento/Projeto Exclusivo já existe).
@@ -1314,7 +1350,7 @@
       +'<div class="paybrick" id="coPayCartao" hidden><div class="cardbrick-wrap" id="coCardWrap"><div id="coCardBrick"></div>'
         +'<div class="cardbrick-loading" id="coCardLoading" hidden><div class="coproc-ring sm" aria-hidden="true"></div><p>Carregando o formulário de cartão…</p></div>'
         +'<div class="cardbrick-fail" id="coCardFail" hidden><p id="coCardFailMsg"></p><div class="cardbrick-fail-cta"><button type="button" class="btn ghost" id="coCardRetry">Tentar de novo</button><button type="button" class="cardbrick-fail-link" id="coCardGoPix">Pagar com Pix em vez disso</button></div></div>'
-      +'</div><p class="paybrickerr" id="coCardErr" hidden></p></div>'
+      +'</div><button type="button" class="btn" id="coCardBtn" disabled>Pagar</button><p class="paybrickerr" id="coCardErr" hidden></p></div>'
       +'<div class="cotrust"><span>Compra protegida</span><span><a href="/faq">Trocas em até 7 dias</a></span><span>Enviamos para todo o Brasil</span></div>'
       +'<p class="cohelp">Dúvida antes de finalizar? <a href="https://wa.me/5511912345678?text='+encodeURIComponent('Olá! Estou finalizando uma compra na loja Studio Suzu e queria tirar uma dúvida.')+'" target="_blank" rel="noopener">Fale com a gente no WhatsApp</a>.</p>'
       +'<p class="cosafe">Ambiente seguro · protótipo de demonstração</p>'
