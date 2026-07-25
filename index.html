@@ -1890,7 +1890,10 @@
     else if(p==='/pedido'){if(!CO.order){navigate('/',true);return;}v=pedidoView();}
     else if(p==='/obrigado'){var _ob=null;try{_ob=JSON.parse(sessionStorage.getItem('suzu_obrigado')||'null');}catch(_e){}if(!_ob){navigate('/exclusivo',true);return;}v=obrigadoView(_ob);}
     closeMenu(); setActiveNav(p); setSeo(p);
-    document.body.classList.toggle('co-mode', p==='/checkout');
+    /* "modo checkout" (esconde nav/rodapé pra reduzir saídas) só vale com a sacola
+       CHEIA — pagando de verdade. Sacola vazia é o oposto: queremos a nav e o rodapé
+       normais pra mandar a pessoa voltar a comprar. */
+    document.body.classList.toggle('co-mode', p==='/checkout' && Object.keys(cart).length>0);
     document.body.classList.toggle('pedido-mode', p==='/pedido');
     document.body.classList.toggle('pix-mode', p.indexOf('/pix/')===0);
     document.body.classList.remove('pix-done'); /* reset; setApproved() readiciona se a compra já estiver aprovada */
