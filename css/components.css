@@ -777,7 +777,13 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
    ficarem prontos). Nome mantido (era o envelope do Brick antigo) pra não
    duplicar a regra de altura mínima/overlay, que continua igual. */
 .cardbrick-wrap{position:relative;min-height:190px}
-.cardbrick-loading,.cardbrick-fail{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--space-3);background:var(--surface);text-align:center;padding:var(--space-5) var(--space-3)}
+/* Loading: overlay absoluto sobre a área do form enquanto os iframes montam
+   (conteúdo curto — spinner + texto — cabe nos 190px reservados). */
+.cardbrick-loading{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--space-3);background:var(--surface);text-align:center;padding:var(--space-5) var(--space-3)}
+/* Falha: bloco NORMAL (não overlay) — o form fica escondido e este bloco toma
+   o lugar dele com altura própria, sem transbordar. Antes era overlay absoluto
+   e o conteúdo (mais alto que os 190px) vazava pra fora. */
+.cardbrick-fail{display:flex;flex-direction:column;align-items:center;text-align:center;gap:var(--space-4);padding:var(--space-6) var(--space-4)}
 .cardbrick-loading[hidden],.cardbrick-fail[hidden]{display:none}
 .cardbrick-loading p{margin:0;font-size:.82rem;font-weight:300;color:var(--text-muted)}
 .coproc-ring.sm{width:24px;height:24px;border-width:2px}
