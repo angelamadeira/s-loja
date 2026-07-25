@@ -210,7 +210,7 @@
     <div class="drow tot"><span>Total</span><b id="tot">R$ 0,00</b></div>
     <div id="freeShipSlot"></div>
     <button class="checkout">Finalizar compra</button>
-    <p class="dnote">Parcele em até 6× no cartão</p>
+    <p class="dnote"><b>5% de desconto</b> no Pix · até 6× no cartão</p>
   </div>
 </aside>
 
@@ -1100,12 +1100,11 @@
       /* Editar um passo já concluído até deixá-lo inválido tira o ✓ (.done) e,
          via refreshNav, fecha o acesso aos seguintes — feedback imediato de que
          precisa corrigir antes de seguir. Revalida ao clicar Salvar/Continuar. */
-      /* Edição de um passo já concluído (sem modal "salvar?", que é fricção —
-         Baymard): inválido → tira o ✓ e fecha o acesso aos seguintes; VÁLIDO →
-         mantém o ✓ e atualiza o resumo colapsado NA HORA (auto-save visível),
-         pra nunca dar a dúvida "será que mudou?". O dado nunca se perde: os
-         campos persistem e a validação lê o valor atual. */
-      cof.addEventListener('input',function(e){var sec=e.target.closest&&e.target.closest('.costep');if(sec&&sec.classList.contains('done')){var n=+sec.dataset.step;if(!validStep(n,true))sec.classList.remove('done');else{var sum=document.getElementById('sum'+n);if(sum)sum.textContent=sumFor(n);}}refreshNav();});
+      /* Editar um passo já concluído até deixá-lo inválido tira o ✓ (.done) e
+         fecha o acesso aos seguintes (guarda de validação). A edição só é
+         "aplicada" (resumo colapsado + .done reafirmado) ao clicar "Continuar" —
+         regra explícita, sem atualizar o resumo enquanto digita. */
+      cof.addEventListener('input',function(e){var sec=e.target.closest&&e.target.closest('.costep');if(sec&&sec.classList.contains('done')&&!validStep(+sec.dataset.step,true))sec.classList.remove('done');refreshNav();});
       refreshNav();
     })();
     /* o pagamento acontece pelo botão "Pagar com Pix" (nosso) ou pelo botão do
@@ -1735,7 +1734,6 @@
     if(coupDisc>0)h+='<div class="sumrow disc"><span>Cupom '+CO.coupon.code+'</span><span>−'+BRL(coupDisc)+'</span></div>';
     if(payPixDisc>0)h+='<div class="sumrow disc"><span>Desconto Pix</span><span>−'+BRL(payPixDisc)+'</span></div>';
     h+='<div class="sumrow tot"><span>Total</span><b>'+BRL(total)+'</b></div>';
-    if(CO.pay!=='pix'&&pixDisc>0)h+='<div class="sumrow disc"><span>−5% se pagar no Pix</span><span>−'+BRL(pixDisc)+'</span></div>';
     if(s.pre.length)h+='<p class="sumnote pre">Nos itens de reserva você paga só o <b>sinal</b> agora. O restante e o frete são cobrados quando a peça lança.</p>';
     h+=freeShipHtml(s.subNow,s.now.length>0,true); /* checkout: só a confirmação positiva de frete grátis */
     el.innerHTML=h;
@@ -2071,7 +2069,10 @@
   var FRETE_GRATIS_MIN=150;
   function freeShipHtml(subNow,hasNow,positiveOnly){
     if(!hasNow||subNow<=0)return '';
-    if(subNow>=FRETE_GRATIS_MIN)return '<div class="freeship done"><p class="freeship-tx"><b>Frete grátis</b> garantido nesta compra</p><div class="freeship-bar"><span style="width:100%"></span></div></div>';
+    /* Atingiu o grátis: na sacola mostra a barra cheia (feedback satisfatório de
+       "completou"); no checkout (positiveOnly) só o texto — a barra 100% ali é
+       redundante (o frete já aparece "Grátis" no resumo). */
+    if(subNow>=FRETE_GRATIS_MIN)return '<div class="freeship done"><p class="freeship-tx"><b>Frete grátis</b> garantido nesta compra</p>'+(positiveOnly?'':'<div class="freeship-bar"><span style="width:100%"></span></div>')+'</div>';
     /* positiveOnly (checkout): não mostra "faltam X" — no clímax da compra o
        carrinho é só leitura, então seria um beco sem saída/distração (Baymard).
        Na sacola (positiveOnly falso) o nudge completo incentiva adicionar. */

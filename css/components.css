@@ -882,6 +882,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
 @keyframes okdraw{to{stroke-dashoffset:0}}
 .oksig{font-size:1.6rem}
 .dnote{font-size:.72rem;color:var(--text-muted);text-align:center;margin:var(--space-3) 0 0;font-weight:300}
+.dnote b{font-weight:600;color:var(--success-text)}
 
 @media (min-width:860px){
   .ham{display:none}
