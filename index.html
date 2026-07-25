@@ -914,12 +914,36 @@
     var cep=document.getElementById('coCep');
     if(cep)cep.oninput=function(){var d=this.value.replace(/\D/g,'').slice(0,8);this.value=d.length>5?d.slice(0,5)+'-'+d.slice(5):d;};
     var cepBtn=document.getElementById('cepBtn');
+    /* ViaCEP (Fase 4a-UX): preenche rua/bairro/cidade a partir do CEP — o frete
+       continua sendo a ESTIMATIVA de shipQuote() (região pelo 1º dígito), ViaCEP
+       só cuida do endereço, são coisas independentes. Número/complemento ficam
+       sempre com a pessoa (ViaCEP não devolve isso). Falha (CEP não encontrado
+       ou rede fora) nunca trava o formulário — a pessoa sempre pode preencher à
+       mão; só CEP não encontrado (erro:true) ganha uma dica em #addrHint, rede
+       fora fica silenciosa (não é um erro do CEP em si). Nunca sobrescreve um
+       campo que a pessoa está editando na hora (document.activeElement). */
+    function viaCepFillAddr(cepMasked){
+      var digits=(cepMasked||'').replace(/\D/g,'');
+      if(digits.length!==8)return;
+      fetch('https://viacep.com.br/ws/'+digits+'/json/')
+        .then(function(r){return r.json();})
+        .then(function(d){
+          var ah=document.getElementById('addrHint');
+          if(!d||d.erro){if(ah){ah.textContent='CEP não encontrado — preencha o endereço manualmente.';ah.className='cephint err';}return;}
+          if(ah){ah.textContent='';ah.className='cephint';}
+          var fill=function(id,val){var el=document.getElementById(id);if(el&&val&&document.activeElement!==el){el.value=val;el.classList.remove('bad');}};
+          fill('coRua',d.logradouro);
+          fill('coBairro',d.bairro);
+          fill('coCidade',d.localidade?d.localidade+(d.uf?' / '+d.uf:''):'');
+        })
+        .catch(function(){/* rede fora — deixa a pessoa preencher à mão, sem travar */});
+    }
     function runCoCep(){
       var hint=document.getElementById('cepHint');
       var data=shipQuote(cep.value,cartSplit().subNow);
       if(!data){hint.textContent='Digite um CEP válido (8 dígitos).';hint.className='cephint err';return;}
       saveCep(cep.value);cep.value=SHIP.cep;
-      hint.textContent='Em produção, o endereço é preenchido automaticamente pelo CEP.';hint.className='cephint';
+      hint.textContent='';hint.className='cephint';
       document.getElementById('addrFields').hidden=false;
       var box=document.getElementById('shipOpts');box.hidden=false;
       box.innerHTML=data.map(function(o,i){return '<label class="shipopt'+(i===0?' sel':'')+'"><input type="radio" name="ship" '+(i===0?'checked':'')+'><span class="shb"><b>'+o.label+'</b><small>'+o.days+'</small></span><span class="shp">'+(o.free?'Grátis':BRL(o.price))+'</span></label>';}).join('');
@@ -927,9 +951,11 @@
       var opts=box.querySelectorAll('.shipopt');
       opts.forEach(function(l,i){l.onclick=function(){opts.forEach(function(x){x.classList.remove('sel');});l.classList.add('sel');l.querySelector('input').checked=true;CO.ship=data[i];renderCoSummary();syncCardBrickAmount();};});
       if(data[0].free){hint.textContent='Frete Econômico grátis nesta compra (acima de R$ 150).';}
+      viaCepFillAddr(SHIP.cep);
     }
     if(cepBtn)cepBtn.onclick=runCoCep;
     if(cep){cep.onkeydown=function(e){if(e.key==='Enter'){e.preventDefault();runCoCep();}};
+      cep.addEventListener('blur',function(){if(cep.value.replace(/\D/g,'').length===8)runCoCep();});
       if(SHIP.cep&&SHIP.cep.replace(/\D/g,'').length===8)runCoCep();}
     /* ===== Acordeão: avançar/validar/editar por etapa ===== */
     (function(){
@@ -1283,9 +1309,11 @@
      CHECKOUT — PENDÊNCIAS DE BACK-END (o front já está pronto; falta integração real)
      Anotado em 2026-07-14 · ver também a memória "suzu-loja-integracoes-pendente".
      ----------------------------------------------------------------------------
-     1. CEP -> endereço automático (ViaCEP): hoje shipQuote() estima o frete pela
-        região (1o digito do CEP) e os campos de endereço são preenchidos à mão.
-        Trocar por https://viacep.com.br/ws/CEP/json/ e preencher rua/bairro/cidade/UF.
+     1. CEP -> endereço automático (ViaCEP): FEITO (Fase 4a-UX) — viaCepFillAddr()
+        preenche rua/bairro/cidade+UF via https://viacep.com.br/ws/CEP/json/ (só no
+        checkout, #coCep; o CEP da PDP/#pdpCep continua só estimando frete, sem
+        campos de endereço pra preencher). shipQuote() continua sendo a estimativa
+        de frete (independente, não vem do ViaCEP). Número/complemento sempre à mão.
      2. Frete real (Correios / Melhor Envio): substituir a fórmula de shipQuote()
         por cotação real por CEP + peso/dimensão da peça.
      3. CPF: FEITO (Fase 4a/dinâmico) — no Pix é campo nosso (coCpf, validado no
