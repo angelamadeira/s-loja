@@ -2,6 +2,11 @@
    @font-face e :root do bloco 1 foram DESCARTADOS aqui (já cobertos por css/tokens.css).
    Extração 1:1, sem mudança visual — hex ainda não tokenizado (Task 2). */
 *{box-sizing:border-box}
+/* O atributo [hidden] SEMPRE esconde — sem !important, regras de componente com
+   display próprio (ex.: .btn{display:inline-block}) têm a mesma especificidade e,
+   vindo depois, anulam o [hidden] do UA. Era por isso que o botão Pagar do cartão
+   continuava visível no loading/falha mesmo com cardBtn.hidden=true. */
+[hidden]{display:none!important}
 html{-webkit-text-size-adjust:100%;overflow-x:clip}
 body{margin:0;background:var(--raised);color:var(--text);font-family:var(--sans);font-weight:300;line-height:1.65;-webkit-font-smoothing:antialiased;padding-bottom:var(--space-10);overflow-x:clip}
 #app{background:var(--surface)}
@@ -853,6 +858,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
   .okwrap .okpanel{grid-area:panel}
   .okwrap .okcta{grid-area:cta;justify-content:center;margin-top:var(--space-1)}
   .okwrap .okhelp{grid-area:help;text-align:center;max-width:42ch;margin:0 auto}
+  .okwrap .pixhow{grid-area:help;margin:var(--space-2) 0 0}
 }
 .okseal{width:64px;height:64px;border-radius:var(--r-round);background:var(--mizu);display:flex;align-items:center;justify-content:center;margin-bottom:var(--space-3)}
 .okcheck{width:30px;height:30px;fill:none;stroke:var(--ink);stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
@@ -1127,13 +1133,23 @@ button.cohd{width:100%;border:0;background:none;font:inherit;color:inherit;text-
 .pixexpiry{margin:0;font-size:.78rem;font-weight:400;color:var(--text-muted);font-variant-numeric:tabular-nums}
 .pixexpiry:empty{display:none}
 .pixexpiry.expired{color:var(--error-text)}
+/* "Como pagar" — passo-a-passo na coluna esquerda da tela de Pix (preenche o
+   espaço vazio ao lado do QR; muita gente não sabe pagar por QR). Só no estado
+   pendente (renderPix popula, setGone limpa). No desktop vai pra grid-area help. */
+.pixhow{width:100%;max-width:400px;margin:var(--space-5) auto 0;text-align:left;display:flex;flex-direction:column;gap:var(--space-4)}
+.pixhow h4{font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);font-weight:500;margin:0}
+.pixhow ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:var(--space-3)}
+.pixhow li{display:flex;gap:var(--space-3);align-items:flex-start;font-size:.86rem;color:var(--text-secondary);font-weight:300;line-height:1.45}
+.pixhow li b{color:var(--text);font-weight:500}
+.pixhow .pixnum{display:flex;align-items:center;justify-content:center;flex:0 0 auto;width:20px;height:20px;border-radius:var(--r-round);background:var(--raised);border:1px solid var(--line);color:var(--text);font-size:.72rem;font-weight:500;font-variant-numeric:tabular-nums}
+.pixsafe{font-size:.76rem;color:var(--text-muted);font-weight:300;margin:0}
 .pixgone{font-size:.92rem;color:var(--text-secondary);font-weight:300;line-height:1.6;text-align:center;margin:var(--space-4) 0}
-.pix-mode .dock{display:none}
-/* Tela de Pix: sem rodapé enquanto ESPERA o pagamento (foco, menos saídas —
-   mesma lógica do .co-mode no checkout). Na confirmação (setApproved adiciona
-   .pix-done) o rodapé volta, como na tela /pedido — aí cross-sell é bem-vindo. */
-.pix-mode footer{display:none}
-.pix-mode.pix-done footer{display:block}
+/* Tela de Pix: modo-foco enquanto ESPERA o pagamento — esconde nav/menu/busca/
+   sacola/rodapé/dock e centraliza o logo (mesma lógica do .co-mode no checkout),
+   pra tirar saídas no clímax. Na confirmação (setApproved adiciona .pix-done) o
+   chrome inteiro volta, como na tela /pedido — aí cross-sell é bem-vindo. */
+.pix-mode:not(.pix-done) nav.main,.pix-mode:not(.pix-done) #openSearch,.pix-mode:not(.pix-done) #openCart,.pix-mode:not(.pix-done) #openMenu,.pix-mode:not(.pix-done) footer,.pix-mode:not(.pix-done) .dock{display:none!important}
+.pix-mode:not(.pix-done) .hd-in{justify-content:center}
 @media(prefers-reduced-motion:reduce){.pixloading .coproc-ring{animation-duration:2.4s}}
 
 

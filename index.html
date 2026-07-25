@@ -857,32 +857,8 @@
     (function(){var em=document.getElementById('coEmail');if(em)em.addEventListener('input',function(){if(em.classList.contains('bad'))emailErr('');});})();
     CO.ship=null;CO.pay='pix';CO.parc=1;CO.coupon=null;CO.cpf='';
     renderCoSummary();
-    /* RESUMO editável — um listener delegado só, no <aside id="coSummary">
-       (o elemento persiste entre chamadas de renderCoSummary(), que só troca
-       o innerHTML — não precisa re-wire a cada render). +/− mexem em
-       cart[k].qty; "Remover" (ou − no último) apaga o item. Depois de
-       QUALQUER edição: persiste (saveCart), atualiza o dock/badge (render) e,
-       se ainda sobrou algo na sacola, re-renderiza o Resumo + re-sincroniza
-       as parcelas do cartão com o novo total (syncCardBrickAmount — só age
-       se o Cartão estiver selecionado, ver sua definição). Se a sacola
-       esvaziou, volta pro próprio /checkout — que, sem itens, já renderiza
-       coEmptyView() (sacola vazia + link pra produtos) em vez de ficar com
-       um checkout quebrado. */
-    var coSummaryEl=document.getElementById('coSummary');
-    if(coSummaryEl)coSummaryEl.addEventListener('click',function(e){
-      var b=e.target.closest('button[data-qp],button[data-qm]');
-      if(!b)return;
-      var k=b.dataset.qp||b.dataset.qm;
-      if(!cart[k])return;
-      if('qp' in b.dataset)cart[k].qty++;
-      else{if(cart[k].qty>1)cart[k].qty--;else delete cart[k];}
-      saveCart();
-      render();
-      if(!Object.keys(cart).length){navigate('/checkout',true);return;}
-      renderShip();   /* re-cota o frete: mudar a qtd pode cruzar o limite de grátis (R$150) */
-      renderCoSummary();
-      syncCardBrickAmount();
-    });
+    /* Resumo do checkout é só leitura — a edição de quantidade fica na sacola
+       (drawer), não aqui. Sem steppers, não há listener a montar. */
     /* CPF: campo nosso nos dois métodos — Pix (coCpf) e Cartão (coCardCpf, ver
        mountCardFields()) — cpfDigits/fmtCpf/cpfMsg são compartilhadas pelos dois
        (o Cartão usa o próprio coCardCpf, mas as mesmas funções de máscara/
@@ -1724,12 +1700,10 @@
        Delegado uma vez só em #coSummary (ver wireCheckout) — não precisa
        re-wire a cada renderCoSummary(). Não mexe no <div class="okri"> puro/sem
        edição usado por confirmView() (tela de sucesso, pós-pagamento). */
-    var rows=s.now.concat(s.pre).map(function(it){return '<div class="okri okri-ed"><div class="okri-img">'+mold(it.p)+'</div><div class="okri-tx"><b>'+it.name+'</b>'+(it.sub?'<small>'+it.sub+'</small>':'')
-      +'<div class="okqty" role="group" aria-label="Quantidade de '+it.name+'">'
-      +'<button type="button" class="okqty-b" data-qm="'+it.k+'" aria-label="Diminuir quantidade"><svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/></svg></button>'
-      +'<span class="okqty-n">'+it.qty+'</span>'
-      +'<button type="button" class="okqty-b" data-qp="'+it.k+'" aria-label="Aumentar quantidade"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>'
-      +'</div></div><div class="okri-pr">'+BRL(it.qty*it.price)+'</div></div>';}).join('');
+    /* Resumo do checkout = só leitura (a edição de quantidade vive na sacola).
+       Mesmo item read-only do recibo (confirmView): quantidade vira selo N× na
+       imagem, sem steppers. */
+    var rows=s.now.concat(s.pre).map(function(it){return '<div class="okri"><div class="okri-img">'+mold(it.p)+(it.qty>1?'<span class="okri-qty">'+it.qty+'×</span>':'')+'</div><div class="okri-tx"><b>'+it.name+'</b>'+(it.sub?'<small>'+it.sub+'</small>':'')+'</div><div class="okri-pr">'+BRL(it.qty*it.price)+'</div></div>';}).join('');
     var frete=s.now.length===0?'no lançamento':(CO.ship?(CO.ship.free?'Grátis':BRL(CO.ship.price)):'calcule no passo 2');
     var h='<h3>Resumo</h3><div class="ciList">'+rows+'</div><div class="cisep"></div>';
     h+='<div class="sumrow"><span>Subtotal</span><span>'+BRL(merch)+'</span></div>';
@@ -1790,6 +1764,7 @@
       +'</div>'
       +'<div class="okpanel" id="pixPanel"><div class="pixloading"><div class="coproc-ring" aria-hidden="true"></div></div></div>'
       +'<div class="okcta" id="pixCta"></div>'
+      +'<div class="pixhow" id="pixHow"></div>'
       +'</div></div>';
   }
   /* Contagem regressiva do Pix — só visual: /api/pagar não devolve a expiração real
@@ -1834,6 +1809,7 @@
       if(amountEl)amountEl.hidden=true;
       if(panel)panel.innerHTML='<p class="pixgone">'+msg+'</p>';
       if(cta)cta.innerHTML=ctaHtml||'';
+      var how=document.getElementById('pixHow');if(how)how.innerHTML='';
     }
     /* Mapeia o `order` que GET /api/compra devolve (compra aprovada, ver src/index.js
        handleCompra) pro shape que confirmView() espera. O servidor não guarda nome (só
@@ -1869,6 +1845,7 @@
       if(titleEl)titleEl.textContent='Pagamento confirmado!';
       if(subEl)subEl.textContent='A confirmação foi enviada para o seu e-mail.';
       if(panel)panel.innerHTML='';
+      var how=document.getElementById('pixHow');if(how)how.innerHTML='';
       if(cta)cta.innerHTML='<a class="btn" href="/produtos">Continuar comprando</a>';
     }
     function handleApproved(order){
@@ -1894,6 +1871,13 @@
         var done=function(){copyBtn.textContent='Copiado!';setTimeout(function(){copyBtn.textContent='Copiar código';},2000);};
         if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(copia).then(done,done);else done();
       };
+      var how=document.getElementById('pixHow');
+      if(how)how.innerHTML='<h4>Como pagar com Pix</h4><ol>'
+        +'<li><span class="pixnum">1</span>Abra o app do seu banco e escolha <b>Pix</b>.</li>'
+        +'<li><span class="pixnum">2</span>Toque em <b>Ler QR Code</b> e aponte pro código ao lado — ou use <b>Pix Copia e Cola</b> com o código copiado.</li>'
+        +'<li><span class="pixnum">3</span>Confira o valor e confirme no app.</li>'
+        +'<li><span class="pixnum">4</span>Pronto — a confirmação aparece aqui sozinha, sem precisar recarregar.</li>'
+        +'</ol><p class="pixsafe">Pagamento processado pelo Mercado Pago.</p>';
       startPixExpiry(expiryEl,function(){
         stopPoll();
         setGone('O código expirou — refaça o pedido para gerar um novo Pix.','<a class="btn" href="/checkout">Voltar ao checkout</a>');
