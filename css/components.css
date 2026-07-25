@@ -728,7 +728,11 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
    indistinguível dos campos nossos ao lado. O SDK de Secure Fields não deixa
    estilizar o iframe por fora — só por dentro, via a opção `style` (cor/
    tamanho de fonte, lidos dos tokens Suzu em mountCardFields()). */
-.mpfield{border:1px solid var(--line);border-radius:var(--r-md);padding:var(--space-3) var(--space-3);background:var(--surface);min-height:44px}
+.mpfield{border:1px solid var(--line);border-radius:var(--r-md);padding:0 var(--space-3);background:var(--surface);height:44px;box-sizing:border-box}
+/* o iframe do MP (número/validade/CVV) é injetado com height:100% — o container
+   PRECISA de altura fixa (não só min-height), senão o 100% não resolve e o campo
+   colapsa a 0 ou estica pra centenas de px. Altura fixa + iframe 100% = 1 linha. */
+.mpfield iframe{height:100%!important;width:100%!important;border:0;display:block}
 .mpfield.bad{border-color:var(--error-text)}
 /* .cardnumrow — só o campo Número do cartão ganha o selo da bandeira (Visa/
    Master/…, detectado via binChange → mp.getPaymentMethods({bin}), ver
