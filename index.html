@@ -1020,15 +1020,18 @@
             initialization:{amount:estTotalReais()},
             customization:{
               paymentMethods:{creditCard:'all',bankTransfer:['pix'],maxInstallments:6},
-              /* customVariables casa o Brick com os tokens Suzu — nomes reconstruídos da API
-                 pública do MP (não fornecidos no shape da task); se algum nome estiver errado
-                 o Brick apenas ignora a chave (sem quebrar o pagamento). Ver relatório. */
+              /* customVariables oficiais do MP Bricks (confirmadas no SDK: mercadopago/sdk-js,
+                 docs/bricks/payment-guest.md), mapeadas pros tokens Suzu. Lidas via mpTok()
+                 (getComputedStyle das custom properties) em vez de hex cru — respeita a regra
+                 "hex só em tokens.css" e acompanha o tema claro/escuro automaticamente. */
               visual:{style:{theme:'default',customVariables:{
-                formBackgroundColor:mpTok('--surface'),
-                baseColor:mpTok('--ink')||mpTok('--text'),
+                baseColor:mpTok('--ink'),
                 textPrimaryColor:mpTok('--text'),
-                textSecondaryColor:mpTok('--text-muted'),
+                textSecondaryColor:mpTok('--text-secondary'),
+                formBackgroundColor:mpTok('--surface'),
                 inputBackgroundColor:mpTok('--surface'),
+                borderRadiusMedium:mpTok('--r-md'),
+                borderRadiusLarge:mpTok('--r-lg'),
                 errorColor:mpTok('--error-text'),
                 successColor:mpTok('--success-text')
               }}}
@@ -1226,6 +1229,9 @@
   }
   function router(){
     var p=location.pathname||'/', v=null;
+    /* sai do /checkout com Pix pendente na tela: encerra o polling de /api/compra
+       pra não ficar batendo a API pra sempre depois que o usuário navegou embora. */
+    if(p!=='/checkout')stopPoll();
     if(p.indexOf('/p/')===0){var _pi=pidBySlug(p.slice(3));v=_pi?productView(_pi):null;if(!v){navigate('/produtos',true);return;}}
     else if(p==='/produtos')v=produtosView();
     else if(p==='/prevenda'){if(PREVENDA){v=prevendaView();}else{navigate('/produtos',true);return;}}
