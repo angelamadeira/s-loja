@@ -1373,10 +1373,12 @@
           numField.on('validityChange',function(){if(isCurrent())fieldErr(numErrEl,numBox,'');});
           expField.on('validityChange',function(){if(isCurrent())fieldErr(expErrEl,expBox,'');});
           cvvField.on('validityChange',function(){if(isCurrent())fieldErr(cvvErrEl,cvvBox,'');});
-          /* binChange: callback recebe o BIN (string) direto, ou vazio/undefined
-             quando o número foi apagado abaixo do tamanho de detecção — trata os
-             dois como "sem bin" (reseta parcelas). */
-          numField.on('binChange',function(bin){if(isCurrent())resolveBin(bin||null);});
+          /* binChange: o SDK V2 entrega um OBJETO {bin:"..."} (não a string direta);
+             algumas versões passam a string. Extrai os dois casos com robustez —
+             sem isso, o objeto ia inteiro pro getPaymentMethods e o BIN nunca
+             resolvia (botão travado em disabled + parcelas presas em 1×). Vazio/
+             undefined = "sem bin" (reseta parcelas). */
+          numField.on('binChange',function(data){if(!isCurrent())return;var b=(data&&typeof data==='object')?data.bin:data;resolveBin(b||null);});
         }).catch(function(err){if(!isCurrent())return;console.error('MP init',err);showFail();});
       }
       if(window.MercadoPago){go();}
