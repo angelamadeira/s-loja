@@ -687,13 +687,16 @@
     </div>
 
     <div class="comp-block">
-      <h3>Selos de preço &amp; promoção — <code>.offtag</code> · <code>.wasp</code> · <code>.pbadge.promo</code> · <code>.note</code> · <code>.couphint</code></h3>
-      <p class="dsrule">Desconto sempre aparece nos dois lados do preço: <code>.wasp</code> risca o valor cheio, <code>.offtag</code> é a pílula "−X%" ao lado do preço atual (PDP, "Leve junto"). No card de listagem a mesma leitura vira selo sobre a imagem — <code>.pbadge.promo</code>, mesma família de cor de <code>.last</code>/<code>.presale</code>/<code>.soldout</code>. A faixa do topo (<code>.note</code>) mostra por padrão o aviso de frete grátis; com a promoção geral do site ativa (<code>SALE.active</code>), o mesmo elemento passa a exibir o texto da campanha — não existe uma classe própria de "faixa promo". <code>.couphint</code> dá o retorno do cupom digitado no checkout: neutro, <code>.err</code> (mesma cor de <code>.field-err</code>, não demonstrado aqui) ou <code>.ok</code>.</p>
+      <h3>Selos de preço &amp; promoção — <code>.offtag</code> · <code>.wasp</code> · <code>.pbadge.promo</code> · <code>.note</code> · <code>.couptoggle</code> · <code>.couphint</code></h3>
+      <p class="dsrule">Desconto sempre aparece nos dois lados do preço: <code>.wasp</code> risca o valor cheio, <code>.offtag</code> é a pílula "−X%" ao lado do preço atual (PDP, "Leve junto"). No card de listagem a mesma leitura vira selo sobre a imagem — <code>.pbadge.promo</code>, mesma família de cor de <code>.last</code>/<code>.presale</code>/<code>.soldout</code>. A faixa do topo (<code>.note</code>) mostra por padrão o aviso de frete grátis; com a promoção geral do site ativa (<code>SALE.active</code>), o mesmo elemento passa a exibir o texto da campanha — não existe uma classe própria de "faixa promo". No checkout, o cupom fica escondido atrás do link discreto <code>.couptoggle</code> ("Tem um cupom de desconto?") — campo vazio sempre visível prejudica conversão (Baymard); um clique revela o <code>.couprow</code> de sempre. <code>.couphint</code> dá o retorno do cupom digitado: neutro, <code>.err</code> (mesma cor de <code>.field-err</code>, não demonstrado aqui) ou <code>.ok</code>.</p>
       <div class="demo" style="display:flex;flex-direction:column;gap:var(--space-5)">
         <div class="note" style="border-radius:var(--space-3)">Promoção de verão — −20% em toda a coleção Bento &amp; Festa</div>
         <div class="demo-row">
           <span style="font-size:1.05rem;font-weight:500"><s class="wasp">R$ 89,00</s>R$ 71,20<span class="offtag">−20%</span></span>
           <div class="pcard" style="max-width:64px"><div class="m" style="background:var(--sango-wash)"><span class="pbadge promo">−20%</span></div></div>
+        </div>
+        <div style="max-width:320px">
+          <button type="button" class="couptoggle">Tem um cupom de desconto?</button>
         </div>
         <div style="max-width:320px">
           <div class="couprow"><input type="text" value="SUZU20" readonly><button type="button" class="btn ghost">Aplicar</button></div>

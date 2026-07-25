@@ -878,6 +878,14 @@
     }
     function syncBrickAmount(){if(brickCtl&&brickCtl.update){brickCtl.update({amount:estTotalReais()}).catch(function(){});}}
     var coupBtn=document.getElementById('coCoupBtn'),coupIn=document.getElementById('coCoupon'),coupHint=document.getElementById('coCoupHint');
+    /* Progressive disclosure (Baymard): o campo de cupom começa escondido atrás de um
+       link discreto — um campo vazio sempre visível faz quem não tem código sair
+       procurando um, o que prejudica conversão. */
+    var coupToggle=document.getElementById('coCoupToggle'),coupRow=document.getElementById('coCoupRow');
+    if(coupToggle&&coupRow){coupToggle.onclick=function(){
+      coupToggle.hidden=true;coupToggle.setAttribute('aria-expanded','true');
+      coupRow.hidden=false;if(coupIn)coupIn.focus();
+    };}
     if(coupBtn){var applyCoup=function(){var code=(coupIn.value||'').trim().toUpperCase();
         if(!code){CO.coupon=null;coupHint.textContent='';coupHint.className='couphint';renderCoSummary();syncBrickAmount();return;}
         if(COUPONS[code]){CO.coupon={code:code,pct:COUPONS[code]};coupHint.textContent='Cupom aplicado: −'+COUPONS[code]+'%.';coupHint.className='couphint ok';}
@@ -1055,15 +1063,24 @@
               /* customVariables oficiais do MP Bricks (confirmadas no SDK: mercadopago/sdk-js,
                  docs/bricks/payment-guest.md), mapeadas pros tokens Suzu. Lidas via mpTok()
                  (getComputedStyle das custom properties) em vez de hex cru — respeita a regra
-                 "hex só em tokens.css" e acompanha o tema claro/escuro automaticamente. */
+                 "hex só em tokens.css" e acompanha o tema claro/escuro automaticamente.
+                 O SDK NÃO documenta qual variável de raio afeta especificamente o botão
+                 "Pagar" (só lista os 4 tokens, sem dizer a que elemento cada um se aplica).
+                 borderRadiusFull e borderRadiusLarge são os candidatos mais plausíveis pro
+                 botão (maior elemento do Brick) e por isso levam o token pílula — Medium
+                 fica com --r-md (mesmo raio usado nos nossos próprios inputs, ex. .couprow
+                 input) pros campos do formulário, e Small ganha um raio pequeno pra não
+                 esquisitar elementos menores (chips/checkboxes). CONFIRMAR VISUALMENTE: só
+                 dá pra saber se o botão realmente virou pílula olhando o Brick renderizado. */
               visual:{style:{theme:'default',customVariables:{
                 baseColor:mpTok('--ink'),
                 textPrimaryColor:mpTok('--text'),
                 textSecondaryColor:mpTok('--text-secondary'),
                 formBackgroundColor:mpTok('--surface'),
                 inputBackgroundColor:mpTok('--surface'),
+                borderRadiusSmall:mpTok('--r-sm'),
                 borderRadiusMedium:mpTok('--r-md'),
-                borderRadiusLarge:mpTok('--r-lg'),
+                borderRadiusLarge:mpTok('--r-pill'),
                 borderRadiusFull:mpTok('--r-pill'),
                 buttonTextColor:mpTok('--surface'),
                 errorColor:mpTok('--error-text'),
@@ -1197,7 +1214,8 @@
       +'<div class="costep-cta"><button type="button" class="btn conext" data-next="1">Continuar</button></div></div></section>'
       +entrega
       +'<section class="costep" data-step="3" id="cstep3">'+stepHead(3,'Pagamento')+'<div class="costep-body">'
-      +'<div class="couprow"><input type="text" id="coCoupon" placeholder="Cupom de desconto" autocomplete="off"><button type="button" class="btn ghost" id="coCoupBtn">Aplicar</button></div><p class="couphint" id="coCoupHint"></p>'
+      +'<button type="button" class="couptoggle" id="coCoupToggle" aria-expanded="false" aria-controls="coCoupRow">Tem um cupom de desconto?</button>'
+      +'<div class="couprow" id="coCoupRow" hidden><input type="text" id="coCoupon" placeholder="Cupom de desconto" autocomplete="off"><button type="button" class="btn ghost" id="coCoupBtn">Aplicar</button></div><p class="couphint" id="coCoupHint"></p>'
       +'<div class="paybrick"><div id="coBrickContainer"></div><p class="paybrickerr" id="coBrickErr" hidden></p></div>'
       +'<div class="cotrust"><span>Compra protegida</span><span><a href="/faq">Trocas em até 7 dias</a></span><span>Enviamos para todo o Brasil</span></div>'
       +'<p class="cohelp">Dúvida antes de finalizar? <a href="https://wa.me/5511912345678?text='+encodeURIComponent('Olá! Estou finalizando uma compra na loja Studio Suzu e queria tirar uma dúvida.')+'" target="_blank" rel="noopener">Fale com a gente no WhatsApp</a>.</p>'
