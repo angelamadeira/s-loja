@@ -857,34 +857,39 @@
     (function(){var em=document.getElementById('coEmail');if(em)em.addEventListener('input',function(){if(em.classList.contains('bad'))emailErr('');});})();
     CO.ship=null;CO.pay='pix';CO.parc=1;CO.coupon=null;CO.cpf='';
     renderCoSummary();
-    /* CPF: no Pix é campo nosso (coCpf, validado abaixo — o método não passa
-       pelo Brick nenhum, então o documento precisa ser coletado aqui); no
-       Cartão continua vindo do cardPayment Brick (formData.payer.identification.number),
-       que precisa do documento de qualquer forma pra tokenizar — sem duplicar campo. */
+    /* CPF: campo nosso nos dois métodos — Pix (coCpf) e Cartão (coCardCpf, ver
+       mountCardFields()) — cpfDigits/fmtCpf/cpfMsg são compartilhadas pelos dois
+       (o Cartão usa o próprio coCardCpf, mas as mesmas funções de máscara/
+       validação, pra não duplicar). */
     var cpfEl=document.getElementById('coCpf');
     function cpfDigits(v){return (v||'').replace(/\D/g,'').slice(0,11);}
     function fmtCpf(d){if(d.length<=3)return d;if(d.length<=6)return d.slice(0,3)+'.'+d.slice(3);if(d.length<=9)return d.slice(0,3)+'.'+d.slice(3,6)+'.'+d.slice(6);return d.slice(0,3)+'.'+d.slice(3,6)+'.'+d.slice(6,9)+'-'+d.slice(9);}
     function cpfMsg(){return 'Precisamos do CPF pra processar o pagamento e emitir a nota.';}
     function cpfErr(msg){var b=document.getElementById('coCpfErr');if(b){b.textContent=msg||'';b.classList.toggle('show',!!msg);}if(cpfEl){cpfEl.classList.toggle('bad',!!msg);cpfEl.setAttribute('aria-invalid',msg?'true':'false');}}
     if(cpfEl)cpfEl.addEventListener('input',function(){cpfEl.value=fmtCpf(cpfDigits(cpfEl.value));if(cpfEl.classList.contains('bad'))cpfErr('');});
-    /* estimativa exibida no cardPayment Brick — o valor cobrado de verdade nasce no
-       servidor (/api/pagar). Ao contrário da versão anterior (Brick único, onde o
-       método só era conhecido no onSubmit), agora CO.pay já reflete a escolha real
+    /* estimativa exibida no formulário de Cartão (Parcelas) — o valor cobrado de
+       verdade nasce no servidor (/api/pagar). CO.pay já reflete a escolha real
        ANTES do pagamento — os rádios nossos setam CO.pay na hora do clique — então
-       o desconto Pix pode entrar aqui com segurança quando metodo=pix. O cardPayment
-       Brick só existe/atualiza quando CO.pay==='cartao' (ver syncCardBrickAmount),
-       então ele nunca recebe o total com desconto Pix — mesma regra do servidor
-       (recomputaTotal em src/precos.js: desconto de 5% só com metodo:'pix'). */
-    var cardBrickCtl=null;
-    /* Timeout de carregamento do cardPayment Brick (Fase 4a-UX): os iframes de
-       secure-fields do MP (secure-fields.mercadopago.com) são o alvo #1 de
-       bloqueadores de anúncio/extensões de privacidade — quando bloqueados ou
-       lentos, o SDK não erra, só nunca chama onReady, e o usuário via uma caixa
-       vazia sem feedback nenhum. cardBrickTimer é compartilhado entre
-       mountCardBrick() (que o arma a cada tentativa) e selectPay() (que o limpa
-       ao trocar pra Pix, pra não disparar a falha "por trás" de uma aba escondida). */
-    var cardBrickTimer=null;
-    function clearCardBrickTimer(){if(cardBrickTimer){clearTimeout(cardBrickTimer);cardBrickTimer=null;}}
+       o desconto Pix pode entrar aqui com segurança quando metodo=pix. As parcelas
+       do Cartão só são (re)consultadas quando CO.pay==='cartao' (ver
+       syncCardBrickAmount/cardFieldsSyncAmount), então nunca recebem o total com
+       desconto Pix — mesma regra do servidor (recomputaTotal em src/precos.js:
+       desconto de 5% só com metodo:'pix'). */
+    /* cardFieldsSyncAmount: setado por mountCardFields() (função de re-consulta de
+       parcelas da geração atual) — syncCardBrickAmount() (chamada de fora, a cada
+       troca de frete/cupom) só invoca essa função, sem conhecer os detalhes do MP
+       Secure Fields. null enquanto o formulário de Cartão nunca foi montado. */
+    var cardFieldsSyncAmount=null;
+    /* Timeout de carregamento dos campos de Cartão (Fase 4a-securefields): os
+       iframes de secure-fields do MP (secure-fields.mercadopago.com) são o alvo #1
+       de bloqueadores de anúncio/extensões de privacidade — quando bloqueados ou
+       lentos, o SDK não erra, só nunca chama o evento 'ready' dos campos, e o
+       usuário via uma caixa vazia sem feedback nenhum. cardFieldsTimer é
+       compartilhado entre mountCardFields() (que o arma a cada tentativa) e
+       selectPay() (que o limpa ao trocar pra Pix, pra não disparar a falha "por
+       trás" de uma aba escondida). */
+    var cardFieldsTimer=null;
+    function clearCardFieldsTimer(){if(cardFieldsTimer){clearTimeout(cardFieldsTimer);cardFieldsTimer=null;}}
     function estTotalReais(){
       var sp=cartSplit(),merch=sp.subNow+sp.subPre;
       var shp=sp.now.length===0?0:(CO.ship?(CO.ship.free?0:CO.ship.price):0);
@@ -892,10 +897,10 @@
       var coupD=CO.coupon?Math.round(merch*CO.coupon.pct/100*100)/100:0;
       return Math.max(1,Math.round((merch+shp-pixD-coupD)*100)/100);
     }
-    /* guard CO.pay==='cartao': evita empurrar pro Brick (escondido, quando o
-       Pix está selecionado) um amount já descontado — o Brick de cartão nunca
-       pode mostrar/cobrar o desconto que só o Pix tem direito. */
-    function syncCardBrickAmount(){if(CO.pay==='cartao'&&cardBrickCtl&&cardBrickCtl.update){cardBrickCtl.update({amount:estTotalReais()}).catch(function(){});}}
+    /* guard CO.pay==='cartao': evita re-consultar parcelas (escondido, quando o
+       Pix está selecionado) com um amount já descontado — o Cartão nunca pode
+       mostrar/cobrar o desconto que só o Pix tem direito. */
+    function syncCardBrickAmount(){if(CO.pay==='cartao'&&cardFieldsSyncAmount)cardFieldsSyncAmount();}
     var coupBtn=document.getElementById('coCoupBtn'),coupIn=document.getElementById('coCoupon'),coupHint=document.getElementById('coCoupHint');
     /* Progressive disclosure (Baymard): o campo de cupom começa escondido atrás de um
        link discreto — um campo vazio sempre visível faz quem não tem código sair
@@ -988,16 +993,17 @@
       cof.querySelectorAll('button.cohd').forEach(function(h){h.onclick=function(){var sec=h.closest('.costep');if(sec.classList.contains('done'))openStep(+sec.dataset.step);};});
     })();
     /* o pagamento acontece pelo botão "Pagar com Pix" (nosso) ou pelo botão do
-       cardPayment Brick (Cartão) — este form não tem botão submit próprio, então
-       isto é só uma rede de segurança (Enter em algum campo, etc). */
+       formulário de Cartão/Secure Fields (nosso, #coCardBtn) — este form não tem
+       botão submit próprio, então isto é só uma rede de segurança (Enter em
+       algum campo, etc). */
     cof.onsubmit=function(e){e.preventDefault();};
-    /* ===== Pagamento — rádios Pix/Cartão + cardPayment Brick do Mercado Pago só
-       pro Cartão + os 3 estados do loader (aprovado/Pix pendente/recusado) =====
-       O Pix não passa pelo MP Brick nenhum: é POST direto em /api/pagar com
+    /* ===== Pagamento — rádios Pix/Cartão + MP Secure Fields só pro Cartão + os
+       3 estados do loader (aprovado/Pix pendente/recusado) =====
+       O Pix não passa pelo SDK do MP nenhum: é POST direto em /api/pagar com
        metodo:'pix' e sem token (o servidor cobra puro Pix, sem cartão). Só o
        Cartão precisa do SDK do MP pra tokenizar o número do cartão (nunca passa
-       pelo nosso servidor em texto puro) — daí o cardPayment Brick, montado só
-       quando o método Cartão é selecionado. */
+       pelo nosso servidor em texto puro) — daí os campos seguros do MP, montados
+       só quando o método Cartão é selecionado (ver mountCardFields()). */
     function procEls(){
       return {ov:document.getElementById('coProc'),msg:document.getElementById('coProcMsg'),sub:document.getElementById('coProcSub'),
         ring:document.getElementById('coProcRing'),ico:document.getElementById('coProcIco'),back:document.getElementById('coProcBack')};
@@ -1043,8 +1049,8 @@
     }
     /* validações + coleta de dados COMUNS aos dois métodos (endereço/e-mail/itens/frete)
        — mesma lógica que antes vivia dentro do onSubmit único do Payment Brick; agora
-       é compartilhada pelo botão Pix e pelo onSubmit do cardPayment Brick, pra não
-       duplicar. Devolve null (e já mostra o erro/foco certo) se algo faltar. */
+       é compartilhada pelo botão Pix e pelo botão Pagar do Cartão (Secure Fields), pra
+       não duplicar. Devolve null (e já mostra o erro/foco certo) se algo faltar. */
     function buildBaseCtx(){
       var email=document.getElementById('coEmail');
       if(!email||!email.value||email.value.indexOf('@')<1){emailErr(emailMsg(email));if(email)email.focus();return null;}
@@ -1088,8 +1094,8 @@
       if(payPixBox)payPixBox.hidden=v!=='pix';
       if(payCardBox)payCardBox.hidden=v!=='cartao';
       renderCoSummary();
-      if(v==='cartao'){mountCardBrick();syncCardBrickAmount();}
-      else{clearCardBrickTimer();}
+      if(v==='cartao'){mountCardFields();syncCardBrickAmount();}
+      else{clearCardFieldsTimer();}
     }
     payRadios.forEach(function(r){r.addEventListener('change',function(){if(r.checked)selectPay(r.value);});});
     /* ===== Pix: botão nosso (pílula .btn) — POST direto em /api/pagar, sem Brick
@@ -1118,160 +1124,265 @@
         .then(function(j){restore();if(!j||!j.ok){showRecusado();return;}handlePagarResult(j);})
         .catch(function(){restore();showRecusado();});
     };
-    /* ===== Cartão: cardPayment Brick do Mercado Pago (só o cartão — tokeniza o
-       número, nunca passa em texto puro pelo nosso servidor). Montado só quando
-       o método Cartão é selecionado pela 1ª vez (não precisa do SDK pro Pix). ===== */
-    var cardBrickMountStarted=false,cardBrickMountGen=0;
+    /* ===== Cartão: formulário nosso + MP Secure Fields (SDK JS V2) — só número/
+       validade/CVV são iframes seguros do MP (mp.fields.create/.mount, nunca
+       passam em texto puro pelo nosso servidor); nome/CPF/parcelas são campos
+       NOSSOS, com o layout/estilo Suzu inteiro. Substitui o cardPayment Brick
+       (controle total de layout, sem depender do que o Brick deixava estilizar).
+       Montado só quando o método Cartão é selecionado pela 1ª vez (não precisa
+       do SDK pro Pix). ===== */
+    var cardFieldsMountStarted=false,cardFieldsMountGen=0;
     var CARD_FAIL_MSG='Não conseguimos carregar o formulário de cartão. Se você usa um bloqueador de anúncios ou extensão de privacidade, desative para este site e recarregue — ou pague com Pix, que não precisa de cartão.';
-    function mountCardBrick(){
-      if(cardBrickMountStarted)return;cardBrickMountStarted=true;
+    function mountCardFields(){
+      if(cardFieldsMountStarted)return;cardFieldsMountStarted=true;
       /* myGen isola esta tentativa de montagem das anteriores: se o usuário clicar
          "Tentar de novo" (retryMount), uma nova geração começa, e os callbacks da
-         tentativa velha (onReady/onError/o .then do bricks.create — que pode
-         resolver bem depois, já que não dá pra cancelar a Promise do SDK) viram
-         no-op via isCurrent(), em vez de pisar no estado da tentativa nova. */
-      var myGen=++cardBrickMountGen;
-      function isCurrent(){return myGen===cardBrickMountGen;}
-      var brickBox=document.getElementById('coCardBrick'),errBox=document.getElementById('coCardErr');
+         tentativa velha (ready/error/binChange, os .then() das chamadas ao MP —
+         que podem resolver bem depois, já que não dá pra cancelar uma Promise)
+         viram no-op via isCurrent(), em vez de pisar no estado da tentativa nova. */
+      var myGen=++cardFieldsMountGen;
+      function isCurrent(){return myGen===cardFieldsMountGen;}
+      var wrapBox=document.getElementById('coCardWrap'),errBox=document.getElementById('coCardErr');
       var loadBox=document.getElementById('coCardLoading'),failBox=document.getElementById('coCardFail'),failMsg=document.getElementById('coCardFailMsg');
       var retryBtn=document.getElementById('coCardRetry'),goPixBtn=document.getElementById('coCardGoPix');
-      var cardBtn=document.getElementById('coCardBtn');
-      if(!brickBox)return;
+      var cardBtn=document.getElementById('coCardBtn'),formBox=document.getElementById('coCardForm');
+      var numBox=document.getElementById('coCardNumberField'),expBox=document.getElementById('coCardExpiryField'),cvvBox=document.getElementById('coCardCvvField');
+      var brandEl=document.getElementById('coCardBrand');
+      var numErrEl=document.getElementById('coCardNumberErr'),expErrEl=document.getElementById('coCardExpiryErr'),cvvErrEl=document.getElementById('coCardCvvErr');
+      var nameEl=document.getElementById('coCardName'),nameErrEl=document.getElementById('coCardNameErr');
+      var cardCpfEl=document.getElementById('coCardCpf'),cardCpfErrEl=document.getElementById('coCardCpfErr');
+      var parcSel=document.getElementById('coCardParcelas');
+      if(!wrapBox||!numBox)return;
       function brickErr(msg){if(!errBox)return;errBox.textContent=msg||'';errBox.hidden=!msg;}
+      function fieldErr(el,box,msg){if(el){el.textContent=msg||'';el.classList.toggle('show',!!msg);}if(box)box.classList.toggle('bad',!!msg);}
       function mpTok(name){var v=getComputedStyle(document.documentElement).getPropertyValue(name);return v?v.trim():'';}
-      /* #coCardBtn (nosso botão pílula, ver .paybrick .btn) só pode ser clicado
-         depois que onReady confirmar que os campos do Brick carregaram — antes
-         disso (ou em falha) getFormData() não teria o que tokenizar. */
-      function setCardBtnEnabled(b){if(cardBtn)cardBtn.disabled=!b;}
-      function showLoading(){if(failBox)failBox.hidden=true;if(loadBox)loadBox.hidden=false;setCardBtnEnabled(false);}
-      function hideLoading(){if(loadBox)loadBox.hidden=true;}
-      /* Falha (timeout OU onError OU init quebrado): sempre a MESMA mensagem —
-         menciona bloqueador de anúncios (causa nº1) e a saída via Pix — com
-         "Tentar de novo" (re-arma mountCardBrick do zero) e um atalho pro Pix. */
+      /* Estado desta geração: prontidão dos 3 campos seguros do MP + o que o
+         binChange resolveu (bandeira/emissor/parcelas). st.bin guarda o BIN em
+         voo pra descartar respostas de getPaymentMethods/getIssuers/getInstallments
+         que cheguem fora de ordem (usuário digitou mais números antes da 1ª
+         resolver) — só a resposta cujo st.bin ainda bate é aplicada. */
+      var st={numReady:false,expReady:false,cvvReady:false,bin:null,paymentMethodId:null,issuerId:null,parcelas:1};
+      var submitting=false;
+      var mp=null;
+      function fieldsReady(){return st.numReady&&st.expReady&&st.cvvReady;}
+      function nameOk(){return !!(nameEl&&nameEl.value.trim());}
+      function cardCpfDigitsVal(){return cpfDigits((cardCpfEl||{}).value);}
+      function cardCpfOk(){return cardCpfDigitsVal().length===11;}
+      /* #coCardBtn (nosso botão pílula, ver .paybrick .btn) só fica habilitado
+         quando: os 3 campos seguros carregaram, nome/CPF nossos são válidos, o
+         BIN já resolveu um payment_method_id (senão não dá pra montar o payload
+         pro servidor) e não há envio em voo. */
+      function updateSubmitEnabled(){if(cardBtn)cardBtn.disabled=!(fieldsReady()&&nameOk()&&cardCpfOk()&&!!st.paymentMethodId&&!submitting);}
+      function showLoading(){if(failBox)failBox.hidden=true;if(formBox)formBox.hidden=true;if(loadBox)loadBox.hidden=false;if(cardBtn)cardBtn.disabled=true;}
+      function hideLoading(){if(loadBox)loadBox.hidden=true;if(formBox)formBox.hidden=false;}
+      /* Falha (timeout OU error de algum campo OU init quebrado): sempre a MESMA
+         mensagem — menciona bloqueador de anúncios (causa nº1, mira os iframes
+         de secure-fields.mercadopago.com) e a saída via Pix — com "Tentar de
+         novo" (re-arma mountCardFields do zero) e um atalho pro Pix. */
       function showFail(){
         if(!isCurrent())return;
-        clearCardBrickTimer();hideLoading();brickErr('');setCardBtnEnabled(false);
+        clearCardFieldsTimer();hideLoading();if(formBox)formBox.hidden=true;brickErr('');if(cardBtn)cardBtn.disabled=true;
         if(failMsg)failMsg.textContent=CARD_FAIL_MSG;
         if(failBox)failBox.hidden=false;
       }
       function retryMount(){
-        clearCardBrickTimer();
-        if(cardBrickCtl&&typeof cardBrickCtl.unmount==='function'){try{cardBrickCtl.unmount();}catch(e){}}
-        cardBrickCtl=null;
-        brickBox.innerHTML='';
+        clearCardFieldsTimer();
+        /* Secure Fields (SDK V2) não expõe um .unmount() por campo — a forma
+           documentada de "recomeçar" é limpar os containers e criar campos
+           novos; os campos velhos (geração anterior) já viram no-op via
+           isCurrent() em qualquer callback que ainda dispare. */
+        if(numBox)numBox.innerHTML='';if(expBox)expBox.innerHTML='';if(cvvBox)cvvBox.innerHTML='';
         if(failBox)failBox.hidden=true;
-        cardBrickMountStarted=false;
-        mountCardBrick();
+        cardFieldsMountStarted=false;
+        mountCardFields();
       }
       if(retryBtn)retryBtn.onclick=function(){retryMount();};
       if(goPixBtn)goPixBtn.onclick=function(){var r=document.querySelector('#coPayMethods input[value="pix"]');if(r){r.checked=true;selectPay('pix');}};
+      /* ===== Parcelas: populadas com os planos REAIS do BIN digitado (nunca uma
+         lista genérica) — ver resolveBin(). Sem BIN resolvido ainda (campo vazio,
+         digitando, ou getInstallments falhou), mostra só a opção à vista com o
+         total estimado atual, e o botão Pagar fica disabled (guard em
+         updateSubmitEnabled, já que sem paymentMethodId não dá pra montar o
+         payload). ===== */
+      function resetInstallments(){
+        st.paymentMethodId=null;st.issuerId=null;st.parcelas=1;
+        if(brandEl){brandEl.innerHTML='';brandEl.hidden=true;}
+        if(parcSel)parcSel.innerHTML='<option value="1">1× de '+BRL(estTotalReais())+'</option>';
+        updateSubmitEnabled();
+      }
+      function showBrand(pm){
+        if(!brandEl)return;
+        var url=pm&&(pm.thumbnail||pm.secure_thumbnail);
+        if(url){brandEl.innerHTML='<img src="'+url+'" alt="'+((pm&&pm.name)||'').replace(/"/g,'')+'">';brandEl.hidden=false;}
+        else{brandEl.innerHTML='';brandEl.hidden=true;}
+      }
+      /* Cap de 6 parcelas é regra de negócio nossa (mesmo limite do antigo
+         customization.paymentMethods.maxInstallments:6 do Brick) — o MP pode
+         devolver mais opções (até 12/18 dependendo do cartão), filtramos aqui.
+         recommended_message já vem formatado em pt-BR pelo MP (locale na
+         chamada) — usamos ele quando existe; senão montamos a partir de
+         installment_amount/installment_rate. */
+      function populateInstallments(instRes){
+        if(!isCurrent())return;
+        var entry=instRes&&instRes[0];
+        var costs=((entry&&entry.payer_costs)||[]).filter(function(c){return c.installments<=6;});
+        if(!costs.length||!parcSel){resetInstallments();return;}
+        parcSel.innerHTML=costs.map(function(c){
+          var label=c.recommended_message||(c.installments+'× de '+BRL(c.installment_amount)+(c.installment_rate>0?' (com juros)':' sem juros'));
+          return '<option value="'+c.installments+'">'+label+'</option>';
+        }).join('');
+        parcSel.value=String(costs[0].installments);
+        st.parcelas=costs[0].installments;
+        updateSubmitEnabled();
+      }
+      if(parcSel)parcSel.onchange=function(){st.parcelas=+parcSel.value||1;};
+      /* ===== binChange → payment_method_id/issuer/parcelas reais (Fase 4a-securefields):
+         1) getPaymentMethods({bin}) — bandeira (payment_method_id) + selo (thumbnail).
+         2) issuer_id: se getPaymentMethods já trouxer pm.issuer.id, usa direto;
+            senão getIssuers({paymentMethodId,bin}) (caminho documentado do MP pra
+            BINs com mais de um emissor possível). Falha aqui não trava o fluxo —
+            issuer_id fica null (o servidor/MP toleram, é opcional em muitos casos).
+         3) getInstallments({amount,bin,paymentMethodId,locale}) — parcelas reais
+            pro total atual (ver populateInstallments). st.bin!==bin em qualquer
+            .then() descarta a resposta se o usuário já digitou um BIN diferente
+            (fora de ordem). Qualquer erro na cadeia reseta pra "1× à vista" e
+            deixa o Pagar desabilitado — nunca finge ter parcelas que não existem. */
+      function resolveBin(bin){
+        if(!isCurrent())return;
+        if(!bin){st.bin=null;resetInstallments();return;}
+        st.bin=bin;
+        mp.getPaymentMethods({bin:bin}).then(function(pmRes){
+          if(!isCurrent()||st.bin!==bin)return;
+          var pm=pmRes&&pmRes.results&&pmRes.results[0];
+          if(!pm)throw new Error('bin sem meio de pagamento');
+          st.paymentMethodId=pm.id;
+          showBrand(pm);
+          if(pm.issuer&&pm.issuer.id){st.issuerId=pm.issuer.id;return null;}
+          return mp.getIssuers({paymentMethodId:pm.id,bin:bin}).then(function(issuers){
+            if(!isCurrent()||st.bin!==bin)return;
+            var iss=issuers&&issuers[0];
+            st.issuerId=iss?iss.id:null;
+          }).catch(function(){st.issuerId=null;});
+        }).then(function(){
+          if(!isCurrent()||st.bin!==bin||!st.paymentMethodId)return;
+          return mp.getInstallments({amount:estTotalReais().toFixed(2),bin:bin,paymentMethodId:st.paymentMethodId,locale:'pt-BR'});
+        }).then(function(instRes){
+          if(!isCurrent()||st.bin!==bin)return;
+          if(instRes)populateInstallments(instRes);else updateSubmitEnabled();
+        }).catch(function(err){
+          if(!isCurrent())return;
+          console.error('MP bin/installments',err);
+          resetInstallments();
+        });
+      }
+      /* Exposto pro syncCardBrickAmount de fora (frete/cupom mudou o total) —
+         só re-consulta parcelas se já existe um BIN resolvido; sem BIN, o total
+         à vista mostrado em resetInstallments() só é atualizado na próxima
+         digitação (não há nada pra re-consultar no MP ainda). */
+      cardFieldsSyncAmount=function(){if(st.bin&&st.paymentMethodId)resolveBin(st.bin);};
+      /* ===== Nome/CPF do titular: campos nossos, validação inline igual ao
+         resto do checkout (erro limpa ao digitar, mostra no blur se inválido —
+         mesmo padrão do CPF do Pix, cpfDigits/fmtCpf/cpfMsg vêm de fora, do
+         escopo de wireCheckout). ===== */
+      if(nameEl){
+        nameEl.addEventListener('input',function(){fieldErr(nameErrEl,null,'');updateSubmitEnabled();});
+        nameEl.addEventListener('blur',function(){if(!nameOk())fieldErr(nameErrEl,null,'Precisamos do nome impresso no cartão.');});
+      }
+      if(cardCpfEl){
+        cardCpfEl.addEventListener('input',function(){cardCpfEl.value=fmtCpf(cardCpfDigitsVal());fieldErr(cardCpfErrEl,null,'');updateSubmitEnabled();});
+        cardCpfEl.addEventListener('blur',function(){if(!cardCpfOk())fieldErr(cardCpfErrEl,null,cpfMsg());});
+      }
       /* ===== Cartão: botão nosso (pílula .btn, igual ao Pix) — ÚNICO caminho de
-         envio do Cartão. No clique: getFormData() tokeniza o cartão e devolve
-         { token, payment_method_id, issuer_id, installments, payer:{identification:{number}} }
-         (rejeita/mostra os campos inválidos direto no Brick se algo estiver
-         errado — não submetemos nesse caso). Com sucesso, mesmo payload/mesmo
-         handlePagarResult do onSubmit antigo — sem duplicar lógica. Guard de
-         duplo envio: disabled+is-loading enquanto getFormData()+/api/pagar
-         estão em voo, igual ao #coPixBtn. */
+         envio do Cartão. No clique: mp.fields.createCardToken({cardholderName,
+         identificationType:'CPF', identificationNumber}) lê os 3 campos seguros
+         MONTADOS automaticamente e devolve {id:<token>} — nunca vemos o número/
+         validade/CVV em texto puro. Com sucesso, mesmo payload/mesmo
+         handlePagarResult do fluxo antigo (buildBaseCtx compartilhado com o
+         Pix) — sem duplicar lógica. Guard de duplo envio: disabled+is-loading
+         enquanto createCardToken()+/api/pagar estão em voo, igual ao #coPixBtn. */
       if(cardBtn)cardBtn.onclick=function(){
-        if(cardBtn.disabled||!cardBrickCtl||typeof cardBrickCtl.getFormData!=='function')return;
-        brickErr('');
+        if(cardBtn.disabled||submitting||!fieldsReady())return;
+        if(!nameOk()){fieldErr(nameErrEl,null,'Precisamos do nome impresso no cartão.');nameEl.focus();return;}
+        if(!cardCpfOk()){fieldErr(cardCpfErrEl,null,cpfMsg());cardCpfEl.focus();return;}
+        if(!st.paymentMethodId){brickErr('Confirme o número do cartão.');return;}
+        brickErr('');submitting=true;updateSubmitEnabled();
         var lbl=cardBtn.textContent;
-        cardBtn.disabled=true;cardBtn.classList.add('is-loading');cardBtn.setAttribute('aria-busy','true');
+        cardBtn.classList.add('is-loading');cardBtn.setAttribute('aria-busy','true');
         cardBtn.innerHTML='Processando<span class="bdots" aria-hidden="true"><i></i><i></i><i></i></span>';
-        function restore(){cardBtn.disabled=false;cardBtn.classList.remove('is-loading');cardBtn.removeAttribute('aria-busy');cardBtn.textContent=lbl;}
-        cardBrickCtl.getFormData().then(function(formData){
-          formData=formData||{};
-          if(!formData.token){restore();brickErr('Revise os dados do cartão.');return;}
+        function restore(){submitting=false;cardBtn.classList.remove('is-loading');cardBtn.removeAttribute('aria-busy');cardBtn.textContent=lbl;updateSubmitEnabled();}
+        var cpfD=cardCpfDigitsVal();
+        mp.fields.createCardToken({cardholderName:nameEl.value.trim(),identificationType:'CPF',identificationNumber:cpfD}).then(function(token){
+          if(!isCurrent())return;
+          if(!token||!token.id){restore();brickErr('Revise os dados do cartão.');return;}
           var ctx=buildBaseCtx();
           if(!ctx){restore();return;}
-          var _ident=(formData.payer&&formData.payer.identification)||{};
-          var cpfD=(_ident.number||'').replace(/\D/g,'');
-          if(!cpfD){restore();brickErr('Confirme o CPF no formulário de pagamento.');return;}
           brickErr('');
-          CO.pay='cartao';CO.parc=formData.installments||1;CO.cpf=cpfD;
+          CO.pay='cartao';CO.parc=st.parcelas||1;CO.cpf=cpfD;
           var payload={
             itens:ctx.itens,metodo:'cartao',parcelas:CO.parc,
             cupom:CO.coupon?CO.coupon.code:undefined,
             cpf:cpfD,email:CO.email,whats:CO.whats,
             endereco:ctx.endereco,freteCents:ctx.freteCents,consentiu:true,
-            token:formData.token,paymentMethodId:formData.payment_method_id,issuerId:formData.issuer_id
+            token:token.id,paymentMethodId:st.paymentMethodId,issuerId:st.issuerId
           };
           showAguardando();
           fetch('/api/pagar',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(payload)})
             .then(function(r){return r.json();})
             .then(function(j){restore();if(!j||!j.ok){showRecusado();return;}handlePagarResult(j);})
             .catch(function(){restore();showRecusado();});
-        }).catch(function(){
-          /* getFormData() rejeitou — o Brick já destaca os campos inválidos
-             (número/validade/CVV) por conta própria; só damos um empurrão gentil. */
+        }).catch(function(err){
+          /* createCardToken() rejeitou (cartão inválido, tokenização recusada) —
+             mensagem genérica gentil; os campos com erro específico já foram
+             destacados pelos eventos 'error' de cada campo, abaixo. */
+          if(!isCurrent())return;
+          console.error('MP createCardToken',err);
           restore();
-          brickErr('Revise os dados do cartão.');
+          brickErr('Revise os dados do cartão. Confira número, validade e CVV.');
         });
       };
       showLoading();
-      clearCardBrickTimer();
-      cardBrickTimer=setTimeout(showFail,12000);
+      clearCardFieldsTimer();
+      cardFieldsTimer=setTimeout(showFail,12000);
       function go(){
         fetch('/api/config').then(function(r){return r.json();}).then(function(cfg){
+          if(!isCurrent())return;
           if(!cfg||!cfg.mpKey||typeof MercadoPago==='undefined')throw new Error('mp indisponível');
-          var mp=new MercadoPago(cfg.mpKey,{locale:'pt-BR'});
-          var bricks=mp.bricks();
-          return bricks.create('cardPayment','coCardBrick',{
-            initialization:{amount:estTotalReais(),payer:{email:CO.email||''}},
-            customization:{
-              paymentMethods:{maxInstallments:6},
-              /* customVariables oficiais do MP Bricks (confirmadas no SDK: mercadopago/sdk-js,
-                 docs/bricks/payment-guest.md), mapeadas pros tokens Suzu. Lidas via mpTok()
-                 (getComputedStyle das custom properties) em vez de hex cru — respeita a regra
-                 "hex só em tokens.css" e acompanha o tema claro/escuro automaticamente.
-                 O SDK NÃO documenta qual variável de raio afeta especificamente o botão
-                 "Pagar" (só lista os 4 tokens, sem dizer a que elemento cada um se aplica).
-                 borderRadiusFull e borderRadiusLarge são os candidatos mais plausíveis pro
-                 botão (maior elemento do Brick) e por isso levam o token pílula — Medium
-                 fica com --r-md (mesmo raio usado nos nossos próprios inputs, ex. .couprow
-                 input) pros campos do formulário, e Small ganha um raio pequeno pra não
-                 esquisitar elementos menores (chips/checkboxes). CONFIRMAR VISUALMENTE: só
-                 dá pra saber se o botão realmente virou pílula olhando o Brick renderizado. */
-              /* hidePaymentButton:true — o botão "Pagar" do próprio Brick some (não dava
-                 pra estilizar em pílula Suzu); o botão nosso (#coCardBtn, mesmo .btn do
-                 Pix) chama cardBrickCtl.getFormData() no clique — ver wiring logo abaixo
-                 do bricks.create(). */
-              visual:{hidePaymentButton:true,style:{theme:'default',customVariables:{
-                baseColor:mpTok('--ink'),
-                textPrimaryColor:mpTok('--text'),
-                textSecondaryColor:mpTok('--text-secondary'),
-                formBackgroundColor:mpTok('--surface'),
-                inputBackgroundColor:mpTok('--surface'),
-                borderRadiusSmall:mpTok('--r-sm'),
-                borderRadiusMedium:mpTok('--r-md'),
-                borderRadiusLarge:mpTok('--r-pill'),
-                borderRadiusFull:mpTok('--r-pill'),
-                buttonTextColor:mpTok('--surface'),
-                errorColor:mpTok('--error-text'),
-                successColor:mpTok('--success-text')
-              }}}
-            },
-            callbacks:{
-              onReady:function(){if(!isCurrent())return;clearCardBrickTimer();hideLoading();if(failBox)failBox.hidden=true;brickErr('');setCardBtnEnabled(true);},
-              onError:function(err){if(!isCurrent())return;console.error('MP Brick',err);showFail();},
-              /* onSubmit é exigido pelo schema do cardPayment Brick, mas com
-                 hidePaymentButton:true o botão interno do MP nem existe — nada
-                 dispara este callback. O único caminho de envio do Cartão é o
-                 nosso botão (#coCardBtn) chamando cardBrickCtl.getFormData()
-                 diretamente (wiring logo abaixo). Mantido como no-op inofensivo. */
-              onSubmit:function(){return Promise.resolve();}
-            }
-          });
-        }).then(function(ctl){
-          if(!isCurrent()){if(ctl&&typeof ctl.unmount==='function'){try{ctl.unmount();}catch(e){}}return;}
-          cardBrickCtl=ctl;
+          mp=new MercadoPago(cfg.mpKey,{locale:'pt-BR'});
+          /* style: o SDK de Secure Fields só deixa estilizar o TEXTO dentro do
+             iframe (não a borda/raio/fundo — isso é o container .mpfield por
+             fora, CSS nosso). color/fontSize lidos via mpTok() (custom property
+             computada) em vez de hex cru, pra respeitar a regra "hex só em
+             tokens.css" e acompanhar claro/escuro automaticamente. */
+          var fieldStyle={style:{color:mpTok('--text'),fontSize:'.95rem'}};
+          var numField=mp.fields.create('cardNumber',Object.assign({placeholder:'0000 0000 0000 0000'},fieldStyle)).mount(numBox.id);
+          var expField=mp.fields.create('expirationDate',Object.assign({placeholder:'MM/AA'},fieldStyle)).mount(expBox.id);
+          var cvvField=mp.fields.create('securityCode',Object.assign({placeholder:'CVV'},fieldStyle)).mount(cvvBox.id);
+          function fieldReadyCheck(){if(!isCurrent())return;if(fieldsReady()){clearCardFieldsTimer();hideLoading();if(failBox)failBox.hidden=true;brickErr('');updateSubmitEnabled();}}
+          numField.on('ready',function(){if(!isCurrent())return;st.numReady=true;fieldReadyCheck();});
+          expField.on('ready',function(){if(!isCurrent())return;st.expReady=true;fieldReadyCheck();});
+          cvvField.on('ready',function(){if(!isCurrent())return;st.cvvReady=true;fieldReadyCheck();});
+          /* 'error' é o sinal forte de campo inválido (mostra a dica); 'validityChange'
+             dispara a cada edição do usuário dentro do iframe — usamos pra limpar
+             a dica otimisticamente (mesmo padrão de "erro some ao digitar" do
+             resto do checkout, ex. cpfEl/coNome acima), já que o SDK não expõe um
+             booleano de validade documentado e estável nesse evento pra decidir
+             com certeza se o valor JÁ está válido ou só mudou. */
+          numField.on('error',function(e){if(!isCurrent())return;console.error('MP field cardNumber',e);fieldErr(numErrEl,numBox,'Confira o número do cartão.');});
+          expField.on('error',function(e){if(!isCurrent())return;console.error('MP field expirationDate',e);fieldErr(expErrEl,expBox,'Confira a validade.');});
+          cvvField.on('error',function(e){if(!isCurrent())return;console.error('MP field securityCode',e);fieldErr(cvvErrEl,cvvBox,'Confira o CVV.');});
+          numField.on('validityChange',function(){if(isCurrent())fieldErr(numErrEl,numBox,'');});
+          expField.on('validityChange',function(){if(isCurrent())fieldErr(expErrEl,expBox,'');});
+          cvvField.on('validityChange',function(){if(isCurrent())fieldErr(cvvErrEl,cvvBox,'');});
+          /* binChange: callback recebe o BIN (string) direto, ou vazio/undefined
+             quando o número foi apagado abaixo do tamanho de detecção — trata os
+             dois como "sem bin" (reseta parcelas). */
+          numField.on('binChange',function(bin){if(isCurrent())resolveBin(bin||null);});
         }).catch(function(err){if(!isCurrent())return;console.error('MP init',err);showFail();});
       }
       if(window.MercadoPago){go();}
       /* Se o SDK (script sdk.mercadopago.com) em si ainda nem carregou, espera até
          40×150ms=6s por window.MercadoPago antes de desistir — sem mostrar erro
-         aqui: o cardBrickTimer (12s, armado acima) é a única fonte da falha
+         aqui: o cardFieldsTimer (12s, armado acima) é a única fonte da falha
          visível, pra não ter duas mensagens brigando. */
       else{var tries=0,iv=setInterval(function(){if(window.MercadoPago){clearInterval(iv);go();}else if(++tries>40){clearInterval(iv);}},150);}
     }
@@ -1316,16 +1427,20 @@
         de frete (independente, não vem do ViaCEP). Número/complemento sempre à mão.
      2. Frete real (Correios / Melhor Envio): substituir a fórmula de shipQuote()
         por cotação real por CEP + peso/dimensão da peça.
-     3. CPF: FEITO (Fase 4a/dinâmico) — no Pix é campo nosso (coCpf, validado no
-        clique de "Pagar com Pix"); no Cartão vem do cardPayment Brick, lido de
-        formData.payer.identification.number a partir de getFormData().
-     4. Pix/cartão de verdade: FEITO (Fase 4a/dinâmico) — rádios Pix/Cartão nossos
-        no passo Pagamento (resumo re-renderiza por método); Pix é POST direto em
-        /api/pagar (sem Brick, sem token); Cartão usa o cardPayment Brick do Mercado
-        Pago (só tokeniza o cartão, com hidePaymentButton:true — o botão "Pagar" é
-        nosso, #coCardBtn, chamando getFormData() no clique). POST /api/pagar cobra
-        de verdade e os 3 estados (aprovado/Pix pendente/recusado) dirigem o loader
-        #coProc. Boleto não é mais oferecido (servidor só suporta metodo pix|cartao).
+     3. CPF: FEITO (Fase 4a/dinâmico) — no Pix E no Cartão é campo nosso (coCpf /
+        coCardCpf, mesma máscara/validação de 11 dígitos), passado a
+        mp.fields.createCardToken({identificationNumber}) no Cartão.
+     4. Pix/cartão de verdade: FEITO (Fase 4a/dinâmico, cartão refeito em
+        Fase 4a-securefields) — rádios Pix/Cartão nossos no passo Pagamento
+        (resumo re-renderiza por método); Pix é POST direto em /api/pagar (sem
+        token); Cartão usa MP Secure Fields (SDK JS V2) — só número/validade/CVV
+        são iframes seguros do MP (mp.fields.create/.mount em #coCardNumberField/
+        #coCardExpiryField/#coCardCvvField), nome/CPF/parcelas são campos nossos.
+        binChange resolve bandeira+parcelas reais (getPaymentMethods/getIssuers/
+        getInstallments); o botão "Pagar" (#coCardBtn, mesmo .btn do Pix) chama
+        mp.fields.createCardToken() no clique. POST /api/pagar cobra de verdade e
+        os 3 estados (aprovado/Pix pendente/recusado) dirigem o loader #coProc.
+        Boleto não é mais oferecido (servidor só suporta metodo pix|cartao).
      5. Persistir o pedido e disparar o e-mail de confirmação de verdade (o texto já
         existe em pedidoView) — falta o e-mail de confirmação da COMPRA (o de
         orçamento/Projeto Exclusivo já existe).
@@ -1375,7 +1490,17 @@
         +'<button type="button" class="btn" id="coPixBtn">Pagar com Pix</button>'
         +'<p class="paybrickerr" id="coPixErr" hidden></p>'
       +'</div>'
-      +'<div class="paybrick" id="coPayCartao" hidden><div class="cardbrick-wrap" id="coCardWrap"><div id="coCardBrick"></div>'
+      +'<div class="paybrick" id="coPayCartao" hidden><div class="cardbrick-wrap" id="coCardWrap">'
+        +'<div class="cardform" id="coCardForm" hidden>'
+          +'<label class="cofield"><span>Número do cartão</span><div class="cardnumrow"><div class="mpfield" id="coCardNumberField"></div><span class="cardbrand" id="coCardBrand" aria-hidden="true" hidden></span></div><small class="fielderr" id="coCardNumberErr" data-err></small></label>'
+          +'<div class="tworow">'
+            +'<label class="cofield"><span>Validade</span><div class="mpfield" id="coCardExpiryField"></div><small class="fielderr" id="coCardExpiryErr" data-err></small></label>'
+            +'<label class="cofield"><span>CVV</span><div class="mpfield" id="coCardCvvField"></div><small class="fielderr" id="coCardCvvErr" data-err></small></label>'
+          +'</div>'
+          +'<label class="cofield"><span>Nome do titular</span><input type="text" id="coCardName" autocomplete="cc-name" placeholder="Como está impresso no cartão" aria-describedby="coCardNameErr"><small class="fielderr" id="coCardNameErr" data-err></small></label>'
+          +'<label class="cofield"><span>CPF do titular</span><input inputmode="numeric" id="coCardCpf" autocomplete="off" placeholder="000.000.000-00" maxlength="14" aria-describedby="coCardCpfErr"><small class="fielderr" id="coCardCpfErr" data-err></small></label>'
+          +'<label class="cofield"><span>Parcelas</span><select id="coCardParcelas"><option value="1">1× à vista</option></select></label>'
+        +'</div>'
         +'<div class="cardbrick-loading" id="coCardLoading" hidden><div class="coproc-ring sm" aria-hidden="true"></div><p>Carregando o formulário de cartão…</p></div>'
         +'<div class="cardbrick-fail" id="coCardFail" hidden><p id="coCardFailMsg"></p><div class="cardbrick-fail-cta"><button type="button" class="btn ghost" id="coCardRetry">Tentar de novo</button><button type="button" class="cardbrick-fail-link" id="coCardGoPix">Pagar com Pix em vez disso</button></div></div>'
       +'</div><button type="button" class="btn" id="coCardBtn" disabled>Pagar</button><p class="paybrickerr" id="coCardErr" hidden></p></div>'
