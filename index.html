@@ -1510,27 +1510,45 @@
              aparece. Isto substitui o comportamento antigo (só limpava a
              dica, nunca validava de verdade) — sem isso um número incompleto
              deixava o botão Pagar habilitado. */
+          /* Extrai a lista de erros do evento validityChange do MP de forma
+             robusta: o SDK V2 já nos surpreendeu no binChange (entregou {bin}
+             quando o código esperava string). Aqui cobrimos {errorMessages:[]},
+             o array direto, {errors:[]} e strings soltas — se a lista está vazia
+             MAS o campo ainda não sinalizou "validado de verdade", tratamos como
+             inválido (incompleto ≠ válido). */
+          function mpErrs(e){
+            if(!e)return [];
+            if(Array.isArray(e))return e;
+            if(Array.isArray(e.errorMessages))return e.errorMessages;
+            if(Array.isArray(e.errors))return e.errors;
+            if(e.errorMessages)return [e.errorMessages];
+            if(e.error)return [e.error];
+            return [];
+          }
           numField.on('error',function(e){if(!isCurrent())return;console.error('MP field cardNumber',e);st.numValid=false;setCheck('coCardNumberCheck',false);fieldErr(numErrEl,numBox,'Confira o número do cartão.');updateSubmitEnabled();});
           expField.on('error',function(e){if(!isCurrent())return;console.error('MP field expirationDate',e);st.expValid=false;setCheck('coCardExpiryCheck',false);fieldErr(expErrEl,expBox,'Confira a validade.');updateSubmitEnabled();});
           cvvField.on('error',function(e){if(!isCurrent())return;console.error('MP field securityCode',e);st.cvvValid=false;setCheck('coCardCvvCheck',false);fieldErr(cvvErrEl,cvvBox,'Confira o CVV.');updateSubmitEnabled();});
           numField.on('validityChange',function(e){
             if(!isCurrent())return;
-            var errs=e&&e.errorMessages;
-            if(errs&&errs.length){st.numValid=false;setCheck('coCardNumberCheck',false);fieldErr(numErrEl,numBox,'Confira o número do cartão.');}
+            console.debug('[MP num validityChange]',JSON.stringify(e));
+            var errs=mpErrs(e);
+            if(errs.length){st.numValid=false;setCheck('coCardNumberCheck',false);fieldErr(numErrEl,numBox,'Confira o número do cartão.');}
             else{st.numValid=true;setCheck('coCardNumberCheck',true);fieldErr(numErrEl,numBox,'');}
             updateSubmitEnabled();
           });
           expField.on('validityChange',function(e){
             if(!isCurrent())return;
-            var errs=e&&e.errorMessages;
-            if(errs&&errs.length){st.expValid=false;setCheck('coCardExpiryCheck',false);fieldErr(expErrEl,expBox,'Confira a validade.');}
+            console.debug('[MP exp validityChange]',JSON.stringify(e));
+            var errs=mpErrs(e);
+            if(errs.length){st.expValid=false;setCheck('coCardExpiryCheck',false);fieldErr(expErrEl,expBox,'Confira a validade.');}
             else{st.expValid=true;setCheck('coCardExpiryCheck',true);fieldErr(expErrEl,expBox,'');}
             updateSubmitEnabled();
           });
           cvvField.on('validityChange',function(e){
             if(!isCurrent())return;
-            var errs=e&&e.errorMessages;
-            if(errs&&errs.length){st.cvvValid=false;setCheck('coCardCvvCheck',false);fieldErr(cvvErrEl,cvvBox,'Confira o CVV.');}
+            console.debug('[MP cvv validityChange]',JSON.stringify(e));
+            var errs=mpErrs(e);
+            if(errs.length){st.cvvValid=false;setCheck('coCardCvvCheck',false);fieldErr(cvvErrEl,cvvBox,'Confira o CVV.');}
             else{st.cvvValid=true;setCheck('coCardCvvCheck',true);fieldErr(cvvErrEl,cvvBox,'');}
             updateSubmitEnabled();
           });
