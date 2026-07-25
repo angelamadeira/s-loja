@@ -734,15 +734,39 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
    colapsa a 0 ou estica pra centenas de px. Altura fixa + iframe 100% = 1 linha. */
 .mpfield iframe{height:100%!important;width:100%!important;border:0;display:block}
 .mpfield.bad{border-color:var(--error-text)}
+/* .fieldcheck — indicador positivo sutil (Fase 4a-validação): ícone de check
+   mostrado quando um campo do checkout fica VÁLIDO (não só preenchido) —
+   feedback "válido" de mercado, mas discreto: --success-text (o mesmo tom
+   oliva/matcha de .sumrow.disc e .couphint.ok), nunca um verde vivo — japandi,
+   não semáforo. Dois contextos:
+   — .fieldwrap: campo NOSSO (<input> normal, ex. CPF/Nome do titular) — o
+     check fica sobre o próprio input, à direita.
+   — .mpwrap / .cardnumrow: campo seguro do MP (.mpfield, iframe) — o check é
+     um irmão do .mpfield (nunca um filho — o SDK de Secure Fields controla o
+     conteúdo do container que recebe .mount(), então o ícone vive no wrapper
+     por fora, sobreposto via position:absolute). No Número do cartão, convive
+     com o selo da bandeira (.cardbrand): check primeiro, bandeira mais à
+     direita — nunca sobrepõem (ver o padding-right combinado abaixo). */
+.fieldwrap,.mpwrap{position:relative}
+.fieldwrap input{padding-right:calc(var(--space-3) + 22px)}
+.mpwrap .mpfield{padding-right:calc(var(--space-3) + 22px)}
+.fieldcheck{position:absolute;right:var(--space-3);top:50%;transform:translateY(-50%);width:16px;height:16px;display:none;align-items:center;justify-content:center;color:var(--success-text);pointer-events:none}
+.fieldcheck svg{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+.fieldcheck.show{display:flex}
 /* .cardnumrow — só o campo Número do cartão ganha o selo da bandeira (Visa/
    Master/…, detectado via binChange → mp.getPaymentMethods({bin}), ver
    resolveBin() no JS). O espaço pro selo é reservado no PRÓPRIO container
    (padding-right extra em .cardnumrow .mpfield), não no iframe — o SDK só
    enxerga o padding do container, então aumentar o padding direito do
    .mpfield encolhe a área do iframe e abre espaço pro selo por cima, sem
-   depender de nenhuma opção de estilo que o SDK não documenta. */
+   depender de nenhuma opção de estilo que o SDK não documenta. Desde a
+   Fase 4a-validação o mesmo container também recebe o .fieldcheck (ícone de
+   check, ver acima) — padding-right ampliado pra caber os DOIS sem sobrepor:
+   o check fica à esquerda (right deslocado além da zona do selo + respiro),
+   o selo continua no canto (right:var(--space-3), inalterado). */
 .cardnumrow{position:relative}
-.cardnumrow .mpfield{padding-right:calc(var(--space-3) + 32px)}
+.cardnumrow .mpfield{padding-right:calc(var(--space-3) + 32px + var(--space-6))}
+.cardnumrow .fieldcheck{right:calc(var(--space-3) + 32px + var(--space-1))}
 .cardbrand{position:absolute;right:var(--space-3);top:50%;transform:translateY(-50%);width:28px;height:18px;pointer-events:none;display:flex;align-items:center;justify-content:flex-end}
 .cardbrand[hidden]{display:none}
 .cardbrand img{max-width:100%;max-height:100%;display:block}

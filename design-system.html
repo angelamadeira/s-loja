@@ -509,6 +509,28 @@
     </div>
 
     <div class="comp-block">
+      <h3>Indicador positivo — <code>.fieldcheck</code></h3>
+      <p class="dsrule">Feedback "válido" (padrão de mercado) para os campos do checkout que têm validação de verdade (CPF — dígito verificador real, ver <code>cpfValido()</code> — e os 3 campos seguros do Cartão, ver bloco abaixo): um check sutil aparece à direita do campo assim que ele fica válido, some se deixar de ser. Cor <code>--success-text</code> (o mesmo tom oliva/matcha discreto de <code>.sumrow.disc</code>/<code>.couphint.ok</code>) — nunca um verde vivo tipo semáforo, japandi até no "certo". Ícone reaproveitado do check de etapa concluída (<code>.cn-ok</code>, mesmos <code>polyline points</code>). Em campo nosso (<code>&lt;input&gt;</code>), o <code>&lt;input&gt;</code> entra num <code>.fieldwrap</code> (só pra dar <code>position:relative</code>) e o <code>.fieldcheck</code> é irmão dele; nos campos seguros do Mercado Pago (<code>.mpfield</code>, iframe) o check TAMBÉM fica como irmão externo (nunca filho — o SDK controla o conteúdo do container que recebe <code>.mount()</code>), num <code>.mpwrap</code> (Validade/CVV) ou dentro do já-existente <code>.cardnumrow</code> (Número, que também reserva espaço pro selo da bandeira ao lado — os dois nunca se sobrepõem).</p>
+      <div class="demo demo-row" style="align-items:flex-start">
+        <label class="cofield" style="flex:1 1 220px">
+          <span>CPF</span>
+          <div class="fieldwrap">
+            <input inputmode="numeric" value="123.456.789-09" maxlength="14" readonly>
+            <span class="fieldcheck show" aria-hidden="true"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
+          </div>
+        </label>
+        <label class="cofield" style="flex:1 1 220px">
+          <span>Número do cartão</span>
+          <div class="cardnumrow">
+            <div class="mpfield">•••• •••• •••• 4242</div>
+            <span class="fieldcheck show" aria-hidden="true"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
+            <span class="cardbrand" style="font-size:.55rem;font-weight:700;color:var(--text-muted)">VISA</span>
+          </div>
+        </label>
+      </div>
+    </div>
+
+    <div class="comp-block">
       <h3>Checkbox — <code>.check</code></h3>
       <p class="dsrule">Componente único para todo checkbox opt-in da loja (antigos <code>.nfopt</code>, <code>.qconsent</code> e <code>.cocheck</code> foram unificados). Caixa de 16×16 alinhada ao topo (<code>align-items:flex-start</code>) com uma margem-top mínima no <code>input</code> — assim ela fica ótica-alinhada com a primeira linha do texto, inclusive em rótulos de duas linhas. Margem externa varia por contexto via modificador (<code>.nf-check</code>, <code>.consent-check</code>, <code>.co-check</code>) — nunca mexendo no core.</p>
       <div class="demo" style="display:flex;flex-direction:column;gap:var(--space-4);align-items:flex-start">
@@ -581,10 +603,10 @@
 
     <div class="comp-block">
       <h3>Pix — <code>.paypix</code></h3>
-      <p class="dsrule">Método padrão (mais barato — nudge de margem). Sem Brick nenhum: CPF é campo nosso (<code>#coCpf</code>, máscara live <code>000.000.000-00</code>, validado em 11 dígitos antes do clique) e o botão "Pagar com Pix" é o botão pílula <code>.btn</code> do site — o primeiro botão de pagar de verdade que é nosso, não do MP. No clique: valida CPF → valida e-mail/endereço (<code>buildBaseCtx()</code>, compartilhado com o Cartão) → <code>POST /api/pagar</code> direto, com <code>metodo:'pix'</code> e sem <code>token</code>.</p>
+      <p class="dsrule">Método padrão (mais barato — nudge de margem). Sem Brick nenhum: CPF é campo nosso (<code>#coCpf</code>, máscara live <code>000.000.000-00</code>) validado com dígito verificador real (<code>cpfValido()</code>, mod-11 — mesma função usada pelo CPF do Cartão) em tempo real ao digitar: dica "CPF inválido — confira os números" some/aparece na hora, e o check positivo (<code>.fieldcheck</code>, ver acima) acende só quando os 11 dígitos passam na validação. O botão "Pagar com Pix" é o botão pílula <code>.btn</code> do site — o primeiro botão de pagar de verdade que é nosso, não do MP. No clique: valida CPF → valida e-mail/endereço (<code>buildBaseCtx()</code>, compartilhado com o Cartão) → <code>POST /api/pagar</code> direto, com <code>metodo:'pix'</code> e sem <code>token</code>.</p>
       <div class="demo demo-row" style="align-items:flex-start">
         <div class="paypix" style="flex:1 1 260px;margin-top:0">
-          <label class="cofield"><span>CPF</span><input inputmode="numeric" placeholder="000.000.000-00" maxlength="14"></label>
+          <label class="cofield"><span>CPF</span><div class="fieldwrap"><input inputmode="numeric" value="123.456.789-09" maxlength="14"><span class="fieldcheck show" aria-hidden="true"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span></div></label>
           <button type="button" class="btn">Pagar com Pix</button>
         </div>
       </div>
@@ -592,23 +614,24 @@
 
     <div class="comp-block">
       <h3>Cartão — MP Secure Fields — <code>.paybrick</code>/<code>.cardform</code></h3>
-      <p class="dsrule">Selecionado o rádio Cartão, monta (uma única vez) os campos seguros do Mercado Pago (SDK JS V2, <code>mp.fields.create/.mount</code>) — Número, Validade e CVV viram iframes do MP dentro de <code>.mpfield</code> (mesmo visual de borda/raio/padding de <code>.cofield input</code>, ver ~L653 de <code>components.css</code>; o SDK só deixa estilizar o texto de dentro, via a opção <code>style</code>). Nome do titular, CPF do titular e Parcelas são <b>campos nossos</b> (<code>.cofield</code> normal) — layout de coluna única, nesta ordem exata. Ao digitar o número, <code>binChange</code> dispara <code>mp.getPaymentMethods({bin})</code> (bandeira → selo em <code>.cardbrand</code>, dentro de <code>.cardnumrow</code>, espaço reservado via padding extra no <code>.mpfield</code>, nunca sobrepondo o iframe) + <code>mp.getIssuers</code> (emissor) + <code>mp.getInstallments({amount,bin,paymentMethodId,locale})</code>, que popula o <code>&lt;select&gt;</code> de Parcelas com os planos REAIS do cartão (<code>recommended_message</code> do MP, capado em 6× por regra nossa). O botão "Pagar" (<code>#coCardBtn</code>, mesmo <code>.btn</code> pílula do Pix, <code>.paybrick .btn</code>) fica <code>disabled</code> até os 3 campos seguros ficarem prontos (evento <code>ready</code>) + nome/CPF válidos + bandeira resolvida. No clique, <code>mp.fields.createCardToken({cardholderName, identificationType:'CPF', identificationNumber})</code> lê os campos seguros automaticamente e devolve <code>{id:token}</code> — nunca vemos número/validade/CVV em texto puro. Guard de duplo envio: <code>disabled</code> + <code>.is-loading</code> (mesmos <code>.bdots</code> do Pix) enquanto <code>createCardToken()</code> + <code>/api/pagar</code> estão em voo.</p>
+      <p class="dsrule">Selecionado o rádio Cartão, monta (uma única vez) os campos seguros do Mercado Pago (SDK JS V2, <code>mp.fields.create/.mount</code>) — Número, Validade e CVV viram iframes do MP dentro de <code>.mpfield</code> (mesmo visual de borda/raio/padding de <code>.cofield input</code>, ver ~L653 de <code>components.css</code>; o SDK só deixa estilizar o texto de dentro, via a opção <code>style</code>). Nome do titular, CPF do titular e Parcelas são <b>campos nossos</b> (<code>.cofield</code> normal) — layout de coluna única, nesta ordem exata. Ao digitar o número, <code>binChange</code> dispara <code>mp.getPaymentMethods({bin})</code> (bandeira → selo em <code>.cardbrand</code>, dentro de <code>.cardnumrow</code>, espaço reservado via padding extra no <code>.mpfield</code>, nunca sobrepondo o iframe/o check) + <code>mp.getIssuers</code> (emissor) + <code>mp.getInstallments({amount,bin,paymentMethodId,locale})</code>, que popula o <code>&lt;select&gt;</code> de Parcelas com os planos REAIS do cartão — sem juros usa o <code>recommended_message</code> do MP quando existe; <b>com juros o rótulo é sempre montado por nós</b> (ex. <code>6× de R$ 27,08 · total R$ 162,50 (com juros)</code>, usando <code>total_amount</code> do MP ou <code>installment_amount×installments</code>) pra garantir que o total apareça, já que o formato do <code>recommended_message</code> varia por emissor/locale. Capado em 6× por regra nossa.</p>
+      <p class="dsrule"><b>Validação em tempo real (Fase 4a-validação):</b> cada campo seguro dispara <code>validityChange</code> a cada edição — <code>errorMessages</code> não-vazio mostra a dica na hora (<code>.fielderr.show</code>); vazio marca o campo como válido (<code>st.numValid</code>/<code>expValid</code>/<code>cvvValid</code>) e acende o check (<code>.fieldcheck</code>, ver bloco acima). O evento <code>error</code> continua como fallback. Nome do titular é válido com ≥2 caracteres (<code>nameValid()</code>); CPF usa o dígito verificador real, <code>cpfValido()</code> (mesma função do Pix). O botão "Pagar" (<code>#coCardBtn</code>, mesmo <code>.btn</code> pílula do Pix, <code>.paybrick .btn</code>) só habilita quando os 3 campos seguros estão <b>válidos</b> (não só montados) <b>e</b> nome/CPF válidos <b>e</b> a bandeira já resolveu — nunca com um número incompleto. No clique, <code>mp.fields.createCardToken({cardholderName, identificationType:'CPF', identificationNumber})</code> lê os campos seguros automaticamente e devolve <code>{id:token}</code> — nunca vemos número/validade/CVV em texto puro. Guard de duplo envio: <code>disabled</code> + <code>.is-loading</code> (mesmos <code>.bdots</code> do Pix) enquanto <code>createCardToken()</code> + <code>/api/pagar</code> estão em voo.</p>
       <div class="demo demo-row" style="align-items:flex-start">
         <div class="paybrick" style="flex:1 1 300px">
           <div class="cardform">
-            <label class="cofield"><span>Número do cartão</span><div class="cardnumrow"><div class="mpfield">•••• •••• •••• 4242</div><span class="cardbrand" style="font-size:.55rem;font-weight:700;color:var(--text-muted)">VISA</span></div></label>
+            <label class="cofield"><span>Número do cartão</span><div class="cardnumrow"><div class="mpfield">•••• •••• •••• 4242</div><span class="fieldcheck show" aria-hidden="true"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><span class="cardbrand" style="font-size:.55rem;font-weight:700;color:var(--text-muted)">VISA</span></div></label>
             <div class="tworow">
-              <label class="cofield"><span>Validade</span><div class="mpfield">12/29</div></label>
-              <label class="cofield"><span>CVV</span><div class="mpfield">•••</div></label>
+              <label class="cofield"><span>Validade</span><div class="mpwrap"><div class="mpfield">12/29</div><span class="fieldcheck show" aria-hidden="true"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span></div></label>
+              <label class="cofield"><span>CVV</span><div class="mpwrap"><div class="mpfield">•••</div><span class="fieldcheck show" aria-hidden="true"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span></div></label>
             </div>
-            <label class="cofield"><span>Nome do titular</span><input type="text" value="ANGELA MADEIRA"></label>
-            <label class="cofield"><span>CPF do titular</span><input inputmode="numeric" value="000.000.000-00" maxlength="14"></label>
-            <label class="cofield"><span>Parcelas</span><select><option>3× de R$ 33,33 sem juros</option></select></label>
+            <label class="cofield"><span>Nome do titular</span><div class="fieldwrap"><input type="text" value="ANGELA MADEIRA"><span class="fieldcheck show" aria-hidden="true"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span></div></label>
+            <label class="cofield"><span>CPF do titular</span><div class="fieldwrap"><input inputmode="numeric" value="123.456.789-09" maxlength="14"><span class="fieldcheck show" aria-hidden="true"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span></div></label>
+            <label class="cofield"><span>Parcelas</span><select><option>3× de R$ 33,33 sem juros</option><option>6× de R$ 27,08 · total R$ 162,50 (com juros)</option></select></label>
           </div>
           <button type="button" class="btn">Pagar</button>
         </div>
       </div>
-      <p class="dsrule"><code>.mpfield</code>/<code>.cardnumrow</code>/<code>.cardbrand</code> acima são apenas os containers estáticos (o iframe real do MP não roda nesta página) — número/validade/CVV mostrados são texto ilustrativo, não campos funcionais.</p>
+      <p class="dsrule"><code>.mpfield</code>/<code>.cardnumrow</code>/<code>.cardbrand</code>/<code>.fieldcheck</code> acima são apenas os containers estáticos (o iframe real do MP não roda nesta página, e os checks estão forçados com <code>.show</code> só pra ilustrar) — número/validade/CVV mostrados são texto ilustrativo, não campos funcionais.</p>
     </div>
 
     <div class="comp-block">
