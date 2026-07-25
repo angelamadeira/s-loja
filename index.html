@@ -1070,27 +1070,38 @@
       /* Marca .can-open nos passos clicáveis (fechado E concluído OU alcançável —
          inclui o Pagamento). O CSS pendura nisso o cursor de mão + hover, deixando
          claro o que dá pra abrir. Rodar a cada mudança de estado (open/done). */
-      function refreshNav(){steps.forEach(function(sec){var n=+sec.dataset.step,reach=true;for(var i=1;i<n;i++){if(!document.getElementById('cstep'+i).classList.contains('done')){reach=false;break;}}sec.classList.toggle('can-open',!sec.classList.contains('open')&&(sec.classList.contains('done')||reach));});}
-      function validStep(n){
-        if(n===1){var em=document.getElementById('coEmail');if(!em.value||em.value.indexOf('@')<1){emailErr(emailMsg(em));em.focus();return false;}emailErr('');CO.email=em.value.trim();return true;}
+      function refreshNav(){steps.forEach(function(sec){var n=+sec.dataset.step;sec.classList.toggle('can-open',!sec.classList.contains('open')&&reachable(n));});}
+      /* silent=true: só devolve o booleano, sem mostrar erro/focar (usado por
+         reachable() a cada refreshNav pra decidir o que dá pra abrir). */
+      function validStep(n,silent){
+        if(n===1){var em=document.getElementById('coEmail');if(!em.value||em.value.indexOf('@')<1){if(!silent){emailErr(emailMsg(em));em.focus();}return false;}if(!silent)emailErr('');CO.email=em.value.trim();return true;}
         if(n===2){var sp=cartSplit();
           if(sp.now.length){
-            if(!CO.ship){var h=document.getElementById('cepHint');if(h){h.textContent='Calcule o frete para continuar.';h.className='cephint err';}var c=document.getElementById('coCep');if(c)c.focus();return false;}
+            if(!CO.ship){if(!silent){var h=document.getElementById('cepHint');if(h){h.textContent='Calcule o frete para continuar.';h.className='cephint err';}var c=document.getElementById('coCep');if(c)c.focus();}return false;}
             var reqd=['coNome','coRua','coNum','coBairro','coCidade'],bad=null;
-            reqd.forEach(function(id){var el=document.getElementById(id);if(!el)return;if(!el.value.trim()){el.classList.add('bad');if(!bad)bad=el;}else{el.classList.remove('bad');}});
+            reqd.forEach(function(id){var el=document.getElementById(id);if(!el)return;if(!el.value.trim()){if(!silent)el.classList.add('bad');if(!bad)bad=el;}else{if(!silent)el.classList.remove('bad');}});
             var ah=document.getElementById('addrHint');
-            if(bad){if(ah){ah.textContent='Preencha os campos destacados do endereço.';ah.className='cephint err';}bad.focus();return false;}
-            if(ah){ah.textContent='';ah.className='cephint';}
+            if(bad){if(!silent){if(ah){ah.textContent='Preencha os campos destacados do endereço.';ah.className='cephint err';}bad.focus();}return false;}
+            if(!silent&&ah){ah.textContent='';ah.className='cephint';}
           }
           return true;}
         return true;
       }
+      /* Alcançável = todos os passos anteriores concluídos E ainda válidos. Se a
+         pessoa voltou e deixou um passo anterior inválido, os seguintes deixam de
+         ser alcançáveis (não dá pra pular por cima do erro); voltar pra corrigir
+         segue livre (um passo sem anteriores é sempre alcançável). */
+      function reachable(n){for(var i=1;i<n;i++){var s=document.getElementById('cstep'+i);if(!s.classList.contains('done')||!validStep(i,true))return false;}return true;}
       function sumFor(n){
         if(n===1){var em=(document.getElementById('coEmail')||{}).value||'';var w=document.getElementById('coWhats');w=w?w.value.trim():'';return em.trim()+(w?' · '+w:'');}
         if(n===2){var sp=cartSplit();if(!sp.now.length)return 'Reserva · endereço confirmado no envio';if(CO.ship)return (SHIP.cep||'')+' · '+CO.ship.label+' '+(CO.ship.free?'grátis':BRL(CO.ship.price));return '';}
         return '';
       }
-      function advance(n){if(!validStep(n))return;markDone(n);
+      function advance(n){
+        /* não avança por cima de um passo anterior inválido — leva a pessoa até
+           ele e mostra o erro (validStep não-silencioso). */
+        for(var i=1;i<n;i++){var s=document.getElementById('cstep'+i);if(!s.classList.contains('done')||!validStep(i,true)){openStep(i);validStep(i);return;}}
+        if(!validStep(n))return;markDone(n);
         var nx=n+1;while(nx<3 && document.getElementById('cstep'+nx).classList.contains('done'))nx++;openStep(nx,true);}
       cof.querySelectorAll('.conext').forEach(function(b){b.onclick=function(){advance(+b.dataset.next);};});
       /* Enter em qualquer campo do passo avança (mesma validação do botão).
@@ -1105,12 +1116,14 @@
         e.preventDefault();advance(+btn.dataset.next);});
       ['coNome','coRua','coNum','coBairro','coCidade'].forEach(function(id){var el=document.getElementById(id);if(el)el.addEventListener('input',function(){el.classList.remove('bad');var ah=document.getElementById('addrHint');if(ah&&!cof.querySelector('#addrFields .bad')){ah.textContent='';ah.className='cephint';}});});
       cof.querySelectorAll('button.cohd').forEach(function(h){h.onclick=function(){var sec=h.closest('.costep');var n=+sec.dataset.step;
-        /* Abre no clique do cabeçalho se o passo já está concluído OU se todos os
-           anteriores estão (alcançável): deixa voltar a qualquer passo feito e,
-           feitos Contato+Entrega, pular direto pro Pagamento — que nunca fica
-           "done" (só conclui ao pagar), então antes disso o header dele era morto. */
-        var reachable=true;for(var i=1;i<n;i++){if(!document.getElementById('cstep'+i).classList.contains('done')){reachable=false;break;}}
-        if(sec.classList.contains('done')||reachable)openStep(n);};});
+        /* Abre no clique do cabeçalho só se for alcançável (anteriores feitos E
+           válidos) — deixa voltar pra corrigir e pular pro Pagamento quando
+           Contato+Entrega estão ok, mas bloqueia pular por cima de um erro. */
+        if(reachable(n))openStep(n);};});
+      /* Editar um passo já concluído até deixá-lo inválido tira o ✓ (.done) e,
+         via refreshNav, fecha o acesso aos seguintes — feedback imediato de que
+         precisa corrigir antes de seguir. Revalida ao clicar Salvar/Continuar. */
+      cof.addEventListener('input',function(e){var sec=e.target.closest&&e.target.closest('.costep');if(sec&&sec.classList.contains('done')&&!validStep(+sec.dataset.step,true))sec.classList.remove('done');refreshNav();});
       refreshNav();
     })();
     /* o pagamento acontece pelo botão "Pagar com Pix" (nosso) ou pelo botão do
