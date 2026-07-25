@@ -1726,7 +1726,7 @@
     /* Resumo do checkout = só leitura (a edição de quantidade vive na sacola).
        Mesmo item read-only do recibo (confirmView): quantidade vira selo N× na
        imagem, sem steppers. */
-    var rows=s.now.concat(s.pre).map(function(it){return '<div class="okri"><div class="okri-img">'+mold(it.p)+(it.qty>1?'<span class="okri-qty">'+it.qty+'×</span>':'')+'</div><div class="okri-tx"><b>'+it.name+'</b>'+(it.sub?'<small>'+it.sub+'</small>':'')+'</div><div class="okri-pr">'+BRL(it.qty*it.price)+'</div></div>';}).join('');
+    var rows=s.now.concat(s.pre).map(function(it){var was=it.presale?'':wasPrice(it.p,priceOf(it.p,it.size)*it.qty);return '<div class="okri"><div class="okri-img">'+mold(it.p)+(it.qty>1?'<span class="okri-qty">'+it.qty+'×</span>':'')+'</div><div class="okri-tx"><b>'+it.name+'</b>'+(it.sub?'<small>'+it.sub+'</small>':'')+'</div><div class="okri-pr'+(was?' hasdisc':'')+'">'+was+BRL(it.qty*it.price)+'</div></div>';}).join('');
     var frete=s.now.length===0?'no lançamento':(CO.ship?(CO.ship.free?'Grátis':BRL(CO.ship.price)):'calcule no passo 2');
     var h='<h3>Resumo</h3><div class="ciList">'+rows+'</div><div class="cisep"></div>';
     h+='<div class="sumrow"><span>Subtotal</span><span>'+BRL(merch)+'</span></div>';
@@ -2101,7 +2101,10 @@
     syncDrawerCep(s,q);
     var box=document.getElementById('items'),keys=Object.keys(cart);
     if(!keys.length){box.innerHTML='<p class="empty"><span class="sig">Sua sacola está vazia.</span>Escolha uma peça pra começar a sua coleção.</p>';return;}
-    box.innerHTML=keys.map(function(k){var it=cart[k];return '<div class="li"><div class="mini">'+mold(it.p)+'</div><div class="info"><b>'+it.name+'</b><small>'+BRL(it.price)+' · '+it.sub+'</small></div><div class="qty"><button data-m="'+k+'" aria-label="menos"><svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/></svg></button><span>'+it.qty+'</span><button data-p="'+k+'" aria-label="mais"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></div></div>';}).join('');
+    /* de/por no item: quando tem desconto (saleP), risca o preço cheio (.wasp) +
+       preço com desconto + selo −X% (.offtag) — mesmos componentes da PDP. Item
+       de reserva não entra (o preço é o sinal de 30%, não comparável ao cheio). */
+    box.innerHTML=keys.map(function(k){var it=cart[k];var deco=it.presale?'':(wasPrice(it.p,priceOf(it.p,it.size))+BRL(it.price)+offtag(it.p));var precoUnit=it.presale?BRL(it.price):deco;return '<div class="li"><div class="mini">'+mold(it.p)+'</div><div class="info"><b>'+it.name+'</b><small>'+precoUnit+' · '+it.sub+'</small></div><div class="qty"><button data-m="'+k+'" aria-label="menos"><svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/></svg></button><span>'+it.qty+'</span><button data-p="'+k+'" aria-label="mais"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></div></div>';}).join('');
     box.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{cart[b.dataset.p].qty++;render();});
     box.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{var k=b.dataset.m;if(--cart[k].qty<=0)delete cart[k];render();});
   }
