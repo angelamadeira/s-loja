@@ -14,18 +14,36 @@ test("criaPagamento manda valor em reais e Bearer token", async () => {
   expect(r.status).toBe("approved");
 });
 
-test("criaPagamento manda X-Idempotency-Key com o ref e payment_method_id pix", async () => {
+test("criaPagamento manda X-Idempotency-Key com o uuid da compra (não o ref curto) e payment_method_id pix", async () => {
   const calls = [];
   const fake = vi.fn(async (url, opts) => {
     calls.push({ url, opts });
     return new Response(JSON.stringify({ id: 222, status: "approved", status_detail: "accredited" }), { status: 201 });
   });
   const env = { MP_ACCESS_TOKEN: "TEST-x" };
-  await criaPagamento(env, { totalCents: 5000, metodo: "pix", email: "a@b.com", cpf: "12345678909", ref: "SUZU-XYZ", descricao: "Pedido" }, fake);
-  expect(calls[0].opts.headers["X-Idempotency-Key"]).toBe("SUZU-XYZ");
+  await criaPagamento(
+    env,
+    { totalCents: 5000, metodo: "pix", email: "a@b.com", cpf: "12345678909", ref: "SUZU-XYZ", idempotencyKey: "11111111-2222-3333-4444-555555555555", descricao: "Pedido" },
+    fake
+  );
+  // idempotência usa o uuid completo — o `ref` de 6 hex pode colidir entre
+  // compras diferentes e devolver o pagamento errado (ver relatório Fase4a).
+  expect(calls[0].opts.headers["X-Idempotency-Key"]).toBe("11111111-2222-3333-4444-555555555555");
   const body = JSON.parse(calls[0].opts.body);
   expect(body.payment_method_id).toBe("pix");
   expect(body.token).toBeUndefined();
+});
+
+test("criaPagamento: erro do MP (res.ok=false) devolve status='error' sem lançar", async () => {
+  const fake = vi.fn(async () => new Response(JSON.stringify({ message: "invalid token" }), { status: 400 }));
+  const env = { MP_ACCESS_TOKEN: "TEST-x" };
+  const r = await criaPagamento(
+    env,
+    { totalCents: 12000, metodo: "cartao", token: "tok-invalido", email: "a@b.com", cpf: "12345678909", idempotencyKey: "id-1", descricao: "Pedido" },
+    fake
+  );
+  expect(r.status).toBe("error");
+  expect(r.statusDetail).toBe("invalid token");
 });
 
 test("Pix: retorna qrBase64 e copiaECola extraídos de point_of_interaction", async () => {

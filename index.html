@@ -861,12 +861,20 @@
        vez de duplicar o campo aqui evita pedir o CPF duas vezes. */
     /* estimativa exibida no Brick — o valor cobrado de verdade nasce no servidor (/api/pagar) */
     var brickCtl=null;
+    /* SEM desconto Pix aqui de propósito: a forma de pagamento só é escolhida
+       DENTRO do Brick (no onSubmit), então CO.pay ainda não reflete a escolha
+       real do cliente neste ponto — aplicar o desconto de Pix incondicionalmente
+       faria o Brick cobrar (e o Total mostrar) menos do que o servidor cobra
+       de quem paga no cartão. O cupom, ao contrário, vale pra qualquer método
+       (recomputaTotal em src/precos.js aplica os dois de forma independente),
+       então esse desconto pode entrar aqui com segurança. Total mostrado deve
+       ser sempre >= o que qualquer método cobra; só o Pix sai mais barato (grata
+       surpresa na hora de pagar). */
     function estTotalReais(){
       var sp=cartSplit(),merch=sp.subNow+sp.subPre;
       var shp=sp.now.length===0?0:(CO.ship?(CO.ship.free?0:CO.ship.price):0);
-      var pixD=Math.round(merch*0.05*100)/100;
       var coupD=CO.coupon?Math.round(merch*CO.coupon.pct/100*100)/100:0;
-      return Math.max(1,Math.round((merch+shp-pixD-coupD)*100)/100);
+      return Math.max(1,Math.round((merch+shp-coupD)*100)/100);
     }
     function syncBrickAmount(){if(brickCtl&&brickCtl.update){brickCtl.update({amount:estTotalReais()}).catch(function(){});}}
     var coupBtn=document.getElementById('coCoupBtn'),coupIn=document.getElementById('coCoupon'),coupHint=document.getElementById('coCoupHint');
@@ -1095,6 +1103,12 @@
                   }else{CO.addr1='';CO.addr2='';}
                   CO.pay=selectedPaymentMethod==='credit_card'?'cartao':'pix';
                   CO.parc=formData.installments||1;
+                  /* ATENÇÃO — PRÉ-VENDA (sinal 30%) NÃO é modelada no servidor: itens de
+                     reserva (sp.pre) entram aqui como {id,tam,qtd} igual aos itens normais,
+                     e /api/pagar recomputa o total pelo preço CHEIO (src/precos.js), cobrando
+                     100% em vez do sinal de 30% mostrado na sacola. Manter PREVENDA=false
+                     (~L232) até a F4-pré-venda implementar o sinal server-side — senão a
+                     primeira reserva cobra 3.3× a mais. */
                   var itens=sp.now.concat(sp.pre).map(function(it){return {id:it.p.id,tam:it.size,qtd:it.qty};});
                   var freteCents=sp.now.length===0?0:(CO.ship?(CO.ship.free?0:Math.round(CO.ship.price*100)):0);
                   var payload={
@@ -1195,19 +1209,22 @@
     var el=document.getElementById('coSummary'); if(!el)return;
     var s=cartSplit(), merch=s.subNow+s.subPre;
     var ship=s.now.length===0?0:(CO.ship?(CO.ship.free?0:CO.ship.price):null);
-    var pixDisc=CO.pay==='pix'?Math.round(merch*0.05*100)/100:0;
+    /* pixDisc é só INFORMATIVO — a forma de pagamento só é escolhida dentro do
+       Brick (CO.pay não reflete a escolha real até o onSubmit), então o Total
+       abaixo NUNCA subtrai o desconto Pix (senão mostraria menos do que o
+       cartão de fato cobra). O cupom vale pra qualquer método, então esse
+       desconto entra no Total normalmente. Ver estTotalReais() acima. */
+    var pixDisc=Math.round(merch*0.05*100)/100;
     var coupDisc=CO.coupon?Math.round(merch*CO.coupon.pct/100*100)/100:0;
-    var total=merch+(ship||0)-pixDisc-coupDisc;
+    var total=merch+(ship||0)-coupDisc;
     var rows=s.now.concat(s.pre).map(function(it){return '<div class="okri"><div class="okri-img">'+mold(it.p)+(it.qty>1?'<span class="okri-qty">'+it.qty+'×</span>':'')+'</div><div class="okri-tx"><b>'+it.name+'</b>'+(it.sub?'<small>'+it.sub+'</small>':'')+'</div><div class="okri-pr">'+BRL(it.qty*it.price)+'</div></div>';}).join('');
     var frete=s.now.length===0?'no lançamento':(CO.ship?(CO.ship.free?'Grátis':BRL(CO.ship.price)):'calcule no passo 2');
     var h='<h3>Resumo</h3><div class="ciList">'+rows+'</div><div class="cisep"></div>';
     h+='<div class="sumrow"><span>Subtotal</span><span>'+BRL(merch)+'</span></div>';
     h+='<div class="sumrow"><span>Frete</span><span>'+frete+'</span></div>';
-    if(pixDisc>0)h+='<div class="sumrow disc"><span>Desconto Pix</span><span>−'+BRL(pixDisc)+'</span></div>';
     if(coupDisc>0)h+='<div class="sumrow disc"><span>Cupom '+CO.coupon.code+'</span><span>−'+BRL(coupDisc)+'</span></div>';
     h+='<div class="sumrow tot"><span>Total</span><b>'+BRL(total)+'</b></div>';
-    if(CO.pay==='cartao'){var n=CO.parc||1;h+='<p class="sumnote">'+n+'× de '+BRL(total/n)+' sem juros</p>';}
-    else if(CO.pay==='pix')h+='<p class="sumnote">À vista no Pix, já com o desconto aplicado.</p>';
+    if(pixDisc>0)h+='<div class="sumrow disc"><span>−5% se pagar no Pix</span><span>−'+BRL(pixDisc)+'</span></div>';
     if(s.pre.length)h+='<p class="sumnote pre">Nos itens de reserva você paga só o <b>sinal</b> agora. O restante e o frete são cobrados quando a peça lança.</p>';
     el.innerHTML=h;
   }
@@ -1347,6 +1364,12 @@
   }
   var cart={};
   function cartKey(id,size,presale){return id+'-'+size+(presale?'-pre':'');}
+  /* ATENÇÃO — PRÉ-VENDA (sinal 30%) NÃO é modelada no servidor: `price` aqui
+     é só o que a SACOLA mostra (o "sinal"), mas /api/pagar recomputa o total
+     a partir do preço CHEIO do produto (src/precos.js) e cobra 100% dele.
+     Manter PREVENDA=false (~L232) até a F4-pré-venda implementar o sinal
+     server-side — senão a primeira reserva cobra 3.3× a mais do que o
+     mostrado aqui (30% virando 100%). */
   function cartItem(p,size,presale){var full=priceNow(p,size),price=presale?Math.round(full*0.3):full;return {p:p,size:size,presale:!!presale,name:p.name+(presale?' — reserva':''),price:price,sub:presale?('Sinal de reserva · '+SIZES[size].name):(SIZES[size].name+' · '+SIZES[size].dim),qty:1};}
   /* Persiste a sacola — assim um refresh no meio do checkout não perde os itens (bug do fluxo de pagamento). */
   function saveCart(){try{localStorage.setItem('suzu_cart',JSON.stringify(Object.keys(cart).map(function(k){var it=cart[k];return {id:it.p.id,size:it.size,presale:it.presale,qty:it.qty};})));}catch(e){}}

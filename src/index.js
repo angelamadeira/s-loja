@@ -171,6 +171,11 @@ async function handlePagar(request, env) {
       .run();
 
     // 4. cobra no Mercado Pago
+    // PRÉ-VENDA (sinal 30%) NÃO é modelada aqui: `total` acima já é o preço
+    // cheio recomputado a partir do preço do servidor — o servidor não sabe
+    // que um item é reserva e cobra 100% dele. Manter PREVENDA=false (index.html)
+    // até a F4-pré-venda implementar o sinal server-side, senão a primeira
+    // reserva cobra 3.3× a mais do que deveria.
     const resultado = await criaPagamento(env, {
       totalCents: total,
       metodo,
@@ -181,10 +186,19 @@ async function handlePagar(request, env) {
       cpf,
       email,
       ref,
+      // uuid da compra como chave de idempotência (não o `ref` curto de 6 hex,
+      // que pode colidir entre compras diferentes e devolver o pagamento
+      // errado) — `ref` continua só na descrição, pra referência humana.
+      idempotencyKey: compraId,
       descricao: "Pedido " + ref,
     });
 
-    const status = mapStatusMp(resultado.status) || "pendente";
+    // Erro de rede/MP (ex.: cartão recusado com corpo sem `status`) mapeia pra
+    // undefined em mapStatusMp e cai aqui: tratamos como "recusado", nunca
+    // como "pendente" — uma tentativa de cartão nunca pode ficar pendurada
+    // com mp_payment_id nulo esperando um Pix que não existe (ver IMPORTANTE #2).
+    const mpMappedStatus = mapStatusMp(resultado.status);
+    const status = resultado.status === "error" || !mpMappedStatus ? "recusado" : mpMappedStatus;
 
     // 5. atualiza a compra com o resultado do MP
     await env.DB.prepare("UPDATE compras SET status = ?, mp_payment_id = ? WHERE id = ?")

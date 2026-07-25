@@ -57,8 +57,8 @@ export function recomputaTotal(itens, opts) {
   }
 
   // Pix e cupom empilham (aditivo): os dois descontos se somam sobre o
-  // subtotal quando ambos se aplicam. Regra de negócio ainda a confirmar
-  // com a fundadora — ver "Pix e cupom empilham (aditivo)" em precos.test.js.
+  // subtotal quando ambos se aplicam. Regra de negócio CONFIRMADA com a
+  // fundadora (aditivo) — ver "Pix e cupom empilham (aditivo)" em precos.test.js.
   let desconto = 0;
   if (metodo === "pix") {
     desconto += Math.round(subtotal * (PIX_DESCONTO_PCT / 100));

@@ -90,6 +90,19 @@ test("sem consentimento => 400", async () => {
   expect(res.status).toBe(400);
 });
 
+test("erro do MP (status='error', ex.: cartão recusado) => compra fica 'recusado', nunca 'pendente' com mp_payment_id nulo", async () => {
+  criaPagamento.mockResolvedValueOnce({ status: "error", statusDetail: "invalid token" });
+  const ctx = createExecutionContext();
+  const res = await worker.fetch(post({ itens: [{ id: "tablete", tam: "M", qtd: 1 }], metodo: "cartao", email: "a@b.com", cpf: "12345678909", consentiu: true }), env, ctx);
+  await waitOnExecutionContext(ctx);
+  const j = await res.json();
+  expect(j.ok).toBe(true);
+  expect(j.status).toBe("recusado");
+  const row = await env.DB.prepare("SELECT status, mp_payment_id FROM compras WHERE ref=?").bind(j.ref).first();
+  expect(row.status).toBe("recusado");
+  expect(row.mp_payment_id).toBeNull();
+});
+
 test("Pix pendente: mapeia in_process => pendente e repassa o QR", async () => {
   criaPagamento.mockResolvedValueOnce({
     id: 1001,

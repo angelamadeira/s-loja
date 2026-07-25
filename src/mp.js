@@ -21,7 +21,11 @@ export async function criaPagamento(env, params, fetchImpl = globalThis.fetch) {
     issuerId,
     cpf,
     email,
-    ref,
+    // uuid da compra (não o `ref` curto de 6 hex) — protege contra colisão
+    // de idempotência entre pedidos diferentes (ver "MP idempotency key" no
+    // relatório do Fase4a). `ref` continua existindo só como referência
+    // humana em `descricao`.
+    idempotencyKey,
     descricao,
   } = params || {};
 
@@ -47,10 +51,27 @@ export async function criaPagamento(env, params, fetchImpl = globalThis.fetch) {
     headers: {
       Authorization: `Bearer ${env.MP_ACCESS_TOKEN}`,
       "Content-Type": "application/json",
-      "X-Idempotency-Key": ref,
+      "X-Idempotency-Key": idempotencyKey,
     },
     body: JSON.stringify(body),
   });
+
+  // Erro do MP (token de cartão inválido/expirado, 4xx/5xx) não tem `status`
+  // no corpo — sem este guard, `data.status` vira undefined e o chamador
+  // (handlePagar) mapeava isso pra "pendente" por padrão, guardando uma
+  // tentativa de cartão RECUSADA como se estivesse esperando confirmação
+  // (tela de Pix com QR em branco). Devolve um resultado tipado em vez de
+  // lançar — handlePagar decide o status interno (ver IMPORTANTE #2).
+  if (!res.ok) {
+    let statusDetail;
+    try {
+      const errBody = await res.json();
+      statusDetail = (errBody && (errBody.message || errBody.error)) || `http_${res.status}`;
+    } catch (_) {
+      statusDetail = `http_${res.status}`;
+    }
+    return { status: "error", statusDetail };
+  }
 
   const data = await res.json();
 
