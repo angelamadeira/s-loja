@@ -1535,17 +1535,27 @@
           numField.on('error',function(e){if(!isCurrent())return;console.error('MP field cardNumber',e);st.numValid=false;setCheck('coCardNumberCheck',false);fieldErr(numErrEl,numBox,'Confira o número do cartão.');updateSubmitEnabled();});
           expField.on('error',function(e){if(!isCurrent())return;console.error('MP field expirationDate',e);st.expValid=false;setCheck('coCardExpiryCheck',false);fieldErr(expErrEl,expBox,'Confira a validade.');updateSubmitEnabled();});
           cvvField.on('error',function(e){if(!isCurrent())return;console.error('MP field securityCode',e);st.cvvValid=false;setCheck('coCardCvvCheck',false);fieldErr(cvvErrEl,cvvBox,'Confira o CVV.');updateSubmitEnabled();});
+          /* NÚMERO: o MP Secure Fields é leniente com o número — validityChange
+             vem com errorMessages:[] mesmo incompleto (confirmado nos logs da
+             fundadora: apagar 1 dígito não gera erro, nem no blur). Como não dá
+             pra ler o valor do iframe nem forçar a validação de tamanho, NÃO
+             acendemos o ✓ verde do número (seria mentira "está válido"): o sinal
+             positivo dele é a BANDEIRA (showBrand, aparece quando o BIN resolve).
+             Só marcamos ERRO quando o MP reporta um. st.numValid segue MP pro
+             botão, mas a validação de verdade é o createCardToken no "Pagar"
+             (rejeita número incompleto → "Revise os dados do cartão", sem cobrar). */
           numField.on('validityChange',function(e){
             if(!isCurrent())return;
-            console.debug('[MP num validityChange]',JSON.stringify(e));
             var errs=mpErrs(e);
-            if(errs.length){st.numValid=false;setCheck('coCardNumberCheck',false);fieldErr(numErrEl,numBox,'Confira o número do cartão.');}
-            else{st.numValid=true;setCheck('coCardNumberCheck',true);fieldErr(numErrEl,numBox,'');}
+            if(errs.length){st.numValid=false;fieldErr(numErrEl,numBox,'Confira o número do cartão.');}
+            else{st.numValid=true;fieldErr(numErrEl,numBox,'');}
+            setCheck('coCardNumberCheck',false); /* nunca ✓ no número — ver acima */
             updateSubmitEnabled();
           });
+          /* VALIDADE e CVV: o MP valida esses certo (reporta invalid_length com
+             currentLength), então o ✓ é confiável aqui. */
           expField.on('validityChange',function(e){
             if(!isCurrent())return;
-            console.debug('[MP exp validityChange]',JSON.stringify(e));
             var errs=mpErrs(e);
             if(errs.length){st.expValid=false;setCheck('coCardExpiryCheck',false);fieldErr(expErrEl,expBox,'Confira a validade.');}
             else{st.expValid=true;setCheck('coCardExpiryCheck',true);fieldErr(expErrEl,expBox,'');}
@@ -1553,7 +1563,6 @@
           });
           cvvField.on('validityChange',function(e){
             if(!isCurrent())return;
-            console.debug('[MP cvv validityChange]',JSON.stringify(e));
             var errs=mpErrs(e);
             if(errs.length){st.cvvValid=false;setCheck('coCardCvvCheck',false);fieldErr(cvvErrEl,cvvBox,'Confira o CVV.');}
             else{st.cvvValid=true;setCheck('coCardCvvCheck',true);fieldErr(cvvErrEl,cvvBox,'');}
