@@ -661,21 +661,15 @@
     </div>
 
     <div class="comp-block">
-      <h3>Resumo editável — <code>.okri-ed</code>/<code>.okqty</code></h3>
-      <p class="dsrule">Padrão de mercado "revisar e editar o carrinho no próprio checkout" (Fase 4a-carrinho): cada linha do Resumo (<code>#coSummary</code>, <code>renderCoSummary()</code>) ganha um stepper de quantidade (<code>.okqty</code>, mesmo par de ícones −/+ do stepper da sacola/<code>.qty</code>, só menor — 20px em vez de 29px). <b>Não há botão "Remover" dedicado</b> (padrão Baymard: no checkout o resumo é pra conferir, não pra editar pesado — botão de remover a mais polui e convida à saída). Um único listener delegado em <code>#coSummary</code> (montado uma vez em <code>wireCheckout()</code> — o <code>&lt;aside&gt;</code> persiste entre re-renders, só o innerHTML troca) resolve a chave do carrinho (<code>cartKey</code>, carregada em cada item por <code>cartSplit()</code> como <code>it.k</code>) e mexe direto em <code>cart[k]</code>: <b>+</b> incrementa; <b>−</b> decrementa, ou <b>remove o item quando já está em 1</b>. Toda edição dispara os mesmos quatro passos: <code>saveCart()</code> (persiste), <code>render()</code> (dock/badge), <code>renderCoSummary()</code> (resumo + totais) e <code>syncCardBrickAmount()</code> (re-sincroniza as parcelas do cartão com o novo total, se o Cartão estiver aberto). Sacola esvaziada por uma remoção → <code>navigate('/checkout',true)</code>, que sem itens já renderiza <code>coEmptyView()</code> (sacola vazia + link pra produtos) em vez de deixar um checkout quebrado.</p>
+      <h3>Resumo do checkout (só leitura) — <code>.okri</code></h3>
+      <p class="dsrule">O Resumo do checkout (<code>#coSummary</code>, <code>renderCoSummary()</code>) é <b>só pra conferir</b> — a edição de quantidade vive na sacola (drawer), não aqui (padrão Baymard: no clímax da compra o resumo não deve convidar a editar/sair). Cada linha usa o mesmo item read-only do recibo (<code>.okri</code>): a quantidade vira selo <b>N×</b> (<code>.okri-qty</code>) sobre a miniatura, sem steppers. Quando o item tem desconto (<code>saleP</code>), o preço mostra <b>de/por</b> — cheio riscado (<code>.wasp</code>) + com desconto — e os totais abrem uma linha <b>Desconto</b> (Subtotal cheio → <code>−</code>Desconto → Frete → Cupom → Desconto Pix → Total), no mesmo estilo verde de <code>.sumrow.disc</code>. O <code>&lt;aside&gt;</code> persiste entre re-renders (só o innerHTML troca).</p>
       <div class="demo demo-row" style="align-items:flex-start">
         <aside class="cosummary" style="flex:1 1 320px;position:static">
           <h3>Resumo</h3>
           <div class="ciList">
-            <div class="okri okri-ed">
-              <div class="okri-img" style="background:var(--surface)"></div>
-              <div class="okri-tx"><b>Tablete Seigaiha</b><small>M · 12 gomos</small>
-                <div class="okqty" role="group" aria-label="Quantidade">
-                  <button type="button" class="okqty-b" aria-label="Diminuir quantidade"><svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
-                  <span class="okqty-n">2</span>
-                  <button type="button" class="okqty-b" aria-label="Aumentar quantidade"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
-                </div>
-              </div>
+            <div class="okri">
+              <div class="okri-img" style="background:var(--surface)"><span class="okri-qty">2×</span></div>
+              <div class="okri-tx"><b>Tablete Seigaiha</b><small>M · 12 gomos</small></div>
               <div class="okri-pr">R$ 178,00</div>
             </div>
           </div>
