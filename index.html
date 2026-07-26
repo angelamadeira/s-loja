@@ -1535,21 +1535,19 @@
           numField.on('error',function(e){if(!isCurrent())return;console.error('MP field cardNumber',e);st.numValid=false;setCheck('coCardNumberCheck',false);fieldErr(numErrEl,numBox,'Confira o número do cartão.');updateSubmitEnabled();});
           expField.on('error',function(e){if(!isCurrent())return;console.error('MP field expirationDate',e);st.expValid=false;setCheck('coCardExpiryCheck',false);fieldErr(expErrEl,expBox,'Confira a validade.');updateSubmitEnabled();});
           cvvField.on('error',function(e){if(!isCurrent())return;console.error('MP field securityCode',e);st.cvvValid=false;setCheck('coCardCvvCheck',false);fieldErr(cvvErrEl,cvvBox,'Confira o CVV.');updateSubmitEnabled();});
-          /* NÚMERO: o MP Secure Fields é leniente com o número — validityChange
-             vem com errorMessages:[] mesmo incompleto (confirmado nos logs da
-             fundadora: apagar 1 dígito não gera erro, nem no blur). Como não dá
-             pra ler o valor do iframe nem forçar a validação de tamanho, NÃO
-             acendemos o ✓ verde do número (seria mentira "está válido"): o sinal
-             positivo dele é a BANDEIRA (showBrand, aparece quando o BIN resolve).
-             Só marcamos ERRO quando o MP reporta um. st.numValid segue MP pro
-             botão, mas a validação de verdade é o createCardToken no "Pagar"
-             (rejeita número incompleto → "Revise os dados do cartão", sem cobrar). */
+          /* NÚMERO: BUG conhecido do SDK do MP (mercadopago/sdk-js, discussão 109) — depois do
+             BIN (8 dígitos) o campo PARA de reportar invalid_length, então
+             validityChange vem com errorMessages:[] tanto no número completo
+             quanto no incompleto. Não há workaround oficial (não dá pra ler o
+             iframe). Escolha: acender o ✓ quando o MP não vê erro (dá feedback no
+             número certo, o padrão dos exemplos do MP). Efeito colateral do bug:
+             se apagar 1 dígito o ✓ pode ficar — inofensivo, o createCardToken do
+             "Pagar" rejeita número incompleto (→ "Revise os dados", sem cobrar). */
           numField.on('validityChange',function(e){
             if(!isCurrent())return;
             var errs=mpErrs(e);
-            if(errs.length){st.numValid=false;fieldErr(numErrEl,numBox,'Confira o número do cartão.');}
-            else{st.numValid=true;fieldErr(numErrEl,numBox,'');}
-            setCheck('coCardNumberCheck',false); /* nunca ✓ no número — ver acima */
+            if(errs.length){st.numValid=false;setCheck('coCardNumberCheck',false);fieldErr(numErrEl,numBox,'Confira o número do cartão.');}
+            else{st.numValid=true;setCheck('coCardNumberCheck',true);fieldErr(numErrEl,numBox,'');}
             updateSubmitEnabled();
           });
           /* VALIDADE e CVV: o MP valida esses certo (reporta invalid_length com
