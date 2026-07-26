@@ -1157,6 +1157,9 @@ button.cohd{width:100%;border:0;background:none;font:inherit;color:inherit;text-
 .pixhow ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:var(--space-3)}
 .pixhow li{display:flex;gap:var(--space-3);align-items:flex-start;font-size:.86rem;color:var(--text-secondary);font-weight:300;line-height:1.45}
 .pixhow li b{color:var(--text);font-weight:500}
+/* o texto vai num único container (não itens flex soltos), pra fluir normal —
+   sem isso os <b> viravam colunas separadas quebrando "Ler/QR/Code". */
+.pixhow .pixtx{flex:1;min-width:0}
 .pixhow .pixnum{display:flex;align-items:center;justify-content:center;flex:0 0 auto;width:20px;height:20px;border-radius:var(--r-round);background:var(--raised);border:1px solid var(--line);color:var(--text);font-size:.72rem;font-weight:500;font-variant-numeric:tabular-nums}
 .pixsafe{font-size:.76rem;color:var(--text-muted);font-weight:300;margin:0}
 .pixgone{font-size:.92rem;color:var(--text-secondary);font-weight:300;line-height:1.6;text-align:center;margin:var(--space-4) 0}
