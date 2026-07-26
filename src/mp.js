@@ -106,6 +106,11 @@ export async function consultaPagamentoFull(env, id, fetchImpl = globalThis.fetc
     },
   });
 
+  // 4xx/5xx do MP (ou corpo não-JSON): degrada sem lançar — status undefined faz
+  // o chamador (webhook/handleCompra) tratar como "sem novidade" e tentar depois,
+  // em vez de estourar uma exceção que viraria 500 sem corpo.
+  if (!res.ok) return { id, status: undefined };
+
   const data = await res.json();
 
   const resultado = { id: data.id, status: data.status };

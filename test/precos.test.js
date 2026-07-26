@@ -39,10 +39,12 @@ test("item inexistente => erro (não confia no cliente)", () => {
   expect(r.erro).toBe("item");
 });
 
-test("qtd inválida (0, negativa, fracionária) => erro qtd", () => {
-  for (const q of [0, -2, 1.5]) {
+test("qtd inválida (0, negativa, fracionária, acima do teto) => erro qtd", () => {
+  for (const q of [0, -2, 1.5, 100, 9999]) {
     expect(recomputaTotal([{ id: "tablete", tam: "M", qtd: q }], { metodo: "pix" }).erro).toBe("qtd");
   }
+  // 99 (o teto) ainda passa
+  expect(recomputaTotal([{ id: "tablete", tam: "M", qtd: 99 }], { metodo: "pix" }).erro).toBeUndefined();
 });
 
 test("Pix e cupom empilham (aditivo) — regra a confirmar", () => {

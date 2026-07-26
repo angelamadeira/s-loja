@@ -8,6 +8,12 @@
 // preço por tamanho = (base + SIZES[tam].add), com sale% aplicado quando o
 // produto tem `sale` (mesma semântica de `priceNow` no cliente), em CENTAVOS.
 // Só os `sizes` listados por produto são combinações válidas.
+//
+// ⚠️ PROMOÇÃO GERAL (SALE do index.html) NÃO está espelhada aqui: este arquivo só
+// conhece o `sale` POR PRODUTO (ex.: cubo:20). Se a promoção geral do site for
+// ligada no front (SALE.active=true) sem ser espelhada aqui, o front mostra o
+// desconto mas recomputaTotal cobra o preço CHEIO → cobrança a mais. Espelhar o
+// SALE aqui antes de usar a promoção geral (ver aviso no index.html ~L247).
 
 const SIZES = { P: 0, M: 34, G: 82 };
 
@@ -51,7 +57,10 @@ export function recomputaTotal(itens, opts) {
     const { id, tam, qtd } = item || {};
     const precoTam = PRECOS[id] && PRECOS[id][tam];
     if (precoTam === undefined) return { erro: "item" };
-    if (!Number.isInteger(qtd) || qtd <= 0) return { erro: "qtd" };
+    // teto por linha: peça autoral em tiragem limitada; 99 é folga de sobra e
+    // fecha o buraco de inflar o total com uma qtd absurda (o MP acabaria
+    // rejeitando por limite de valor, mas não devemos depender disso).
+    if (!Number.isInteger(qtd) || qtd <= 0 || qtd > 99) return { erro: "qtd" };
     subtotal += precoTam * qtd;
     linhas.push({ id, tam, qtd, preco_unit: precoTam });
   }

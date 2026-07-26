@@ -116,6 +116,17 @@ function mapStatusMp(mpStatus) {
   return MP_STATUS[mpStatus];
 }
 
+// JSON.parse tolerante: dado malformado no D1 (itens/endereço) não pode derrubar
+// GET /api/compra num 500 sem corpo (o front cairia no .catch genérico). Degrada
+// pro fallback e segue.
+function jparse(s, fallback) {
+  try {
+    return s ? JSON.parse(s) : fallback;
+  } catch (_) {
+    return fallback;
+  }
+}
+
 // Teto de frete aceito do cliente: R$1000 em centavos. F4a ainda recebe o
 // frete do cliente (frete real/calculado por CEP é F4b — servidor autoritativo
 // só pra frete vem depois); este teto + o floor em 0 fecham o buraco de
@@ -263,13 +274,13 @@ async function handleCompra(url, env) {
     // nunca inclui cpf nem mp_payment_id aqui — só o que o recap precisa mostrar.
     resposta.order = {
       ref: row.ref,
-      itens: JSON.parse(row.itens || "[]"),
+      itens: jparse(row.itens, []),
       total: row.total,
       frete: row.frete,
       desconto: row.desconto,
       metodo: row.metodo,
       parcelas: row.parcelas,
-      endereco: row.endereco ? JSON.parse(row.endereco) : null,
+      endereco: jparse(row.endereco, null),
       contato_email: row.contato_email,
       contato_whats: row.contato_whats,
       criado_em: row.criado_em,
