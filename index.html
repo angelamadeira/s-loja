@@ -1278,7 +1278,7 @@
          voo pra descartar respostas de getPaymentMethods/getIssuers/getInstallments
          que cheguem fora de ordem (usuário digitou mais números antes da 1ª
          resolver) — só a resposta cujo st.bin ainda bate é aplicada. */
-      var st={numReady:false,expReady:false,cvvReady:false,numValid:false,expValid:false,cvvValid:false,numFocused:false,bin:null,paymentMethodId:null,issuerId:null,parcelas:1};
+      var st={numReady:false,expReady:false,cvvReady:false,numValid:false,expValid:false,cvvValid:false,bin:null,paymentMethodId:null,issuerId:null,parcelas:1};
       var submitting=false;
       var mp=null;
       function fieldsReady(){return st.numReady&&st.expReady&&st.cvvReady;}
@@ -1535,22 +1535,18 @@
           numField.on('error',function(e){if(!isCurrent())return;console.error('MP field cardNumber',e);st.numValid=false;setCheck('coCardNumberCheck',false);fieldErr(numErrEl,numBox,'Confira o número do cartão.');updateSubmitEnabled();});
           expField.on('error',function(e){if(!isCurrent())return;console.error('MP field expirationDate',e);st.expValid=false;setCheck('coCardExpiryCheck',false);fieldErr(expErrEl,expBox,'Confira a validade.');updateSubmitEnabled();});
           cvvField.on('error',function(e){if(!isCurrent())return;console.error('MP field securityCode',e);st.cvvValid=false;setCheck('coCardCvvCheck',false);fieldErr(cvvErrEl,cvvBox,'Confira o CVV.');updateSubmitEnabled();});
-          /* NÚMERO: BUG conhecido do SDK do MP (mercadopago/sdk-js, discussão 109) — depois do
-             BIN (8 dígitos) o campo PARA de reportar invalid_length, então
-             validityChange vem com errorMessages:[] tanto no número completo
-             quanto no incompleto. Não há workaround oficial (não dá pra ler o
-             iframe). Escolha: acender o ✓ quando o MP não vê erro (dá feedback no
-             número certo, o padrão dos exemplos do MP). Efeito colateral do bug:
-             se apagar 1 dígito o ✓ pode ficar — inofensivo, o createCardToken do
-             "Pagar" rejeita número incompleto (→ "Revise os dados", sem cobrar). */
+          /* Os 3 campos (número/validade/CVV) seguem o MESMO padrão do MP, sem
+             gambiarra: ✓ quando o validityChange não traz erro, dica em vermelho
+             quando traz. Ressalva conhecida do SDK do MP (mercadopago/sdk-js,
+             discussão 109): pra 8+ dígitos o campo de número para de reportar
+             invalid_length, então o ✓ dele pode ficar num número incompleto —
+             inofensivo, o createCardToken do "Pagar" valida de verdade e rejeita
+             número incompleto sem cobrar. */
           numField.on('validityChange',function(e){
             if(!isCurrent())return;
             var errs=mpErrs(e);
             if(errs.length){st.numValid=false;setCheck('coCardNumberCheck',false);fieldErr(numErrEl,numBox,'Confira o número do cartão.');}
-            /* ✓ só quando o campo NÃO está em edição (blur) — enquanto o cursor
-               está no número, esconde o ✓, então apagar dígitos não deixa um ✓
-               velho pendurado. O blur reavalia. Mitiga o bug do SDK do MP. */
-            else{st.numValid=true;setCheck('coCardNumberCheck',!st.numFocused);fieldErr(numErrEl,numBox,'');}
+            else{st.numValid=true;setCheck('coCardNumberCheck',true);fieldErr(numErrEl,numBox,'');}
             updateSubmitEnabled();
           });
           /* VALIDADE e CVV: o MP valida esses certo (reporta invalid_length com
@@ -1575,10 +1571,6 @@
              resolvia (botão travado em disabled + parcelas presas em 1×). Vazio/
              undefined = "sem bin" (reseta parcelas). */
           numField.on('binChange',function(data){if(!isCurrent())return;var b=(data&&typeof data==='object')?data.bin:data;resolveBin(b||null);});
-          /* Foco no número esconde o ✓ (está editando); ao sair (blur) mostra de
-             novo se o MP não vê erro — padrão "valida no blur". */
-          numField.on('focus',function(){if(!isCurrent())return;st.numFocused=true;setCheck('coCardNumberCheck',false);});
-          numField.on('blur',function(){if(!isCurrent())return;st.numFocused=false;setCheck('coCardNumberCheck',!!st.numValid);});
         }).catch(function(err){if(!isCurrent())return;console.error('MP init',err);showFail();});
       }
       if(window.MercadoPago){go();}
