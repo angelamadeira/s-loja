@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Studio Suzu · @somos.suzu</title>
+<meta name="description" content="Studio Suzu — moldes autorais para confeitaria. Loja, projeto exclusivo, receitas e atendimento.">
+<link rel="canonical" href="https://studiosuzu.com.br/links">
+<meta property="og:title" content="Studio Suzu · @somos.suzu">
+<meta property="og:description" content="Moldes autorais para confeitaria.">
+<meta property="og:url" content="https://studiosuzu.com.br/links">
+<link rel="stylesheet" href="/css/tokens.css">
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;min-height:100vh;background:var(--surface);color:var(--text);font-family:var(--sans);-webkit-font-smoothing:antialiased;padding:var(--space-9) var(--space-5) var(--space-7)}
+  .wrap{max-width:520px;margin:0 auto;text-align:center}
+  .name{font-size:26px;font-weight:500;letter-spacing:.3em;margin:0 0 var(--space-2);color:var(--text)}
+  .sub{font-size:12px;letter-spacing:.34em;text-transform:uppercase;color:var(--text-tertiary);margin:0 0 var(--space-4)}
+  .handle{display:inline-block;font-size:15px;color:var(--text-secondary);text-decoration:none;padding:var(--space-1) 0}
+  .handle:hover{color:var(--ink)}
+  .socials{display:flex;justify-content:center;gap:var(--space-3);margin:var(--space-3) 0 var(--space-8)}
+  .soc{width:44px;height:44px;border-radius:var(--r-pill);border:1px solid var(--line);display:grid;place-items:center;color:var(--stone);transition:color .2s,border-color .2s,transform .2s}
+  .soc:hover{color:var(--ink);border-color:var(--line-strong);transform:translateY(-1px)}
+  .soc svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .links{display:flex;flex-direction:column;gap:var(--space-3)}
+  .lk{display:flex;align-items:center;gap:var(--space-4);text-align:left;background:var(--raised);border:1px solid var(--line);border-radius:var(--r-xl);padding:var(--space-4) var(--space-5);text-decoration:none;color:var(--text);transition:border-color .2s,transform .2s}
+  .lk:hover{border-color:var(--line-strong);transform:translateY(-1px)}
+  .lk-ic{flex:0 0 auto;width:46px;height:46px;border-radius:var(--r-md);display:grid;place-items:center}
+  .lk-ic svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .lk-tx{flex:1 1 auto;min-width:0}
+  .lk-tx b{display:block;font-size:17px;font-weight:500;color:var(--text)}
+  .lk-tx small{display:block;font-size:13px;color:var(--text-tertiary);margin-top:var(--space-2xs)}
+  .lk-ar{flex:0 0 auto;color:var(--text-tertiary)}
+  .lk-ar svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;display:block}
+  .share{width:100%;margin-top:var(--space-5);display:flex;align-items:center;justify-content:center;gap:var(--space-2);background:transparent;border:1px solid var(--line);border-radius:var(--r-pill);color:var(--text-secondary);font-family:var(--sans);font-size:14px;letter-spacing:.02em;padding:var(--space-3) var(--space-4);cursor:pointer;transition:color .2s,border-color .2s}
+  .share:hover{color:var(--ink);border-color:var(--line-strong)}
+  .share svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .foot{margin-top:var(--space-7);font-size:13px}
+  .foot a{color:var(--text-tertiary);text-decoration:none;letter-spacing:.04em}
+  .foot a:hover{color:var(--stone)}
+  /* share sheet (padrão Linktree: QR + copiar + apps) */
+  .shov{position:fixed;inset:0;background:rgba(0,0,0,.42);display:flex;align-items:center;justify-content:center;padding:var(--space-5);z-index:50}
+  .shov[hidden]{display:none}
+  .shcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-2xl);padding:var(--space-6);max-width:340px;width:100%;text-align:center;position:relative}
+  .shhead{display:flex;align-items:center;justify-content:center;position:relative;margin-bottom:var(--space-5)}
+  .shhead b{font-size:16px;font-weight:500;letter-spacing:.02em}
+  .shx{position:absolute;right:0;top:0;width:30px;height:30px;display:grid;place-items:center;background:none;border:0;color:var(--text-tertiary);cursor:pointer;border-radius:var(--r-pill)}
+  .shx:hover{color:var(--ink)}
+  .shx svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .qrbox{width:168px;height:168px;margin:0 auto var(--space-3);padding:var(--space-3);background:var(--white);border:1px solid var(--line);border-radius:var(--r-lg);color:var(--ink)}
+  .qr{width:100%;height:100%;display:block}
+  .shurl{font-size:13px;color:var(--text-secondary);margin:0 0 var(--space-5);word-break:break-all}
+  .shrow{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--space-2)}
+  .sht{display:flex;flex-direction:column;align-items:center;gap:var(--space-1);background:none;border:0;color:var(--text);font-family:var(--sans);font-size:11px;cursor:pointer;text-decoration:none;padding:var(--space-1)}
+  .sht i{width:44px;height:44px;border-radius:var(--r-pill);border:1px solid var(--line);display:grid;place-items:center;color:var(--stone);transition:border-color .2s,color .2s}
+  .sht:hover i{border-color:var(--line-strong);color:var(--ink)}
+  .sht i svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+</style>
+</head>
+<body>
+  <main class="wrap">
+    <h1 class="name">STUDIO SUZU</h1>
+    <p class="sub">formas autorais</p>
+    <span class="handle">@somos.suzu</span>
+    <div class="socials">
+      <a class="soc" href="https://www.instagram.com/somos.suzu/" target="_blank" rel="noopener" aria-label="Instagram"><svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg></a>
+      <a class="soc" href="https://www.tiktok.com/@somos.suzu" target="_blank" rel="noopener" aria-label="TikTok"><svg viewBox="0 0 24 24" style="fill:currentColor;stroke:none"><path d="M12.53 2h3.12c.17 1.53.83 2.87 1.94 3.66.86.61 1.9.97 3.01 1.03v3.17a8.1 8.1 0 0 1-4.42-1.4v6.34a6.06 6.06 0 1 1-6.06-6.06c.32 0 .63.03.94.08v3.28a2.78 2.78 0 1 0 1.93 2.65V2z"/></svg></a>
+    </div>
+    <nav class="links">
+      <a class="lk" href="/produtos">
+        <span class="lk-ic" style="background:var(--matcha-wash);color:var(--matcha-deep)"><svg viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg></span>
+        <span class="lk-tx"><b>Loja de moldes</b><small>Peças autorais em tiragem limitada</small></span>
+        <span class="lk-ar" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></span>
+      </a>
+      <a class="lk" href="/exclusivo">
+        <span class="lk-ic" style="background:var(--sakura-wash);color:var(--sakura-deep)"><svg viewBox="0 0 24 24"><path d="M12 3v18M3 12h18M5.6 5.6l12.8 12.8M18.4 5.6 5.6 18.4"/></svg></span>
+        <span class="lk-tx"><b>Projeto exclusivo</b><small>Seu molde sob medida — peça um orçamento</small></span>
+        <span class="lk-ar" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></span>
+      </a>
+      <a class="lk" href="/receitas">
+        <span class="lk-ic" style="background:var(--sango-wash);color:var(--sango-deep)"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg></span>
+        <span class="lk-tx"><b>Receitas</b><small>O passo a passo pra usar as formas</small></span>
+        <span class="lk-ar" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></span>
+      </a>
+      <a class="lk" target="_blank" rel="noopener" href="https://wa.me/5511977167137?text=Ol%C3%A1%21%20Vim%20pelo%20Studio%20Suzu%20e%20queria%20saber%20mais%20%F0%9F%8C%BF">
+        <span class="lk-ic" style="background:var(--mizu-wash);color:var(--mizu-deep)"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5Z"/></svg></span>
+        <span class="lk-tx"><b>WhatsApp</b><small>Fale com a gente — atendimento direto</small></span>
+        <span class="lk-ar" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></span>
+      </a>
+    </nav>
+    <button class="share" id="shareBtn" type="button"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"/><line x1="15.4" y1="6.5" x2="8.6" y2="10.5"/></svg><span>Compartilhar</span></button>
+    <footer class="foot"><a href="/">studiosuzu.com.br</a></footer>
+  </main>
+
+  <div class="shov" id="shOv" hidden role="dialog" aria-modal="true" aria-label="Compartilhar">
+    <div class="shcard">
+      <div class="shhead"><b>Compartilhar</b><button class="shx" id="shX" type="button" aria-label="Fechar"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+      <div class="qrbox"><svg class="qr" viewBox="0 0 27 27" shape-rendering="crispEdges" aria-label="QR do studiosuzu.com.br/links"><g transform="translate(1,1)" fill="currentColor"><rect x="0" y="0" width="1" height="1"/><rect x="1" y="0" width="1" height="1"/><rect x="2" y="0" width="1" height="1"/><rect x="3" y="0" width="1" height="1"/><rect x="4" y="0" width="1" height="1"/><rect x="5" y="0" width="1" height="1"/><rect x="6" y="0" width="1" height="1"/><rect x="9" y="0" width="1" height="1"/><rect x="10" y="0" width="1" height="1"/><rect x="11" y="0" width="1" height="1"/><rect x="15" y="0" width="1" height="1"/><rect x="18" y="0" width="1" height="1"/><rect x="19" y="0" width="1" height="1"/><rect x="20" y="0" width="1" height="1"/><rect x="21" y="0" width="1" height="1"/><rect x="22" y="0" width="1" height="1"/><rect x="23" y="0" width="1" height="1"/><rect x="24" y="0" width="1" height="1"/><rect x="0" y="1" width="1" height="1"/><rect x="6" y="1" width="1" height="1"/><rect x="8" y="1" width="1" height="1"/><rect x="10" y="1" width="1" height="1"/><rect x="11" y="1" width="1" height="1"/><rect x="14" y="1" width="1" height="1"/><rect x="15" y="1" width="1" height="1"/><rect x="16" y="1" width="1" height="1"/><rect x="18" y="1" width="1" height="1"/><rect x="24" y="1" width="1" height="1"/><rect x="0" y="2" width="1" height="1"/><rect x="2" y="2" width="1" height="1"/><rect x="3" y="2" width="1" height="1"/><rect x="4" y="2" width="1" height="1"/><rect x="6" y="2" width="1" height="1"/><rect x="8" y="2" width="1" height="1"/><rect x="14" y="2" width="1" height="1"/><rect x="15" y="2" width="1" height="1"/><rect x="16" y="2" width="1" height="1"/><rect x="18" y="2" width="1" height="1"/><rect x="20" y="2" width="1" height="1"/><rect x="21" y="2" width="1" height="1"/><rect x="22" y="2" width="1" height="1"/><rect x="24" y="2" width="1" height="1"/><rect x="0" y="3" width="1" height="1"/><rect x="2" y="3" width="1" height="1"/><rect x="3" y="3" width="1" height="1"/><rect x="4" y="3" width="1" height="1"/><rect x="6" y="3" width="1" height="1"/><rect x="10" y="3" width="1" height="1"/><rect x="16" y="3" width="1" height="1"/><rect x="18" y="3" width="1" height="1"/><rect x="20" y="3" width="1" height="1"/><rect x="21" y="3" width="1" height="1"/><rect x="22" y="3" width="1" height="1"/><rect x="24" y="3" width="1" height="1"/><rect x="0" y="4" width="1" height="1"/><rect x="2" y="4" width="1" height="1"/><rect x="3" y="4" width="1" height="1"/><rect x="4" y="4" width="1" height="1"/><rect x="6" y="4" width="1" height="1"/><rect x="8" y="4" width="1" height="1"/><rect x="10" y="4" width="1" height="1"/><rect x="11" y="4" width="1" height="1"/><rect x="14" y="4" width="1" height="1"/><rect x="15" y="4" width="1" height="1"/><rect x="16" y="4" width="1" height="1"/><rect x="18" y="4" width="1" height="1"/><rect x="20" y="4" width="1" height="1"/><rect x="21" y="4" width="1" height="1"/><rect x="22" y="4" width="1" height="1"/><rect x="24" y="4" width="1" height="1"/><rect x="0" y="5" width="1" height="1"/><rect x="6" y="5" width="1" height="1"/><rect x="8" y="5" width="1" height="1"/><rect x="12" y="5" width="1" height="1"/><rect x="15" y="5" width="1" height="1"/><rect x="16" y="5" width="1" height="1"/><rect x="18" y="5" width="1" height="1"/><rect x="24" y="5" width="1" height="1"/><rect x="0" y="6" width="1" height="1"/><rect x="1" y="6" width="1" height="1"/><rect x="2" y="6" width="1" height="1"/><rect x="3" y="6" width="1" height="1"/><rect x="4" y="6" width="1" height="1"/><rect x="5" y="6" width="1" height="1"/><rect x="6" y="6" width="1" height="1"/><rect x="8" y="6" width="1" height="1"/><rect x="10" y="6" width="1" height="1"/><rect x="12" y="6" width="1" height="1"/><rect x="14" y="6" width="1" height="1"/><rect x="16" y="6" width="1" height="1"/><rect x="18" y="6" width="1" height="1"/><rect x="19" y="6" width="1" height="1"/><rect x="20" y="6" width="1" height="1"/><rect x="21" y="6" width="1" height="1"/><rect x="22" y="6" width="1" height="1"/><rect x="23" y="6" width="1" height="1"/><rect x="24" y="6" width="1" height="1"/><rect x="8" y="7" width="1" height="1"/><rect x="9" y="7" width="1" height="1"/><rect x="11" y="7" width="1" height="1"/><rect x="15" y="7" width="1" height="1"/><rect x="0" y="8" width="1" height="1"/><rect x="1" y="8" width="1" height="1"/><rect x="3" y="8" width="1" height="1"/><rect x="6" y="8" width="1" height="1"/><rect x="7" y="8" width="1" height="1"/><rect x="10" y="8" width="1" height="1"/><rect x="12" y="8" width="1" height="1"/><rect x="13" y="8" width="1" height="1"/><rect x="14" y="8" width="1" height="1"/><rect x="18" y="8" width="1" height="1"/><rect x="19" y="8" width="1" height="1"/><rect x="20" y="8" width="1" height="1"/><rect x="22" y="8" width="1" height="1"/><rect x="23" y="8" width="1" height="1"/><rect x="2" y="9" width="1" height="1"/><rect x="3" y="9" width="1" height="1"/><rect x="5" y="9" width="1" height="1"/><rect x="7" y="9" width="1" height="1"/><rect x="12" y="9" width="1" height="1"/><rect x="13" y="9" width="1" height="1"/><rect x="16" y="9" width="1" height="1"/><rect x="18" y="9" width="1" height="1"/><rect x="24" y="9" width="1" height="1"/><rect x="3" y="10" width="1" height="1"/><rect x="6" y="10" width="1" height="1"/><rect x="7" y="10" width="1" height="1"/><rect x="9" y="10" width="1" height="1"/><rect x="10" y="10" width="1" height="1"/><rect x="12" y="10" width="1" height="1"/><rect x="14" y="10" width="1" height="1"/><rect x="16" y="10" width="1" height="1"/><rect x="17" y="10" width="1" height="1"/><rect x="18" y="10" width="1" height="1"/><rect x="23" y="10" width="1" height="1"/><rect x="24" y="10" width="1" height="1"/><rect x="1" y="11" width="1" height="1"/><rect x="2" y="11" width="1" height="1"/><rect x="4" y="11" width="1" height="1"/><rect x="12" y="11" width="1" height="1"/><rect x="13" y="11" width="1" height="1"/><rect x="19" y="11" width="1" height="1"/><rect x="20" y="11" width="1" height="1"/><rect x="3" y="12" width="1" height="1"/><rect x="4" y="12" width="1" height="1"/><rect x="5" y="12" width="1" height="1"/><rect x="6" y="12" width="1" height="1"/><rect x="8" y="12" width="1" height="1"/><rect x="11" y="12" width="1" height="1"/><rect x="12" y="12" width="1" height="1"/><rect x="13" y="12" width="1" height="1"/><rect x="17" y="12" width="1" height="1"/><rect x="18" y="12" width="1" height="1"/><rect x="19" y="12" width="1" height="1"/><rect x="21" y="12" width="1" height="1"/><rect x="23" y="12" width="1" height="1"/><rect x="24" y="12" width="1" height="1"/><rect x="3" y="13" width="1" height="1"/><rect x="5" y="13" width="1" height="1"/><rect x="8" y="13" width="1" height="1"/><rect x="9" y="13" width="1" height="1"/><rect x="10" y="13" width="1" height="1"/><rect x="12" y="13" width="1" height="1"/><rect x="13" y="13" width="1" height="1"/><rect x="18" y="13" width="1" height="1"/><rect x="19" y="13" width="1" height="1"/><rect x="21" y="13" width="1" height="1"/><rect x="22" y="13" width="1" height="1"/><rect x="24" y="13" width="1" height="1"/><rect x="0" y="14" width="1" height="1"/><rect x="4" y="14" width="1" height="1"/><rect x="6" y="14" width="1" height="1"/><rect x="7" y="14" width="1" height="1"/><rect x="8" y="14" width="1" height="1"/><rect x="9" y="14" width="1" height="1"/><rect x="11" y="14" width="1" height="1"/><rect x="13" y="14" width="1" height="1"/><rect x="14" y="14" width="1" height="1"/><rect x="18" y="14" width="1" height="1"/><rect x="19" y="14" width="1" height="1"/><rect x="20" y="14" width="1" height="1"/><rect x="22" y="14" width="1" height="1"/><rect x="24" y="14" width="1" height="1"/><rect x="1" y="15" width="1" height="1"/><rect x="3" y="15" width="1" height="1"/><rect x="4" y="15" width="1" height="1"/><rect x="5" y="15" width="1" height="1"/><rect x="7" y="15" width="1" height="1"/><rect x="8" y="15" width="1" height="1"/><rect x="9" y="15" width="1" height="1"/><rect x="10" y="15" width="1" height="1"/><rect x="12" y="15" width="1" height="1"/><rect x="13" y="15" width="1" height="1"/><rect x="14" y="15" width="1" height="1"/><rect x="16" y="15" width="1" height="1"/><rect x="20" y="15" width="1" height="1"/><rect x="23" y="15" width="1" height="1"/><rect x="0" y="16" width="1" height="1"/><rect x="1" y="16" width="1" height="1"/><rect x="5" y="16" width="1" height="1"/><rect x="6" y="16" width="1" height="1"/><rect x="7" y="16" width="1" height="1"/><rect x="11" y="16" width="1" height="1"/><rect x="12" y="16" width="1" height="1"/><rect x="15" y="16" width="1" height="1"/><rect x="16" y="16" width="1" height="1"/><rect x="17" y="16" width="1" height="1"/><rect x="18" y="16" width="1" height="1"/><rect x="19" y="16" width="1" height="1"/><rect x="20" y="16" width="1" height="1"/><rect x="21" y="16" width="1" height="1"/><rect x="22" y="16" width="1" height="1"/><rect x="8" y="17" width="1" height="1"/><rect x="9" y="17" width="1" height="1"/><rect x="11" y="17" width="1" height="1"/><rect x="14" y="17" width="1" height="1"/><rect x="15" y="17" width="1" height="1"/><rect x="16" y="17" width="1" height="1"/><rect x="20" y="17" width="1" height="1"/><rect x="21" y="17" width="1" height="1"/><rect x="24" y="17" width="1" height="1"/><rect x="0" y="18" width="1" height="1"/><rect x="1" y="18" width="1" height="1"/><rect x="2" y="18" width="1" height="1"/><rect x="3" y="18" width="1" height="1"/><rect x="4" y="18" width="1" height="1"/><rect x="5" y="18" width="1" height="1"/><rect x="6" y="18" width="1" height="1"/><rect x="8" y="18" width="1" height="1"/><rect x="9" y="18" width="1" height="1"/><rect x="10" y="18" width="1" height="1"/><rect x="12" y="18" width="1" height="1"/><rect x="15" y="18" width="1" height="1"/><rect x="16" y="18" width="1" height="1"/><rect x="18" y="18" width="1" height="1"/><rect x="20" y="18" width="1" height="1"/><rect x="21" y="18" width="1" height="1"/><rect x="23" y="18" width="1" height="1"/><rect x="24" y="18" width="1" height="1"/><rect x="0" y="19" width="1" height="1"/><rect x="6" y="19" width="1" height="1"/><rect x="10" y="19" width="1" height="1"/><rect x="14" y="19" width="1" height="1"/><rect x="16" y="19" width="1" height="1"/><rect x="20" y="19" width="1" height="1"/><rect x="21" y="19" width="1" height="1"/><rect x="22" y="19" width="1" height="1"/><rect x="24" y="19" width="1" height="1"/><rect x="0" y="20" width="1" height="1"/><rect x="2" y="20" width="1" height="1"/><rect x="3" y="20" width="1" height="1"/><rect x="4" y="20" width="1" height="1"/><rect x="6" y="20" width="1" height="1"/><rect x="9" y="20" width="1" height="1"/><rect x="11" y="20" width="1" height="1"/><rect x="13" y="20" width="1" height="1"/><rect x="16" y="20" width="1" height="1"/><rect x="17" y="20" width="1" height="1"/><rect x="18" y="20" width="1" height="1"/><rect x="19" y="20" width="1" height="1"/><rect x="20" y="20" width="1" height="1"/><rect x="21" y="20" width="1" height="1"/><rect x="0" y="21" width="1" height="1"/><rect x="2" y="21" width="1" height="1"/><rect x="3" y="21" width="1" height="1"/><rect x="4" y="21" width="1" height="1"/><rect x="6" y="21" width="1" height="1"/><rect x="8" y="21" width="1" height="1"/><rect x="12" y="21" width="1" height="1"/><rect x="19" y="21" width="1" height="1"/><rect x="20" y="21" width="1" height="1"/><rect x="21" y="21" width="1" height="1"/><rect x="22" y="21" width="1" height="1"/><rect x="0" y="22" width="1" height="1"/><rect x="2" y="22" width="1" height="1"/><rect x="3" y="22" width="1" height="1"/><rect x="4" y="22" width="1" height="1"/><rect x="6" y="22" width="1" height="1"/><rect x="12" y="22" width="1" height="1"/><rect x="16" y="22" width="1" height="1"/><rect x="19" y="22" width="1" height="1"/><rect x="20" y="22" width="1" height="1"/><rect x="22" y="22" width="1" height="1"/><rect x="24" y="22" width="1" height="1"/><rect x="0" y="23" width="1" height="1"/><rect x="6" y="23" width="1" height="1"/><rect x="8" y="23" width="1" height="1"/><rect x="9" y="23" width="1" height="1"/><rect x="11" y="23" width="1" height="1"/><rect x="13" y="23" width="1" height="1"/><rect x="14" y="23" width="1" height="1"/><rect x="15" y="23" width="1" height="1"/><rect x="16" y="23" width="1" height="1"/><rect x="17" y="23" width="1" height="1"/><rect x="21" y="23" width="1" height="1"/><rect x="0" y="24" width="1" height="1"/><rect x="1" y="24" width="1" height="1"/><rect x="2" y="24" width="1" height="1"/><rect x="3" y="24" width="1" height="1"/><rect x="4" y="24" width="1" height="1"/><rect x="5" y="24" width="1" height="1"/><rect x="6" y="24" width="1" height="1"/><rect x="8" y="24" width="1" height="1"/><rect x="10" y="24" width="1" height="1"/><rect x="12" y="24" width="1" height="1"/><rect x="13" y="24" width="1" height="1"/><rect x="15" y="24" width="1" height="1"/><rect x="16" y="24" width="1" height="1"/><rect x="18" y="24" width="1" height="1"/><rect x="19" y="24" width="1" height="1"/><rect x="23" y="24" width="1" height="1"/><rect x="24" y="24" width="1" height="1"/></g></svg></div>
+      <p class="shurl">studiosuzu.com.br/links</p>
+      <div class="shrow">
+        <a class="sht" target="_blank" rel="noopener" href="https://wa.me/?text=Conhe%C3%A7a%20o%20Studio%20Suzu%20%E2%80%94%20moldes%20autorais%20para%20confeitaria%20%F0%9F%8C%BF%0Ahttps%3A//studiosuzu.com.br/links"><i><svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5Z"/></svg></i>WhatsApp</a>
+        <a class="sht" href="mailto:?subject=Studio%20Suzu&body=Conhe%C3%A7a%20o%20Studio%20Suzu%20%E2%80%94%20moldes%20autorais%20para%20confeitaria%20%F0%9F%8C%BF%0Ahttps%3A//studiosuzu.com.br/links"><i><svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg></i>E-mail</a>
+        <button class="sht" id="shCopy" type="button"><i><svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></i><span class="shl">Copiar</span></button>
+        <button class="sht" id="shMore" type="button" hidden><i><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></i>Mais</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      var url='https://studiosuzu.com.br/links';
+      var ov=document.getElementById('shOv'),btn=document.getElementById('shareBtn'),x=document.getElementById('shX');
+      var copy=document.getElementById('shCopy'),more=document.getElementById('shMore');
+      function open(){ov.hidden=false;} function close(){ov.hidden=true;}
+      if(btn)btn.addEventListener('click',open);
+      if(x)x.addEventListener('click',close);
+      if(ov)ov.addEventListener('click',function(e){if(e.target===ov)close();});
+      document.addEventListener('keydown',function(e){if(e.key==='Escape')close();});
+      if(copy)copy.addEventListener('click',async function(){
+        var lbl=copy.querySelector('.shl');
+        try{await navigator.clipboard.writeText(url);if(lbl){lbl.textContent='Copiado!';setTimeout(function(){lbl.textContent='Copiar';},2000);}}
+        catch(e){window.prompt('Copie o link:',url);}
+      });
+      if(navigator.share&&more){more.hidden=false;more.addEventListener('click',function(){
+        navigator.share({title:'Studio Suzu',text:'Conheça o Studio Suzu — moldes autorais para confeitaria 🌿',url:url}).catch(function(){});
+      });}
+    })();
+  </script>
+</body>
+</html>

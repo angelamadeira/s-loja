@@ -18,7 +18,7 @@ input,textarea{font-family:inherit}
 .wrap{width:100%;max-width:1120px;margin:0 auto;padding:0 var(--space-6)}
 .label{font-weight:400;font-size:.64rem;letter-spacing:.24em;text-transform:uppercase;color:var(--label)}
 .sig{font-family:var(--serif);font-style:italic;font-weight:500;color:var(--text-secondary)}
-.seal{width:38px;height:38px}
+.seal{width:38px;height:38px;color:var(--logo-ink)}
 .btn{display:inline-block;border:1px solid var(--text);background:var(--text);color:var(--bg);padding:var(--space-4) var(--space-7);border-radius:var(--r-pill);font-size:.78rem;font-weight:500;letter-spacing:.06em;text-transform:uppercase;transition:background .16s}
 .btn:hover{background:var(--ink-hover)}
 .btn.ghost{background:transparent;color:var(--text);border-color:var(--line-strong)}
@@ -47,7 +47,7 @@ nav.main a.active{color:var(--text);font-weight:500}
 .ibtn:hover{background:var(--raised)}
 .ibtn svg{width:21px;height:21px;stroke:var(--text);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .cart-btn{position:relative}
-.badge{position:absolute;top:4px;right:4px;min-width:17px;height:17px;padding:0 var(--space-1);background:var(--gold);color:var(--ink);font-size:.6rem;font-weight:600;border-radius:var(--r-sm);display:grid;place-items:center;font-variant-numeric:tabular-nums;transform:scale(0);transition:transform .2s cubic-bezier(.3,1.5,.5,1)}
+.badge{position:absolute;top:4px;right:4px;min-width:17px;height:17px;padding:0 var(--space-1);background:var(--gold-text);color:var(--white);font-size:.6rem;font-weight:600;border-radius:var(--r-sm);display:grid;place-items:center;font-variant-numeric:tabular-nums;transform:scale(0);transition:transform .2s cubic-bezier(.3,1.5,.5,1)}
 .badge.on{transform:scale(1)}
 .ham{display:grid}
 .mobmenu{position:fixed;inset:0;z-index:70;background:var(--surface);transform:translateY(-100%);transition:transform .32s cubic-bezier(.32,.72,0,1);display:flex;flex-direction:column;padding:var(--space-5) var(--space-6) var(--space-7);visibility:hidden}

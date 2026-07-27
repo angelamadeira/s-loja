@@ -11,12 +11,12 @@
   --gold:#C4A25A; --stone:#8A7A63; --ink:#463C34;
   --sakura:#E4A7B0; --fuji:#BDB0D0; --torinoko:#E6D3A3; --mizu:#A6C9CC; --sango:#E89A85; --matcha:#C6CFA3;
   --sakura-wash:#F5E4E1; --fuji-wash:#ECE6E9; --torinoko-wash:#F6EFDE; --mizu-wash:#E6ECE8; --sango-wash:#F6E1D6; --matcha-wash:#EEEEDE;
-  --sakura-light:#F0D0D1; --sakura-deep:#A57C7E;
-  --fuji-light:#DCD4E1; --fuji-deep:#8D8292;
-  --torinoko-light:#F1E6CA; --torinoko-deep:#A69777;
-  --mizu-light:#D1E1DF; --mizu-deep:#80918F;
-  --sango-light:#F2C9BB; --sango-deep:#A77465;
-  --matcha-light:#E1E4CB; --matcha-deep:#939477;
+  --sakura-light:#F0D0D1; --sakura-deep:#7B5456;
+  --fuji-light:#DCD4E1; --fuji-deep:#645A68;
+  --torinoko-light:#F1E6CA; --torinoko-deep:#73664B;
+  --mizu-light:#D1E1DF; --mizu-deep:#586563;
+  --sango-light:#F2C9BB; --sango-deep:#795145;
+  --matcha-light:#E1E4CB; --matcha-deep:#666651;
   /* dark japandi (charcoal) — bruta, consumida pelo override [data-theme=dark] abaixo */
   --carvao:#1E1A16; --carvao-sup:#292521; --carvao-elev:#34302C; --carvao-borda:#44403B;
   --d-text-2:#DFD5C6; --d-text-3:#CDC2B1; --d-text-4:#BDB2A1; --d-pedra:#B9AA93;
