@@ -39,8 +39,19 @@ export default {
       if (request.method !== "GET") return json({ ok: false, error: "metodo" }, 405);
       return json({ mpKey: env.MP_PUBLIC_KEY });
     }
-    // qualquer outra coisa → a loja (assets)
-    return env.ASSETS.fetch(request);
+    // qualquer outra coisa → a loja (assets).
+    // Cache "sempre revalida" (no-cache) em HTML/CSS/JS: o Cloudflare guarda mas
+    // consulta a origem a cada request → 304 (REVALIDATED) quando não mudou
+    // (rápido, quase-cache) e 200 (EXPIRED) quando mudou. Assim todo deploy
+    // aparece na hora, SEM purge manual. Fontes/imagens seguem o cache padrão.
+    const res = await env.ASSETS.fetch(request);
+    const ct = res.headers.get("content-type") || "";
+    if (/text\/html|text\/css|javascript/i.test(ct)) {
+      const r = new Response(res.body, res);
+      r.headers.set("Cache-Control", "no-cache, must-revalidate");
+      return r;
+    }
+    return res;
   },
 };
 
