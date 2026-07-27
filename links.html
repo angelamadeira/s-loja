@@ -11,7 +11,7 @@
 <meta property="og:url" content="https://studiosuzu.com.br/links">
 <link rel="stylesheet" href="/css/tokens.css">
 <style>
-  *{box-sizing:border-box}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   body{margin:0;min-height:100vh;background:var(--surface);color:var(--text);font-family:var(--sans);-webkit-font-smoothing:antialiased;padding:var(--space-9) var(--space-5) var(--space-7)}
   .wrap{max-width:520px;margin:0 auto;text-align:center}
   .name{font-size:26px;font-weight:500;letter-spacing:.3em;margin:0 0 var(--space-2);color:var(--text)}
@@ -56,6 +56,10 @@
   .sht{display:flex;flex-direction:column;align-items:center;gap:var(--space-1);background:none;border:0;color:var(--text);font-family:var(--sans);font-size:11px;cursor:pointer;text-decoration:none;padding:var(--space-1)}
   .sht i{width:44px;height:44px;border-radius:var(--r-pill);border:1px solid var(--line);display:grid;place-items:center;color:var(--stone);transition:border-color .2s,color .2s}
   .sht:hover i{border-color:var(--line-strong);color:var(--ink)}
+  .sht:active{transform:scale(.94)}
+  .soc:active{transform:scale(.94)}
+  .lk:active,.share:active,.shm:active{transform:scale(.99)}
+  .sht,.soc,.lk,.share,.shm,.shx{transition:transform .12s ease,border-color .2s,color .2s}
   .sht i svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 </style>
 </head>
@@ -129,7 +133,7 @@
         catch(e){window.prompt('Copie o link:',url);}
       });
       if(more)more.addEventListener('click',function(){
-        if(navigator.share){navigator.share({title:'Studio Suzu',text:'Conheça o Studio Suzu — moldes autorais para confeitaria 🌸',url:url}).catch(function(){});return;}
+        if(navigator.share){navigator.share({title:'Studio Suzu',text:'Conheça o Studio Suzu — moldes autorais para confeitaria '+String.fromCodePoint(0x1F338),url:url}).catch(function(){});return;}
         var row=document.getElementById('shMoreRow');if(row)row.hidden=!row.hidden;
       });
     })();
