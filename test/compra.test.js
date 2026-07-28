@@ -141,6 +141,25 @@ test("compra aprovada em pix não consulta o MP (não precisa mais de QR)", asyn
   expect(consultaPagamentoFull).not.toHaveBeenCalled();
 });
 
+// Se o MP já avançou (aprovou o Pix) mas o webhook ainda não chegou, o próprio
+// GET /api/compra persiste o novo status e devolve o `order` — a tela /pix
+// confirma sozinha, sem depender só do webhook.
+test("compra pendente em pix que o MP já aprovou: persiste 'aprovado' e devolve order", async () => {
+  consultaPagamentoFull.mockResolvedValueOnce({ id: 42, status: "approved" }); // sem QR: já aprovou
+  const itens = JSON.stringify([{ id: "tablete", tam: "M", qtd: 1, preco_unit: 12300 }]);
+  await seedCompra("SUZU-PIX9", "pendente", { metodo: "pix", mpId: "42", itens });
+  const ctx = createExecutionContext();
+  const res = await worker.fetch(get("?ref=SUZU-PIX9"), env, ctx);
+  await waitOnExecutionContext(ctx);
+  const j = await res.json();
+  expect(j.status).toBe("aprovado");
+  expect(j.order).toBeTruthy();
+  expect(j.order.itens).toEqual([{ id: "tablete", tam: "M", qtd: 1, preco_unit: 12300 }]);
+  expect(j.pix).toBeUndefined(); // aprovado não precisa mais de QR
+  const row = await env.DB.prepare("SELECT status FROM compras WHERE ref='SUZU-PIX9'").first();
+  expect(row.status).toBe("aprovado"); // persistido
+});
+
 test("falha do MP ao reconsultar não derruba o endpoint — devolve só o status", async () => {
   consultaPagamentoFull.mockRejectedValueOnce(new Error("MP indisponível"));
   await seedCompra("SUZU-PIX004", "pendente", { metodo: "pix", mpId: "999" });

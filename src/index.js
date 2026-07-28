@@ -180,14 +180,41 @@ async function handlePagar(request, env) {
     // 3. grava a compra ANTES de chamar o MP — se a rede/MP falhar, a venda
     //    iniciada não se perde. itens grava as linhas com o preco_unit
     //    efetivamente cobrado (registro financeiro), não o payload cru do cliente.
-    const compraId = crypto.randomUUID();
+    //
+    // IDEMPOTÊNCIA (anti-cobrança-dupla): o cliente manda um `checkoutId` estável
+    // — o MESMO em retries/duplo-clique da mesma tentativa. Ele vira a PK da compra
+    // E a X-Idempotency-Key do MP. Assim um retry: (a) esbarra na PK (compra já
+    // existe) e devolve o mesmo resultado sem cobrar de novo; (b) mesmo se dois
+    // requests correrem juntos, o MP com a mesma chave devolve o MESMO pagamento
+    // (não cobra 2×). Sem checkoutId (cliente antigo) cai no uuid aleatório = hoje.
+    const compraId = /^[0-9a-f-]{36}$/i.test(str(body.checkoutId)) ? str(body.checkoutId) : crypto.randomUUID();
     const ref = gerarRef(compraId);
-    await env.DB.prepare(
-      "INSERT INTO compras (id, ref, criado_em, itens, subtotal, frete, desconto, total, metodo, parcelas, contato_email, contato_whats, cpf, endereco, status, consentiu, ip) " +
-        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'iniciado', 1, ?)"
-    )
-      .bind(compraId, ref, new Date().toISOString(), JSON.stringify(linhas), subtotal, frete, desconto, total, metodo, parcelas, email, whats || null, cpf, endereco ? JSON.stringify(endereco) : null, ip)
-      .run();
+    try {
+      await env.DB.prepare(
+        "INSERT INTO compras (id, ref, criado_em, itens, subtotal, frete, desconto, total, metodo, parcelas, contato_email, contato_whats, cpf, endereco, status, consentiu, ip) " +
+          "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'iniciado', 1, ?)"
+      )
+        .bind(compraId, ref, new Date().toISOString(), JSON.stringify(linhas), subtotal, frete, desconto, total, metodo, parcelas, email, whats || null, cpf, endereco ? JSON.stringify(endereco) : null, ip)
+        .run();
+    } catch (e) {
+      // Provável violação de PK = retry do MESMO checkout. Se a 1ª tentativa já
+      // avançou (status != 'iniciado'), devolve o mesmo resultado — não cobra de novo.
+      const existente = await env.DB.prepare("SELECT ref, status, metodo, mp_payment_id FROM compras WHERE id = ?").bind(compraId).first();
+      if (!existente) {
+        // INSERT falhou por outro motivo (não é a compra duplicada) — não cobra às cegas.
+        console.error("insert compra falhou", e);
+        return json({ ok: false, erro: "servidor" }, 500);
+      }
+      if (existente.status !== "iniciado") {
+        let pix;
+        if (existente.status === "pendente" && existente.metodo === "pix" && existente.mp_payment_id) {
+          try { const full = await consultaPagamentoFull(env, existente.mp_payment_id); if (full && full.pix) pix = full.pix; } catch (_) { /* MP fora do ar: devolve sem pix, o polling tenta de novo */ }
+        }
+        return json({ ok: true, ref: existente.ref, status: existente.status, pix });
+      }
+      // status 'iniciado' (1ª tentativa ainda em voo): segue e chama o MP com a MESMA
+      // idempotencyKey — o MP devolve o mesmo pagamento (não cobra 2×) e o UPDATE converge.
+    }
 
     // 4. cobra no Mercado Pago
     // PRÉ-VENDA (sinal 30%) NÃO é modelada aqui: `total` acima já é o preço
@@ -253,7 +280,7 @@ async function handleCompra(url, env) {
   const ref = str(url.searchParams.get("ref"));
   if (!ref) return json({ status: "nao_encontrado" });
   const row = await env.DB.prepare(
-    "SELECT ref, status, metodo, mp_payment_id, itens, total, frete, desconto, parcelas, endereco, contato_email, contato_whats, criado_em " +
+    "SELECT id, ref, status, metodo, mp_payment_id, itens, total, frete, desconto, parcelas, endereco, contato_email, contato_whats, criado_em " +
       "FROM compras WHERE ref = ?"
   )
     .bind(ref)
@@ -270,7 +297,19 @@ async function handleCompra(url, env) {
     if (row.mp_payment_id) {
       try {
         const full = await consultaPagamentoFull(env, row.mp_payment_id);
-        if (full && full.pix) resposta.pix = full.pix;
+        const novo = mapStatusMp(full.status);
+        if (novo && novo !== "pendente") {
+          // O MP já avançou (aprovado/recusado/cancelado) e o webhook ainda não
+          // chegou (ou se perdeu): persiste AQUI e reflete já nesta resposta —
+          // a tela /pix/<ref> confirma sozinha, sem depender só do webhook.
+          await env.DB.prepare("UPDATE compras SET status = ? WHERE id = ? AND status = 'pendente'")
+            .bind(novo, row.id)
+            .run();
+          row.status = novo;
+          resposta.status = novo;
+        }
+        // só faz sentido devolver o QR enquanto segue pendente
+        if (row.status === "pendente" && full && full.pix) resposta.pix = full.pix;
       } catch (e) {
         // MP indisponível nesta rodada — devolve só o status; o polling do
         // cliente tenta de novo em ~4s.
@@ -305,23 +344,84 @@ async function handleCompra(url, env) {
 // 2x não muda o resultado. Evento sem compra correspondente (WHERE não bate
 // nenhuma linha) e tipo de evento desconhecido são no-op, não erro.
 async function handleMpWebhook(request, env) {
+  let body;
   try {
-    const body = await request.json();
-    if (body && body.type === "payment" && body.data && body.data.id != null) {
-      const resultado = await consultaPagamento(env, body.data.id);
-      const status = mapStatusMp(resultado.status);
-      // status MP não mapeado (ex.: authorized, in_mediation) → não sobrescreve
-      // o status atual da compra em vez de arriscar um default errado.
-      if (status) {
-        await env.DB.prepare("UPDATE compras SET status = ? WHERE mp_payment_id = ?")
-          .bind(status, String(body.data.id))
+    body = await request.json();
+  } catch (_) {
+    return json({ ok: true }, 200); // corpo inválido: ack, não faz o MP reenviar à toa
+  }
+
+  // Só nos importa evento de pagamento com id — o resto é ack (no-op bem-formado).
+  if (!(body && body.type === "payment" && body.data && body.data.id != null)) {
+    return json({ ok: true }, 200);
+  }
+
+  // Assinatura do MP (defesa em profundidade). O endpoint já é resistente a forja
+  // porque RECONSULTA o status real no MP (não confia no corpo) — mas verificar a
+  // assinatura evita consultas disparadas por terceiros. Inerte até MP_WEBHOOK_SECRET
+  // existir (ainda não configurado): sem o segredo, não bloqueia nada.
+  if (env.MP_WEBHOOK_SECRET) {
+    const ok = await verificaAssinaturaMp(request, body, env.MP_WEBHOOK_SECRET);
+    if (!ok) return json({ ok: false, erro: "assinatura" }, 401);
+  }
+
+  try {
+    const resultado = await consultaPagamento(env, body.data.id);
+    if (resultado.status == null) {
+      // Não conseguimos ler o status no MP (indisponível/erro de rede) — NÃO
+      // engole como 200. Devolve 5xx pro MP reenviar; senão a confirmação some.
+      return json({ ok: false, erro: "mp_indisponivel" }, 503);
+    }
+    const status = mapStatusMp(resultado.status);
+    // status conhecido mas não mapeado (in_mediation, refunded…) → ack, no-op:
+    // não sobrescreve o status atual com um default errado.
+    if (status) {
+      const upd = await env.DB.prepare("UPDATE compras SET status = ? WHERE mp_payment_id = ?")
+        .bind(status, String(body.data.id))
+        .run();
+      // Cura de órfão: se nenhuma linha casou pelo mp_payment_id, a compra pode ter
+      // ficado 'iniciado' com mp_payment_id NULL (o /api/pagar cobrou mas morreu antes
+      // do UPDATE). Casa pela external_reference (= id da compra) e backfilla o
+      // mp_payment_id, pra os próximos webhooks casarem direto.
+      if ((!upd.meta || upd.meta.changes === 0) && resultado.externalReference) {
+        await env.DB.prepare("UPDATE compras SET status = ?, mp_payment_id = ? WHERE id = ? AND mp_payment_id IS NULL")
+          .bind(status, String(body.data.id), String(resultado.externalReference))
           .run();
       }
     }
   } catch (e) {
+    // Erro nosso (DB/rede) — pede reenvio (5xx), não engole como sucesso.
     console.error("mp-webhook falhou", e);
+    return json({ ok: false, erro: "servidor" }, 500);
   }
   return json({ ok: true }, 200);
+}
+
+// Verifica a assinatura HMAC do webhook do MP (header x-signature: "ts=...,v1=...").
+// Manifesto = "id:<data.id>;request-id:<x-request-id>;ts:<ts>;" (partes omitidas
+// quando ausentes), HMAC-SHA256 com o segredo → compara em hex com v1.
+async function verificaAssinaturaMp(request, body, secret) {
+  try {
+    const sig = request.headers.get("x-signature") || "";
+    const reqId = request.headers.get("x-request-id") || "";
+    const parts = {};
+    sig.split(",").forEach((kv) => {
+      const i = kv.indexOf("=");
+      if (i > 0) parts[kv.slice(0, i).trim()] = kv.slice(i + 1).trim();
+    });
+    if (!parts.ts || !parts.v1) return false;
+    const id = body.data && body.data.id != null ? String(body.data.id) : "";
+    let manifest = "";
+    if (id) manifest += "id:" + id + ";";
+    if (reqId) manifest += "request-id:" + reqId + ";";
+    manifest += "ts:" + parts.ts + ";";
+    const k = await crypto.subtle.importKey("raw", new TextEncoder().encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+    const mac = await crypto.subtle.sign("HMAC", k, new TextEncoder().encode(manifest));
+    const hex = [...new Uint8Array(mac)].map((b) => b.toString(16).padStart(2, "0")).join("");
+    return hex === parts.v1;
+  } catch (_) {
+    return false;
+  }
 }
 
 // Serve um anexo do R2 se o link (assinado) for válido — usado nos links do e-mail.

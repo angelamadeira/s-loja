@@ -15,6 +15,7 @@ import schemaSql from "../schema.sql?raw";
 // vitest.config.mjs, porque um setupFile que importa de "cloudflare:test"
 // quebra o vi.mock() acima (ver issue 10201 do cloudflare/workers-sdk).
 beforeEach(async () => {
+  vi.clearAllMocks(); // zera contadores de chamada entre testes (idempotência checa nº de cobranças)
   const statements = schemaSql.split(";").map((s) => s.trim()).filter(Boolean);
   for (const stmt of statements) {
     await env.DB.prepare(stmt).run();
@@ -67,6 +68,30 @@ test("parcelas do cliente são clampadas ao máximo permitido pro total", async 
   expect(res.status).toBe(200);
   const row = await env.DB.prepare("SELECT parcelas FROM compras WHERE ref=?").bind(j.ref).first();
   expect(row.parcelas).toBe(2);
+});
+
+test("idempotência: mesmo checkoutId não cobra 2× — o retry devolve a mesma compra", async () => {
+  const cid = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee";
+  const payload = { itens: [{ id: "tablete", tam: "M", qtd: 1 }], metodo: "pix", email: "a@b.com", cpf: "12345678909", endereco: { cep: "01310100" }, freteOpcao: "economico", checkoutId: cid, consentiu: true };
+
+  const ctx1 = createExecutionContext();
+  const r1 = await worker.fetch(post(payload), env, ctx1);
+  await waitOnExecutionContext(ctx1);
+  const j1 = await r1.json();
+  expect(j1.status).toBe("aprovado");
+  expect(criaPagamento).toHaveBeenCalledTimes(1);
+
+  // retry (duplo-clique / timeout): MESMO checkoutId
+  const ctx2 = createExecutionContext();
+  const r2 = await worker.fetch(post(payload), env, ctx2);
+  await waitOnExecutionContext(ctx2);
+  const j2 = await r2.json();
+  expect(j2.ref).toBe(j1.ref); // mesma compra
+  expect(j2.status).toBe("aprovado");
+  expect(criaPagamento).toHaveBeenCalledTimes(1); // NÃO cobrou de novo
+
+  const cnt = await env.DB.prepare("SELECT COUNT(*) AS n FROM compras WHERE id = ?").bind(cid).first();
+  expect(cnt.n).toBe(1); // uma única linha
 });
 
 test("carrinho vazio => 400", async () => {

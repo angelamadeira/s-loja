@@ -1224,6 +1224,7 @@
     }
     function handlePagarResult(j){
       if(j.status==='aprovado'){
+        coCheckoutId=null; /* pedido concluído — o próximo pedido gera um id novo */
         fillRecap(j.ref);
         Object.keys(cart).forEach(function(k){delete cart[k];});render();
         closeProc(function(){navigate('/pedido',true);});
@@ -1231,6 +1232,7 @@
         if(CO.pay==='pix'){fillRecap(j.ref);closeProc(function(){navigate('/pix/'+encodeURIComponent(j.ref));});}
         else{showEmAnalise();} /* cartão pendente: análise antifraude, sem QR */
       }else{
+        coCheckoutId=null; /* recusado — a próxima tentativa é uma cobrança NOVA (não pode ser bloqueada pelo dedup) */
         showRecusado();
       }
     }
@@ -1251,6 +1253,13 @@
        — mesma lógica que antes vivia dentro do onSubmit único do Payment Brick; agora
        é compartilhada pelo botão Pix e pelo botão Pagar do Cartão (Secure Fields), pra
        não duplicar. Devolve null (e já mostra o erro/foco certo) se algo faltar. */
+    /* Idempotência anti-cobrança-dupla: um id estável por TENTATIVA de checkout,
+       enviado igual em todo retry/duplo-clique. O servidor usa como PK da compra
+       + chave do MP, então um retry não vira 2ª cobrança. Resetado só quando o
+       pedido conclui (aprovado) ou é recusado (aí a próxima é cobrança nova);
+       num resultado INCERTO ele é MANTIDO de propósito, pra o retry casar. */
+    var coCheckoutId=null;
+    function uuidish(){if(window.crypto&&crypto.randomUUID)return crypto.randomUUID();var h='';for(var i=0;i<36;i++){h+=(i===8||i===13||i===18||i===23)?'-':Math.floor(Math.random()*16).toString(16);}return h;}
     function buildBaseCtx(){
       var email=document.getElementById('coEmail');
       if(!email||!email.value||email.value.indexOf('@')<1){emailErr(emailMsg(email));if(email)email.focus();return null;}
@@ -1281,7 +1290,8 @@
          primeira reserva cobra 3.3× a mais. */
       var itens=sp.now.concat(sp.pre).map(function(it){return {id:it.p.id,tam:it.size,qtd:it.qty};});
       var freteCents=sp.now.length===0?0:(CO.ship?(CO.ship.free?0:Math.round(CO.ship.price*100)):0);
-      return {itens:itens,endereco:endereco,freteCents:freteCents,freteOpcao:(CO.ship&&/xpress/i.test(CO.ship.label))?'expresso':'economico'};
+      if(!coCheckoutId)coCheckoutId=uuidish();
+      return {itens:itens,endereco:endereco,freteCents:freteCents,freteOpcao:(CO.ship&&/xpress/i.test(CO.ship.label))?'expresso':'economico',checkoutId:coCheckoutId};
     }
     /* ===== rádios Pix/Cartão: trocam CO.pay, mostram a forma certa e re-renderizam
        o resumo (Total muda com o método — ver renderCoSummary) ===== */
@@ -1314,7 +1324,7 @@
         itens:ctx.itens,metodo:'pix',
         cupom:CO.coupon?CO.coupon.code:undefined,
         cpf:cpfD,email:CO.email,whats:CO.whats,
-        endereco:ctx.endereco,freteCents:ctx.freteCents,freteOpcao:ctx.freteOpcao,consentiu:true
+        endereco:ctx.endereco,freteCents:ctx.freteCents,freteOpcao:ctx.freteOpcao,checkoutId:ctx.checkoutId,consentiu:true
       };
       var lbl=pixBtn.textContent;pixBtn.disabled=true;pixBtn.classList.add('is-loading');pixBtn.setAttribute('aria-busy','true');pixBtn.innerHTML='Processando<span class="bdots" aria-hidden="true"><i></i><i></i><i></i></span>';
       function restore(){pixBtn.disabled=false;pixBtn.classList.remove('is-loading');pixBtn.removeAttribute('aria-busy');pixBtn.textContent=lbl;}
@@ -1547,7 +1557,7 @@
             itens:ctx.itens,metodo:'cartao',parcelas:CO.parc,
             cupom:CO.coupon?CO.coupon.code:undefined,
             cpf:cpfD,email:CO.email,whats:CO.whats,
-            endereco:ctx.endereco,freteCents:ctx.freteCents,freteOpcao:ctx.freteOpcao,consentiu:true,
+            endereco:ctx.endereco,freteCents:ctx.freteCents,freteOpcao:ctx.freteOpcao,checkoutId:ctx.checkoutId,consentiu:true,
             token:token.id,paymentMethodId:st.paymentMethodId,issuerId:st.issuerId
           };
           showAguardando();

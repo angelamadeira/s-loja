@@ -34,6 +34,10 @@ export async function criaPagamento(env, params, fetchImpl = globalThis.fetch) {
     description: descricao,
     payment_method_id: metodo === "pix" ? "pix" : paymentMethodId,
     installments: parcelas,
+    // external_reference = id da compra (mesmo valor da idempotencyKey): o MP ecoa
+    // esse campo de volta na consulta, o que deixa o webhook curar um pedido órfão
+    // (cobrado mas que ficou 'iniciado' com mp_payment_id NULL) casando por ele.
+    external_reference: idempotencyKey,
     payer: {
       email,
       identification: { type: "CPF", number: cpf },
@@ -113,7 +117,7 @@ export async function consultaPagamentoFull(env, id, fetchImpl = globalThis.fetc
 
   const data = await res.json();
 
-  const resultado = { id: data.id, status: data.status };
+  const resultado = { id: data.id, status: data.status, externalReference: data.external_reference };
   const txData = data.point_of_interaction && data.point_of_interaction.transaction_data;
   if (txData) {
     resultado.pix = {
@@ -124,8 +128,9 @@ export async function consultaPagamentoFull(env, id, fetchImpl = globalThis.fetc
   return resultado;
 }
 
-// Mantida por compatibilidade (usada pelo webhook) — só {id,status}, nunca pix.
+// Usada pelo webhook — {id,status,externalReference}, nunca pix. A external_reference
+// (id da compra) deixa o webhook curar um pedido órfão (ver handleMpWebhook).
 export async function consultaPagamento(env, id, fetchImpl = globalThis.fetch) {
   const full = await consultaPagamentoFull(env, id, fetchImpl);
-  return { id: full.id, status: full.status };
+  return { id: full.id, status: full.status, externalReference: full.externalReference };
 }

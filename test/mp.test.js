@@ -84,6 +84,19 @@ test("cartão envia o payment_method_id e o token do Brick", async () => {
   expect(calls[0].installments).toBe(3);
 });
 
+test("criaPagamento envia external_reference = idempotencyKey (deixa o webhook curar órfão)", async () => {
+  const calls = [];
+  const fake = async (url, opts) => { calls.push(JSON.parse(opts.body)); return new Response(JSON.stringify({ id: 9, status: "approved" }), { status: 201 }); };
+  await criaPagamento({ MP_ACCESS_TOKEN: "TEST-x" }, { totalCents: 5000, metodo: "pix", email: "a@b.com", cpf: "12345678909", idempotencyKey: "compra-uuid-abc", descricao: "Pedido" }, fake);
+  expect(calls[0].external_reference).toBe("compra-uuid-abc");
+});
+
+test("consultaPagamento devolve a external_reference que o MP ecoa", async () => {
+  const fake = async () => new Response(JSON.stringify({ id: 6, status: "approved", external_reference: "compra-uuid-xyz" }), { status: 200 });
+  const r = await consultaPagamento({ MP_ACCESS_TOKEN: "x" }, 6, fake);
+  expect(r.externalReference).toBe("compra-uuid-xyz");
+});
+
 test("consultaPagamento faz GET em /v1/payments/{id} com Bearer token", async () => {
   const calls = [];
   const fake = vi.fn(async (url, opts) => {
