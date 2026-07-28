@@ -119,10 +119,10 @@
     // ── Preço / Estoque / Envio (somem quando há variantes — padrão Shopify)
     var cP = card("Preço");
     var iPreco = inp("text", deCents(p.preco), "0,00"); iPreco.inputMode = "decimal";
-    var iComp = inp("text", deCents(p.preco_promo), "opcional"); iComp.inputMode = "decimal";
+    var iComp = inp("text", deCents(p.preco_promo), "sem promoção"); iComp.inputMode = "decimal";
     var gp = el("div", "agrid2");
-    gp.appendChild(campo("Preço (R$)", iPreco));
-    gp.appendChild(campo("Comparar em (R$)", iComp, "Preço cheio riscado. Precisa ser MAIOR que o preço."));
+    gp.appendChild(campo("Preço (R$)", iPreco, "Preço cheio, de tabela."));
+    gp.appendChild(campo("Preço promocional (R$)", iComp, "O que a cliente paga. Menor que o preço — a loja mostra o cheio riscado. Vazio = sem promoção."));
     cP.appendChild(gp);
     main.appendChild(cP);
 
@@ -279,7 +279,7 @@
           g.appendChild(campo(rot, i));
         }
         add("Preço (R$)", "text", deCents(v.preco), function (x) { v.preco = paraCents(x); }, "0,00");
-        add("Comparar (R$)", "text", deCents(v.preco_promo), function (x) { v.preco_promo = x === "" ? null : paraCents(x); }, "opcional");
+        add("Promocional (R$)", "text", deCents(v.preco_promo), function (x) { v.preco_promo = x === "" ? null : paraCents(x); }, "sem promoção");
         add("Estoque", "number", v.estoque, function (x) { v.estoque = Number(x) || 0; });
         add("Peso (g)", "number", v.peso_g, function (x) { v.peso_g = Number(x) || 0; });
         add("Compr. (cm)", "number", v.comp_cm, function (x) { v.comp_cm = Number(x) || 0; });
@@ -341,7 +341,7 @@
           if (d && d.ok) {
             aviso("Produto salvo.");
             if (!p.id) { p.id = d.id; history.replaceState(null, "", "/admin/produto?id=" + encodeURIComponent(d.id)); }
-          } else aviso(d && d.erro === "promo_maior" ? "“Comparar em” precisa ser maior que o preço." : d && d.erro === "nome" ? "Dê um nome ao produto." : "Não deu para salvar.", true);
+          } else aviso(d && d.erro === "promo_maior" ? "O preço promocional precisa ser MENOR que o preço cheio." : d && d.erro === "nome" ? "Dê um nome ao produto." : "Não deu para salvar.", true);
         })
         .catch(function () { salvar.disabled = false; salvar.textContent = "Salvar"; aviso("Falha de rede.", true); });
     });
