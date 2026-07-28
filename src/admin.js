@@ -523,7 +523,11 @@ function paginaCategorias() {
 }
 
 function paginaProduto() {
-  return baseLargo("<div class=apage id=form>Carregando…</div>", "Produto");
+  // formulário na anatomia do admin do Shopify — script próprio (js/admin-produto.js)
+  return base("<main class='awrap awrap-wide'><div class=apage id=form>Carregando…</div></main>", "Produto").replace(
+    "</body>",
+    "<script src='/js/admin-produto.js?v=" + assetsV() + "'></script></body>"
+  );
 }
 
 function escapar(s) {

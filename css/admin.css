@@ -437,3 +437,116 @@
   padding: var(--space-1) 0;
 }
 .avar-nomeinp:focus-visible { outline: none; border-bottom-color: var(--text); }
+
+/* ── formulário de produto: 2 colunas (conteúdo + lateral), padrão Shopify ── */
+.acols {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: var(--space-5);
+  align-items: start;
+}
+@media (max-width: 720px) { .acols { grid-template-columns: 1fr; } }
+.acol-main, .acol-side { display: flex; flex-direction: column; gap: var(--space-4); min-width: 0; }
+
+/* card de conteúdo (o "card" do Polaris) */
+.acard-b {
+  background: var(--raised);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  padding: var(--space-5);
+}
+.acard-b-title {
+  font-size: .68rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin: 0 0 var(--space-4);
+}
+.acard-b select {
+  width: 100%;
+  box-sizing: border-box;
+  padding: var(--space-4);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: .95rem;
+}
+.agrid2 { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
+@media (max-width: 520px) { .agrid2 { grid-template-columns: 1fr; } }
+
+/* link de ação discreto (o "+ Adicionar opção" do Shopify) */
+.alink {
+  display: inline-block;
+  background: none;
+  border: 0;
+  padding: 0;
+  color: var(--gold-text);
+  font-family: var(--sans);
+  font-size: .85rem;
+  cursor: pointer;
+  text-decoration: none;
+}
+.alink:hover { text-decoration: underline; }
+.alink-del { color: var(--text-muted); margin-top: var(--space-3); }
+
+/* valores da opção como CHIPS (digita, Enter vira etiqueta) */
+.achips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+  padding: var(--space-3);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+}
+.achip-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  background: var(--raised);
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  padding: var(--space-1) var(--space-3);
+  font-size: .85rem;
+}
+.achip-x {
+  border: 0;
+  background: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+  padding: 0;
+}
+.achip-inp {
+  flex: 1;
+  min-width: 6rem;
+  border: 0;
+  background: none;
+  font-family: var(--sans);
+  font-size: .9rem;
+  color: var(--text);
+  padding: var(--space-1);
+}
+.achip-inp:focus-visible { outline: none; }
+
+/* linha de variante na tabela */
+.avlinha {
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  padding: var(--space-4);
+  margin-bottom: var(--space-3);
+  background: var(--surface);
+}
+.avlinha-topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+.avlinha-nome { font-size: .95rem; font-weight: 500; }
+.avtab { margin-top: var(--space-5); }
