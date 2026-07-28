@@ -9,6 +9,7 @@
 // válidos; toda ação sensível vira linha em admin_auditoria.
 import { EmailMessage } from "cloudflare:email";
 import { registroInicio, registroFim, loginInicio, loginFim } from "./passkey.js";
+import { listaProdutos, leProduto, salvaProduto, apagaProduto } from "./catalogo.js";
 
 // Quem pode entrar. Dono = somos.suzu; angelmadeira = recuperação. Ambos
 // autenticam na MESMA conta dona. (Entrega do link p/ angelmadeira depende de
@@ -105,6 +106,36 @@ export async function handleAdmin(request, env, url) {
       return json({ ok: false, erro: "servidor" }, 400);
     }
   }
+
+  // ── catálogo (produtos) ──────────────────────────────────────────────────
+  if (p === "/api/admin/produtos" && m === "GET") {
+    return json({ ok: true, produtos: await listaProdutos(env) });
+  }
+  if (p === "/api/admin/produto" && m === "GET") {
+    const prod = await leProduto(env, url.searchParams.get("id"));
+    return prod ? json({ ok: true, produto: prod }) : json({ ok: false, erro: "nao_encontrado" }, 404);
+  }
+  if (p === "/api/admin/produto" && m === "POST") {
+    const ip = request.headers.get("CF-Connecting-IP") || "";
+    try {
+      const body = await request.json();
+      const r = await salvaProduto(env, body);
+      if (r.ok) await auditoria(env, sessao.usuario_id, "produto.salvo", r.id, { nome: body.nome }, ip);
+      return json(r, r.ok ? 200 : 400);
+    } catch (e) {
+      console.error("produto.salvar", e);
+      return json({ ok: false, erro: "servidor" }, 500);
+    }
+  }
+  if (p === "/api/admin/produto/arquivar" && m === "POST") {
+    const ip = request.headers.get("CF-Connecting-IP") || "";
+    const { id } = await request.json();
+    const r = await apagaProduto(env, id);
+    if (r.ok) await auditoria(env, sessao.usuario_id, "produto.arquivado", String(id), null, ip);
+    return json(r, r.ok ? 200 : 400);
+  }
+  if (p === "/admin/produtos") return html(paginaProdutos());
+  if (p === "/admin/produto") return html(paginaProduto());
 
   if (p === "/admin" || p === "/admin/") return html(paginaAdmin(sessao));
 
@@ -383,7 +414,13 @@ function paginaAdmin(sessao) {
   return base(
     "<div class=awrap><div class=acard>" +
       "<h1>Você está no Admin</h1>" +
-      "<p>Sessão segura ativa como <b>" + escapar(sessao.email) + "</b>. As telas de produtos, pedidos e configurações entram nos próximos passos.</p>" +
+      "<p>Sessão segura ativa como <b>" + escapar(sessao.email) + "</b>.</p>" +
+      "<section class=asec>" +
+        "<h2 class=asec-title>Gerenciar</h2>" +
+        "<nav class=anav>" +
+          "<a href='/admin/produtos'>Produtos<span>catálogo, preços, estoque</span></a>" +
+        "</nav>" +
+      "</section>" +
       "<section class=asec id=pkbox>" +
         "<h2 class=asec-title>Entrada por passkey</h2>" +
         "<div id=pklista class=apk-lista></div>" +
@@ -407,6 +444,31 @@ function paginaAdmin(sessao) {
       "</div></div>",
     "Admin"
   );
+}
+
+// Casca larga (listas/formulários) — o conteúdo é montado por js/admin-catalogo.js
+function baseLargo(inner, titulo) {
+  return base("<main class='awrap awrap-wide'>" + inner + "</main>", titulo).replace(
+    "</body>",
+    "<script src=/js/admin-catalogo.js></script></body>"
+  );
+}
+
+function paginaProdutos() {
+  return baseLargo(
+    "<div class=apage>" +
+      "<div class=apage-head>" +
+        "<div><h1>Produtos</h1><p class=apage-sub id=contagem>Carregando…</p></div>" +
+        "<a class='btn' href='/admin/produto'>Novo produto</a>" +
+      "</div>" +
+      "<div id=lista class=alista></div>" +
+    "</div>",
+    "Produtos"
+  );
+}
+
+function paginaProduto() {
+  return baseLargo("<div class=apage id=form>Carregando…</div>", "Produto");
 }
 
 function escapar(s) {

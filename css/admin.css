@@ -206,6 +206,130 @@
   margin: var(--space-4) 0 0;
 }
 
+/* ── páginas largas (listas e formulários) ──────────────────────────────── */
+.awrap-wide { align-items: flex-start; max-width: 52rem; margin: 0 auto; width: 100%; }
+.apage { width: 100%; }
+.apage-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-6);
+}
+.apage-head h1 { font-size: 1.5rem; font-weight: 500; margin: 0 0 var(--space-1); }
+.apage-sub { color: var(--text-muted); font-size: .85rem; margin: 0; }
+.apage-sub-link { color: var(--text-muted); font-size: .85rem; text-decoration: none; }
+.apage-sub-link:hover { color: var(--text); }
+
+/* lista de produtos */
+.alista { display: flex; flex-direction: column; gap: var(--space-2); }
+.aitem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  padding: var(--space-4) var(--space-5);
+  background: var(--raised);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  text-decoration: none;
+  color: var(--text);
+}
+.aitem:hover { border-color: var(--line-strong); }
+.aitem-nome { font-size: 1rem; margin-bottom: var(--space-1); }
+.aitem-meta { display: flex; gap: var(--space-3); flex-wrap: wrap; color: var(--text-muted); font-size: .82rem; }
+.aitem-de { text-decoration: line-through; }
+.aitem-side { display: flex; gap: var(--space-2); align-items: center; flex-wrap: wrap; }
+
+/* selos de situação/estoque */
+.achip {
+  font-size: .64rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--r-pill);
+  border: 1px solid var(--line);
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+.achip-ok { background: var(--matcha-wash); }
+.achip-low { background: var(--torinoko-wash); }
+.achip-off { background: var(--sango-wash); }
+.achip-ativo { background: var(--mizu-wash); }
+.achip-rascunho { background: var(--surface); }
+.achip-arquivado { background: var(--surface); }
+
+.avazio {
+  padding: var(--space-8) var(--space-5);
+  text-align: center;
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--r-lg);
+  color: var(--text-muted);
+}
+
+/* formulário: campos em grade */
+.agrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(7rem, 1fr));
+  gap: var(--space-3);
+}
+.ahint { color: var(--text-muted); font-size: .78rem; line-height: 1.5; margin: 0 0 var(--space-4); }
+.afield textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: var(--space-4);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: .95rem;
+  resize: vertical;
+}
+.afield select {
+  width: 100%;
+  box-sizing: border-box;
+  padding: var(--space-4);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: .95rem;
+}
+.aop, .avar {
+  padding: var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  margin-bottom: var(--space-3);
+  background: var(--surface);
+}
+.avar-nome {
+  font-size: .72rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: var(--space-3);
+}
+
+/* atalhos do painel */
+.anav { display: grid; gap: var(--space-2); }
+.anav a {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  text-decoration: none;
+  color: var(--text);
+  font-size: .95rem;
+}
+.anav a:hover { border-color: var(--line-strong); }
+.anav a span { color: var(--text-muted); font-size: .78rem; }
+
 .afoot {
   padding: var(--space-5);
   text-align: center;
