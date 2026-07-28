@@ -94,6 +94,15 @@ test("idempotência: mesmo checkoutId não cobra 2× — o retry devolve a mesma
   expect(cnt.n).toBe(1); // uma única linha
 });
 
+test("trava de servidor: /api/pagar no domínio de produção => 403 (checkout OFF até o MEI)", async () => {
+  const ctx = createExecutionContext();
+  const req = new Request("https://studiosuzu.com.br/api/pagar", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ itens: [{ id: "tablete", tam: "M", qtd: 1 }], metodo: "pix", email: "a@b.com", cpf: "12345678909", endereco: { cep: "01310100" }, freteOpcao: "economico", consentiu: true }) });
+  const res = await worker.fetch(req, env, ctx);
+  await waitOnExecutionContext(ctx);
+  expect(res.status).toBe(403);
+  expect(criaPagamento).not.toHaveBeenCalled(); // nem chegou a cobrar
+});
+
 test("carrinho vazio => 400", async () => {
   const ctx = createExecutionContext();
   const res = await worker.fetch(post({ itens: [], metodo: "pix", email: "a@b.com", cpf: "12345678909", endereco: { cep: "01310100" }, freteOpcao: "economico", consentiu: true}), env, ctx);

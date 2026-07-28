@@ -144,6 +144,15 @@ function jparse(s, fallback) {
 // se o MP/rede falhar, a linha não se perde), chama o MP e atualiza o status.
 async function handlePagar(request, env) {
   try {
+    // Trava de SERVIDOR: o checkout fica OFF na loja de produção (studiosuzu.com.br)
+    // até o MEI abrir — espelha o CHECKOUT_ON do cliente (index.html). Sem esta trava,
+    // alguém poderia POSTar /api/pagar direto no domínio de produção e criar uma
+    // cobrança à revelia da UI (que esconde o checkout). Staging/local/testes seguem
+    // liberados pra validar o fluxo. Ao lançar de verdade, liberar este domínio.
+    if (/(^|\.)studiosuzu\.com\.br$/i.test(new URL(request.url).hostname)) {
+      return json({ ok: false, erro: "indisponivel" }, 403);
+    }
+
     const body = await request.json();
     const itens = Array.isArray(body.itens) ? body.itens : [];
     const metodo = str(body.metodo);
