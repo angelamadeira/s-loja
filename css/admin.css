@@ -261,7 +261,8 @@
    • em estoque       = sem cor   (a loja não sinaliza estoque normal) */
 .achip-ok { background: transparent; }
 .achip-low { background: var(--torinoko); color: var(--ink); border-color: transparent; }
-.achip-off { background: var(--raised); color: var(--text-muted); }
+/* igual ao .soldout da vitrine, inclusive sem borda */
+.achip-off { background: var(--raised); color: var(--text-muted); border-color: transparent; }
 .achip-ativo { background: var(--mizu-wash); }
 .achip-rascunho { background: var(--surface); }
 .achip-arquivado { background: var(--surface); }
