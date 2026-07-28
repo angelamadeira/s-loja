@@ -3,6 +3,7 @@
    Preço: a pessoa digita em REAIS; o servidor recebe CENTAVOS (conversão aqui). */
 (function () {
   var BRL = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
+  var LIMIAR = 5; // "últimas unidades" a partir daqui pra baixo (ajustável em Config)
   function el(tag, cls, txt) {
     var e = document.createElement(tag);
     if (cls) e.className = cls;
@@ -64,8 +65,8 @@
         linha.appendChild(esq);
         var dir = el("div", "aitem-side");
         var est = Number(p.estoque_total) || 0;
-        dir.appendChild(el("span", "achip " + (est === 0 ? "achip-off" : est <= 3 ? "achip-low" : "achip-ok"),
-          est === 0 ? "esgotado" : est + " em estoque"));
+        dir.appendChild(el("span", "achip " + (est === 0 ? "achip-off" : est <= LIMIAR ? "achip-low" : "achip-ok"),
+          est === 0 ? "esgotado" : est <= LIMIAR ? "últimas " + est + " unidades" : est + " em estoque"));
         dir.appendChild(el("span", "achip achip-" + p.status, p.status));
         linha.appendChild(dir);
         alvo.appendChild(linha);
@@ -78,7 +79,7 @@
     var raiz = document.getElementById("form");
     var id = new URLSearchParams(location.search).get("id") || "";
     var novo = !id;
-    var p = { id: "", nome: "", slug: "", descricao: "", status: "rascunho", destaque: 0, ordem: 0, preco: 0, preco_promo: null, opcoes: [], variantes: [] };
+    var p = { id: "", nome: "", slug: "", descricao: "", status: "rascunho", destaque: 0, ordem: 0, preco: 0, preco_promo: null, opcoes: [], variantes: [], categorias: [], galeria: [] };
 
     function pintar() {
       raiz.textContent = "";
@@ -119,6 +120,92 @@
       s2.appendChild(el("p", "ahint", "Com promoção, a loja mostra o preço cheio riscado. Precisa ser menor que o preço."));
       raiz.appendChild(s2);
 
+      // mídia (imagem OU vídeo)
+      var sM = el("section", "asec");
+      sM.appendChild(el("h2", "asec-title", "Fotos e vídeos"));
+      sM.appendChild(el("p", "ahint", "Imagem ou vídeo. O primeiro item é a capa que aparece na vitrine."));
+      var galWrap = el("div", "agal");
+      sM.appendChild(galWrap);
+      var fInp = document.createElement("input");
+      fInp.type = "file"; fInp.accept = "image/*,video/*"; fInp.hidden = true;
+      var bUp = el("button", "btn ghost abtn-full", "Adicionar foto ou vídeo");
+      bUp.type = "button";
+      bUp.addEventListener("click", function () { fInp.click(); });
+      fInp.addEventListener("change", function () {
+        var f = fInp.files && fInp.files[0];
+        if (!f) return;
+        bUp.disabled = true; bUp.textContent = "Enviando…";
+        var fd = new FormData(); fd.append("arquivo", f);
+        fetch("/api/admin/midia", { method: "POST", body: fd })
+          .then(function (r) { return r.json(); })
+          .then(function (d) {
+            bUp.disabled = false; bUp.textContent = "Adicionar foto ou vídeo";
+            fInp.value = "";
+            if (d && d.ok) { p.galeria.push({ asset_id: d.id, tipo: d.tipo }); pintarGaleria(); }
+            else { aviso(d && d.erro === "grande" ? "Arquivo muito grande (imagem até 10 MB, vídeo até 50 MB)." : "Não deu para enviar.", true); }
+          })
+          .catch(function () { bUp.disabled = false; bUp.textContent = "Adicionar foto ou vídeo"; aviso("Falha no envio.", true); });
+      });
+      sM.appendChild(bUp); sM.appendChild(fInp);
+      raiz.appendChild(sM);
+
+      function pintarGaleria() {
+        galWrap.textContent = "";
+        p.galeria.forEach(function (g, i) {
+          var cel = el("div", "agal-item");
+          var midia;
+          if (String(g.tipo || "").indexOf("video") === 0) {
+            midia = document.createElement("video");
+            midia.src = "/midia/" + g.asset_id; midia.muted = true; midia.loop = true;
+            midia.autoplay = true; midia.playsInline = true;
+          } else {
+            midia = document.createElement("img");
+            midia.src = "/midia/" + g.asset_id; midia.alt = "";
+          }
+          cel.appendChild(midia);
+          if (i === 0) cel.appendChild(el("span", "agal-capa", "capa"));
+          var rm = el("button", "agal-rm", "×");
+          rm.type = "button"; rm.title = "remover";
+          rm.addEventListener("click", function () { p.galeria.splice(i, 1); pintarGaleria(); });
+          cel.appendChild(rm);
+          galWrap.appendChild(cel);
+        });
+      }
+
+      // categorias
+      var sC = el("section", "asec");
+      sC.appendChild(el("h2", "asec-title", "Categorias"));
+      var catWrap = el("div", "acats");
+      sC.appendChild(catWrap);
+      var linkCats = el("a", "apage-sub-link", "Criar ou organizar categorias →");
+      linkCats.href = "/admin/categorias";
+      sC.appendChild(linkCats);
+      raiz.appendChild(sC);
+      fetch("/api/admin/categorias").then(function (r) { return r.json(); }).then(function (d) {
+        var cs = (d && d.categorias) || [];
+        catWrap.textContent = "";
+        if (!cs.length) { catWrap.appendChild(el("p", "ahint", "Nenhuma categoria criada ainda.")); return; }
+        var porPai = {};
+        cs.forEach(function (c) { (porPai[c.pai_id || ""] = porPai[c.pai_id || ""] || []).push(c); });
+        function nivel(paiId, prof) {
+          (porPai[paiId] || []).forEach(function (c) {
+            var l = el("label", "acheck" + (prof ? " acheck-filha" : ""));
+            var cb = document.createElement("input");
+            cb.type = "checkbox";
+            cb.checked = p.categorias.indexOf(c.id) >= 0;
+            cb.addEventListener("change", function () {
+              var i = p.categorias.indexOf(c.id);
+              if (cb.checked && i < 0) p.categorias.push(c.id);
+              if (!cb.checked && i >= 0) p.categorias.splice(i, 1);
+            });
+            l.appendChild(cb); l.appendChild(el("span", null, c.nome));
+            catWrap.appendChild(l);
+            nivel(c.id, prof + 1);
+          });
+        }
+        nivel("", 0);
+      });
+
       // variação
       var s3 = el("section", "asec");
       s3.appendChild(el("h2", "asec-title", "Variação"));
@@ -146,6 +233,8 @@
       salvar.type = "button";
       s5.appendChild(salvar);
       raiz.appendChild(s5);
+
+      function aviso(t, erro) { msg.hidden = false; msg.className = erro ? "amsg err" : "amsg"; msg.textContent = t; }
 
       // ---- opções
       function pintarOpcoes() {
@@ -227,6 +316,13 @@
           add("Larg. (cm)", "number", v.larg_cm, function (x) { v.larg_cm = Number(x) || 0; });
           add("Alt. (cm)", "number", v.alt_cm, function (x) { v.alt_cm = Number(x) || 0; });
           box.appendChild(g);
+          // pausar a venda manualmente, mesmo com estoque (o "esgotado" por
+          // contagem é automático; isto é o controle manual)
+          var lv = el("label", "acheck");
+          var cv = document.createElement("input"); cv.type = "checkbox"; cv.checked = v.ativo !== false;
+          cv.addEventListener("change", function () { v.ativo = cv.checked; });
+          lv.appendChild(cv); lv.appendChild(el("span", null, "À venda"));
+          box.appendChild(lv);
           varWrap.appendChild(box);
         });
       }
@@ -238,7 +334,7 @@
         salvar.disabled = true; salvar.textContent = "Salvando…";
         fetch("/api/admin/produto", {
           method: "POST", headers: { "content-type": "application/json" },
-          body: JSON.stringify({ id: p.id || "", nome: p.nome, slug: p.slug, descricao: p.descricao, status: p.status, destaque: p.destaque, ordem: p.ordem, preco: p.preco, preco_promo: p.preco_promo, opcoes: p.opcoes, variantes: p.variantes }),
+          body: JSON.stringify({ id: p.id || "", nome: p.nome, slug: p.slug, descricao: p.descricao, status: p.status, destaque: p.destaque, ordem: p.ordem, preco: p.preco, preco_promo: p.preco_promo, opcoes: p.opcoes, variantes: p.variantes, categorias: p.categorias, galeria: p.galeria }),
         }).then(function (r) { return r.json(); }).then(function (d) {
           salvar.disabled = false; salvar.textContent = "Salvar produto";
           msg.hidden = false;
@@ -256,6 +352,7 @@
         });
       });
 
+      pintarGaleria();
       sincroniza();
     }
 
@@ -263,7 +360,7 @@
     fetch("/api/admin/produto?id=" + encodeURIComponent(id)).then(function (r) { return r.json(); }).then(function (d) {
       if (d && d.ok) {
         var x = d.produto;
-        p = { id: x.id, nome: x.nome, slug: x.slug, descricao: x.descricao || "", status: x.status, destaque: x.destaque, ordem: x.ordem, preco: x.preco, preco_promo: x.preco_promo, opcoes: x.opcoes || [], variantes: (x.variantes || []).map(function (v) { return { id: v.id, combinacao: v.combinacao, preco: v.preco, preco_promo: v.preco_promo, estoque: v.estoque, peso_g: v.peso_g, comp_cm: v.comp_cm, larg_cm: v.larg_cm, alt_cm: v.alt_cm, ativo: !!v.ativo }; }) };
+        p = { id: x.id, nome: x.nome, slug: x.slug, descricao: x.descricao || "", status: x.status, destaque: x.destaque, ordem: x.ordem, preco: x.preco, preco_promo: x.preco_promo, opcoes: x.opcoes || [], variantes: (x.variantes || []).map(function (v) { return { id: v.id, combinacao: v.combinacao, preco: v.preco, preco_promo: v.preco_promo, estoque: v.estoque, peso_g: v.peso_g, comp_cm: v.comp_cm, larg_cm: v.larg_cm, alt_cm: v.alt_cm, ativo: !!v.ativo }; }), categorias: x.categorias || [], galeria: (x.galeria || []).map(function (g) { return { asset_id: g.asset_id, tipo: g.tipo }; }) };
       }
       pintar();
     });
@@ -271,4 +368,90 @@
 
   if (document.getElementById("lista")) renderLista();
   if (document.getElementById("form")) renderForm();
+})();
+
+/* ── CATEGORIAS (criar, renomear, aninhar, apagar) ───────────────────────── */
+(function () {
+  var raiz = document.getElementById("cats");
+  if (!raiz) return;
+  function el(t, c, x) { var e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; }
+  var todas = [];
+
+  function salvar(cat) {
+    return fetch("/api/admin/categoria", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(cat) })
+      .then(function (r) { return r.json(); }).then(carrega);
+  }
+  function apagar(id) {
+    return fetch("/api/admin/categoria/apagar", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ id: id }) })
+      .then(function (r) { return r.json(); }).then(carrega);
+  }
+
+  function carrega() {
+    return fetch("/api/admin/categorias").then(function (r) { return r.json(); }).then(function (d) {
+      todas = (d && d.categorias) || [];
+      pinta();
+    });
+  }
+
+  function pinta() {
+    raiz.textContent = "";
+    var lista = el("div", "alista");
+    var porPai = {};
+    todas.forEach(function (c) { (porPai[c.pai_id || ""] = porPai[c.pai_id || ""] || []).push(c); });
+
+    function nivel(paiId, prof) {
+      (porPai[paiId] || []).forEach(function (c) {
+        var it = el("div", "aitem acat" + (prof ? " acat-filha" : ""));
+        var esq = el("div", "aitem-main");
+        var nome = document.createElement("input");
+        nome.type = "text"; nome.value = c.nome; nome.className = "acat-nome";
+        nome.addEventListener("change", function () { salvar({ id: c.id, nome: nome.value, pai_id: c.pai_id, ordem: c.ordem }); });
+        esq.appendChild(nome);
+        esq.appendChild(el("div", "aitem-meta", c.n_produtos + (c.n_produtos === 1 ? " produto" : " produtos")));
+        it.appendChild(esq);
+
+        var dir = el("div", "aitem-side");
+        // mãe: aninha esta categoria dentro de outra
+        var sel = document.createElement("select");
+        var op0 = document.createElement("option"); op0.value = ""; op0.textContent = "— categoria raiz —";
+        sel.appendChild(op0);
+        todas.forEach(function (o) {
+          if (o.id === c.id) return;
+          var op = document.createElement("option"); op.value = o.id; op.textContent = "dentro de " + o.nome;
+          if (c.pai_id === o.id) op.selected = true;
+          sel.appendChild(op);
+        });
+        sel.addEventListener("change", function () { salvar({ id: c.id, nome: c.nome, pai_id: sel.value, ordem: c.ordem }); });
+        dir.appendChild(sel);
+        var rm = el("button", "apk-rm", "apagar");
+        rm.type = "button";
+        rm.addEventListener("click", function () {
+          if (confirm("Apagar a categoria “" + c.nome + "”? Os produtos não são apagados.")) apagar(c.id);
+        });
+        dir.appendChild(rm);
+        it.appendChild(dir);
+        lista.appendChild(it);
+        nivel(c.id, prof + 1);
+      });
+    }
+    nivel("", 0);
+    raiz.appendChild(lista);
+
+    var nova = el("section", "asec");
+    nova.appendChild(el("h2", "asec-title", "Nova categoria"));
+    var i = document.createElement("input");
+    i.type = "text"; i.placeholder = "Ex.: Coleção de Páscoa";
+    var l = el("label", "afield"); l.appendChild(el("span", null, "Nome")); l.appendChild(i);
+    nova.appendChild(l);
+    var b = el("button", "btn abtn-full", "Criar categoria");
+    b.type = "button";
+    b.addEventListener("click", function () {
+      if (!i.value.trim()) return;
+      salvar({ nome: i.value.trim() }).then(function () { i.value = ""; });
+    });
+    nova.appendChild(b);
+    raiz.appendChild(nova);
+  }
+
+  carrega();
 })();

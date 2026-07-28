@@ -9,7 +9,7 @@
 // válidos; toda ação sensível vira linha em admin_auditoria.
 import { EmailMessage } from "cloudflare:email";
 import { registroInicio, registroFim, loginInicio, loginFim } from "./passkey.js";
-import { listaProdutos, leProduto, salvaProduto, apagaProduto } from "./catalogo.js";
+import { listaProdutos, leProduto, salvaProduto, apagaProduto, listaCategorias, salvaCategoria, apagaCategoria, subirMidia } from "./catalogo.js";
 
 // Quem pode entrar. Dono = somos.suzu; angelmadeira = recuperação. Ambos
 // autenticam na MESMA conta dona. (Entrega do link p/ angelmadeira depende de
@@ -134,6 +134,34 @@ export async function handleAdmin(request, env, url) {
     if (r.ok) await auditoria(env, sessao.usuario_id, "produto.arquivado", String(id), null, ip);
     return json(r, r.ok ? 200 : 400);
   }
+  if (p === "/api/admin/categorias" && m === "GET") {
+    return json({ ok: true, categorias: await listaCategorias(env) });
+  }
+  if (p === "/api/admin/categoria" && m === "POST") {
+    const ip = request.headers.get("CF-Connecting-IP") || "";
+    const r = await salvaCategoria(env, await request.json());
+    if (r.ok) await auditoria(env, sessao.usuario_id, "categoria.salva", r.id, null, ip);
+    return json(r, r.ok ? 200 : 400);
+  }
+  if (p === "/api/admin/categoria/apagar" && m === "POST") {
+    const ip = request.headers.get("CF-Connecting-IP") || "";
+    const { id } = await request.json();
+    const r = await apagaCategoria(env, id);
+    if (r.ok) await auditoria(env, sessao.usuario_id, "categoria.apagada", String(id), null, ip);
+    return json(r, r.ok ? 200 : 400);
+  }
+  if (p === "/api/admin/midia" && m === "POST") {
+    const ip = request.headers.get("CF-Connecting-IP") || "";
+    try {
+      const r = await subirMidia(env, request);
+      if (r.ok) await auditoria(env, sessao.usuario_id, "midia.enviada", r.id, { tipo: r.tipo }, ip);
+      return json(r, r.ok ? 200 : 400);
+    } catch (e) {
+      console.error("midia", e);
+      return json({ ok: false, erro: "servidor" }, 500);
+    }
+  }
+  if (p === "/admin/categorias") return html(paginaCategorias());
   if (p === "/admin/produtos") return html(paginaProdutos());
   if (p === "/admin/produto") return html(paginaProduto());
 
@@ -419,6 +447,7 @@ function paginaAdmin(sessao) {
         "<h2 class=asec-title>Gerenciar</h2>" +
         "<nav class=anav>" +
           "<a href='/admin/produtos'>Produtos<span>catálogo, preços, estoque</span></a>" +
+          "<a href='/admin/categorias'>Categorias<span>organizar a vitrine</span></a>" +
         "</nav>" +
       "</section>" +
       "<section class=asec id=pkbox>" +
@@ -464,6 +493,17 @@ function paginaProdutos() {
       "<div id=lista class=alista></div>" +
     "</div>",
     "Produtos"
+  );
+}
+
+function paginaCategorias() {
+  return baseLargo(
+    "<div class=apage>" +
+      "<div class=apage-head><div><h1>Categorias</h1>" +
+      "<a class=apage-sub-link href='/admin/produtos'>← Produtos</a></div></div>" +
+      "<div id=cats>Carregando…</div>" +
+    "</div>",
+    "Categorias"
   );
 }
 

@@ -254,9 +254,14 @@
   color: var(--text-muted);
   white-space: nowrap;
 }
-.achip-ok { background: var(--matcha-wash); }
-.achip-low { background: var(--torinoko-wash); }
-.achip-off { background: var(--sango-wash); }
+/* MESMO código de cores da vitrine (components.css), pra o admin não ensinar
+   uma leitura diferente da que a cliente vê:
+   • últimas unidades = torinoko  (.pbadge.last)
+   • esgotado         = neutro    (.soldout — NÃO é vermelho; vermelho lá é promoção)
+   • em estoque       = sem cor   (a loja não sinaliza estoque normal) */
+.achip-ok { background: transparent; }
+.achip-low { background: var(--torinoko); color: var(--ink); border-color: transparent; }
+.achip-off { background: var(--raised); color: var(--text-muted); }
 .achip-ativo { background: var(--mizu-wash); }
 .achip-rascunho { background: var(--surface); }
 .achip-arquivado { background: var(--surface); }
@@ -336,4 +341,79 @@
   color: var(--text-muted);
   font-size: .72rem;
   letter-spacing: .06em;
+}
+
+/* ── galeria de mídia do produto (imagem OU vídeo) ───────────────────────── */
+.agal {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(6rem, 1fr));
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+.agal-item {
+  position: relative;
+  aspect-ratio: 1;
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  overflow: hidden;
+  background: var(--surface);
+}
+.agal-item img,
+.agal-item video { width: 100%; height: 100%; object-fit: cover; display: block; }
+.agal-capa {
+  position: absolute;
+  left: var(--space-2);
+  bottom: var(--space-2);
+  font-size: .58rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  background: var(--raised);
+  color: var(--text-muted);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--r-pill);
+}
+.agal-rm {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+  width: 22px;
+  height: 22px;
+  border: 0;
+  border-radius: var(--r-round);
+  background: var(--raised);
+  color: var(--text);
+  cursor: pointer;
+  line-height: 1;
+  font-size: .9rem;
+}
+
+/* ── seleção de categorias ──────────────────────────────────────────────── */
+.acats { display: grid; gap: var(--space-2); margin-bottom: var(--space-4); }
+.acheck {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: .92rem;
+  cursor: pointer;
+}
+.acheck input { width: auto; }
+.acheck-filha { padding-left: var(--space-6); }
+.acat-nome {
+  border: 0;
+  background: none;
+  font-family: var(--sans);
+  font-size: 1rem;
+  color: var(--text);
+  padding: 0;
+  width: 100%;
+}
+.acat-filha { margin-left: var(--space-6); }
+.acat select {
+  font-family: var(--sans);
+  font-size: .78rem;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  color: var(--text-muted);
 }

@@ -7,6 +7,7 @@ import { EmailMessage } from "cloudflare:email";
 import { recomputaTotal, parcelasValidas } from "./precos.js";
 import { criaPagamento, consultaPagamento, consultaPagamentoFull } from "./mp.js";
 import { handleAdmin } from "./admin.js";
+import { serveMidia } from "./catalogo.js";
 
 const MAX_ARQUIVO = 10 * 1024 * 1024; // 10 MB por anexo
 const MAX_ANEXOS = 12;
@@ -39,6 +40,11 @@ export default {
     if (url.pathname === "/api/config") {
       if (request.method !== "GET") return json({ ok: false, error: "metodo" }, 405);
       return json({ mpKey: env.MP_PUBLIC_KEY });
+    }
+    // Mídia do catálogo (imagem/vídeo do produto) — PÚBLICA: aparece na loja.
+    if (url.pathname.startsWith("/midia/")) {
+      if (request.method !== "GET") return json({ ok: false, error: "metodo" }, 405);
+      return serveMidia(env, url.pathname.slice(7));
     }
     // Admin (área restrita) — segurança/sessão dentro de handleAdmin. noindex.
     if (url.pathname === "/admin" || url.pathname.startsWith("/admin/") || url.pathname.startsWith("/api/admin/")) {

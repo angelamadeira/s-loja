@@ -26,10 +26,16 @@ export async function leProduto(env, id) {
   if (!p) return null;
   const ops = await env.DB.prepare("SELECT id, nome, ordem, valores FROM cat_opcoes WHERE produto_id = ? ORDER BY ordem").bind(p.id).all();
   const vars = await env.DB.prepare("SELECT * FROM cat_variantes WHERE produto_id = ? ORDER BY ordem").bind(p.id).all();
+  const cats = await env.DB.prepare("SELECT categoria_id FROM cat_produto_categorias WHERE produto_id = ?").bind(p.id).all();
+  const imgs = await env.DB.prepare(
+    "SELECT i.asset_id, i.ordem, a.tipo FROM cat_produto_imagens i JOIN assets a ON a.id = i.asset_id WHERE i.produto_id = ? ORDER BY i.ordem"
+  ).bind(p.id).all();
   return {
     ...p,
     opcoes: (ops.results || []).map((o) => ({ ...o, valores: jparse(o.valores, []) })),
     variantes: (vars.results || []).map((v) => ({ ...v, combinacao: jparse(v.combinacao, {}) })),
+    categorias: (cats.results || []).map((c) => c.categoria_id),
+    galeria: imgs.results || [],
   };
 }
 
@@ -106,6 +112,24 @@ export async function salvaProduto(env, body) {
       )
       .run();
   }
+  // categorias do produto (N:N) — regrava o conjunto
+  await env.DB.prepare("DELETE FROM cat_produto_categorias WHERE produto_id = ?").bind(id).run();
+  const cats = Array.isArray(body.categorias) ? body.categorias.slice(0, 20) : [];
+  for (const c of cats) {
+    const cid = txt(c, 64);
+    if (!cid) continue;
+    await env.DB.prepare("INSERT OR IGNORE INTO cat_produto_categorias (produto_id, categoria_id) VALUES (?,?)").bind(id, cid).run();
+  }
+
+  // galeria (imagens/vídeos) — regrava o conjunto, na ordem enviada
+  await env.DB.prepare("DELETE FROM cat_produto_imagens WHERE produto_id = ?").bind(id).run();
+  const galeria = Array.isArray(body.galeria) ? body.galeria.slice(0, 20) : [];
+  for (let i = 0; i < galeria.length; i++) {
+    const aid = txt(galeria[i] && (galeria[i].asset_id || galeria[i]), 64);
+    if (!aid) continue;
+    await env.DB.prepare("INSERT OR IGNORE INTO cat_produto_imagens (produto_id, asset_id, ordem) VALUES (?,?,?)").bind(id, aid, i).run();
+  }
+
   return { ok: true, id, slug };
 }
 
@@ -117,6 +141,107 @@ export async function apagaProduto(env, id) {
     .bind(new Date().toISOString(), pid)
     .run();
   return { ok: true };
+}
+
+// ── CATEGORIAS (com aninhamento) ────────────────────────────────────────────
+export async function listaCategorias(env) {
+  const { results } = await env.DB.prepare(
+    "SELECT c.id, c.nome, c.slug, c.pai_id, c.ordem, " +
+      "(SELECT COUNT(*) FROM cat_produto_categorias pc WHERE pc.categoria_id = c.id) AS n_produtos " +
+      "FROM cat_categorias c ORDER BY c.ordem, c.nome"
+  ).all();
+  return results || [];
+}
+
+export async function salvaCategoria(env, body) {
+  const nome = txt(body.nome, 120);
+  if (!nome) return { ok: false, erro: "nome" };
+  const id = txt(body.id, 64) || crypto.randomUUID();
+  let pai = txt(body.pai_id, 64) || null;
+  if (pai === id) pai = null; // não pode ser mãe de si mesma
+  // evita ciclo (A dentro de B dentro de A)
+  if (pai && (await ehDescendente(env, pai, id))) pai = null;
+  const existente = await env.DB.prepare("SELECT id FROM cat_categorias WHERE id = ?").bind(id).first();
+  const slug = await slugUnicoCat(env, txt(body.slug, 120) || slugify(nome), id);
+  if (existente) {
+    await env.DB.prepare("UPDATE cat_categorias SET nome=?, slug=?, pai_id=?, ordem=?, descricao=? WHERE id=?")
+      .bind(nome, slug, pai, int(body.ordem), txt(body.descricao, 1000), id)
+      .run();
+  } else {
+    await env.DB.prepare("INSERT INTO cat_categorias (id,nome,slug,pai_id,ordem,descricao,criado_em) VALUES (?,?,?,?,?,?,?)")
+      .bind(id, nome, slug, pai, int(body.ordem), txt(body.descricao, 1000), new Date().toISOString())
+      .run();
+  }
+  return { ok: true, id, slug };
+}
+
+export async function apagaCategoria(env, id) {
+  const cid = txt(id, 64);
+  if (!cid) return { ok: false, erro: "id" };
+  // filhas sobem pra raiz (ON DELETE SET NULL) e os vínculos caem (CASCADE)
+  await env.DB.prepare("DELETE FROM cat_categorias WHERE id = ?").bind(cid).run();
+  return { ok: true };
+}
+
+// true se `possivelFilha` estiver na descendência de `raiz` — trava de ciclo
+async function ehDescendente(env, possivelFilha, raiz) {
+  let atual = possivelFilha;
+  for (let i = 0; i < 20 && atual; i++) {
+    if (atual === raiz) return true;
+    const r = await env.DB.prepare("SELECT pai_id FROM cat_categorias WHERE id = ?").bind(atual).first();
+    atual = r && r.pai_id ? r.pai_id : null;
+  }
+  return false;
+}
+
+async function slugUnicoCat(env, base, id) {
+  let s = base || "categoria";
+  for (let i = 0; i < 50; i++) {
+    const bate = await env.DB.prepare("SELECT id FROM cat_categorias WHERE slug = ? AND id <> ?").bind(s, id).first();
+    if (!bate) return s;
+    s = base + "-" + (i + 2);
+  }
+  return base + "-" + Date.now();
+}
+
+// ── MÍDIA (imagem OU vídeo) — arquivo no R2, metadados no D1 ────────────────
+const MAX_IMAGEM = 10 * 1024 * 1024; // 10 MB
+const MAX_VIDEO = 50 * 1024 * 1024; // 50 MB
+
+export async function subirMidia(env, request) {
+  const form = await request.formData();
+  const f = form.get("arquivo");
+  if (!f || typeof f === "string") return { ok: false, erro: "arquivo" };
+  const tipo = String(f.type || "");
+  const ehImagem = tipo.startsWith("image/");
+  const ehVideo = tipo.startsWith("video/");
+  if (!ehImagem && !ehVideo) return { ok: false, erro: "tipo" };
+  if (f.size > (ehVideo ? MAX_VIDEO : MAX_IMAGEM)) return { ok: false, erro: "grande" };
+
+  const id = crypto.randomUUID();
+  const ext = (String(f.name || "").match(/\.[a-z0-9]{1,5}$/i) || [""])[0].toLowerCase();
+  const key = "catalogo/" + id + ext;
+  await env.ANEXOS.put(key, f.stream(), { httpMetadata: { contentType: tipo } });
+  await env.DB.prepare(
+    "INSERT INTO assets (id, r2_key, nome, tipo, bytes, poster_asset, criado_em) VALUES (?,?,?,?,?,?,?)"
+  )
+    .bind(id, key, txt(f.name, 200), tipo, f.size, txt(form.get("poster_asset"), 64) || null, new Date().toISOString())
+    .run();
+  return { ok: true, id, tipo, url: "/midia/" + id };
+}
+
+// Serve a mídia (pública — é imagem/vídeo de produto, aparece na loja).
+export async function serveMidia(env, id) {
+  const a = await env.DB.prepare("SELECT r2_key, tipo FROM assets WHERE id = ?").bind(txt(id, 64)).first();
+  if (!a) return new Response("não encontrado", { status: 404 });
+  const obj = await env.ANEXOS.get(a.r2_key);
+  if (!obj) return new Response("não encontrado", { status: 404 });
+  const h = new Headers();
+  obj.writeHttpMetadata(h);
+  if (a.tipo) h.set("content-type", a.tipo);
+  // o id é único por upload, então o conteúdo nunca muda → cache longo
+  h.set("cache-control", "public, max-age=31536000, immutable");
+  return new Response(obj.body, { headers: h });
 }
 
 // ── util ────────────────────────────────────────────────────────────────────
