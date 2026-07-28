@@ -37,9 +37,9 @@
   var id = new URLSearchParams(location.search).get("id") || "";
   var novo = !id;
   var p = {
-    id: "", nome: "", descricao: "", status: "rascunho",
+    id: "", slug: "", nome: "", descricao: "", status: "rascunho",
     preco: 0, preco_promo: null, estoque: 0, peso_g: 0, comp_cm: 0, larg_cm: 0, alt_cm: 0,
-    opcoes: [], variantes: [], categorias: [], galeria: [],
+    opcoes: [], variantes: [], categorias: [], galeria: [], video_asset: null,
   };
   var categoriasTodas = [];
 
@@ -54,9 +54,19 @@
     tit.appendChild(volta);
     tit.appendChild(el("h1", null, novo ? "Novo produto" : p.nome || "Produto"));
     head.appendChild(tit);
+    var acoes = el("div", "apage-acoes");
+    if (!novo && p.slug) {
+      // "Ver na loja" — padrão Shopify/Nuvemshop. Abre em nova aba.
+      var verLoja = el("a", "alink", "Ver na loja ↗");
+      verLoja.href = "/p/" + p.slug;
+      verLoja.target = "_blank";
+      verLoja.rel = "noopener";
+      acoes.appendChild(verLoja);
+    }
     var salvar = el("button", "btn", "Salvar");
     salvar.type = "button";
-    head.appendChild(salvar);
+    acoes.appendChild(salvar);
+    head.appendChild(acoes);
     raiz.appendChild(head);
 
     var cols = el("div", "acols");
@@ -116,14 +126,66 @@
       });
     }
 
+    // ── Vídeo do produto (o "reel" do botão flutuante da vitrine — separado da galeria)
+    var cVid = card("Vídeo do produto");
+    var vidPrev = el("div", "avid"); cVid.appendChild(vidPrev);
+    var vInp = document.createElement("input");
+    vInp.type = "file"; vInp.accept = "video/*"; vInp.hidden = true;
+    var bVid = el("button", "btn ghost abtn-full", "Enviar vídeo");
+    bVid.type = "button";
+    bVid.addEventListener("click", function () { vInp.click(); });
+    vInp.addEventListener("change", function () {
+      var f = vInp.files && vInp.files[0]; if (!f) return;
+      bVid.disabled = true; bVid.textContent = "Enviando…";
+      var fd = new FormData(); fd.append("arquivo", f);
+      fetch("/api/admin/midia", { method: "POST", body: fd })
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+          bVid.disabled = false; bVid.textContent = "Enviar vídeo"; vInp.value = "";
+          if (d && d.ok) { p.video_asset = d.id; pintarVideo(); }
+          else aviso(d && d.erro === "grande" ? "Vídeo grande demais (até 50 MB)." : "Não deu para enviar.", true);
+        })
+        .catch(function () { bVid.disabled = false; bVid.textContent = "Enviar vídeo"; aviso("Falha no envio.", true); });
+    });
+    cVid.appendChild(bVid); cVid.appendChild(vInp);
+    cVid.appendChild(el("p", "ahint", "É o vídeo que toca no botão flutuante da página do produto — o mesmo das redes."));
+    main.appendChild(cVid);
+    function pintarVideo() {
+      vidPrev.textContent = "";
+      if (!p.video_asset) return;
+      var v = document.createElement("video");
+      v.src = "/midia/" + p.video_asset; v.muted = true; v.loop = true; v.autoplay = true; v.playsInline = true; v.controls = true;
+      vidPrev.appendChild(v);
+      var rm = el("button", "alink alink-del", "Remover vídeo"); rm.type = "button";
+      rm.addEventListener("click", function () { p.video_asset = null; pintarVideo(); });
+      vidPrev.appendChild(rm);
+    }
+
     // ── Preço / Estoque / Envio (somem quando há variantes — padrão Shopify)
     var cP = card("Preço");
     var iPreco = inp("text", deCents(p.preco), "0,00"); iPreco.inputMode = "decimal";
     var iComp = inp("text", deCents(p.preco_promo), "sem promoção"); iComp.inputMode = "decimal";
     var gp = el("div", "agrid2");
     gp.appendChild(campo("Preço (R$)", iPreco, "Preço cheio, de tabela."));
-    gp.appendChild(campo("Preço promocional (R$)", iComp, "O que a cliente paga. Menor que o preço — a loja mostra o cheio riscado. Vazio = sem promoção."));
+    var campoPromo = campo("Preço promocional (R$)", iComp, "O que a cliente paga. Vazio = sem promoção.");
+    gp.appendChild(campoPromo);
     cP.appendChild(gp);
+    // Validação INLINE, enquanto digita — não um "não" na cara depois de Salvar.
+    // A regra existe por CDC: o preço riscado tem de ser um preço real praticado;
+    // promocional MAIOR mostraria um "desconto" que é aumento.
+    var alertaPromo = el("small", "ahint ahint-err");
+    alertaPromo.hidden = true;
+    campoPromo.appendChild(alertaPromo);
+    function checaPromo() {
+      var cheio = paraCents(iPreco.value), promo = iComp.value.trim() === "" ? null : paraCents(iComp.value);
+      var ruim = promo !== null && cheio > 0 && promo > cheio;
+      alertaPromo.hidden = !ruim;
+      if (ruim) alertaPromo.textContent = "Precisa ser menor que " + BRL(cheio / 100) + " — senão o desconto seria um aumento.";
+      iComp.classList.toggle("ainp-err", ruim);
+      return !ruim;
+    }
+    iPreco.addEventListener("input", checaPromo);
+    iComp.addEventListener("input", checaPromo);
     main.appendChild(cP);
 
     var cE = card("Estoque");
@@ -315,13 +377,19 @@
     salvar.addEventListener("click", function () {
       p.nome = iNome.value; p.descricao = iDesc.value; p.status = iStatus.value;
       if (!p.variantes.length) {
+        if (!checaPromo()) { aviso("Confira o preço promocional.", true); iComp.focus(); return; }
         p.preco = paraCents(iPreco.value);
         p.preco_promo = iComp.value.trim() === "" ? null : paraCents(iComp.value);
+        // igual ao cheio não é engano, é "sem promoção" — limpa em vez de brigar
+        if (p.preco_promo !== null && p.preco_promo >= p.preco) p.preco_promo = null;
         p.estoque = Number(iEst.value) || 0;
         p.peso_g = Number(iPeso.value) || 0;
         p.comp_cm = Number(iC.value) || 0; p.larg_cm = Number(iL.value) || 0; p.alt_cm = Number(iA.value) || 0;
       } else {
         // com variantes: o preço do produto é o MENOR ("a partir de" da vitrine)
+        p.variantes.forEach(function (v) {
+          if (v.preco_promo !== null && v.preco_promo >= v.preco) v.preco_promo = null;
+        });
         var ps = p.variantes.map(function (v) { return Number(v.preco) || 0; }).filter(function (n) { return n > 0; });
         p.preco = ps.length ? Math.min.apply(null, ps) : 0;
         p.preco_promo = null;
@@ -330,7 +398,7 @@
       var corpo = {
         id: p.id || "", nome: p.nome, descricao: p.descricao, status: p.status,
         preco: p.preco, preco_promo: p.preco_promo,
-        opcoes: p.opcoes, categorias: p.categorias, galeria: p.galeria,
+        opcoes: p.opcoes, categorias: p.categorias, galeria: p.galeria, video_asset: p.video_asset,
         variantes: p.variantes.length ? p.variantes
           : [{ combinacao: {}, preco: p.preco, preco_promo: p.preco_promo, estoque: p.estoque, peso_g: p.peso_g, comp_cm: p.comp_cm, larg_cm: p.larg_cm, alt_cm: p.alt_cm, ativo: true }],
       };
@@ -340,13 +408,14 @@
           salvar.disabled = false; salvar.textContent = "Salvar";
           if (d && d.ok) {
             aviso("Produto salvo.");
-            if (!p.id) { p.id = d.id; history.replaceState(null, "", "/admin/produto?id=" + encodeURIComponent(d.id)); }
+            if (!p.id) { p.id = d.id; p.slug = d.slug || p.slug; history.replaceState(null, "", "/admin/produto?id=" + encodeURIComponent(d.id)); }
           } else aviso(d && d.erro === "promo_maior" ? "O preço promocional precisa ser MENOR que o preço cheio." : d && d.erro === "nome" ? "Dê um nome ao produto." : "Não deu para salvar.", true);
         })
         .catch(function () { salvar.disabled = false; salvar.textContent = "Salvar"; aviso("Falha de rede.", true); });
     });
 
     pintarGaleria();
+    pintarVideo();
     pintarOpcoes();
     regenera();
   }
@@ -365,7 +434,7 @@
       });
       var unica = vs.length === 1 && !Object.keys(vs[0].combinacao || {}).length;
       p = {
-        id: x.id, nome: x.nome, descricao: x.descricao || "", status: x.status,
+        id: x.id, slug: x.slug, nome: x.nome, descricao: x.descricao || "", status: x.status,
         preco: unica ? vs[0].preco : x.preco, preco_promo: unica ? vs[0].preco_promo : x.preco_promo,
         estoque: unica ? vs[0].estoque : 0,
         peso_g: unica ? vs[0].peso_g : 0, comp_cm: unica ? vs[0].comp_cm : 0, larg_cm: unica ? vs[0].larg_cm : 0, alt_cm: unica ? vs[0].alt_cm : 0,
@@ -373,6 +442,7 @@
         variantes: unica ? [] : vs,
         categorias: x.categorias || [],
         galeria: (x.galeria || []).map(function (g) { return { asset_id: g.asset_id, tipo: g.tipo }; }),
+        video_asset: x.video_asset || null,
       };
     }
     pintar();

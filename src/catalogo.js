@@ -55,20 +55,23 @@ export async function salvaProduto(env, body) {
   const promo = body.preco_promo === null || body.preco_promo === "" ? null : cents(body.preco_promo);
   // "de/por" só faz sentido se o promocional for MENOR que o cheio (CDC: preço
   // riscado tem de ser preço real praticado — não deixamos inverter por engano).
-  if (promo !== null && promo >= preco) return { ok: false, erro: "promo_maior" };
+  // MAIOR é erro de verdade (mostraria um "desconto" que é aumento); IGUAL não é
+  // engano nenhum, é só "sem promoção" — normaliza pra null em vez de recusar.
+  const promoOk = promo === null || promo < preco ? promo : promo === preco ? null : undefined;
+  if (promoOk === undefined) return { ok: false, erro: "promo_maior" };
   const agora = new Date().toISOString();
 
   if (existente) {
     await env.DB.prepare(
-      "UPDATE cat_produtos SET slug=?, nome=?, descricao=?, status=?, destaque=?, ordem=?, preco=?, preco_promo=?, capa_asset=?, atualizado_em=? WHERE id=?"
+      "UPDATE cat_produtos SET slug=?, nome=?, descricao=?, status=?, destaque=?, ordem=?, preco=?, preco_promo=?, capa_asset=?, video_asset=?, atualizado_em=? WHERE id=?"
     )
-      .bind(slug, nome, txt(body.descricao, MAX_TXT), status, body.destaque ? 1 : 0, int(body.ordem), preco, promo, txt(body.capa_asset, 64) || null, agora, id)
+      .bind(slug, nome, txt(body.descricao, MAX_TXT), status, body.destaque ? 1 : 0, int(body.ordem), preco, promoOk, txt(body.capa_asset, 64) || null, txt(body.video_asset, 64) || null, agora, id)
       .run();
   } else {
     await env.DB.prepare(
-      "INSERT INTO cat_produtos (id,slug,nome,descricao,status,destaque,ordem,preco,preco_promo,capa_asset,criado_em,atualizado_em) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)"
+      "INSERT INTO cat_produtos (id,slug,nome,descricao,status,destaque,ordem,preco,preco_promo,capa_asset,video_asset,criado_em,atualizado_em) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)"
     )
-      .bind(id, slug, nome, txt(body.descricao, MAX_TXT), status, body.destaque ? 1 : 0, int(body.ordem), preco, promo, txt(body.capa_asset, 64) || null, agora, agora)
+      .bind(id, slug, nome, txt(body.descricao, MAX_TXT), status, body.destaque ? 1 : 0, int(body.ordem), preco, promoOk, txt(body.capa_asset, 64) || null, txt(body.video_asset, 64) || null, agora, agora)
       .run();
   }
 
