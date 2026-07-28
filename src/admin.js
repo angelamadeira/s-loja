@@ -21,6 +21,21 @@ const TOKEN_TTL_MS = 15 * 60 * 1000; // link mágico: 15 min
 const SESSAO_TTL_MS = 7 * 24 * 60 * 60 * 1000; // sessão: 7 dias
 const COOKIE = "suzu_admin";
 
+// Cache-busting dos assets do admin.
+// ATENÇÃO: Date.now() no ESCOPO DE MÓDULO de um Worker devolve 0 (o runtime
+// congela o relógio até haver I/O) — daria um "?v=0" eterno, PIOR que não ter.
+// Por isso é função: chamada durante a requisição, aí o relógio é real.
+// O admin é de uma pessoa só, então revalidar sempre custa nada e garante que
+// ela nunca veja CSS/JS velho (já a confundiu três vezes).
+function assetsV() {
+  // NÃO usar Date.now(): num Worker o relógio fica congelado em 0 até haver I/O
+  // (a tela de login não consulta nada), o que daria "?v=0" eterno — pior que
+  // não ter. Um id aleatório por requisição garante CSS/JS sempre frescos.
+  // O admin é de uma pessoa só: baixar ~20 KB por visita é irrelevante perto de
+  // ela ver a versão errada da tela (o que já aconteceu três vezes).
+  return crypto.randomUUID().slice(0, 8);
+}
+
 // ── roteador do admin ────────────────────────────────────────────────────────
 export async function handleAdmin(request, env, url) {
   const p = url.pathname;
@@ -397,7 +412,7 @@ function base(inner, titulo) {
     "<title>" + titulo + " · Admin Suzu</title>" +
     "<link rel=stylesheet href=/css/tokens.css>" +
     "<link rel=stylesheet href=/css/components.css>" +
-    "<link rel=stylesheet href=/css/admin.css>" +
+    "<link rel=stylesheet href='/css/admin.css?v=" + assetsV() + "'>" +
     "</head><body class=abody>" +
     "<header class=ahd><div class=ahd-in>" +
       "<a class=brand href=/admin aria-label='Admin — Studio Suzu'>" +
@@ -426,7 +441,7 @@ function paginaLogin(msg) {
         "<button type=submit id=b class='btn ghost abtn-full'>Enviar link de entrada</button>" +
       "</form>" +
       "<div class=amsg id=ok hidden></div>" +
-      "<script src=/js/admin-passkey.js></script>" +
+      "<script src='/js/admin-passkey.js?v=" + assetsV() + "'></script>" +
       "<script>" +
       "var f=document.getElementById('f'),pk=document.getElementById('pk'),sep=document.getElementById('sep'),ok=document.getElementById('ok');" +
       "if(window.SuzuPasskey&&SuzuPasskey.suportado()){pk.hidden=false;sep.hidden=false;}" +
@@ -460,7 +475,7 @@ function paginaAdmin(sessao) {
       "<section class=asec>" +
         "<button id=sair class='btn ghost abtn-full'>Sair</button>" +
       "</section>" +
-      "<script src=/js/admin-passkey.js></script>" +
+      "<script src='/js/admin-passkey.js?v=" + assetsV() + "'></script>" +
       "<script>" +
       "var msg=document.getElementById('msg'),lista=document.getElementById('pklista'),add=document.getElementById('pkadd');" +
       "function aviso(t,erro){msg.hidden=false;msg.className=erro?'amsg err':'amsg';msg.textContent=t;}" +

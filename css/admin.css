@@ -418,3 +418,22 @@
   background: var(--surface);
   color: var(--text-muted);
 }
+
+/* ── versões do produto: cada linha é uma versão real, com tudo junto ────── */
+.avar-topo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+.avar-nomeinp {
+  flex: 1;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  background: none;
+  font-family: var(--sans);
+  font-size: 1rem;
+  color: var(--text);
+  padding: var(--space-1) 0;
+}
+.avar-nomeinp:focus-visible { outline: none; border-bottom-color: var(--text); }

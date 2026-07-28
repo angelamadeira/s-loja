@@ -79,7 +79,7 @@
     var raiz = document.getElementById("form");
     var id = new URLSearchParams(location.search).get("id") || "";
     var novo = !id;
-    var p = { id: "", nome: "", slug: "", descricao: "", status: "rascunho", destaque: 0, ordem: 0, preco: 0, preco_promo: null, opcoes: [], variantes: [], categorias: [], galeria: [] };
+    var p = { id: "", nome: "", slug: "", descricao: "", status: "rascunho", destaque: 0, ordem: 0, preco: 0, preco_promo: null, tipo_variacao: '', opcoes: [], variantes: [], categorias: [], galeria: [] };
 
     function pintar() {
       raiz.textContent = "";
@@ -108,17 +108,6 @@
       s1.appendChild(campo("Situação", iStatus));
       raiz.appendChild(s1);
 
-      // preço
-      var s2 = el("section", "asec");
-      s2.appendChild(el("h2", "asec-title", "Preço"));
-      var iPreco = inp("text", deCents(p.preco), "0,00");
-      iPreco.inputMode = "decimal";
-      s2.appendChild(campo("Preço (R$)", iPreco));
-      var iPromo = inp("text", deCents(p.preco_promo), "vazio = sem promoção");
-      iPromo.inputMode = "decimal";
-      s2.appendChild(campo("Preço promocional (R$)", iPromo));
-      s2.appendChild(el("p", "ahint", "Com promoção, a loja mostra o preço cheio riscado. Precisa ser menor que o preço."));
-      raiz.appendChild(s2);
 
       // mídia (imagem OU vídeo)
       var sM = el("section", "asec");
@@ -206,24 +195,23 @@
         nivel("", 0);
       });
 
-      // variação
-      var s3 = el("section", "asec");
-      s3.appendChild(el("h2", "asec-title", "Variação"));
-      s3.appendChild(el("p", "ahint", "Dê um nome ao tipo (Tamanho, Cor, Sabor…) e liste os valores separados por vírgula. Sem variação, o produto é peça única."));
-      var opWrap = el("div", "aops");
-      s3.appendChild(opWrap);
-      var addOp = el("button", "btn ghost abtn-full", "Adicionar tipo de variação");
-      addOp.type = "button";
-      s3.appendChild(addOp);
-      raiz.appendChild(s3);
-
-      // variantes
-      var s4 = el("section", "asec");
-      s4.appendChild(el("h2", "asec-title", "Estoque e envio"));
-      s4.appendChild(el("p", "ahint", "Cada combinação tem estoque, peso e medidas próprios — é o que calcula o frete e gera a etiqueta."));
+      // VERSÕES — uma tabela só: cada linha é uma versão real, com tudo junto.
+      var sV = el("section", "asec");
+      sV.appendChild(el("h2", "asec-title", "Versões e estoque"));
+      var iTipo = inp("text", p.tipo_variacao || "", "Tamanho, Cor, Sabor…");
+      sV.appendChild(campo("O que muda entre as versões?", iTipo));
+      iTipo.addEventListener("input", function () { p.tipo_variacao = iTipo.value; });
+      sV.appendChild(el("p", "ahint", "Deixe em branco se a peça for única. Preço, estoque, peso e medidas são de cada versão — é o que calcula o frete e gera a etiqueta."));
       var varWrap = el("div", "avars");
-      s4.appendChild(varWrap);
-      raiz.appendChild(s4);
+      sV.appendChild(varWrap);
+      var addV = el("button", "btn ghost abtn-full", "Adicionar versão");
+      addV.type = "button";
+      addV.addEventListener("click", function () {
+        p.variantes.push({ nome: "", preco: 0, preco_promo: null, estoque: 0, peso_g: 0, comp_cm: 0, larg_cm: 0, alt_cm: 0, ativo: true });
+        pintarVariantes();
+      });
+      sV.appendChild(addV);
+      raiz.appendChild(sV);
 
       // salvar
       var s5 = el("section", "asec");
@@ -236,72 +224,26 @@
 
       function aviso(t, erro) { msg.hidden = false; msg.className = erro ? "amsg err" : "amsg"; msg.textContent = t; }
 
-      // ---- opções
-      function pintarOpcoes() {
-        opWrap.textContent = "";
-        p.opcoes.forEach(function (o, idx) {
-          var box = el("div", "aop");
-          var iN = inp("text", o.nome, "Tamanho");
-          box.appendChild(campo("Tipo", iN));
-          var iV = inp("text", (o.valores || []).join(", "), "Pequeno, Médio, Grande");
-          box.appendChild(campo("Valores", iV));
-          var rm = el("button", "apk-rm", "remover");
-          rm.type = "button";
-          rm.addEventListener("click", function () { p.opcoes.splice(idx, 1); sincroniza(); });
-          box.appendChild(rm);
-          iN.addEventListener("input", function () { o.nome = iN.value; });
-          iV.addEventListener("change", function () {
-            o.valores = iV.value.split(",").map(function (s) { return s.trim(); }).filter(Boolean);
-            sincroniza();
-          });
-          opWrap.appendChild(box);
-        });
-      }
-      addOp.addEventListener("click", function () {
-        if (p.opcoes.length >= 2) return;
-        p.opcoes.push({ nome: "", valores: [] });
-        sincroniza();
-      });
 
-      // ---- variantes: produto cartesiano das opções, preservando o que já existe
-      function combinacoes() {
-        var ops = p.opcoes.filter(function (o) { return o.nome && (o.valores || []).length; });
-        if (!ops.length) return [{}];
-        var res = [{}];
-        ops.forEach(function (o) {
-          var novo = [];
-          res.forEach(function (base) {
-            o.valores.forEach(function (v) {
-              var c = {};
-              Object.keys(base).forEach(function (k) { c[k] = base[k]; });
-              c[o.nome] = v;
-              novo.push(c);
-            });
-          });
-          res = novo;
-        });
-        return res;
-      }
-      function chave(c) { return JSON.stringify(c); }
-      function sincroniza() {
-        var combos = combinacoes();
-        var antigas = {};
-        p.variantes.forEach(function (v) { antigas[chave(v.combinacao || {})] = v; });
-        p.variantes = combos.map(function (c) {
-          return antigas[chave(c)] || { combinacao: c, preco: null, preco_promo: null, estoque: 0, peso_g: 0, comp_cm: 0, larg_cm: 0, alt_cm: 0, ativo: true };
-        });
-        pintarOpcoes();
-        pintarVariantes();
-      }
-      function rotuloCombo(c) {
-        var ks = Object.keys(c);
-        return ks.length ? ks.map(function (k) { return c[k]; }).join(" · ") : "Peça única";
-      }
       function pintarVariantes() {
         varWrap.textContent = "";
-        p.variantes.forEach(function (v) {
+        if (!p.variantes.length) {
+          p.variantes.push({ nome: "", preco: 0, preco_promo: null, estoque: 0, peso_g: 0, comp_cm: 0, larg_cm: 0, alt_cm: 0, ativo: true });
+        }
+        p.variantes.forEach(function (v, idx) {
           var box = el("div", "avar");
-          box.appendChild(el("div", "avar-nome", rotuloCombo(v.combinacao || {})));
+          var topo = el("div", "avar-topo");
+          var iN = inp("text", v.nome || "", p.tipo_variacao ? ("Ex.: " + (idx === 0 ? "Médio" : "Grande")) : "Peça única");
+          iN.className = "avar-nomeinp";
+          iN.addEventListener("input", function () { v.nome = iN.value; });
+          topo.appendChild(iN);
+          if (p.variantes.length > 1) {
+            var rm = el("button", "apk-rm", "remover");
+            rm.type = "button";
+            rm.addEventListener("click", function () { p.variantes.splice(idx, 1); pintarVariantes(); });
+            topo.appendChild(rm);
+          }
+          box.appendChild(topo);
           var g = el("div", "agrid");
           function add(rot, tipo, val, set, ph) {
             var i = inp(tipo, val, ph);
@@ -309,15 +251,14 @@
             i.addEventListener("input", function () { set(i.value); });
             g.appendChild(campo(rot, i));
           }
-          add("Preço (R$)", "text", deCents(v.preco), function (x) { v.preco = x === "" ? null : paraCents(x); }, "herda");
+          add("Preço (R$)", "text", deCents(v.preco), function (x) { v.preco = paraCents(x); }, "0,00");
+          add("Promocional (R$)", "text", deCents(v.preco_promo), function (x) { v.preco_promo = x === "" ? null : paraCents(x); }, "sem promoção");
           add("Estoque", "number", v.estoque, function (x) { v.estoque = Number(x) || 0; });
           add("Peso (g)", "number", v.peso_g, function (x) { v.peso_g = Number(x) || 0; });
           add("Compr. (cm)", "number", v.comp_cm, function (x) { v.comp_cm = Number(x) || 0; });
           add("Larg. (cm)", "number", v.larg_cm, function (x) { v.larg_cm = Number(x) || 0; });
           add("Alt. (cm)", "number", v.alt_cm, function (x) { v.alt_cm = Number(x) || 0; });
           box.appendChild(g);
-          // pausar a venda manualmente, mesmo com estoque (o "esgotado" por
-          // contagem é automático; isto é o controle manual)
           var lv = el("label", "acheck");
           var cv = document.createElement("input"); cv.type = "checkbox"; cv.checked = v.ativo !== false;
           cv.addEventListener("change", function () { v.ativo = cv.checked; });
@@ -329,12 +270,20 @@
 
       salvar.addEventListener("click", function () {
         p.nome = iNome.value; p.descricao = iDesc.value; p.status = iStatus.value;
-        p.preco = paraCents(iPreco.value);
-        p.preco_promo = iPromo.value.trim() === "" ? null : paraCents(iPromo.value);
+        // preço do PRODUTO = o menor das versões (a vitrine mostra "a partir de")
+        var precos = p.variantes.map(function (v) { return Number(v.preco) || 0; }).filter(function (n) { return n > 0; });
+        p.preco = precos.length ? Math.min.apply(null, precos) : 0;
+        p.preco_promo = null;
+        // a combinação guarda {tipo: nome} — o que a loja usa pra montar o seletor
+        var tipo = (p.tipo_variacao || "").trim();
+        p.variantes.forEach(function (v) {
+          var n = (v.nome || "").trim();
+          v.combinacao = (tipo && n) ? (function () { var o = {}; o[tipo] = n; return o; })() : {};
+        });
         salvar.disabled = true; salvar.textContent = "Salvando…";
         fetch("/api/admin/produto", {
           method: "POST", headers: { "content-type": "application/json" },
-          body: JSON.stringify({ id: p.id || "", nome: p.nome, slug: p.slug, descricao: p.descricao, status: p.status, destaque: p.destaque, ordem: p.ordem, preco: p.preco, preco_promo: p.preco_promo, opcoes: p.opcoes, variantes: p.variantes, categorias: p.categorias, galeria: p.galeria }),
+          body: JSON.stringify({ id: p.id || "", nome: p.nome, slug: p.slug, descricao: p.descricao, status: p.status, destaque: p.destaque, ordem: p.ordem, preco: p.preco, preco_promo: p.preco_promo, opcoes: (p.tipo_variacao || '').trim() ? [{ nome: p.tipo_variacao.trim(), valores: p.variantes.map(function (v) { return (v.nome || '').trim(); }).filter(Boolean) }] : [], variantes: p.variantes, categorias: p.categorias, galeria: p.galeria }),
         }).then(function (r) { return r.json(); }).then(function (d) {
           salvar.disabled = false; salvar.textContent = "Salvar produto";
           msg.hidden = false;
@@ -353,14 +302,14 @@
       });
 
       pintarGaleria();
-      sincroniza();
+      pintarVariantes();
     }
 
     if (novo) { pintar(); return; }
     fetch("/api/admin/produto?id=" + encodeURIComponent(id)).then(function (r) { return r.json(); }).then(function (d) {
       if (d && d.ok) {
         var x = d.produto;
-        p = { id: x.id, nome: x.nome, slug: x.slug, descricao: x.descricao || "", status: x.status, destaque: x.destaque, ordem: x.ordem, preco: x.preco, preco_promo: x.preco_promo, opcoes: x.opcoes || [], variantes: (x.variantes || []).map(function (v) { return { id: v.id, combinacao: v.combinacao, preco: v.preco, preco_promo: v.preco_promo, estoque: v.estoque, peso_g: v.peso_g, comp_cm: v.comp_cm, larg_cm: v.larg_cm, alt_cm: v.alt_cm, ativo: !!v.ativo }; }), categorias: x.categorias || [], galeria: (x.galeria || []).map(function (g) { return { asset_id: g.asset_id, tipo: g.tipo }; }) };
+        p = { id: x.id, nome: x.nome, slug: x.slug, descricao: x.descricao || "", status: x.status, destaque: x.destaque, ordem: x.ordem, preco: x.preco, preco_promo: x.preco_promo, opcoes: x.opcoes || [], variantes: (x.variantes || []).map(function (v) { return { id: v.id, nome: Object.keys(v.combinacao || {}).length ? v.combinacao[Object.keys(v.combinacao)[0]] : '', combinacao: v.combinacao, preco: v.preco, preco_promo: v.preco_promo, estoque: v.estoque, peso_g: v.peso_g, comp_cm: v.comp_cm, larg_cm: v.larg_cm, alt_cm: v.alt_cm, ativo: !!v.ativo }; }), tipo_variacao: ((x.opcoes || [])[0] || {}).nome || '', categorias: x.categorias || [], galeria: (x.galeria || []).map(function (g) { return { asset_id: g.asset_id, tipo: g.tipo }; }) };
       }
       pintar();
     });
