@@ -46,14 +46,32 @@ export const PIX_DESCONTO_PCT = 5;
 export const PARCELA_MIN_CENTS = 5000;
 export const MAX_PARCELAS_SEM_JUROS = 3;
 export const MAX_PARCELAS = 6;
+export const FRETE_GRATIS_MIN_CENTS = 15000; // R$150 — casa com o subNow>=150 do cliente
+export const MAX_ITENS = 50; // teto de LINHAS por pedido (anti-abuso; a qtd por linha já é ≤99)
+
+// Frete recomputado NO SERVIDOR a partir do CEP + opção escolhida — o cliente
+// nunca dita o valor do frete (só escolhe a opção). Mesma fórmula do shipQuote()
+// de index.html: base = 12,90 + (1ª casa do CEP)×1,60; Econômico grátis acima de
+// R$150; Expresso = base + 16 (nunca grátis). Devolve CENTAVOS, ou null se o CEP
+// for inválido (≠ 8 dígitos).
+export function freteQuoteCents(cep, subtotalCents, opcao) {
+  const d = String(cep || "").replace(/\D/g, "");
+  if (d.length !== 8) return null;
+  const region = parseInt(d[0], 10) || 0;
+  const base = Math.round((12.9 + region * 1.6) * 100) / 100; // reais, 2 casas
+  if (opcao === "expresso") return Math.round((base + 16) * 100);
+  return subtotalCents >= FRETE_GRATIS_MIN_CENTS ? 0 : Math.round(base * 100); // econômico (default)
+}
 
 export function recomputaTotal(itens, opts) {
-  const { metodo, cupom, freteCents } = opts || {};
-  const frete = Number.isFinite(freteCents) ? freteCents : 0;
+  const { metodo, cupom, cep, freteOpcao } = opts || {};
+
+  const lista = Array.isArray(itens) ? itens : [];
+  if (lista.length > MAX_ITENS) return { erro: "itens" };
 
   let subtotal = 0;
   const linhas = [];
-  for (const item of itens || []) {
+  for (const item of lista) {
     const { id, tam, qtd } = item || {};
     const precoTam = PRECOS[id] && PRECOS[id][tam];
     if (precoTam === undefined) return { erro: "item" };
@@ -63,6 +81,15 @@ export function recomputaTotal(itens, opts) {
     if (!Number.isInteger(qtd) || qtd <= 0 || qtd > 99) return { erro: "qtd" };
     subtotal += precoTam * qtd;
     linhas.push({ id, tam, qtd, preco_unit: precoTam });
+  }
+
+  // Frete: recomputado do CEP AQUI (nunca confia no cliente). Só há frete quando
+  // há subtotal a enviar; com itens a enviar e CEP inválido => erro "cep".
+  let frete = 0;
+  if (subtotal > 0) {
+    const f = freteQuoteCents(cep, subtotal, freteOpcao);
+    if (f === null) return { erro: "cep" };
+    frete = f;
   }
 
   // Pix e cupom empilham (aditivo): os dois descontos se somam sobre o

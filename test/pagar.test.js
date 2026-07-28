@@ -25,32 +25,32 @@ const post = (body) => new Request("https://x/api/pagar", { method: "POST", head
 
 test("cobra o valor do servidor, não o do cliente", async () => {
   const ctx = createExecutionContext();
-  const res = await worker.fetch(post({ itens: [{ id: "tablete", tam: "M", qtd: 1 }], metodo: "pix", email: "a@b.com", cpf: "12345678909", consentiu: true, precoFalso: 1 }), env, ctx);
+  const res = await worker.fetch(post({ itens: [{ id: "tablete", tam: "M", qtd: 1 }], metodo: "pix", email: "a@b.com", cpf: "12345678909", endereco: { cep: "01310100" }, freteOpcao: "economico", consentiu: true, precoFalso: 1 }), env, ctx);
   await waitOnExecutionContext(ctx);
   const j = await res.json();
   expect(res.status).toBe(200);
   expect(j.ok).toBe(true);
   expect(j.status).toBe("aprovado");
   const row = await env.DB.prepare("SELECT total, status FROM compras WHERE ref=?").bind(j.ref).first();
-  // tablete/M = 12300; pix -5% = 615 de desconto; sem frete => total 11685
-  expect(row.total).toBe(12300 - 615);
+  // tablete/M = 12300; pix -5% = 615 desconto; frete econômico R$12,90 (região 0) => total 12975
+  expect(row.total).toBe(12300 - 615 + 1290);
   expect(row.status).toBe("aprovado");
 });
 
-test("freteCents negativo não zera o total (clamp em 0)", async () => {
+test("cliente não dita o frete — freteCents do payload é ignorado (recomputado do CEP)", async () => {
   const ctx = createExecutionContext();
-  const res = await worker.fetch(post({ itens: [{ id: "tablete", tam: "M", qtd: 1 }], metodo: "pix", email: "a@b.com", cpf: "12345678909", consentiu: true, freteCents: -1000000 }), env, ctx);
+  const res = await worker.fetch(post({ itens: [{ id: "tablete", tam: "M", qtd: 1 }], metodo: "pix", email: "a@b.com", cpf: "12345678909", endereco: { cep: "01310100" }, freteOpcao: "economico", consentiu: true, freteCents: -1000000 }), env, ctx);
   await waitOnExecutionContext(ctx);
   const j = await res.json();
   expect(res.status).toBe(200);
   const row = await env.DB.prepare("SELECT total FROM compras WHERE ref=?").bind(j.ref).first();
-  // frete negativo é clampado pra 0, não repassado — total = subtotal - desconto Pix
-  expect(row.total).toBe(12300 - 615);
+  // freteCents:-1000000 é ignorado; frete vem do CEP (econômico R$12,90) => total 12975
+  expect(row.total).toBe(12300 - 615 + 1290);
 });
 
 test("grava itens com preco_unit efetivamente cobrado (registro financeiro)", async () => {
   const ctx = createExecutionContext();
-  const res = await worker.fetch(post({ itens: [{ id: "tablete", tam: "M", qtd: 2, preco: 1 }], metodo: "cartao", email: "a@b.com", cpf: "12345678909", consentiu: true }), env, ctx);
+  const res = await worker.fetch(post({ itens: [{ id: "tablete", tam: "M", qtd: 2, preco: 1 }], metodo: "cartao", email: "a@b.com", cpf: "12345678909", endereco: { cep: "01310100" }, freteOpcao: "economico", consentiu: true}), env, ctx);
   await waitOnExecutionContext(ctx);
   const j = await res.json();
   expect(res.status).toBe(200);
@@ -61,7 +61,7 @@ test("grava itens com preco_unit efetivamente cobrado (registro financeiro)", as
 test("parcelas do cliente são clampadas ao máximo permitido pro total", async () => {
   const ctx = createExecutionContext();
   // tablete/M cartão = 12300 => parcelasValidas(12300).maxParcelas = 2 (12300/5000 = 2.46 -> 2)
-  const res = await worker.fetch(post({ itens: [{ id: "tablete", tam: "M", qtd: 1 }], metodo: "cartao", parcelas: 99, email: "a@b.com", cpf: "12345678909", consentiu: true }), env, ctx);
+  const res = await worker.fetch(post({ itens: [{ id: "tablete", tam: "M", qtd: 1 }], metodo: "cartao", parcelas: 99, email: "a@b.com", cpf: "12345678909", endereco: { cep: "01310100" }, freteOpcao: "economico", consentiu: true}), env, ctx);
   await waitOnExecutionContext(ctx);
   const j = await res.json();
   expect(res.status).toBe(200);
@@ -71,14 +71,14 @@ test("parcelas do cliente são clampadas ao máximo permitido pro total", async 
 
 test("carrinho vazio => 400", async () => {
   const ctx = createExecutionContext();
-  const res = await worker.fetch(post({ itens: [], metodo: "pix", email: "a@b.com", cpf: "12345678909", consentiu: true }), env, ctx);
+  const res = await worker.fetch(post({ itens: [], metodo: "pix", email: "a@b.com", cpf: "12345678909", endereco: { cep: "01310100" }, freteOpcao: "economico", consentiu: true}), env, ctx);
   await waitOnExecutionContext(ctx);
   expect(res.status).toBe(400);
 });
 
 test("item inexistente => 400", async () => {
   const ctx = createExecutionContext();
-  const res = await worker.fetch(post({ itens: [{ id: "hacker", tam: "M", qtd: 1 }], metodo: "pix", email: "a@b.com", cpf: "12345678909", consentiu: true }), env, ctx);
+  const res = await worker.fetch(post({ itens: [{ id: "hacker", tam: "M", qtd: 1 }], metodo: "pix", email: "a@b.com", cpf: "12345678909", endereco: { cep: "01310100" }, freteOpcao: "economico", consentiu: true}), env, ctx);
   await waitOnExecutionContext(ctx);
   expect(res.status).toBe(400);
 });
@@ -93,7 +93,7 @@ test("sem consentimento => 400", async () => {
 test("erro do MP (status='error', ex.: cartão recusado) => compra fica 'recusado', nunca 'pendente' com mp_payment_id nulo", async () => {
   criaPagamento.mockResolvedValueOnce({ status: "error", statusDetail: "invalid token" });
   const ctx = createExecutionContext();
-  const res = await worker.fetch(post({ itens: [{ id: "tablete", tam: "M", qtd: 1 }], metodo: "cartao", email: "a@b.com", cpf: "12345678909", consentiu: true }), env, ctx);
+  const res = await worker.fetch(post({ itens: [{ id: "tablete", tam: "M", qtd: 1 }], metodo: "cartao", email: "a@b.com", cpf: "12345678909", endereco: { cep: "01310100" }, freteOpcao: "economico", consentiu: true}), env, ctx);
   await waitOnExecutionContext(ctx);
   const j = await res.json();
   expect(j.ok).toBe(true);
@@ -111,7 +111,7 @@ test("Pix pendente: mapeia in_process => pendente e repassa o QR", async () => {
     pix: { qrBase64: "IMG", copiaECola: "COPIA" },
   });
   const ctx = createExecutionContext();
-  const res = await worker.fetch(post({ itens: [{ id: "tablete", tam: "M", qtd: 1 }], metodo: "pix", email: "a@b.com", cpf: "12345678909", consentiu: true }), env, ctx);
+  const res = await worker.fetch(post({ itens: [{ id: "tablete", tam: "M", qtd: 1 }], metodo: "pix", email: "a@b.com", cpf: "12345678909", endereco: { cep: "01310100" }, freteOpcao: "economico", consentiu: true}), env, ctx);
   await waitOnExecutionContext(ctx);
   const j = await res.json();
   expect(j.status).toBe("pendente");

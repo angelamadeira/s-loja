@@ -1063,6 +1063,8 @@
       if(hint&&hint.className.indexOf('err')<0){hint.textContent=data[0].free?'Frete Econômico grátis nesta compra (acima de R$ 150).':'';hint.className='cephint';}
       return data;
     }
+    /* expõe o recálculo pro render() (sacola): re-cota o frete com o subtotal atual e atualiza o resumo */
+    coRecalc=function(){var _d=(SHIP.cep||'').replace(/\D/g,'');if(_d.length===8)renderShip();renderCoSummary();syncCardBrickAmount();};
     function runCoCep(){
       var hint=document.getElementById('cepHint');
       if(!shipQuote(cep.value,cartSplit().subNow)){hint.textContent='Digite um CEP válido (8 dígitos).';hint.className='cephint err';return;}
@@ -1273,7 +1275,7 @@
          primeira reserva cobra 3.3× a mais. */
       var itens=sp.now.concat(sp.pre).map(function(it){return {id:it.p.id,tam:it.size,qtd:it.qty};});
       var freteCents=sp.now.length===0?0:(CO.ship?(CO.ship.free?0:Math.round(CO.ship.price*100)):0);
-      return {itens:itens,endereco:endereco,freteCents:freteCents};
+      return {itens:itens,endereco:endereco,freteCents:freteCents,freteOpcao:(CO.ship&&/xpress/i.test(CO.ship.label))?'expresso':'economico'};
     }
     /* ===== rádios Pix/Cartão: trocam CO.pay, mostram a forma certa e re-renderizam
        o resumo (Total muda com o método — ver renderCoSummary) ===== */
@@ -1306,7 +1308,7 @@
         itens:ctx.itens,metodo:'pix',
         cupom:CO.coupon?CO.coupon.code:undefined,
         cpf:cpfD,email:CO.email,whats:CO.whats,
-        endereco:ctx.endereco,freteCents:ctx.freteCents,consentiu:true
+        endereco:ctx.endereco,freteCents:ctx.freteCents,freteOpcao:ctx.freteOpcao,consentiu:true
       };
       var lbl=pixBtn.textContent;pixBtn.disabled=true;pixBtn.classList.add('is-loading');pixBtn.setAttribute('aria-busy','true');pixBtn.innerHTML='Processando<span class="bdots" aria-hidden="true"><i></i><i></i><i></i></span>';
       function restore(){pixBtn.disabled=false;pixBtn.classList.remove('is-loading');pixBtn.removeAttribute('aria-busy');pixBtn.textContent=lbl;}
@@ -1539,7 +1541,7 @@
             itens:ctx.itens,metodo:'cartao',parcelas:CO.parc,
             cupom:CO.coupon?CO.coupon.code:undefined,
             cpf:cpfD,email:CO.email,whats:CO.whats,
-            endereco:ctx.endereco,freteCents:ctx.freteCents,consentiu:true,
+            endereco:ctx.endereco,freteCents:ctx.freteCents,freteOpcao:ctx.freteOpcao,consentiu:true,
             token:token.id,paymentMethodId:st.paymentMethodId,issuerId:st.issuerId
           };
           showAguardando();
@@ -2109,6 +2111,7 @@
   /* CARRINHO */
   /* ── Frete compartilhado — carrinho, página de produto e checkout usam a mesma conta e o mesmo CEP ── */
   var SHIP={cep:''};
+  var coRecalc=null; /* hook setado pelo wireCheckout: recalcula frete+resumo do /checkout quando o carrinho muda */
   try{SHIP.cep=localStorage.getItem('suzu_cep')||'';}catch(e){}
   function fmtCep(v){var d=(v||'').replace(/\D/g,'').slice(0,8);return d.length>5?d.slice(0,5)+'-'+d.slice(5):d;}
   function saveCep(c){SHIP.cep=fmtCep(c);try{localStorage.setItem('suzu_cep',SHIP.cep);}catch(e){}}
@@ -2198,6 +2201,8 @@
     box.innerHTML=keys.map(function(k){var it=cart[k];var deco=it.presale?'':(wasPrice(it.p,priceOf(it.p,it.size))+BRL(it.price)+offtag(it.p));var precoUnit=it.presale?BRL(it.price):deco;return '<div class="li"><div class="mini">'+mold(it.p)+'</div><div class="info"><b>'+it.name+'</b><small>'+precoUnit+' · '+it.sub+'</small></div><div class="qty"><button data-m="'+k+'" aria-label="menos"><svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/></svg></button><span>'+it.qty+'</span><button data-p="'+k+'" aria-label="mais"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></div></div>';}).join('');
     box.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{cart[b.dataset.p].qty++;render();});
     box.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{var k=b.dataset.m;if(--cart[k].qty<=0)delete cart[k];render();});
+    /* no /checkout, recalcula frete + resumo quando o carrinho muda (senão o frete/total fica preso no valor antigo) */
+    if(location.pathname==='/checkout'&&typeof coRecalc==='function')coRecalc();
   }
   var ov=document.getElementById('overlay'),dr=document.getElementById('drawer');
   function open(){ov.classList.add('open');dr.classList.add('open');dr.setAttribute('aria-hidden','false');}

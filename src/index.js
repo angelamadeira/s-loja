@@ -138,12 +138,6 @@ function jparse(s, fallback) {
   }
 }
 
-// Teto de frete aceito do cliente: R$1000 em centavos. F4a ainda recebe o
-// frete do cliente (frete real/calculado por CEP é F4b — servidor autoritativo
-// só pra frete vem depois); este teto + o floor em 0 fecham o buraco de
-// "pagar quase nada pelos produtos" mandando freteCents negativo.
-const FRETE_MAX_CENTS = 100000;
-
 // POST /api/pagar — hub da Fase 4a: recomputa o total no servidor (nunca confia
 // no preço do cliente), grava a compra ANTES de chamar o MP (resiliência —
 // se o MP/rede falhar, a linha não se perde), chama o MP e atualiza o status.
@@ -157,9 +151,9 @@ async function handlePagar(request, env) {
     const whats = str(body.whats);
     const cpf = str(body.cpf).replace(/\D/g, "");
     const endereco = body.endereco || null;
-    // freteCents é do cliente (F4a) — nunca confiar sem clamp: negativo
-    // zeraria o total junto com o subtotal recomputado.
-    const freteCents = Math.max(0, Math.min(Math.round(Number(body.freteCents) || 0), FRETE_MAX_CENTS));
+    // frete recomputado no servidor (em recomputaTotal) a partir do CEP do
+    // endereço + a OPÇÃO escolhida — o cliente só manda a opção, nunca o valor.
+    const freteOpcao = str(body.freteOpcao) === "expresso" ? "expresso" : "economico";
     const consentiu = body.consentiu === true;
     const ip = request.headers.get("CF-Connecting-IP") || "";
 
@@ -169,10 +163,10 @@ async function handlePagar(request, env) {
     if (cpf.length !== 11) return json({ ok: false, erro: "cpf" }, 400);
     if (!itens.length) return json({ ok: false, erro: "vazio" }, 400);
 
-    // 2. o valor cobrado nasce AQUI — recomputado a partir de {id,tam,qtd},
-    //    ignorando qualquer preço (e agora também qualquer frete fora do
-    //    teto) que tenha vindo no payload do cliente
-    const calc = recomputaTotal(itens, { metodo, cupom, freteCents });
+    // 2. o valor cobrado nasce AQUI — subtotal recomputado de {id,tam,qtd} e
+    //    FRETE recomputado do CEP + opção; ignora qualquer preço/frete que tenha
+    //    vindo no payload do cliente (que só escolhe a opção de frete).
+    const calc = recomputaTotal(itens, { metodo, cupom, cep: endereco && endereco.cep, freteOpcao });
     if (calc.erro) return json({ ok: false, erro: calc.erro }, 400);
     const { subtotal, desconto, frete, total, linhas } = calc;
 
