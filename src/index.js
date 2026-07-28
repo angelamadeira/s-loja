@@ -118,6 +118,7 @@ async function handleOrcamento(request, env) {
 // retorna undefined (cada chamador decide o que fazer com isso).
 const MP_STATUS = {
   approved: "aprovado",
+  authorized: "pendente", // auth-hold (auth-e-captura): ainda não capturado — nunca tratar como recusado
   in_process: "pendente",
   pending: "pendente",
   rejected: "recusado",
@@ -172,7 +173,9 @@ async function handlePagar(request, env) {
 
     // parcelas: nunca confiar no valor do cliente — clampa em [1, máximo
     // permitido pro total recomputado] (mesma regra de negócio de parcelasValidas)
-    const parcelas = Math.min(Math.max(1, Math.round(Number(body.parcelas) || 1)), parcelasValidas(total).maxParcelas);
+    // Pix é sempre à vista (1×); só o cartão parcela. Evita mandar installments>1
+    // num Pix (o MP rejeitaria e viraria "recusado" à toa).
+    const parcelas = metodo === "pix" ? 1 : Math.min(Math.max(1, Math.round(Number(body.parcelas) || 1)), parcelasValidas(total).maxParcelas);
 
     // 3. grava a compra ANTES de chamar o MP — se a rede/MP falhar, a venda
     //    iniciada não se perde. itens grava as linhas com o preco_unit

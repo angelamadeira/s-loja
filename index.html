@@ -1136,7 +1136,13 @@
         var t=e.target;if(!t||t.tagName==='TEXTAREA'||t.tagName==='BUTTON')return;
         if(t.id==='coCep'||t.id==='coCoupon')return;
         var sec=t.closest&&t.closest('.costep');if(!sec)return;
-        var btn=sec.querySelector('.conext');if(!btn)return;
+        var btn=sec.querySelector('.conext');
+        if(!btn){
+          /* passo de Pagamento não tem .conext: Enter dispara o botão de pagar
+             visível e habilitado, se já há forma escolhida (Pix/Cartão). */
+          if(CO.pay){var pb=[].slice.call(sec.querySelectorAll('button')).find(function(b){return /Pagar/i.test(b.textContent)&&b.offsetParent!==null&&!b.disabled;});if(pb){e.preventDefault();pb.click();}}
+          return;
+        }
         e.preventDefault();advance(+btn.dataset.next);});
       ['coNome','coRua','coNum','coBairro','coCidade'].forEach(function(id){var el=document.getElementById(id);if(el)el.addEventListener('input',function(){el.classList.remove('bad');var ah=document.getElementById('addrHint');if(ah&&!cof.querySelector('#addrFields .bad')){ah.textContent='';ah.className='cephint';}});});
       cof.querySelectorAll('button.cohd').forEach(function(h){h.onclick=function(){var sec=h.closest('.costep');var n=+sec.dataset.step;
@@ -1151,7 +1157,7 @@
          fecha o acesso aos seguintes (guarda de validação). A edição só é
          "aplicada" (resumo colapsado + .done reafirmado) ao clicar "Continuar" —
          regra explícita, sem atualizar o resumo enquanto digita. */
-      cof.addEventListener('input',function(e){var sec=e.target.closest&&e.target.closest('.costep');if(sec&&sec.classList.contains('done')&&!validStep(+sec.dataset.step,true))sec.classList.remove('done');refreshNav();});
+      cof.addEventListener('input',function(e){var sec=e.target.closest&&e.target.closest('.costep');if(sec&&sec.classList.contains('done')&&!validStep(+sec.dataset.step,true)){sec.classList.remove('done');var _n=+sec.dataset.step;/* recolhe qualquer passo posterior aberto (ex.: Pagamento) sobre um passo agora inválido */cof.querySelectorAll('.costep.open').forEach(function(o){if(+o.dataset.step>_n)o.classList.remove('open');});}refreshNav();});
       refreshNav();
     })();
     /* o pagamento acontece pelo botão "Pagar com Pix" (nosso) ou pelo botão do
@@ -1820,7 +1826,10 @@
     h+='<div class="sumrow"><span>Frete</span><span>'+frete+'</span></div>';
     if(coupDisc>0)h+='<div class="sumrow disc"><span>Cupom '+CO.coupon.code+'</span><span>−'+BRL(coupDisc)+'</span></div>';
     if(payPixDisc>0)h+='<div class="sumrow disc"><span>Desconto Pix</span><span>−'+BRL(payPixDisc)+'</span></div>';
-    h+='<div class="sumrow tot"><span>Total</span><b>'+BRL(total)+'</b></div>';
+    /* enquanto o frete não foi calculado (itens a enviar, sem CO.ship), o Total
+       ainda não é o real — mostra "a calcular" em vez de um valor menor enganoso. */
+    var _totalStr=(s.now.length&&ship===null)?'a calcular':BRL(total);
+    h+='<div class="sumrow tot"><span>Total</span><b>'+_totalStr+'</b></div>';
     if(s.pre.length)h+='<p class="sumnote pre">Nos itens de reserva você paga só o <b>sinal</b> agora. O restante e o frete são cobrados quando a peça lança.</p>';
     h+=freeShipHtml(s.subNow,s.now.length>0,true); /* checkout: só a confirmação positiva de frete grátis */
     el.innerHTML=h;
@@ -1902,6 +1911,7 @@
      aprovado é o mesmo que esta aba estava pagando, CO.order===ref). */
   function wirePixView(){
     var wrap=document.getElementById('pixWrap'); if(!wrap)return;
+    stopPoll(); /* mata qualquer polling de um Pix anterior (ex.: /pix/A -> /pix/B) antes de armar o desta ref */
     var ref=wrap.dataset.ref;
     var titleEl=document.getElementById('pixTitle'),subEl=document.getElementById('pixSub'),panel=document.getElementById('pixPanel'),cta=document.getElementById('pixCta');
     var amountEl=document.getElementById('pixAmount'),amountVal=document.getElementById('pixAmountVal');
@@ -1997,6 +2007,7 @@
       stopPoll();
       pollTimer=setInterval(function(){
         fetch('/api/compra?ref='+encodeURIComponent(ref)).then(function(r){return r.json();}).then(function(d){
+          if(document.getElementById('pixWrap')!==wrap){stopPoll();return;} /* saiu do /pix desta ref — encerra */
           if(!d)return;
           if(d.status==='aprovado'){handleApproved(d.order);}
           else if(d.status==='recusado'||d.status==='cancelado'){stopPoll();setGone('O pagamento não foi concluído — nada foi cobrado.','<a class="btn" href="/checkout">Voltar ao checkout</a>');}
@@ -2005,6 +2016,7 @@
       },4000);
     }
     fetch('/api/compra?ref='+encodeURIComponent(ref)).then(function(r){return r.json();}).then(function(d){
+      if(document.getElementById('pixWrap')!==wrap)return; /* já navegou pra fora antes da resposta — não renderiza nem re-arma poll() */
       if(!d||d.status==='nao_encontrado'){setGone('Não encontramos esse pedido.','<a class="btn" href="/produtos">Ver produtos</a><a class="btn ghost" href="/checkout">Voltar ao checkout</a>');return;}
       if(d.status==='aprovado'){handleApproved(d.order);return;}
       if(d.status==='recusado'||d.status==='cancelado'){setGone('O pagamento não foi concluído — nada foi cobrado.','<a class="btn" href="/checkout">Voltar ao checkout</a>');return;}
