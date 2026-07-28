@@ -127,6 +127,70 @@
 }
 .amsg.err { background: var(--sango-wash); }
 
+/* ── separador "ou" entre passkey e link por e-mail ─────────────────────── */
+.asep {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin: var(--space-5) 0;
+  color: var(--text-muted);
+  font-size: .68rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+.asep::before,
+.asep::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+}
+
+/* ── passkeys cadastradas ───────────────────────────────────────────────── */
+.apk-title {
+  font-size: .68rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: var(--space-3);
+}
+.apk-lista { margin-bottom: var(--space-4); }
+.apk-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  margin-bottom: var(--space-2);
+  font-size: .92rem;
+}
+.apk-rm {
+  background: none;
+  border: 0;
+  color: var(--text-muted);
+  font-family: var(--sans);
+  font-size: .72rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--r-xs);
+}
+.apk-rm:hover { color: var(--sango-deep); }
+.apk-vazio {
+  color: var(--text-muted);
+  font-size: .88rem;
+  padding: var(--space-3) 0;
+}
+.apk-nota {
+  color: var(--text-muted);
+  font-size: .76rem;
+  line-height: 1.5;
+  margin: var(--space-3) 0 var(--space-5);
+}
+
 .afoot {
   padding: var(--space-5);
   text-align: center;
