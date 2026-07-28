@@ -1,0 +1,12 @@
+-- Link do POST da rede social onde o vídeo do produto foi publicado.
+-- Decisão (ver plano do admin): o ARQUIVO no R2 continua sendo a fonte da vitrine
+-- (toca sozinho, mudo, em loop, sem cookie de terceiro e não some se o post cair);
+-- o link é só um caminho OPCIONAL pro post real — vira botão "ver no Instagram"
+-- / "ver no TikTok" dentro do vídeo, onde ficam curtidas e comentários.
+--
+-- Aplicar (staging primeiro, sempre):
+--   npx wrangler d1 execute suzu-pedidos --env preview --remote --file=migra-links-video.sql
+--
+-- JSON: {"instagram":"https://...","tiktok":"https://..."} — só https e só nos
+-- domínios das duas redes (validado em src/catalogo.js, nunca confiando no campo).
+ALTER TABLE cat_produtos ADD COLUMN video_links TEXT NOT NULL DEFAULT '{}';

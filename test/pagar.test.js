@@ -9,16 +9,25 @@ vi.mock("../src/mp.js", () => ({
 import worker from "../src/index.js";
 import { criaPagamento } from "../src/mp.js";
 import schemaSql from "../schema.sql?raw";
+import catalogoSql from "../schema-catalogo.sql?raw";
+import migraSql from "../migra-catalogo.sql?raw";
 
 // O D1 de teste começa vazio (sem tabelas) — cria o schema (mesmo schema.sql
 // de produção) antes de cada teste. Feito aqui, e não num setupFile de
 // vitest.config.mjs, porque um setupFile que importa de "cloudflare:test"
 // quebra o vi.mock() acima (ver issue 10201 do cloudflare/workers-sdk).
+//
+// O CATÁLOGO entra junto porque o preço cobrado passou a nascer de cat_variantes
+// (ver src/precos.js): sem catálogo no banco não existe compra, e é assim que
+// tem de ser — servidor sem preço não inventa preço.
+function statements(sql) {
+  // comentários primeiro: vários deles contêm ";" e partiriam o SQL no meio
+  return sql.replace(/--[^\n]*/g, "").split(";").map((s) => s.trim()).filter(Boolean);
+}
 beforeEach(async () => {
   vi.clearAllMocks(); // zera contadores de chamada entre testes (idempotência checa nº de cobranças)
-  const statements = schemaSql.split(";").map((s) => s.trim()).filter(Boolean);
-  for (const stmt of statements) {
-    await env.DB.prepare(stmt).run();
+  for (const sql of [schemaSql, catalogoSql, migraSql]) {
+    for (const stmt of statements(sql)) await env.DB.prepare(stmt).run();
   }
 });
 

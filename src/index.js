@@ -7,7 +7,7 @@ import { EmailMessage } from "cloudflare:email";
 import { recomputaTotal, parcelasValidas } from "./precos.js";
 import { criaPagamento, consultaPagamento, consultaPagamentoFull } from "./mp.js";
 import { handleAdmin } from "./admin.js";
-import { serveMidia } from "./catalogo.js";
+import { serveMidia, catalogoPublico } from "./catalogo.js";
 
 const MAX_ARQUIVO = 10 * 1024 * 1024; // 10 MB por anexo
 const MAX_ANEXOS = 12;
@@ -40,6 +40,27 @@ export default {
     if (url.pathname === "/api/config") {
       if (request.method !== "GET") return json({ ok: false, error: "metodo" }, 405);
       return json({ mpKey: env.MP_PUBLIC_KEY });
+    }
+    // Catálogo PÚBLICO — a loja lê daqui o que a fundadora edita no admin.
+    // É a MESMA linha de cat_variantes que o servidor usa pra cobrar
+    // (src/precos.js), então o que aparece na vitrine é o que vai na fatura.
+    if (url.pathname === "/api/catalogo") {
+      if (request.method !== "GET") return json({ ok: false, error: "metodo" }, 405);
+      try {
+        const dados = await catalogoPublico(env);
+        return new Response(JSON.stringify({ ok: true, ...dados }), {
+          headers: {
+            "content-type": "application/json; charset=utf-8",
+            // curto de propósito: ela edita no admin e quer ver na loja logo.
+            "cache-control": "public, max-age=30",
+          },
+        });
+      } catch (e) {
+        console.error("catalogo publico", e);
+        // A loja tem o catálogo do código como reserva — devolver erro aqui só
+        // faz ela continuar mostrando o que já mostrava, sem página quebrada.
+        return json({ ok: false, erro: "servidor" }, 500);
+      }
     }
     // Mídia do catálogo (imagem/vídeo do produto) — PÚBLICA: aparece na loja.
     if (url.pathname.startsWith("/midia/")) {
@@ -187,7 +208,7 @@ async function handlePagar(request, env) {
     // 2. o valor cobrado nasce AQUI — subtotal recomputado de {id,tam,qtd} e
     //    FRETE recomputado do CEP + opção; ignora qualquer preço/frete que tenha
     //    vindo no payload do cliente (que só escolhe a opção de frete).
-    const calc = recomputaTotal(itens, { metodo, cupom, cep: endereco && endereco.cep, freteOpcao });
+    const calc = await recomputaTotal(env, itens, { metodo, cupom, cep: endereco && endereco.cep, freteOpcao });
     if (calc.erro) return json({ ok: false, erro: calc.erro }, 400);
     const { subtotal, desconto, frete, total, linhas } = calc;
 

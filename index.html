@@ -225,15 +225,67 @@
   var reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
   var BRL=v=>'R$ '+v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
   var SIZES={P:{name:'Pequeno',dim:'≈ 3 cm',add:0},M:{name:'Médio',dim:'≈ 7 cm',add:34},G:{name:'Grande',dim:'≈ 12 cm',add:82}};
-  var IG='https://www.instagram.com/somos.suzu/';
+  /* `ig`/`tt` = link do POST onde o vídeo desta peça foi publicado (não é o
+     perfil — o perfil fica no rodapé). Vira o botão "ver no Instagram/TikTok"
+     dentro do vídeo. Vazio = botão não aparece. Quando a vitrine passar a ler do
+     banco, estes valores vêm de cat_produtos.video_links. */
   var PRODUCTS=[
-    {id:'tablete',name:'Tablete Seigaiha',shape:'bar',cols:3,rows:4,base:89,rating:4.9,rev:128,use:'Tablete · 12 gomos',coll:'Essenciais',sizes:['M','G'],out:['G'],launch:6,seigaiha:true,edition:40,left:7,status:'live',ig:IG,desc:'Doze gomos com o relevo de ondas seigaiha — o mesmo traço que assina as nossas embalagens. Uma barra que já chega autoral.'},
-    {id:'coracao',name:'Coração Selado',shape:'heart', cols:4,rows:2,base:68,rating:5.0,rev:64,use:'Bombom · coração',coll:'Bombons',sizes:['P','M'],launch:5,edition:50,left:50,status:'presale',avail:'15/03',ig:IG,desc:'Corações com o relevo do selo, para as datas que pedem afeto — sem cair no óbvio.'},
-    {id:'concha', name:'Bombom Concha', shape:'circle',cols:6,rows:4,base:71,rating:4.8,rev:203,use:'Bombom · mini',coll:'Bombons',sizes:['P','M'],launch:4,edition:80,left:44,status:'presale',avail:'02/04',ig:IG,desc:'Vinte e quatro mini bombons por fornada — para caixas e mimos que se vendem no olhar.'},
-    {id:'cubo',   name:'Pão de Mel Cubo',shape:'square',cols:3,rows:3,base:82,sale:20,rating:4.9,rev:52,use:'Pão de mel · cubo',coll:'Bento & Festa',sizes:['M','G'],launch:3,edition:45,left:21,status:'live',ig:IG,desc:'Cubos de faces retas e vivas — pães de mel, brownies e entremets com acabamento de galeria.'},
-    {id:'esfera', name:'Bombom Esfera', shape:'circle',cols:5,rows:3,base:74,rating:4.8,rev:96,use:'Bombom · esfera',coll:'Bombons',sizes:['P','M','G'],launch:2,edition:60,left:33,status:'live',ig:IG,desc:'Esferas de fecho perfeito para bombons recheados. Desenforma limpa, brilho de vitrine.',media:[{type:'image',src:'data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20600%20600%27%3E%3Cdefs%3E%3ClinearGradient%20id%3D%27bgA%27%20x1%3D%270%27%20y1%3D%270%27%20x2%3D%270%27%20y2%3D%271%27%3E%3Cstop%20offset%3D%270%27%20stop-color%3D%27%23FBF8F1%27%2F%3E%3Cstop%20offset%3D%271%27%20stop-color%3D%27%23F6E1D6%27%2F%3E%3C%2FlinearGradient%3E%3CradialGradient%20id%3D%27chocA%27%20cx%3D%27.38%27%20cy%3D%27.32%27%20r%3D%27.8%27%3E%3Cstop%20offset%3D%270%27%20stop-color%3D%27%237E5643%27%2F%3E%3Cstop%20offset%3D%27.55%27%20stop-color%3D%27%235A3B2E%27%2F%3E%3Cstop%20offset%3D%271%27%20stop-color%3D%27%233E2619%27%2F%3E%3C%2FradialGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%27600%27%20height%3D%27600%27%20fill%3D%27url%28%23bgA%29%27%2F%3E%3Cellipse%20cx%3D%27300%27%20cy%3D%27545%27%20rx%3D%27320%27%20ry%3D%2760%27%20fill%3D%27%23E4C9A8%27%20opacity%3D%27.35%27%2F%3E%3Cg%20transform%3D%27translate%28300%20232%29%20rotate%28-7%29%27%3E%3Crect%20x%3D%27-196%27%20y%3D%27-126%27%20width%3D%27392%27%20height%3D%27252%27%20rx%3D%2738%27%20fill%3D%27%23463C34%27%20opacity%3D%27.10%27%2F%3E%3Crect%20x%3D%27-196%27%20y%3D%27-134%27%20width%3D%27392%27%20height%3D%27252%27%20rx%3D%2738%27%20fill%3D%27%23E89A85%27%2F%3E%3Crect%20x%3D%27-196%27%20y%3D%27-134%27%20width%3D%27392%27%20height%3D%27252%27%20rx%3D%2738%27%20fill%3D%27none%27%20stroke%3D%27%23D5836C%27%20stroke-width%3D%273%27%2F%3E%3Cg%20transform%3D%27translate%280%20-8%29%27%3E%3Cellipse%20cx%3D%27-130%27%20cy%3D%27-51%27%20rx%3D%2746%27%20ry%3D%2740%27%20fill%3D%27%23C9765F%27%20opacity%3D%27.5%27%2F%3E%3Ccircle%20cx%3D%27-130%27%20cy%3D%27-58%27%20r%3D%2744%27%20fill%3D%27%23D98770%27%2F%3E%3Cellipse%20cx%3D%270%27%20cy%3D%27-51%27%20rx%3D%2746%27%20ry%3D%2740%27%20fill%3D%27%23C9765F%27%20opacity%3D%27.5%27%2F%3E%3Ccircle%20cx%3D%270%27%20cy%3D%27-58%27%20r%3D%2744%27%20fill%3D%27%23D98770%27%2F%3E%3Cellipse%20cx%3D%27130%27%20cy%3D%27-51%27%20rx%3D%2746%27%20ry%3D%2740%27%20fill%3D%27%23C9765F%27%20opacity%3D%27.5%27%2F%3E%3Ccircle%20cx%3D%27130%27%20cy%3D%27-58%27%20r%3D%2744%27%20fill%3D%27%23D98770%27%2F%3E%3Cellipse%20cx%3D%27-130%27%20cy%3D%2765%27%20rx%3D%2746%27%20ry%3D%2740%27%20fill%3D%27%23C9765F%27%20opacity%3D%27.5%27%2F%3E%3Ccircle%20cx%3D%27-130%27%20cy%3D%2758%27%20r%3D%2744%27%20fill%3D%27%23D98770%27%2F%3E%3Cellipse%20cx%3D%270%27%20cy%3D%2765%27%20rx%3D%2746%27%20ry%3D%2740%27%20fill%3D%27%23C9765F%27%20opacity%3D%27.5%27%2F%3E%3Ccircle%20cx%3D%270%27%20cy%3D%2758%27%20r%3D%2744%27%20fill%3D%27%23D98770%27%2F%3E%3Cellipse%20cx%3D%27130%27%20cy%3D%2765%27%20rx%3D%2746%27%20ry%3D%2740%27%20fill%3D%27%23C9765F%27%20opacity%3D%27.5%27%2F%3E%3Ccircle%20cx%3D%27130%27%20cy%3D%2758%27%20r%3D%2744%27%20fill%3D%27%23D98770%27%2F%3E%3C%2Fg%3E%3C%2Fg%3E%3Cg%3E%3Cellipse%20cx%3D%27196%27%20cy%3D%27476%27%20rx%3D%2774%27%20ry%3D%2720%27%20fill%3D%27%23463C34%27%20opacity%3D%27.14%27%2F%3E%3Ccircle%20cx%3D%27196%27%20cy%3D%27430%27%20r%3D%2766%27%20fill%3D%27url%28%23chocA%29%27%2F%3E%3Cellipse%20cx%3D%27172%27%20cy%3D%27406%27%20rx%3D%2722%27%20ry%3D%2713%27%20fill%3D%27%23FFFFFF%27%20opacity%3D%27.30%27%20transform%3D%27rotate%28-24%20172%20406%29%27%2F%3E%3Cellipse%20cx%3D%27392%27%20cy%3D%27498%27%20rx%3D%2760%27%20ry%3D%2717%27%20fill%3D%27%23463C34%27%20opacity%3D%27.13%27%2F%3E%3Ccircle%20cx%3D%27392%27%20cy%3D%27462%27%20r%3D%2752%27%20fill%3D%27url%28%23chocA%29%27%2F%3E%3Cellipse%20cx%3D%27374%27%20cy%3D%27443%27%20rx%3D%2717%27%20ry%3D%2710%27%20fill%3D%27%23FFFFFF%27%20opacity%3D%27.28%27%20transform%3D%27rotate%28-24%20374%20443%29%27%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E',alt:'Molde de silicone com as esferas prontas'},{type:'image',src:'data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20600%20600%27%3E%3Cdefs%3E%3CradialGradient%20id%3D%27bgB%27%20cx%3D%27.5%27%20cy%3D%27.42%27%20r%3D%27.75%27%3E%3Cstop%20offset%3D%270%27%20stop-color%3D%27%23EAF0EC%27%2F%3E%3Cstop%20offset%3D%271%27%20stop-color%3D%27%23D6E1DB%27%2F%3E%3C%2FradialGradient%3E%3CradialGradient%20id%3D%27chocB%27%20cx%3D%27.36%27%20cy%3D%27.30%27%20r%3D%27.85%27%3E%3Cstop%20offset%3D%270%27%20stop-color%3D%27%23875C48%27%2F%3E%3Cstop%20offset%3D%27.5%27%20stop-color%3D%27%235A3B2E%27%2F%3E%3Cstop%20offset%3D%271%27%20stop-color%3D%27%2338210F%27%2F%3E%3C%2FradialGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%27600%27%20height%3D%27600%27%20fill%3D%27url%28%23bgB%29%27%2F%3E%3Ccircle%20cx%3D%27150%27%20cy%3D%27150%27%20r%3D%2770%27%20fill%3D%27%235A3B2E%27%20opacity%3D%27.14%27%2F%3E%3Ccircle%20cx%3D%27470%27%20cy%3D%27120%27%20r%3D%2748%27%20fill%3D%27%235A3B2E%27%20opacity%3D%27.10%27%2F%3E%3Cellipse%20cx%3D%27300%27%20cy%3D%27470%27%20rx%3D%27170%27%20ry%3D%2742%27%20fill%3D%27%23463C34%27%20opacity%3D%27.16%27%2F%3E%3Ccircle%20cx%3D%27300%27%20cy%3D%27312%27%20r%3D%27168%27%20fill%3D%27url%28%23chocB%29%27%2F%3E%3Cellipse%20cx%3D%27242%27%20cy%3D%27250%27%20rx%3D%2754%27%20ry%3D%2734%27%20fill%3D%27%23FFFFFF%27%20opacity%3D%27.30%27%20transform%3D%27rotate%28-26%20242%20250%29%27%2F%3E%3Ccircle%20cx%3D%27372%27%20cy%3D%27372%27%20r%3D%2710%27%20fill%3D%27%23FFFFFF%27%20opacity%3D%27.10%27%2F%3E%3C%2Fsvg%3E',alt:'Esfera de chocolate desenformada, brilho de vitrine'}]},
-    {id:'macaron',name:'Macaron Anel',  shape:'ring',  cols:4,rows:3,base:79,rating:4.7,rev:141,use:'Macaron',coll:'Essenciais',sizes:['P','M'],launch:1,edition:40,left:0,status:'soldout',ig:IG,desc:'Anéis de borda impecável: macarons de altura uniforme, fileira após fileira.'}
+    {id:'tablete',name:'Tablete Seigaiha',shape:'bar',cols:3,rows:4,base:89,rating:4.9,rev:128,use:'Tablete · 12 gomos',coll:'Essenciais',sizes:['M','G'],out:['G'],launch:6,seigaiha:true,edition:40,left:7,status:'live',ig:'',tt:'',desc:'Doze gomos com o relevo de ondas seigaiha — o mesmo traço que assina as nossas embalagens. Uma barra que já chega autoral.'},
+    {id:'coracao',name:'Coração Selado',shape:'heart', cols:4,rows:2,base:68,rating:5.0,rev:64,use:'Bombom · coração',coll:'Bombons',sizes:['P','M'],launch:5,edition:50,left:50,status:'presale',avail:'15/03',ig:'',tt:'',desc:'Corações com o relevo do selo, para as datas que pedem afeto — sem cair no óbvio.'},
+    {id:'concha', name:'Bombom Concha', shape:'circle',cols:6,rows:4,base:71,rating:4.8,rev:203,use:'Bombom · mini',coll:'Bombons',sizes:['P','M'],launch:4,edition:80,left:44,status:'presale',avail:'02/04',ig:'',tt:'',desc:'Vinte e quatro mini bombons por fornada — para caixas e mimos que se vendem no olhar.'},
+    {id:'cubo',   name:'Pão de Mel Cubo',shape:'square',cols:3,rows:3,base:82,sale:20,rating:4.9,rev:52,use:'Pão de mel · cubo',coll:'Bento & Festa',sizes:['M','G'],launch:3,edition:45,left:21,status:'live',ig:'',tt:'',desc:'Cubos de faces retas e vivas — pães de mel, brownies e entremets com acabamento de galeria.'},
+    {id:'esfera', name:'Bombom Esfera', shape:'circle',cols:5,rows:3,base:74,rating:4.8,rev:96,use:'Bombom · esfera',coll:'Bombons',sizes:['P','M','G'],launch:2,edition:60,left:33,status:'live',ig:'',tt:'',desc:'Esferas de fecho perfeito para bombons recheados. Desenforma limpa, brilho de vitrine.'},
+    {id:'macaron',name:'Macaron Anel',  shape:'ring',  cols:4,rows:3,base:79,rating:4.7,rev:141,use:'Macaron',coll:'Essenciais',sizes:['P','M'],launch:1,edition:40,left:0,status:'soldout',ig:'',tt:'',desc:'Anéis de borda impecável: macarons de altura uniforme, fileira após fileira.'}
   ];
+  /* ── O CATÁLOGO VEM DO BANCO ───────────────────────────────────────────────
+     A fundadora edita em /admin/produtos e a loja acompanha. O array acima passa
+     a ser o PRESET: a arte procedural (shape/cols/rows/tint) e os textos de apoio
+     que não existem no banco, mais a RESERVA se a rede falhar.
+     O que o banco manda: nome, descrição, preço e estoque POR TAMANHO, fotos,
+     vídeo, links do post e situação. Preço e estoque vêm da mesma linha
+     (cat_variantes) que o servidor usa pra cobrar — uma verdade só.
+     Produto novo criado no admin entra aqui mesmo sem PRESET: sem arte
+     procedural, ele aparece com a foto que ela subiu. */
+  var PRESET={};PRODUCTS.forEach(function(p){PRESET[p.id]=p;});
+  var PRESET_PADRAO={shape:'circle',cols:4,rows:3,use:'Peça autoral',coll:'Essenciais',rating:0,rev:0,launch:0,sizes:['M'],desc:''};
+  function midiaDoAsset(g,alt){
+    return String(g.tipo||'').indexOf('video')===0
+      ?{type:'video',src:'/midia/'+g.id}
+      :{type:'image',src:'/midia/'+g.id,alt:alt};
+  }
+  function aplicaCatalogo(lista){
+    var novos=[];
+    lista.forEach(function(d){
+      if(!d||!d.vars||!d.vars.length)return; /* sem tamanho mapeado, a vitrine atual não sabe desenhar */
+      var base=PRESET[d.id]||PRESET_PADRAO;
+      var p={};Object.keys(base).forEach(function(k){p[k]=base[k];});
+      p.id=d.id;p.name=d.nome;p.slug=d.slug;
+      if(d.desc)p.desc=d.desc;
+      if(d.use)p.use=d.use;   /* legenda curta ("Tablete · 12 gomos"), editável no admin */
+      p.ig=d.ig||'';p.tt=d.tt||'';
+      if(d.video)p.video='/midia/'+d.video;
+      if(d.galeria&&d.galeria.length)p.media=d.galeria.map(function(g){return midiaDoAsset(g,d.nome);});
+      if(d.capa)p.cover=midiaDoAsset({id:d.capa,tipo:'image/*'},d.nome);
+      /* V: preço e estoque por tamanho, em REAIS (o banco guarda centavos) */
+      p.V={};
+      d.vars.forEach(function(v){
+        p.V[v.tam]={cheio:(v.cheio||0)/100,promo:v.promo?v.promo/100:0,estoque:Number(v.estoque)||0,semEstoque:!!v.semEstoque};
+      });
+      p.sizes=['P','M','G'].filter(function(t){return p.V[t];});
+      p.out=p.sizes.filter(function(t){return p.V[t].estoque<=0&&!p.V[t].semEstoque;});
+      p.left=p.sizes.reduce(function(n,t){return n+Math.max(0,p.V[t].estoque);},0);
+      p.status=p.out.length===p.sizes.length?'soldout':'live';
+      delete p.sale; /* a % agora é calculada dos dois preços (ver saleP) */
+      novos.push(p);
+    });
+    if(!novos.length)return false;
+    /* troca o CONTEÚDO do array, não a referência — o resto do código fecha
+       sobre PRODUCTS e perderia o vínculo se fosse reatribuído */
+    PRODUCTS.length=0;
+    novos.forEach(function(p){PRODUCTS.push(p);});
+    return true;
+  }
+
   /* PRÉ-VENDA desligada por ora (guardada p/ voltar depois) — flipar p/ true reativa tudo.
      Off: normaliza produtos 'presale' -> 'live' em runtime; o literal acima mantém 'presale'. */
   var PREVENDA=false;
@@ -242,12 +294,30 @@
   /* slug = nome "achatado" p/ a URL (sem acento, espaços viram hífen). Mantém URL sempre
      alinhada ao nome, inclusive p/ itens novos. id continua sendo a chave interna estável. */
   function slugify(s){return String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');}
-  function pslug(id){var p=byId(id);return p?slugify(p.name):id;}
+  /* O endereço do produto é o `slug` do banco (campo "Endereço da página", no
+     SEO do admin). Sem banco, cai no nome, como era antes. */
+  function pslug(id){var p=byId(id);return p?(p.slug||slugify(p.name)):id;}
   function rslug(id){var r=RECIPES.find(function(x){return x.id===id;});return r?slugify(r.name):id;}
-  function pidBySlug(s){var p=PRODUCTS.find(function(x){return slugify(x.name)===s;});return p?p.id:null;}
+  function pidBySlug(s){
+    var p=PRODUCTS.find(function(x){return (x.slug||slugify(x.name))===s;});
+    /* endereço ANTIGO, derivado do nome: continua abrindo. Trocar o endereço no
+       admin não pode matar um link que já foi compartilhado. */
+    if(!p)p=PRODUCTS.find(function(x){return slugify(x.name)===s;});
+    return p?p.id:null;
+  }
   function ridBySlug(s){var r=RECIPES.find(function(x){return slugify(x.name)===s;});return r?r.id:null;}
-  var priceOf=(p,s)=>p.base+SIZES[s].add;
-  var fromPrice=p=>p.base+Math.min.apply(null,p.sizes.map(s=>SIZES[s].add));
+  /* ── PREÇO: sai da VARIANTE do banco (p.V), preenchida por aplicaCatalogo() ──
+     p.V = { M:{cheio, promo, estoque, semEstoque}, ... } em REAIS.
+     É a MESMA linha de cat_variantes que o servidor lê pra cobrar (src/precos.js),
+     e é isso que garante que a vitrine e a fatura digam o mesmo número.
+     A conta antiga (base + acréscimo do tamanho) só sobra como reserva, pra loja
+     não quebrar se a rede falhar antes do catálogo chegar. */
+  var priceOf=function(p,s){var v=p.V&&p.V[s];return v?v.cheio:p.base+SIZES[s].add;};
+  var priceOfNow=function(p,s){var v=p.V&&p.V[s];return v&&v.promo?v.promo:null;};
+  var fromPrice=function(p){
+    if(p.V){var ks=Object.keys(p.V);if(ks.length)return Math.min.apply(null,ks.map(function(s){return p.V[s].cheio;}));}
+    return p.base+Math.min.apply(null,p.sizes.map(function(s){return SIZES[s].add;}));
+  };
   /* ── PROMOÇÕES / DESCONTOS ──────────────────────────────────────────────
      1) Desconto por PRODUTO: adicione `sale:20` (= −20%) no produto no PRODUCTS.
      2) Promoção GERAL do site: ligue SALE.active=true (pct; `coll` opcional p/ limitar a uma coleção).
@@ -282,19 +352,63 @@
     L.push('','(frete e forma de pagamento a combinar)');
     return 'https://wa.me/'+WA_NUM+'?text='+encodeURIComponent(L.join('\n'));
   }
-  function saleP(p){if(p&&p.sale)return p.sale;if(SALE.active&&(!SALE.coll||SALE.coll===p.coll))return SALE.pct;return 0;}
-  function priceNow(p,s){var b=priceOf(p,s),d=saleP(p);return d?Math.round(b*(1-d/100)*100)/100:b;}
-  function fromNow(p){var b=fromPrice(p),d=saleP(p);return d?Math.round(b*(1-d/100)*100)/100:b;}
-  function offtag(p){var d=saleP(p);return d?' <span class="offtag">−'+d+'%</span>':'';}
-  function wasPrice(p,base){return saleP(p)?'<s class="wasp">'+BRL(base)+'</s> ':'';}
+  /* A PORCENTAGEM NÃO É DIGITADA EM LUGAR NENHUM: ela é a conta entre o preço
+     cheio e o promocional da variante. Antes vinha de um `sale:20` cravado no
+     código — que era preciso lembrar de mudar junto com o preço, em dois lugares.
+     `s` (tamanho) é opcional: sem ele, vale o tamanho mostrado por padrão, que é
+     o que a etiqueta do card anuncia. MESMO arredondamento do admin. */
+  function pctOf(cheio,promo){return cheio&&promo&&promo<cheio?Math.round((1-promo/cheio)*100):0;}
+  function saleP(p,s){
+    if(p&&p.V){
+      var t=s&&p.V[s]?s:(p.sizes&&p.sizes.length?firstAvail(p):null);
+      var v=t&&p.V[t];
+      if(v)return pctOf(v.cheio,v.promo);
+      return 0;
+    }
+    if(p&&p.sale)return p.sale;
+    if(SALE.active&&(!SALE.coll||SALE.coll===p.coll))return SALE.pct;
+    return 0;
+  }
+  function priceNow(p,s){
+    var promo=priceOfNow(p,s);
+    if(promo)return promo;
+    var b=priceOf(p,s);
+    if(p&&p.V)return b;               /* com banco, promoção é preço, não conta */
+    var d=saleP(p,s);
+    return d?Math.round(b*(1-d/100)*100)/100:b;
+  }
+  function fromNow(p){
+    if(p&&p.V){
+      var ks=Object.keys(p.V);
+      if(ks.length)return Math.min.apply(null,ks.map(function(s){return p.V[s].promo||p.V[s].cheio;}));
+    }
+    var b=fromPrice(p),d=saleP(p);
+    return d?Math.round(b*(1-d/100)*100)/100:b;
+  }
+  function offtag(p,s){var d=saleP(p,s);return d?' <span class="offtag">−'+d+'%</span>':'';}
+  function wasPrice(p,base,s){return saleP(p,s)?'<s class="wasp">'+BRL(base)+'</s> ':'';}
   /* estoque POR TAMANHO: p.out = lista de tamanhos esgotados. allOut = produto 100% esgotado. */
-  function sizeOut(p,s){return p.status==='soldout' || (p.out && p.out.indexOf(s)>-1);}
+  /* Esgotado sai do ESTOQUE da variante (banco). "Continuar vendendo quando
+     esgotar", marcado no admin, mantém o tamanho à venda mesmo em zero. */
+  function sizeOut(p,s){
+    if(p.status==='soldout')return true;
+    if(p.V&&p.V[s])return p.V[s].estoque<=0&&!p.V[s].semEstoque;
+    return !!(p.out && p.out.indexOf(s)>-1);
+  }
   function allOut(p){return p.status==='soldout' || p.sizes.every(function(s){return sizeOut(p,s);});}
   function firstAvail(p){if(p.sizes.indexOf('M')>-1&&!sizeOut(p,'M'))return 'M';for(var i=0;i<p.sizes.length;i++){if(!sizeOut(p,p.sizes[i]))return p.sizes[i];}return p.sizes[0];}
+  /* A partir de quantas peças a loja avisa "Últimas unidades". Sai de
+     Configurações no admin (cat_config) e chega pelo /api/catalogo; o 8 é só o
+     valor de partida até a resposta voltar. Antes era um 8 cravado aqui e um 5
+     cravado no admin — dois números diferentes pra mesma regra. */
+  var LIMIAR_ULTIMAS=8;
+  /* vira true quando a resposta do /api/catalogo chega (ou falha) — até lá o
+     router não desiste de um endereço de produto que ainda não conhece */
+  var catalogoPronto=false;
   function statusMeta(p){
     if(p.status==='soldout')return{k:'soldout',label:'Esgotado'};
     if(p.status==='presale')return{k:'presale',label:'Pré-venda'};
-    if(p.left<=8)return{k:'last',label:'Últimas unidades'};
+    if(p.left<=LIMIAR_ULTIMAS)return{k:'last',label:'Últimas unidades'};
     return{k:'limited',label:'Edição limitada'};
   }
   var COLLS=['Essenciais','Bombons','Bento & Festa'];
@@ -422,35 +536,68 @@
     return '<a class="pcard'+(p.status==='soldout'?' out':'')+'" href="/p/'+pslug(p.id)+'" aria-label="'+p.name+'"><div class="m"><div class="pbadges"><span class="pbadge '+st.k+'">'+st.label+'</span>'+(saleP(p)?'<span class="pbadge promo">−'+saleP(p)+'%</span>':'')+'</div>'+coverHTML(p)+'</div><div class="b"><span class="use">'+p.use+'</span><h3>'+p.name+'</h3>'+pr+'</div></a>';
   }
 
-  /* HERO */
+  /* HERO — precisa ser REMONTÁVEL: quando o catálogo do banco chega, nome, preço
+     e endereço mudam, e o carrossel vive fora do render(). Os gestos ficam no
+     container (montado uma vez); só os slides e os pontinhos são refeitos. */
   var stage=document.getElementById('stage');
-  (function(){
-    var feat=['tablete','coracao','esfera'], tints=['var(--mizu-wash)','var(--sakura-wash)','var(--matcha-wash)'];
+  var heroSlides=[],heroDots=[],heroCur=0,heroTimer;
+  function heroGo(n){
+    if(!heroSlides.length)return;
+    heroCur=(n+heroSlides.length)%heroSlides.length;
+    heroSlides.forEach(function(s,i){s.classList.toggle('on',i===heroCur);});
+    heroDots.forEach(function(d,i){d.classList.toggle('on',i===heroCur);});
+  }
+  function heroReset(){if(reduce)return;clearInterval(heroTimer);heroTimer=setInterval(function(){heroGo(heroCur+1);},5200);}
+  function montaHero(){
+    var tints=['var(--mizu-wash)','var(--sakura-wash)','var(--matcha-wash)'];
+    /* destaques fixos; se um deles sumir do catálogo, o hero completa com os
+       primeiros produtos disponíveis em vez de quebrar */
+    var feat=['tablete','coracao','esfera'].filter(function(id){return !!byId(id);});
+    PRODUCTS.forEach(function(p){if(feat.length<3&&feat.indexOf(p.id)<0)feat.push(p.id);});
+    if(!feat.length)return;
     var html=feat.map(function(id,i){var p=byId(id),st=statusMeta(p);
-      return '<a class="slide'+(i===0?' on':'')+'" href="/p/'+pslug(id)+'" style="--st:'+tints[i]+'"><div class="bg"></div><div class="piece">'+mold(p)+'</div><div class="copy"><span class="kick '+st.k+'">'+st.label+'</span><h2>'+p.name+'</h2><span class="pr">a partir de '+BRL(fromPrice(p))+'</span><span class="cta">'+(st.k==='presale'?'Reservar':'Garanta o seu')+'</span></div></a>';
+      return '<a class="slide'+(i===0?' on':'')+'" href="/p/'+pslug(id)+'" style="--st:'+tints[i%tints.length]+'"><div class="bg"></div><div class="piece">'+mold(p)+'</div><div class="copy"><span class="kick '+st.k+'">'+st.label+'</span><h2>'+p.name+'</h2><span class="pr">a partir de '+BRL(fromPrice(p))+'</span><span class="cta">'+(st.k==='presale'?'Reservar':'Garanta o seu')+'</span></div></a>';
     }).join('');
     html+='<div class="dots">'+feat.map(function(_,i){return '<button class="dot'+(i===0?' on':'')+'" data-i="'+i+'" aria-label="Destaque '+(i+1)+'"></button>';}).join('')+'</div>';
     stage.innerHTML=html;
-    var slides=stage.querySelectorAll('.slide'),dots=stage.querySelectorAll('.dot'),cur=0,timer;
-    function go(n){cur=(n+slides.length)%slides.length;slides.forEach((s,i)=>s.classList.toggle('on',i===cur));dots.forEach((d,i)=>d.classList.toggle('on',i===cur));}
-    function reset(){if(reduce)return;clearInterval(timer);timer=setInterval(function(){go(cur+1);},5200);}
-    dots.forEach(d=>d.addEventListener('click',function(e){e.preventDefault();go(+d.dataset.i);reset();}));
+    heroSlides=stage.querySelectorAll('.slide');heroDots=stage.querySelectorAll('.dot');heroCur=0;
+    heroDots.forEach(function(d){d.addEventListener('click',function(e){e.preventDefault();heroGo(+d.dataset.i);heroReset();});});
+    heroReset();
+  }
+  montaHero();
+  (function(){ /* gestos: no container, uma vez só (não se refazem a cada remonta) */
     var sx=0,swiped=false;
     stage.addEventListener('touchstart',function(e){sx=e.touches[0].clientX;swiped=false;},{passive:true});
     stage.addEventListener('touchmove',function(e){if(Math.abs(e.touches[0].clientX-sx)>10)swiped=true;},{passive:true});
-    stage.addEventListener('touchend',function(e){var dx=e.changedTouches[0].clientX-sx;if(Math.abs(dx)>40){go(cur+(dx<0?1:-1));reset();}},{passive:true});
+    stage.addEventListener('touchend',function(e){var dx=e.changedTouches[0].clientX-sx;if(Math.abs(dx)>40){heroGo(heroCur+(dx<0?1:-1));heroReset();}},{passive:true});
     stage.addEventListener('click',function(e){if(swiped){e.preventDefault();swiped=false;}},true);
-    reset();
   })();
 
-  /* HOME */
-  document.getElementById('lancCar').innerHTML=PRODUCTS.filter(p=>p.status!=='presale').sort((a,b)=>b.launch-a.launch).map(cardHTML).join('');
-  if(!PREVENDA)document.querySelectorAll('[data-prevenda]').forEach(function(e){e.remove();});
-  var _preCar=document.getElementById('preCar'); if(_preCar)_preCar.innerHTML=PRODUCTS.filter(p=>p.status==='presale').map(cardHTML).join('');
+  /* HOME — também remontável: os trilhos de produto são preenchidos fora do
+     render(), então precisam ser refeitos quando o catálogo do banco chega.
+     initCarousel() CRIA as setas dentro do .carwrap; chamar duas vezes duplicaria
+     os botões — por isso a limpeza antes. */
+  function reinitCarousel(w){
+    w.querySelectorAll('.carrow').forEach(function(b){b.remove();});
+    var d=w.querySelector('.cdots');if(d){d.innerHTML='';d.hidden=true;}
+    initCarousel(w);
+  }
+  function montaHome(){
+    var lanc=document.getElementById('lancCar');
+    if(lanc)lanc.innerHTML=PRODUCTS.filter(p=>p.status!=='presale').sort((a,b)=>b.launch-a.launch).map(cardHTML).join('');
+    if(!PREVENDA)document.querySelectorAll('[data-prevenda]').forEach(function(e){e.remove();});
+    var _pre=document.getElementById('preCar');
+    if(_pre)_pre.innerHTML=PRODUCTS.filter(p=>p.status==='presale').map(cardHTML).join('');
+    var peca=document.getElementById('customPiece');
+    if(peca){var mp=byId('coracao')||PRODUCTS[0];if(mp)peca.innerHTML=mold(mp);}
+    document.querySelectorAll('.carwrap').forEach(reinitCarousel);
+  }
+  /* receitas e depoimentos não dependem do catálogo — preenchem antes, e o
+     montaHome() logo abaixo é quem liga os carrosséis de TODOS os trilhos
+     (inclusive estes), uma vez só. */
   document.getElementById('recCar').innerHTML=RECIPES.slice(0,6).map(recCard).join('');
   document.getElementById('reviews').innerHTML=REVIEWS.map(r=>'<div class="rev"><div class="st">'+star().repeat(5)+'</div><q>'+r.q+'</q><div class="who"><b>'+r.who+'</b> · '+r.role+'</div></div>').join('');
-  document.getElementById('customPiece').innerHTML=mold(byId('coracao'));
-  document.querySelectorAll('.carwrap').forEach(initCarousel);
+  montaHome();
 
   /* ===== PRODUTOS (filtros + ordenação) ===== */
   var FS={size:[],status:[],coll:[],price:[],promo:[],sort:'novo',q:''};
@@ -662,7 +809,30 @@
       '</div>'+
       '</div></div>'+crossSell(p)+suggestionsHTML(p)+
       '<button class="igfab reeltrigger" id="reelFab" aria-label="Ver o vídeo desta peça"><span class="fabframe" style="background:'+tint+'">'+(p.video?'<video class="fabvid" src="'+p.video+'"'+(p.poster?' poster="'+p.poster+'"':'')+' muted loop autoplay playsinline></video>':mold(p))+'<span class="fabplay"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></span></span></button>'+
-      '<div class="reelov" id="reelov"></div><div class="reelbox" id="reelbox"><button class="reelclose" id="reelclose" aria-label="Fechar"><svg viewBox="0 0 24 24" fill="none" stroke="var(--white)" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button><div class="reelframe" style="background:'+tint+'">'+(p.video?'<video src="'+p.video+'"'+(p.poster?' poster="'+p.poster+'"':'')+' controls autoplay loop playsinline></video>':'<div class="reelph">'+mold(p)+'<span class="reelplay"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></span><b>Vídeo em breve</b></div>')+'</div><p class="reelcap">'+p.name+' · @somos.suzu</p></div>';
+      '<div class="reelov" id="reelov"></div><div class="reelbox" id="reelbox"><button class="reelclose" id="reelclose" aria-label="Fechar"><svg viewBox="0 0 24 24" fill="none" stroke="var(--white)" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button><div class="reelframe" style="background:'+tint+'">'+(p.video?'<video src="'+p.video+'"'+(p.poster?' poster="'+p.poster+'"':'')+' controls autoplay loop playsinline></video>':'<div class="reelph">'+mold(p)+'<span class="reelplay"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></span><b>Vídeo em breve</b></div>')+'</div><p class="reelcap">'+p.name+' · @somos.suzu</p>'+reelLinks(p)+'</div>';
+  }
+  /* Botão "ver no Instagram / TikTok" dentro do vídeo — leva ao POST original,
+     onde estão curtidas e comentários. O arquivo continua sendo a fonte da
+     vitrine (toca sozinho, mudo, em loop); o embed da rede não faria isso.
+     GUARDA: o endereço vem do admin e vira href numa página pública, então só
+     passa https nos domínios das duas redes. Qualquer outra coisa simplesmente
+     não vira link. */
+  var REDES={
+    instagram:{hosts:['instagram.com','www.instagram.com'],label:'Ver no Instagram'},
+    tiktok:{hosts:['tiktok.com','www.tiktok.com','m.tiktok.com','vm.tiktok.com','vt.tiktok.com'],label:'Ver no TikTok'}
+  };
+  function redeLink(u,rede){
+    if(!u)return '';
+    var x;try{x=new URL(u);}catch(e){return '';}
+    return x.protocol==='https:'&&REDES[rede].hosts.indexOf(x.hostname.toLowerCase())>=0?x.href:'';
+  }
+  function reelLinks(p){
+    var out='';
+    ['instagram','tiktok'].forEach(function(rede){
+      var u=redeLink(rede==='tiktok'?p.tt:p.ig,rede);
+      if(u)out+='<a class="reellink" href="'+u+'" target="_blank" rel="noopener">'+REDES[rede].label+' ↗</a>';
+    });
+    return out?'<div class="reellinks">'+out+'</div>':'';
   }
   function pdpShipBlock(p){
     if(p.status==='soldout')return '';
@@ -2067,7 +2237,11 @@
        navegou embora. A tela de Pix (/pix/<ref>) tem o próprio polling agora
        (wirePixView()), então ela também precisa ficar de fora deste stopPoll(). */
     if(p!=='/checkout'&&p.indexOf('/pix/')!==0)stopPoll();
-    if(p.indexOf('/p/')===0){var _pi=pidBySlug(p.slice(3));v=_pi?productView(_pi):null;if(!v){navigate('/produtos',true);return;}}
+    /* Endereço de produto: enquanto o catálogo do banco não chegou, um slug que
+       não bate pode ser simplesmente um produto renomeado no admin. Redirecionar
+       agora mataria TODO link compartilhado de produto. Espera a resposta — o
+       router roda de novo quando ela chega — e só então desiste. */
+    if(p.indexOf('/p/')===0){var _pi=pidBySlug(p.slice(3));v=_pi?productView(_pi):null;if(!v){if(!catalogoPronto)return;navigate('/produtos',true);return;}}
     else if(p==='/produtos')v=produtosView();
     else if(p==='/prevenda'){if(PREVENDA){v=prevendaView();}else{navigate('/produtos',true);return;}}
     else if(p==='/exclusivo')v=exclusivoView();
@@ -2269,6 +2443,31 @@
   })();
   (function(){var _sn=document.querySelector('.note');if(_sn)_sn.textContent=(SALE.active&&SALE.label)?SALE.label:BANNER;})();
   restoreCart();router();render();
+  /* CATÁLOGO DO BANCO. Desenha primeiro com o preset (instantâneo) e corrige
+     quando a resposta chega — assim a página nunca fica em branco esperando a
+     rede, e se a rede falhar a loja continua de pé com o que está no código. */
+  fetch('/api/catalogo').then(function(r){return r.json();}).then(function(d){
+    catalogoPronto=true;
+    if(!d||!d.ok){router();render();return;} /* destrava um endereço em espera */
+    if(d.config&&d.config.limiarUltimas)LIMIAR_ULTIMAS=d.config.limiarUltimas;
+    if(d.produtos&&aplicaCatalogo(d.produtos)){
+      /* A sacola guarda o PRODUTO por referência e o preço da hora em que o item
+         foi adicionado. Com preços novos, remonta do zero (o localStorage só tem
+         id/tamanho/quantidade) — senão a pessoa veria na sacola um preço que a
+         loja não pratica mais. */
+      Object.keys(cart).forEach(function(k){delete cart[k];});
+      restoreCart();
+      montaHero();  /* o carrossel do topo vive fora do render() */
+      montaHome();  /* e os trilhos da home também */
+    }
+    /* re-roteia SEMPRE: o endereço atual pode ser um produto renomeado no admin,
+       ou um /p/ que ficou esperando o catálogo pra saber se existe */
+    router();
+    render();
+  }).catch(function(){
+    /* sem rede: segue com o catálogo do código, mas destrava quem esperava */
+    catalogoPronto=true;router();render();
+  });
   (function(){var pd=document.getElementById('printdate');if(!pd)return;function setD(){try{pd.textContent='Impresso em '+new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});}catch(e){}}setD();try{window.addEventListener('beforeprint',setD);}catch(e){}})();
 })();
 </script>

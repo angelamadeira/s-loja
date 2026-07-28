@@ -10,7 +10,128 @@
 const MAX_TXT = 5000;
 const MAX_NOME = 200;
 
+// ── mapa de tamanhos: uma verdade só ────────────────────────────────────────
+// A vitrine trabalha com códigos P/M/G; o banco guarda o VALOR que a fundadora
+// digitou na opção ("Pequeno"). Esta tabela é o único lugar que liga os dois —
+// e é usada tanto pra montar o catálogo público quanto pra cobrar (precos.js).
+export const TAM_CODIGO = { Pequeno: "P", Médio: "M", Medio: "M", Grande: "G" };
+
+// Devolve o código de tamanho da variante, ou null se ela não for "por tamanho"
+// (ex.: uma opção de Cor — a vitrine atual ainda não sabe desenhar isso).
+export function tamDaVariante(combinacao) {
+  const c = combinacao && typeof combinacao === "object" ? combinacao : {};
+  for (const chave of Object.keys(c)) {
+    if (chave.trim().toLowerCase() !== "tamanho") continue;
+    const cod = TAM_CODIGO[String(c[chave]).trim()];
+    if (cod) return cod;
+  }
+  return null;
+}
+
+// ── config da loja (singleton `cat_config`, 1 linha) ────────────────────────
+// Regras que valem pra loja inteira e não pertencem a nenhum produto.
+// O PADRÃO é o comportamento que a loja JÁ TINHA (limiar 8) — mudar o padrão
+// aqui mudaria a vitrine de todo mundo sem ninguém pedir.
+const CONFIG_PADRAO = { limiar_ultimas_unidades: 8 };
+
+export async function leConfig(env) {
+  const linha = await env.DB.prepare("SELECT data FROM cat_config WHERE id = 'loja'").first();
+  const salvo = linha ? jparse(linha.data, {}) : {};
+  return { ...CONFIG_PADRAO, ...salvo };
+}
+
+export async function salvaConfig(env, body) {
+  const atual = await leConfig(env);
+  const b = body && typeof body === "object" ? body : {};
+  // Limiar de "Últimas unidades": inteiro de 1 a 99. Zero não faz sentido (o
+  // selo de 0 é "Esgotado", não "Últimas unidades").
+  const limiar = Math.round(Number(b.limiar_ultimas_unidades));
+  const nova = {
+    ...atual,
+    limiar_ultimas_unidades:
+      Number.isFinite(limiar) && limiar >= 1 && limiar <= 99 ? limiar : atual.limiar_ultimas_unidades,
+  };
+  await env.DB.prepare(
+    "INSERT INTO cat_config (id, data, atualizado_em) VALUES ('loja', ?, ?) " +
+      "ON CONFLICT(id) DO UPDATE SET data = excluded.data, atualizado_em = excluded.atualizado_em"
+  )
+    .bind(JSON.stringify(nova), new Date().toISOString())
+    .run();
+  return { ok: true, config: nova };
+}
+
+// ── catálogo PÚBLICO (o que a loja lê) ──────────────────────────────────────
+// Só produtos 'ativo' e variantes 'ativo'. Devolve exatamente o que a vitrine
+// precisa — nada de estoque interno, custo ou rascunho vazando pra fora.
+export async function catalogoPublico(env) {
+  const config = await leConfig(env);
+  const prods = (await env.DB.prepare(
+    "SELECT id, slug, nome, descricao, legenda, preco, preco_promo, capa_asset, video_asset, video_links " +
+      "FROM cat_produtos WHERE status = 'ativo' ORDER BY ordem DESC, nome"
+  ).all()).results || [];
+  // A config vai junto mesmo sem produtos: é ela que diz à vitrine a partir de
+  // quantas peças o selo vira "Últimas unidades".
+  if (!prods.length) return { produtos: [], config: { limiarUltimas: config.limiar_ultimas_unidades } };
+
+  const ids = prods.map((p) => p.id);
+  const marcas = ids.map(() => "?").join(",");
+  const vars = (await env.DB.prepare(
+    "SELECT produto_id, combinacao, preco, preco_promo, estoque, vender_sem_estoque, imagem_asset " +
+      "FROM cat_variantes WHERE ativo = 1 AND produto_id IN (" + marcas + ") ORDER BY ordem"
+  ).bind(...ids).all()).results || [];
+  const imgs = (await env.DB.prepare(
+    "SELECT i.produto_id, i.asset_id, a.tipo FROM cat_produto_imagens i JOIN assets a ON a.id = i.asset_id " +
+      "WHERE i.produto_id IN (" + marcas + ") ORDER BY i.ordem"
+  ).bind(...ids).all()).results || [];
+  const cats = (await env.DB.prepare(
+    "SELECT produto_id, categoria_id FROM cat_produto_categorias WHERE produto_id IN (" + marcas + ")"
+  ).bind(...ids).all()).results || [];
+
+  const porProduto = (linhas) =>
+    linhas.reduce((m, l) => ((m[l.produto_id] = m[l.produto_id] || []).push(l), m), {});
+  const vPorProd = porProduto(vars);
+  const iPorProd = porProduto(imgs);
+  const cPorProd = porProduto(cats);
+
+  return {
+    config: { limiarUltimas: config.limiar_ultimas_unidades },
+    produtos: prods.map((p) => {
+      const links = jparse(p.video_links, {});
+      return {
+        id: p.id,
+        slug: p.slug,
+        nome: p.nome,
+        desc: p.descricao || "",
+        use: p.legenda || "", /* a linha miúda acima do nome no card */
+        capa: p.capa_asset || null,
+        video: p.video_asset || null,
+        ig: links.instagram || "",
+        tt: links.tiktok || "",
+        galeria: (iPorProd[p.id] || []).map((i) => ({ id: i.asset_id, tipo: i.tipo })),
+        cats: (cPorProd[p.id] || []).map((c) => c.categoria_id),
+        vars: (vPorProd[p.id] || [])
+          .map((v) => {
+            const tam = tamDaVariante(jparse(v.combinacao, {}));
+            if (!tam) return null;
+            return {
+              tam,
+              cheio: v.preco,
+              promo: v.preco_promo,
+              estoque: v.estoque,
+              semEstoque: v.vender_sem_estoque ? 1 : 0,
+              img: v.imagem_asset || null,
+            };
+          })
+          .filter(Boolean),
+      };
+    }),
+  };
+}
+
 // ── leitura ─────────────────────────────────────────────────────────────────
+// Lista do admin. Traz as VARIANTES junto porque é nelas que moram preço,
+// estoque e disponibilidade — a lista do Shopify abre a linha do produto e
+// mostra cada variante; sem esses dados aqui, essa tela não existe.
 export async function listaProdutos(env) {
   const { results } = await env.DB.prepare(
     "SELECT p.id, p.nome, p.slug, p.status, p.destaque, p.ordem, p.preco, p.preco_promo, p.capa_asset, " +
@@ -18,7 +139,45 @@ export async function listaProdutos(env) {
       "(SELECT COALESCE(SUM(v.estoque),0) FROM cat_variantes v WHERE v.produto_id = p.id) AS estoque_total " +
       "FROM cat_produtos p ORDER BY p.ordem DESC, p.nome"
   ).all();
-  return results || [];
+  const produtos = results || [];
+  if (!produtos.length) return [];
+
+  const marcas = produtos.map(() => "?").join(",");
+  const vars = (await env.DB.prepare(
+    "SELECT produto_id, combinacao, sku, preco, preco_promo, estoque, vender_sem_estoque, ativo, imagem_asset " +
+      "FROM cat_variantes WHERE produto_id IN (" + marcas + ") ORDER BY ordem"
+  ).bind(...produtos.map((p) => p.id)).all()).results || [];
+  const capas = (await env.DB.prepare(
+    "SELECT produto_id, asset_id, MIN(ordem) AS ordem FROM cat_produto_imagens WHERE produto_id IN (" + marcas + ") GROUP BY produto_id"
+  ).bind(...produtos.map((p) => p.id)).all()).results || [];
+
+  const porProd = {};
+  for (const v of vars) (porProd[v.produto_id] = porProd[v.produto_id] || []).push(v);
+  const capaDe = {};
+  for (const c of capas) capaDe[c.produto_id] = c.asset_id;
+
+  return produtos.map((p) => {
+    const lista = (porProd[p.id] || []).map((v) => ({
+      combinacao: jparse(v.combinacao, {}),
+      sku: v.sku || "",
+      preco: v.preco,
+      preco_promo: v.preco_promo,
+      estoque: v.estoque,
+      vender_sem_estoque: v.vender_sem_estoque,
+      ativo: v.ativo,
+      imagem_asset: v.imagem_asset,
+    }));
+    // faixa de preço ("a partir de X" quando as variantes têm preços diferentes)
+    const cobrados = lista.filter((v) => v.ativo).map((v) => (v.preco_promo || v.preco) || 0).filter((n) => n > 0);
+    return {
+      ...p,
+      // capa: a imagem escolhida no produto ou, na falta dela, a 1ª da galeria
+      capa_asset: p.capa_asset || capaDe[p.id] || null,
+      preco_min: cobrados.length ? Math.min(...cobrados) : null,
+      preco_max: cobrados.length ? Math.max(...cobrados) : null,
+      variantes: lista,
+    };
+  });
 }
 
 export async function leProduto(env, id) {
@@ -32,6 +191,9 @@ export async function leProduto(env, id) {
   ).bind(p.id).all();
   return {
     ...p,
+    seo: jparse(p.seo, {}),
+    tags: jparse(p.tags, []),
+    video_links: jparse(p.video_links, {}),
     opcoes: (ops.results || []).map((o) => ({ ...o, valores: jparse(o.valores, []) })),
     variantes: (vars.results || []).map((v) => ({ ...v, combinacao: jparse(v.combinacao, {}) })),
     categorias: (cats.results || []).map((c) => c.categoria_id),
@@ -46,7 +208,11 @@ export async function salvaProduto(env, body) {
   if (!nome) return { ok: false, erro: "nome" };
 
   const id = txt(body.id, 64) || crypto.randomUUID();
-  const existente = await env.DB.prepare("SELECT id FROM cat_produtos WHERE id = ?").bind(id).first();
+  const existente = await env.DB.prepare("SELECT id, ordem FROM cat_produtos WHERE id = ?").bind(id).first();
+  // A posição na vitrine não é campo do formulário. Se o corpo não trouxer
+  // `ordem`, PRESERVA a que já existe — senão todo "Salvar" jogaria o produto
+  // pro fim da fila sem ninguém pedir (foi o que aconteceu com os 6 primeiros).
+  const ordem = body.ordem == null || body.ordem === "" ? (existente ? existente.ordem : 0) : int(body.ordem);
 
   const slugBase = txt(body.slug, 200) || slugify(nome);
   const slug = await slugUnico(env, slugBase, id);
@@ -59,19 +225,22 @@ export async function salvaProduto(env, body) {
   // engano nenhum, é só "sem promoção" — normaliza pra null em vez de recusar.
   const promoOk = promo === null || promo < preco ? promo : promo === preco ? null : undefined;
   if (promoOk === undefined) return { ok: false, erro: "promo_maior" };
+  const seo = JSON.stringify(limpaSeo(body.seo));
+  const tags = JSON.stringify(limpaTags(body.tags));
+  const links = JSON.stringify(limpaLinksVideo(body.video_links));
   const agora = new Date().toISOString();
 
   if (existente) {
     await env.DB.prepare(
-      "UPDATE cat_produtos SET slug=?, nome=?, descricao=?, status=?, destaque=?, ordem=?, preco=?, preco_promo=?, capa_asset=?, video_asset=?, atualizado_em=? WHERE id=?"
+      "UPDATE cat_produtos SET slug=?, nome=?, descricao=?, legenda=?, status=?, destaque=?, ordem=?, preco=?, preco_promo=?, capa_asset=?, video_asset=?, video_links=?, seo=?, tags=?, atualizado_em=? WHERE id=?"
     )
-      .bind(slug, nome, txt(body.descricao, MAX_TXT), status, body.destaque ? 1 : 0, int(body.ordem), preco, promoOk, txt(body.capa_asset, 64) || null, txt(body.video_asset, 64) || null, agora, id)
+      .bind(slug, nome, txt(body.descricao, MAX_TXT), txt(body.legenda, 80) || null, status, body.destaque ? 1 : 0, ordem, preco, promoOk, txt(body.capa_asset, 64) || null, txt(body.video_asset, 64) || null, links, seo, tags, agora, id)
       .run();
   } else {
     await env.DB.prepare(
-      "INSERT INTO cat_produtos (id,slug,nome,descricao,status,destaque,ordem,preco,preco_promo,capa_asset,video_asset,criado_em,atualizado_em) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)"
+      "INSERT INTO cat_produtos (id,slug,nome,descricao,legenda,status,destaque,ordem,preco,preco_promo,capa_asset,video_asset,video_links,seo,tags,criado_em,atualizado_em) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
     )
-      .bind(id, slug, nome, txt(body.descricao, MAX_TXT), status, body.destaque ? 1 : 0, int(body.ordem), preco, promoOk, txt(body.capa_asset, 64) || null, txt(body.video_asset, 64) || null, agora, agora)
+      .bind(id, slug, nome, txt(body.descricao, MAX_TXT), txt(body.legenda, 80) || null, status, body.destaque ? 1 : 0, ordem, preco, promoOk, txt(body.capa_asset, 64) || null, txt(body.video_asset, 64) || null, links, seo, tags, agora, agora)
       .run();
   }
 
@@ -95,16 +264,18 @@ export async function salvaProduto(env, body) {
     const vpreco = v.preco === null || v.preco === "" ? null : cents(v.preco);
     const vpromo = v.preco_promo === null || v.preco_promo === "" ? null : cents(v.preco_promo);
     await env.DB.prepare(
-      "INSERT INTO cat_variantes (id,produto_id,combinacao,sku,preco,preco_promo,estoque,peso_g,comp_cm,larg_cm,alt_cm,imagem_asset,ativo,ordem) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
+      "INSERT INTO cat_variantes (id,produto_id,combinacao,sku,gtin,preco,preco_promo,estoque,vender_sem_estoque,peso_g,comp_cm,larg_cm,alt_cm,imagem_asset,ativo,ordem) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
     )
       .bind(
         txt(v.id, 64) || crypto.randomUUID(),
         id,
         JSON.stringify(v.combinacao && typeof v.combinacao === "object" ? v.combinacao : {}),
         txt(v.sku, 60) || null,
+        txt(v.gtin, 60) || null,
         vpreco,
         vpromo,
         int(v.estoque),
+        v.vender_sem_estoque ? 1 : 0,
         int(v.peso_g),
         num(v.comp_cm),
         num(v.larg_cm),
@@ -144,6 +315,73 @@ export async function apagaProduto(env, id) {
     .bind(new Date().toISOString(), pid)
     .run();
   return { ok: true };
+}
+
+// Exclusão DEFINITIVA — a que o Shopify esconde atrás de um "tem certeza?".
+// Seguro para o histórico: `compras.itens` guarda um SNAPSHOT em JSON do que foi
+// vendido (nome, tamanho, preço da hora), não uma FK pro catálogo. Apagar o
+// produto não reescreve nem apaga venda nenhuma.
+export async function excluiProduto(env, id) {
+  const pid = txt(id, 64);
+  if (!pid) return { ok: false, erro: "id" };
+  const existe = await env.DB.prepare("SELECT id FROM cat_produtos WHERE id = ?").bind(pid).first();
+  if (!existe) return { ok: false, erro: "nao_encontrado" };
+  // opções, variantes, imagens e vínculos de categoria caem por ON DELETE CASCADE.
+  await env.DB.prepare("DELETE FROM cat_produtos WHERE id = ?").bind(pid).run();
+  return { ok: true };
+}
+
+// Duplicar — copia tudo (dados, opções, variantes, galeria, categorias) e devolve
+// o clone como RASCUNHO, pra não publicar por acidente. Padrão Shopify.
+export async function duplicaProduto(env, id) {
+  const orig = await leProduto(env, id);
+  if (!orig) return { ok: false, erro: "nao_encontrado" };
+  const novoId = crypto.randomUUID();
+  const nome = txt("Cópia de " + orig.nome, MAX_NOME);
+  const slug = await slugUnico(env, slugify(nome), novoId);
+  const agora = new Date().toISOString();
+
+  await env.DB.prepare(
+    "INSERT INTO cat_produtos (id,slug,nome,descricao,legenda,status,destaque,ordem,preco,preco_promo,capa_asset,video_asset,video_links,seo,tags,criado_em,atualizado_em) " +
+      "VALUES (?,?,?,?,?,'rascunho',?,?,?,?,?,?,?,?,?,?,?)"
+  )
+    .bind(
+      novoId, slug, nome, orig.descricao || null, orig.legenda || null, orig.destaque ? 1 : 0, orig.ordem || 0,
+      orig.preco, orig.preco_promo, orig.capa_asset, orig.video_asset,
+      JSON.stringify(orig.video_links || {}), JSON.stringify(orig.seo || {}), JSON.stringify(orig.tags || []), agora, agora
+    )
+    .run();
+
+  for (const o of orig.opcoes || []) {
+    await env.DB.prepare("INSERT INTO cat_opcoes (id,produto_id,nome,ordem,valores) VALUES (?,?,?,?,?)")
+      .bind(crypto.randomUUID(), novoId, o.nome, o.ordem || 0, JSON.stringify(o.valores || []))
+      .run();
+  }
+  for (const v of orig.variantes || []) {
+    await env.DB.prepare(
+      "INSERT INTO cat_variantes (id,produto_id,combinacao,sku,gtin,preco,preco_promo,estoque,vender_sem_estoque,peso_g,comp_cm,larg_cm,alt_cm,imagem_asset,ativo,ordem) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
+    )
+      .bind(
+        crypto.randomUUID(), novoId, JSON.stringify(v.combinacao || {}),
+        // SKU e código de barras NÃO se copiam: são identificadores únicos —
+        // duas peças com o mesmo código viram confusão de estoque.
+        null, null,
+        v.preco, v.preco_promo, v.estoque, v.vender_sem_estoque ? 1 : 0,
+        v.peso_g, v.comp_cm, v.larg_cm, v.alt_cm, v.imagem_asset, v.ativo ? 1 : 0, v.ordem || 0
+      )
+      .run();
+  }
+  for (const g of orig.galeria || []) {
+    await env.DB.prepare("INSERT OR IGNORE INTO cat_produto_imagens (produto_id, asset_id, ordem) VALUES (?,?,?)")
+      .bind(novoId, g.asset_id, g.ordem || 0)
+      .run();
+  }
+  for (const c of orig.categorias || []) {
+    await env.DB.prepare("INSERT OR IGNORE INTO cat_produto_categorias (produto_id, categoria_id) VALUES (?,?)")
+      .bind(novoId, c)
+      .run();
+  }
+  return { ok: true, id: novoId, slug };
 }
 
 // ── CATEGORIAS (com aninhamento) ────────────────────────────────────────────
@@ -272,6 +510,55 @@ function num(v) {
 function cents(v) {
   const n = Math.round(Number(v) || 0);
   return Number.isFinite(n) ? Math.max(0, Math.min(n, 99999999)) : 0;
+}
+// SEO: só os dois campos que o Google mostra. Limites folgados em relação ao que
+// aparece na busca (~60 e ~160 caracteres) — cortar aqui seria decidir pela
+// fundadora; o aviso de tamanho é do formulário, não uma trava do servidor.
+function limpaSeo(s) {
+  const o = s && typeof s === "object" ? s : {};
+  const titulo = txt(o.titulo, 200);
+  const descricao = txt(o.descricao, 500);
+  return titulo || descricao ? { titulo, descricao } : {};
+}
+// Link do post da rede — este valor vira um href numa página PÚBLICA, então é
+// lista de permissão, não faxina: só https e só nos domínios das duas redes.
+// Assim um "javascript:..." ou um link pra qualquer outro site nunca chega lá.
+const HOSTS_REDE = {
+  instagram: ["instagram.com", "www.instagram.com"],
+  tiktok: ["tiktok.com", "www.tiktok.com", "m.tiktok.com", "vm.tiktok.com", "vt.tiktok.com"],
+};
+function limpaLinksVideo(v) {
+  const o = v && typeof v === "object" ? v : {};
+  const out = {};
+  for (const rede of Object.keys(HOSTS_REDE)) {
+    const url = linkDaRede(o[rede], rede);
+    if (url) out[rede] = url;
+  }
+  return out;
+}
+function linkDaRede(bruto, rede) {
+  const s = txt(bruto, 300);
+  if (!s) return "";
+  let u;
+  try {
+    u = new URL(s);
+  } catch (_) {
+    return "";
+  }
+  if (u.protocol !== "https:") return "";
+  if (!HOSTS_REDE[rede].includes(u.hostname.toLowerCase())) return "";
+  return u.toString();
+}
+// Tags: lista de etiquetas curtas, sem repetição e sem vazias.
+function limpaTags(t) {
+  const arr = Array.isArray(t) ? t : [];
+  const vistas = [];
+  for (const x of arr) {
+    const v = txt(x, 40);
+    if (v && vistas.indexOf(v) < 0) vistas.push(v);
+    if (vistas.length >= 30) break;
+  }
+  return vistas;
 }
 function slugify(n) {
   return String(n)

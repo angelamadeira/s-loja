@@ -40,7 +40,11 @@ CREATE TABLE IF NOT EXISTS cat_produtos (
   preco        INTEGER NOT NULL,          -- centavos — preço-base (a variante pode sobrescrever)
   preco_promo  INTEGER,                   -- centavos — "de/por" base (null = sem promoção)
   capa_asset   TEXT,                      -- imagem de capa (FK assets.id)
+  video_asset  TEXT,                      -- vídeo "reel" do produto (FK assets.id) — ver migra-video.sql
+  video_links  TEXT NOT NULL DEFAULT '{}',-- JSON {instagram, tiktok} — link do POST onde o vídeo saiu
+  legenda      TEXT,                      -- linha miúda acima do nome no card ("Tablete · 12 gomos")
   seo          TEXT,                      -- JSON opcional {titulo, descricao} — controles críticos ficam no template
+  tags         TEXT NOT NULL DEFAULT '[]',-- JSON de strings — organização livre, paralela às categorias
   criado_em    TEXT NOT NULL,
   atualizado_em TEXT NOT NULL,
   FOREIGN KEY (capa_asset) REFERENCES assets(id)
@@ -77,9 +81,11 @@ CREATE TABLE IF NOT EXISTS cat_variantes (
   produto_id  TEXT NOT NULL,
   combinacao  TEXT NOT NULL DEFAULT '{}', -- JSON: {"Cor":"Rosa","Tamanho":"M"} (vazio p/ peça única)
   sku         TEXT,                       -- código interno (opcional)
+  gtin        TEXT,                       -- código de barras EAN/UPC/GTIN (opcional)
   preco       INTEGER,                    -- centavos (null = herda cat_produtos.preco)
   preco_promo INTEGER,                    -- centavos (null = herda / sem promoção)
   estoque     INTEGER NOT NULL DEFAULT 0, -- contagem; baixa no PAGAMENTO confirmado
+  vender_sem_estoque INTEGER NOT NULL DEFAULT 0, -- 1 = continua vendendo com estoque 0
   -- Frete/envio (por variante — é o que muda a cotação e a etiqueta do Melhor Envio):
   peso_g      INTEGER NOT NULL DEFAULT 0, -- gramas
   comp_cm     REAL NOT NULL DEFAULT 0,    -- comprimento da embalagem (cm)

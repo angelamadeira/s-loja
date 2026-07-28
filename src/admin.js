@@ -9,7 +9,20 @@
 // válidos; toda ação sensível vira linha em admin_auditoria.
 import { EmailMessage } from "cloudflare:email";
 import { registroInicio, registroFim, loginInicio, loginFim } from "./passkey.js";
-import { listaProdutos, leProduto, salvaProduto, apagaProduto, listaCategorias, salvaCategoria, apagaCategoria, subirMidia } from "./catalogo.js";
+import {
+  listaProdutos,
+  leProduto,
+  salvaProduto,
+  apagaProduto,
+  excluiProduto,
+  duplicaProduto,
+  listaCategorias,
+  salvaCategoria,
+  apagaCategoria,
+  subirMidia,
+  leConfig,
+  salvaConfig,
+} from "./catalogo.js";
 
 // Quem pode entrar. Dono = somos.suzu; angelmadeira = recuperação. Ambos
 // autenticam na MESMA conta dona. (Entrega do link p/ angelmadeira depende de
@@ -149,6 +162,32 @@ export async function handleAdmin(request, env, url) {
     if (r.ok) await auditoria(env, sessao.usuario_id, "produto.arquivado", String(id), null, ip);
     return json(r, r.ok ? 200 : 400);
   }
+  if (p === "/api/admin/produto/duplicar" && m === "POST") {
+    const ip = request.headers.get("CF-Connecting-IP") || "";
+    try {
+      const { id } = await request.json();
+      const r = await duplicaProduto(env, id);
+      if (r.ok) await auditoria(env, sessao.usuario_id, "produto.duplicado", r.id, { origem: String(id) }, ip);
+      return json(r, r.ok ? 200 : 400);
+    } catch (e) {
+      console.error("produto.duplicar", e);
+      return json({ ok: false, erro: "servidor" }, 500);
+    }
+  }
+  if (p === "/api/admin/produto/excluir" && m === "POST") {
+    const ip = request.headers.get("CF-Connecting-IP") || "";
+    try {
+      const { id } = await request.json();
+      // guarda o nome ANTES de apagar — depois não dá pra saber o que sumiu
+      const antes = await leProduto(env, id);
+      const r = await excluiProduto(env, id);
+      if (r.ok) await auditoria(env, sessao.usuario_id, "produto.excluido", String(id), { nome: antes && antes.nome }, ip);
+      return json(r, r.ok ? 200 : 400);
+    } catch (e) {
+      console.error("produto.excluir", e);
+      return json({ ok: false, erro: "servidor" }, 500);
+    }
+  }
   if (p === "/api/admin/categorias" && m === "GET") {
     return json({ ok: true, categorias: await listaCategorias(env) });
   }
@@ -176,6 +215,22 @@ export async function handleAdmin(request, env, url) {
       return json({ ok: false, erro: "servidor" }, 500);
     }
   }
+  if (p === "/api/admin/config" && m === "GET") {
+    return json({ ok: true, config: await leConfig(env) });
+  }
+  if (p === "/api/admin/config" && m === "POST") {
+    const ip = request.headers.get("CF-Connecting-IP") || "";
+    try {
+      const corpo = await request.json();
+      const r = await salvaConfig(env, corpo);
+      if (r.ok) await auditoria(env, sessao.usuario_id, "config.salva", "loja", r.config, ip);
+      return json(r, r.ok ? 200 : 400);
+    } catch (e) {
+      console.error("config", e);
+      return json({ ok: false, erro: "servidor" }, 500);
+    }
+  }
+  if (p === "/admin/config") return html(paginaConfig());
   if (p === "/admin/categorias") return html(paginaCategorias());
   if (p === "/admin/produtos") return html(paginaProdutos());
   if (p === "/admin/produto") return html(paginaProduto());
@@ -463,6 +518,7 @@ function paginaAdmin(sessao) {
         "<nav class=anav>" +
           "<a href='/admin/produtos'>Produtos<span>catálogo, preços, estoque</span></a>" +
           "<a href='/admin/categorias'>Categorias<span>organizar a vitrine</span></a>" +
+          "<a href='/admin/config'>Configurações<span>regras que valem para a loja toda</span></a>" +
         "</nav>" +
       "</section>" +
       "<section class=asec id=pkbox>" +
@@ -520,6 +576,16 @@ function paginaCategorias() {
     "</div>",
     "Categorias"
   );
+}
+
+// Configurações da loja — anatomia do "Settings" do Shopify: seções por assunto,
+// cada regra com o efeito explicado ao lado. Começa com uma seção (Vitrine);
+// frete, remetente e contato entram aqui conforme forem saindo do código.
+function paginaConfig() {
+  return base(
+    "<main class='awrap awrap-wide'><div class=apage id=config>Carregando…</div></main>",
+    "Configurações"
+  ).replace("</body>", "<script src='/js/admin-config.js?v=" + assetsV() + "'></script></body>");
 }
 
 function paginaProduto() {

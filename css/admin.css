@@ -568,3 +568,227 @@
 
 /* ações do topo do formulário (Ver na loja + Salvar) */
 .apage-acoes { display: flex; align-items: center; gap: var(--space-4); }
+
+/* ── barra de "alterações não salvas" (padrão Shopify: gruda no topo) ─────── */
+.abarra {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  padding: var(--space-3) var(--space-4);
+  margin-bottom: var(--space-4);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-md);
+  background: var(--raised);
+}
+.abarra-txt { font-size: .85rem; color: var(--text-secondary); }
+.abarra-acoes { display: flex; align-items: center; gap: var(--space-3); }
+.abarra-btn { font-size: .7rem; }
+
+/* ── reordenar mídia (arrastar ou setas) ─────────────────────────────────── */
+.agal-item { cursor: grab; }
+.agal-drag { opacity: .4; }
+.agal-alvo { outline: 2px solid var(--gold-text); outline-offset: -2px; }
+.agal-setas {
+  position: absolute;
+  left: var(--space-2);
+  top: var(--space-2);
+  display: flex;
+  gap: var(--space-1);
+}
+.agal-seta {
+  width: 22px;
+  height: 22px;
+  border: 0;
+  border-radius: var(--r-round);
+  background: var(--raised);
+  color: var(--text);
+  cursor: pointer;
+  line-height: 1;
+  font-size: .9rem;
+  padding: 0;
+}
+.agal-seta:disabled { opacity: .35; cursor: default; }
+
+/* ── prévia no Google (card "Buscadores") ────────────────────────────────── */
+.aseo-prev {
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  padding: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+.aseo-prev-url { font-size: .72rem; color: var(--text-muted); margin-bottom: var(--space-1); }
+/* o Google mostra o título em azul; aqui usamos o acento do DS — a função
+   (é o link clicável do resultado) fica clara sem inventar cor fora da paleta */
+.aseo-prev-tit { font-size: 1.05rem; color: var(--gold-text); line-height: 1.3; }
+.aseo-prev-desc { font-size: .82rem; color: var(--text-secondary); line-height: 1.5; margin-top: var(--space-1); }
+.aseo-cont { display: block; }
+
+/* endereço da página (prefixo fixo + campo) */
+.aslug {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  overflow: hidden;
+}
+/* o prefixo é um <span> dentro de .afield, que estiliza <span> como RÓTULO
+   (caixa-alta, miúdo). Aqui ele é endereço de verdade — reverte pra parecer o
+   que é: a parte fixa da URL, colada no campo. */
+.afield .aslug-pre {
+  display: inline;
+  margin: 0;
+  padding: var(--space-4) 0 var(--space-4) var(--space-4);
+  color: var(--text-muted);
+  font-size: .95rem;
+  letter-spacing: normal;
+  text-transform: none;
+  white-space: nowrap;
+}
+.aslug input { border: 0; background: none; }
+
+/* ── imagem por variante (aponta pra galeria, não é upload novo) ─────────── */
+.avimg {
+  width: 44px;
+  height: 44px;
+  flex: none;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  overflow: hidden;
+  cursor: pointer;
+}
+.avimg img, .avimg video { width: 100%; height: 100%; object-fit: cover; display: block; }
+.avimg-vazio { color: var(--text-muted); font-size: 1.1rem; line-height: 1; }
+.avimg-lista {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  margin-bottom: var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--raised);
+}
+.avimg-op {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  overflow: hidden;
+  cursor: pointer;
+}
+.avimg-op img, .avimg-op video { width: 100%; height: 100%; object-fit: cover; display: block; }
+.avimg-op-on { border-color: var(--gold-text); }
+
+/* ── mais ações do produto (duplicar · arquivar · excluir) ───────────────── */
+.aacoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--line);
+}
+.aacoes-perigo { color: var(--sango-deep); border-color: var(--sango-deep); }
+
+/* aviso "vai virar a etiqueta −20%" ao lado do preço promocional */
+.aetiq { display: block; color: var(--gold-text); }
+.aetiq-off { color: var(--text-muted); }
+
+/* prévia "como vai aparecer na loja" (selo de estoque + etiqueta de %) */
+.aprev {
+  margin-top: var(--space-4);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--line);
+}
+.aprev-tit {
+  font-size: .64rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: var(--space-3);
+}
+.aprev-selos { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-bottom: var(--space-3); }
+.aprev-selo {
+  font-size: .64rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--r-pill);
+  border: 1px solid var(--line-strong);
+  color: var(--text);
+}
+.aprev-selo-off { color: var(--text-muted); border-color: var(--line); }
+
+/* ── lista de produtos: linha que ABRE nas variantes (anatomia do Shopify) ── */
+.aprod {
+  background: var(--raised);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  overflow: hidden;
+}
+.aprod-topo { background: none; border: 0; border-radius: 0; }
+.aprod-topo:hover { border-color: transparent; }
+.aprod-link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  flex: 1;
+  min-width: 0;
+  text-decoration: none;
+  color: var(--text);
+}
+.aprod-abrir {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  color: var(--text-muted);
+  font-size: 1rem;
+  line-height: 1;
+  padding: 0;
+  cursor: pointer;
+  transition: transform .16s ease;
+}
+.aprod-abrir-on { transform: rotate(90deg); color: var(--text); }
+.aprod-abrir-vazio { border-color: transparent; background: none; cursor: default; }
+
+/* miniatura do produto/variante */
+.amini {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+}
+.amini img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.amini-vazio { color: var(--text-muted); font-size: .9rem; }
+
+/* sub-lista das variantes */
+.avars { border-top: 1px solid var(--line); background: var(--surface); }
+.avar-linha {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  padding: var(--space-3) var(--space-5) var(--space-3) var(--space-8);
+  border-bottom: 1px solid var(--line-soft);
+}
+.avar-linha:last-child { border-bottom: 0; }
+.avar-nome { font-size: .92rem; margin-bottom: var(--space-1); }
