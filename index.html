@@ -1229,7 +1229,7 @@
         Object.keys(cart).forEach(function(k){delete cart[k];});render();
         closeProc(function(){navigate('/pedido',true);});
       }else if(j.status==='pendente'){
-        if(CO.pay==='pix'){fillRecap(j.ref);closeProc(function(){navigate('/pix/'+encodeURIComponent(j.ref));});}
+        if(CO.pay==='pix'){fillRecap(j.ref);closeProc(function(){navigate('/pix/'+encodeURIComponent(j.ref)+(j.t?('?t='+encodeURIComponent(j.t)):''));});}
         else{showEmAnalise();} /* cartão pendente: análise antifraude, sem QR */
       }else{
         coCheckoutId=null; /* recusado — a próxima tentativa é uma cobrança NOVA (não pode ser bloqueada pelo dedup) */
@@ -1884,8 +1884,8 @@
      mesmo padrão .okwrap/.okhead/.okpanel das outras telas de feedback (pedidoView);
      o título usa .sig/.oksig, igual "Deu tudo certo!" — não o texto fraco que a
      msg do overlay tinha antes. */
-  function pixView(ref){
-    return '<div class="wrap cowrap"><div class="okwrap" id="pixWrap" data-ref="'+ref+'">'
+  function pixView(ref,t){
+    return '<div class="wrap cowrap"><div class="okwrap" id="pixWrap" data-ref="'+ref+'" data-t="'+(t||'')+'">'
       +'<div class="okhead">'
         +'<span class="sig oksig" id="pixTitle">Aguardando o seu Pix…</span>'
         +'<p class="okhead-sub" id="pixSub">Escaneie o QR ou copie o código no app do seu banco. A gente confirma sozinho assim que cair.</p>'
@@ -1923,6 +1923,8 @@
     var wrap=document.getElementById('pixWrap'); if(!wrap)return;
     stopPoll(); /* mata qualquer polling de um Pix anterior (ex.: /pix/A -> /pix/B) antes de armar o desta ref */
     var ref=wrap.dataset.ref;
+    var tok=wrap.dataset.t||''; /* token assinado — libera os dados do pedido (order) no /api/compra */
+    var qref='ref='+encodeURIComponent(ref)+(tok?'&t='+encodeURIComponent(tok):'');
     var titleEl=document.getElementById('pixTitle'),subEl=document.getElementById('pixSub'),panel=document.getElementById('pixPanel'),cta=document.getElementById('pixCta');
     var amountEl=document.getElementById('pixAmount'),amountVal=document.getElementById('pixAmountVal');
     /* total (centavos) só existe enquanto a compra segue pendente em Pix — ver
@@ -2016,7 +2018,7 @@
     function poll(){
       stopPoll();
       pollTimer=setInterval(function(){
-        fetch('/api/compra?ref='+encodeURIComponent(ref)).then(function(r){return r.json();}).then(function(d){
+        fetch('/api/compra?'+qref).then(function(r){return r.json();}).then(function(d){
           if(document.getElementById('pixWrap')!==wrap){stopPoll();return;} /* saiu do /pix desta ref — encerra */
           if(!d)return;
           if(d.status==='aprovado'){handleApproved(d.order);}
@@ -2025,7 +2027,7 @@
         }).catch(function(){/* rede falhou nessa rodada — a próxima tenta de novo */});
       },4000);
     }
-    fetch('/api/compra?ref='+encodeURIComponent(ref)).then(function(r){return r.json();}).then(function(d){
+    fetch('/api/compra?'+qref).then(function(r){return r.json();}).then(function(d){
       if(document.getElementById('pixWrap')!==wrap)return; /* já navegou pra fora antes da resposta — não renderiza nem re-arma poll() */
       if(!d||d.status==='nao_encontrado'){setGone('Não encontramos esse pedido.','<a class="btn" href="/produtos">Ver produtos</a><a class="btn ghost" href="/checkout">Voltar ao checkout</a>');return;}
       if(d.status==='aprovado'){handleApproved(d.order);return;}
@@ -2080,7 +2082,12 @@
       /* ref só tem letras/dígitos/hífen (gerarRef() no servidor: "SUZU-XXXXXX") — valida
          ANTES de interpolar em data-ref="" (pixView()) pra nunca deixar o path da URL
          (controlado pelo usuário) virar HTML/atributo cru. */
-      if(!_pixRef||!/^[A-Za-z0-9_-]+$/.test(_pixRef)){navigate('/checkout',true);return;}v=pixView(_pixRef);}
+      if(!_pixRef||!/^[A-Za-z0-9_-]+$/.test(_pixRef)){navigate('/checkout',true);return;}
+      /* token assinado do pedido (?t=): libera os dados (order) no /api/compra. base64url,
+         mesmo cuidado do ref antes de virar atributo. Ausente/ inválido => só status. */
+      var _pixT='';try{_pixT=new URLSearchParams(location.search).get('t')||'';}catch(_e2){}
+      if(_pixT&&!/^[A-Za-z0-9_-]+$/.test(_pixT))_pixT='';
+      v=pixView(_pixRef,_pixT);}
     else if(p==='/pedido'){if(!CO.order){navigate('/',true);return;}v=pedidoView();}
     else if(p==='/obrigado'){var _ob=null;try{_ob=JSON.parse(sessionStorage.getItem('suzu_obrigado')||'null');}catch(_e){}if(!_ob){navigate('/exclusivo',true);return;}v=obrigadoView(_ob);}
     closeMenu(); setActiveNav(p); setSeo(p);

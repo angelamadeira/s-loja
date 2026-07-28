@@ -219,7 +219,7 @@ async function handlePagar(request, env) {
         if (existente.status === "pendente" && existente.metodo === "pix" && existente.mp_payment_id) {
           try { const full = await consultaPagamentoFull(env, existente.mp_payment_id); if (full && full.pix) pix = full.pix; } catch (_) { /* MP fora do ar: devolve sem pix, o polling tenta de novo */ }
         }
-        return json({ ok: true, ref: existente.ref, status: existente.status, pix });
+        return json({ ok: true, ref: existente.ref, status: existente.status, pix, t: await tokenPedido(existente.ref, env) });
       }
       // status 'iniciado' (1ª tentativa ainda em voo): segue e chama o MP com a MESMA
       // idempotencyKey — o MP devolve o mesmo pagamento (não cobra 2×) e o UPDATE converge.
@@ -260,7 +260,7 @@ async function handlePagar(request, env) {
       .bind(status, resultado.id != null ? String(resultado.id) : null, compraId)
       .run();
 
-    return json({ ok: true, ref, status, pix: resultado.pix });
+    return json({ ok: true, ref, status, pix: resultado.pix, t: await tokenPedido(ref, env) });
   } catch (e) {
     console.error("pagar falhou", e);
     return json({ ok: false, erro: "servidor" }, 500);
@@ -326,7 +326,11 @@ async function handleCompra(url, env) {
       }
     }
   }
-  if (row.status === "aprovado") {
+  // PII do pedido (order) só sai com o token assinado válido (?t=) — o `ref` curto
+  // sozinho nunca libera endereço/e-mail/telefone (senão daria pra varrer e coletar).
+  // Sem token válido devolve só o status (o polling do /pix segue funcionando).
+  const tokOk = row.status === "aprovado" && str(url.searchParams.get("t")) === (await tokenPedido(row.ref, env));
+  if (tokOk) {
     // nunca inclui cpf nem mp_payment_id aqui — só o que o recap precisa mostrar.
     resposta.order = {
       ref: row.ref,
@@ -535,6 +539,21 @@ async function assina(dado, secret) {
     .replace(/\+/g, "-")
     .replace(/\//g, "_")
     .replace(/=+$/, "");
+}
+
+// Token (assinatura HMAC) do link do pedido — mesma primitiva dos links de anexo.
+// O `ref` (SUZU-XXXXXX) é curto e adivinhável; sem este token, GET /api/compra
+// só devolve o STATUS (não sensível), nunca os dados pessoais do pedido (order:
+// itens/endereço/e-mail/telefone). Quem varrer refs não forja a assinatura (não
+// tem a secret), então não coleta PII de ninguém. O token viaja no link do /pix
+// (?t=), então a aba retornável do cliente funciona sem pedir nada; um estranho
+// que só tenha o código curto não vê os dados. Exportado pra os testes calcularem
+// o token esperado (só a função; a secret nunca sai do worker).
+export async function tokenPedido(ref, env) {
+  // TURNSTILE_SECRET está SEMPRE setado em prod (os links de anexo dependem dele).
+  // O fallback só serve pra dev/teste sem o segredo — uma chave HMAC vazia estoura
+  // no crypto.subtle.importKey. Prod nunca cai no fallback.
+  return assina(String(ref), (env && env.TURNSTILE_SECRET) || "suzu-token-dev");
 }
 
 function str(v) {

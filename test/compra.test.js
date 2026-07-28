@@ -7,7 +7,7 @@ vi.mock("../src/mp.js", () => ({
   consultaPagamentoFull: vi.fn(async () => ({ id: 999, status: "in_process", pix: { qrBase64: "BASE64IMG", copiaECola: "COPIA-COLA" } })),
 }));
 
-import worker from "../src/index.js";
+import worker, { tokenPedido } from "../src/index.js";
 import { consultaPagamentoFull } from "../src/mp.js";
 import schemaSql from "../schema.sql?raw";
 
@@ -148,8 +148,9 @@ test("compra pendente em pix que o MP já aprovou: persiste 'aprovado' e devolve
   consultaPagamentoFull.mockResolvedValueOnce({ id: 42, status: "approved" }); // sem QR: já aprovou
   const itens = JSON.stringify([{ id: "tablete", tam: "M", qtd: 1, preco_unit: 12300 }]);
   await seedCompra("SUZU-PIX9", "pendente", { metodo: "pix", mpId: "42", itens });
+  const t = await tokenPedido("SUZU-PIX9", env);
   const ctx = createExecutionContext();
-  const res = await worker.fetch(get("?ref=SUZU-PIX9"), env, ctx);
+  const res = await worker.fetch(get("?ref=SUZU-PIX9&t=" + encodeURIComponent(t)), env, ctx);
   await waitOnExecutionContext(ctx);
   const j = await res.json();
   expect(j.status).toBe("aprovado");
@@ -185,8 +186,9 @@ test("compra aprovada em pix inclui order com itens/total e NÃO expõe cpf nem 
     frete: 1500,
     whats: "11999999999",
   });
+  const t = await tokenPedido("SUZU-OK0001", env);
   const ctx = createExecutionContext();
-  const res = await worker.fetch(get("?ref=SUZU-OK0001"), env, ctx);
+  const res = await worker.fetch(get("?ref=SUZU-OK0001&t=" + encodeURIComponent(t)), env, ctx);
   await waitOnExecutionContext(ctx);
   const j = await res.json();
   expect(res.status).toBe(200);
@@ -203,4 +205,27 @@ test("compra aprovada em pix inclui order com itens/total e NÃO expõe cpf nem 
   expect(j.order.cpf).toBeUndefined();
   expect(j.order.mp_payment_id).toBeUndefined();
   expect(JSON.stringify(j.order)).not.toContain("12345678909"); // cpf usado no seed, nunca deve vazar
+});
+
+// Privacidade: sem o token assinado (?t=), uma compra aprovada NÃO expõe os dados
+// pessoais (order) — só o status. Fecha a coleta de PII por varredura de refs.
+test("aprovada SEM token => devolve status mas NÃO o order (sem PII)", async () => {
+  await seedCompra("SUZU-NOAUTH", "aprovado", { metodo: "pix", mpId: "321", endereco: JSON.stringify({ rua: "Rua X", cep: "01000-000" }) });
+  const ctx = createExecutionContext();
+  const res = await worker.fetch(get("?ref=SUZU-NOAUTH"), env, ctx);
+  await waitOnExecutionContext(ctx);
+  const j = await res.json();
+  expect(res.status).toBe(200);
+  expect(j.status).toBe("aprovado");
+  expect(j.order).toBeUndefined(); // dados do pedido ficam protegidos
+});
+
+test("aprovada com token ERRADO => também não expõe o order", async () => {
+  await seedCompra("SUZU-BADTOK", "aprovado", { metodo: "pix", mpId: "322", endereco: JSON.stringify({ rua: "Rua Y", cep: "01000-000" }) });
+  const ctx = createExecutionContext();
+  const res = await worker.fetch(get("?ref=SUZU-BADTOK&t=nao-e-o-token-certo"), env, ctx);
+  await waitOnExecutionContext(ctx);
+  const j = await res.json();
+  expect(j.status).toBe("aprovado");
+  expect(j.order).toBeUndefined();
 });
