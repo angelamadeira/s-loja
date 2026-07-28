@@ -60,6 +60,97 @@ export async function salvaConfig(env, body) {
   return { ok: true, config: nova };
 }
 
+// ── BAIXA DE ESTOQUE ────────────────────────────────────────────────────────
+// Roda quando o pagamento é CONFIRMADO — nunca no carrinho, nunca no "iniciado".
+// Reservar no carrinho travaria peça por causa de gente que só olha; descontar
+// antes da confirmação venderia estoque que talvez nunca seja pago.
+//
+// IDEMPOTENTE por construção: o webhook do Mercado Pago é reenviado até receber
+// 200, então a MESMA venda chega aqui várias vezes. A trava é `compras
+// .estoque_baixado`: quem conseguir virar 0→1 é o único que desconta. Sem isso,
+// cada reenvio comeria estoque de novo e a loja diria "esgotado" com peça pronta.
+export async function baixaEstoque(env, compraId) {
+  const id = txt(compraId, 64);
+  if (!id) return { ok: false, erro: "id" };
+
+  // reivindica a baixa: só uma execução consegue
+  const claim = await env.DB.prepare(
+    "UPDATE compras SET estoque_baixado = 1 WHERE id = ? AND estoque_baixado = 0 AND status = 'aprovado'"
+  ).bind(id).run();
+  if (!claim.meta || claim.meta.changes === 0) return { ok: true, jaFeito: true };
+
+  const compra = await env.DB.prepare("SELECT ref, itens FROM compras WHERE id = ?").bind(id).first();
+  const itens = jparse(compra && compra.itens, []);
+  const baixados = [];
+  for (const it of Array.isArray(itens) ? itens : []) {
+    const qtd = Math.max(0, Math.round(Number(it && it.qtd) || 0));
+    if (!qtd) continue;
+    // pelo id da variante quando existe; senão, pela combinação de tamanho
+    // (compras antigas, gravadas antes de a linha carregar var_id)
+    let varId = txt(it.var_id, 64);
+    if (!varId && it.id && it.tam) {
+      const nome = Object.keys(TAM_CODIGO).find((k) => TAM_CODIGO[k] === it.tam);
+      const achou = await env.DB.prepare(
+        "SELECT id FROM cat_variantes WHERE produto_id = ? AND combinacao LIKE ?"
+      ).bind(String(it.id), '%"' + (nome || "") + '"%').first();
+      varId = achou ? achou.id : "";
+    }
+    if (!varId) continue;
+    // MAX(0, …): estoque negativo não existe no mundo real. Se chegasse aqui
+    // negativo seria venda acima do disponível — que fica registrada na auditoria
+    // abaixo em vez de virar um número impossível na tela.
+    const antes = await env.DB.prepare("SELECT estoque FROM cat_variantes WHERE id = ?").bind(varId).first();
+    await env.DB.prepare("UPDATE cat_variantes SET estoque = MAX(0, estoque - ?) WHERE id = ?")
+      .bind(qtd, varId)
+      .run();
+    baixados.push({ varId, qtd, antes: antes ? antes.estoque : null, faltou: antes && antes.estoque < qtd });
+  }
+  return { ok: true, ref: compra && compra.ref, baixados };
+}
+
+// ── resumo do painel (a tela "Início" do admin) ─────────────────────────────
+// Números REAIS do banco. Um painel com número inventado é pior que painel
+// nenhum: ela tomaria decisão em cima de enfeite.
+export async function resumoAdmin(env) {
+  const cfg = await leConfig(env);
+  const limiar = cfg.limiar_ultimas_unidades;
+  const agora = new Date();
+  const inicioMes = new Date(Date.UTC(agora.getUTCFullYear(), agora.getUTCMonth(), 1)).toISOString();
+
+  const vendas = await env.DB.prepare(
+    "SELECT COUNT(*) AS n, COALESCE(SUM(total),0) AS total FROM compras WHERE status = 'aprovado' AND criado_em >= ?"
+  ).bind(inicioMes).first();
+  const aPagar = await env.DB.prepare(
+    "SELECT COUNT(*) AS n FROM compras WHERE status = 'pendente'"
+  ).first();
+  const orcamentos = await env.DB.prepare(
+    "SELECT COUNT(*) AS n FROM pedidos WHERE status = 'novo'"
+  ).first();
+  // estoque por produto ATIVO: quantos zeraram e quantos estão na faixa de aviso
+  const estoque = await env.DB.prepare(
+    "SELECT SUM(CASE WHEN e = 0 THEN 1 ELSE 0 END) AS esgotados, " +
+      "SUM(CASE WHEN e > 0 AND e <= ? THEN 1 ELSE 0 END) AS baixos FROM (" +
+      "SELECT COALESCE(SUM(v.estoque),0) AS e FROM cat_produtos p " +
+      "LEFT JOIN cat_variantes v ON v.produto_id = p.id AND v.ativo = 1 " +
+      "WHERE p.status = 'ativo' GROUP BY p.id)"
+  ).bind(limiar).first();
+  const cat = await env.DB.prepare(
+    "SELECT SUM(CASE WHEN status='ativo' THEN 1 ELSE 0 END) AS ativos, " +
+      "SUM(CASE WHEN status='rascunho' THEN 1 ELSE 0 END) AS rascunhos FROM cat_produtos"
+  ).first();
+
+  return {
+    vendas_mes: { n: (vendas && vendas.n) || 0, total: (vendas && vendas.total) || 0 },
+    aguardando_pagamento: (aPagar && aPagar.n) || 0,
+    orcamentos_novos: (orcamentos && orcamentos.n) || 0,
+    esgotados: (estoque && estoque.esgotados) || 0,
+    estoque_baixo: (estoque && estoque.baixos) || 0,
+    limiar: limiar,
+    produtos_ativos: (cat && cat.ativos) || 0,
+    produtos_rascunho: (cat && cat.rascunhos) || 0,
+  };
+}
+
 // ── catálogo PÚBLICO (o que a loja lê) ──────────────────────────────────────
 // Só produtos 'ativo' e variantes 'ativo'. Devolve exatamente o que a vitrine
 // precisa — nada de estoque interno, custo ou rascunho vazando pra fora.
@@ -86,6 +177,10 @@ export async function catalogoPublico(env) {
   const cats = (await env.DB.prepare(
     "SELECT produto_id, categoria_id FROM cat_produto_categorias WHERE produto_id IN (" + marcas + ")"
   ).bind(...ids).all()).results || [];
+  // endereços antigos → id do produto: é o que mantém link compartilhado vivo
+  const antigos = (await env.DB.prepare(
+    "SELECT slug, produto_id FROM cat_slugs_antigos WHERE produto_id IN (" + marcas + ")"
+  ).bind(...ids).all()).results || [];
 
   const porProduto = (linhas) =>
     linhas.reduce((m, l) => ((m[l.produto_id] = m[l.produto_id] || []).push(l), m), {});
@@ -95,6 +190,7 @@ export async function catalogoPublico(env) {
 
   return {
     config: { limiarUltimas: config.limiar_ultimas_unidades },
+    slugsAntigos: antigos.reduce((m, a) => ((m[a.slug] = a.produto_id), m), {}),
     produtos: prods.map((p) => {
       const links = jparse(p.video_links, {});
       return {
@@ -208,7 +304,7 @@ export async function salvaProduto(env, body) {
   if (!nome) return { ok: false, erro: "nome" };
 
   const id = txt(body.id, 64) || crypto.randomUUID();
-  const existente = await env.DB.prepare("SELECT id, ordem FROM cat_produtos WHERE id = ?").bind(id).first();
+  const existente = await env.DB.prepare("SELECT id, ordem, slug FROM cat_produtos WHERE id = ?").bind(id).first();
   // A posição na vitrine não é campo do formulário. Se o corpo não trouxer
   // `ordem`, PRESERVA a que já existe — senão todo "Salvar" jogaria o produto
   // pro fim da fila sem ninguém pedir (foi o que aconteceu com os 6 primeiros).
@@ -216,6 +312,16 @@ export async function salvaProduto(env, body) {
 
   const slugBase = txt(body.slug, 200) || slugify(nome);
   const slug = await slugUnico(env, slugBase, id);
+  // Endereço mudou? Guarda o antigo pra ele continuar abrindo (links já
+  // compartilhados não podem morrer porque a peça mudou de nome).
+  if (existente && existente.slug && existente.slug !== slug) {
+    await env.DB.prepare(
+      "INSERT OR REPLACE INTO cat_slugs_antigos (slug, produto_id, criado_em) VALUES (?,?,?)"
+    ).bind(existente.slug, id, new Date().toISOString()).run();
+  }
+  // Se o endereço NOVO era um endereço antigo (voltou atrás), tira do histórico —
+  // senão o mesmo slug seria atual e antigo ao mesmo tempo.
+  await env.DB.prepare("DELETE FROM cat_slugs_antigos WHERE slug = ?").bind(slug).run();
   const status = ["rascunho", "ativo", "arquivado"].includes(body.status) ? body.status : "rascunho";
   const preco = cents(body.preco);
   const promo = body.preco_promo === null || body.preco_promo === "" ? null : cents(body.preco_promo);

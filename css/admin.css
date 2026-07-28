@@ -792,3 +792,111 @@
 }
 .avar-linha:last-child { border-bottom: 0; }
 .avar-nome { font-size: .92rem; margin-bottom: var(--space-1); }
+
+/* ── casca do admin: navegação persistente + conteúdo (Shopify/Nuvemshop) ─── */
+.ashell {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 13rem minmax(0, 1fr);
+  gap: var(--space-6);
+  max-width: 68rem;
+  width: 100%;
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-5);
+  box-sizing: border-box;
+  align-items: start;
+}
+.ashell-conteudo { min-width: 0; }
+
+.anav-lat { display: flex; flex-direction: column; gap: var(--space-2xs); position: sticky; top: var(--space-4); }
+.anav-grupo {
+  font-size: .6rem;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--label);
+  margin: var(--space-4) 0 var(--space-1);
+  padding: 0 var(--space-3);
+}
+.anav-grupo:first-child { margin-top: 0; }
+.anav-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--r-sm);
+  font-size: .88rem;
+  color: var(--text-secondary);
+  text-decoration: none;
+}
+a.anav-item:hover { background: var(--raised); color: var(--text); }
+.anav-item.on { background: var(--raised); color: var(--text); font-weight: 500; }
+/* "em breve": legível, mas claramente sem ação — não é link e não recebe hover */
+.anav-item[aria-disabled="true"] { color: var(--text-muted); opacity: .75; }
+.anav-breve {
+  font-style: normal;
+  font-size: .55rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--label);
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  padding: 0 var(--space-2);
+}
+
+/* Mobile-first de verdade: o menu vira uma faixa rolável no topo, com os itens
+   disponíveis à frente — o admin é usado do celular. */
+@media (max-width: 780px) {
+  .ashell { grid-template-columns: 1fr; gap: var(--space-4); padding: var(--space-4) var(--space-4); }
+  .anav-lat {
+    position: static;
+    flex-direction: row;
+    gap: var(--space-2);
+    overflow-x: auto;
+    padding-bottom: var(--space-2);
+  }
+  .anav-grupo { display: none; }
+  .anav-item { flex: none; border: 1px solid var(--line); border-radius: var(--r-pill); white-space: nowrap; }
+  .anav-item[aria-disabled="true"] { display: none; }
+  .anav-breve { display: none; }
+}
+
+/* ── Início: cartões de número ─────────────────────────────────────────────── */
+.akpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
+}
+.akpi {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-4) var(--space-5);
+  background: var(--raised);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  text-decoration: none;
+  color: var(--text);
+}
+a.akpi:hover { border-color: var(--line-strong); }
+.akpi-rot { font-size: .62rem; letter-spacing: .12em; text-transform: uppercase; color: var(--text-muted); }
+.akpi-num { font-size: 1.5rem; font-weight: 400; line-height: 1.1; }
+.akpi-nota { font-size: .74rem; color: var(--text-muted); }
+.akpi-alerta { border-color: var(--sango-deep); }
+
+/* próximos passos (o "setup guide") */
+.apassos { display: flex; flex-direction: column; gap: var(--space-2); }
+.apasso {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  text-decoration: none;
+  color: var(--text);
+}
+a.apasso:hover { border-color: var(--line-strong); }
+.apasso b { font-weight: 500; font-size: .92rem; }
+.apasso span { font-size: .78rem; color: var(--text-muted); line-height: 1.5; }

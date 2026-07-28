@@ -20,6 +20,11 @@ function statements(sql) {
     .filter(Boolean);
 }
 
+// O banco de teste é o MESMO ao longo do arquivo (o schema usa CREATE IF NOT
+// EXISTS, que não limpa nada). Sem zerar, um produto criado num teste faz o
+// slug do seguinte virar "peca-2" e o teste quebra por contaminação, não por bug.
+const TABELAS = ["cat_slugs_antigos", "cat_produto_imagens", "cat_produto_categorias", "cat_variantes", "cat_opcoes", "cat_produtos", "cat_config", "assets"];
+
 beforeEach(async () => {
   for (const sql of [catalogoSql, categoriasSql]) {
     for (const stmt of statements(sql)) {
@@ -30,6 +35,7 @@ beforeEach(async () => {
       await env.DB.prepare(stmt).run();
     }
   }
+  for (const t of TABELAS) await env.DB.prepare("DELETE FROM " + t + " WHERE 1 = 1").run();
 });
 
 function base(extra) {
@@ -188,6 +194,29 @@ test("link do post vai junto na duplicação", async () => {
   const orig = await salvaProduto(env, base({ video_links: { instagram: "https://www.instagram.com/reel/AbC/" } }));
   const dup = await duplicaProduto(env, orig.id);
   expect((await leProduto(env, dup.id)).video_links.instagram).toBe("https://www.instagram.com/reel/AbC/");
+});
+
+// ── renomear não pode matar link já compartilhado ───────────────────────────
+test("trocar o endereço guarda o antigo, e o antigo ainda aponta pro produto", async () => {
+  const r = await salvaProduto(env, base({ nome: "Tablete Seigaiha", status: "ativo" }));
+  expect((await leProduto(env, r.id)).slug).toBe("tablete-seigaiha");
+
+  await salvaProduto(env, base({ id: r.id, nome: "Tablete Ursinho", slug: "tablete-ursinho", status: "ativo" }));
+  expect((await leProduto(env, r.id)).slug).toBe("tablete-ursinho");
+
+  const pub = await catalogoPublico(env);
+  expect(pub.slugsAntigos["tablete-seigaiha"]).toBe(r.id);
+});
+
+test("voltar ao endereço antigo o tira do histórico (não pode ser atual e antigo)", async () => {
+  const r = await salvaProduto(env, base({ nome: "Peça A", status: "ativo" }));
+  await salvaProduto(env, base({ id: r.id, nome: "Peça A", slug: "peca-b", status: "ativo" }));
+  expect((await catalogoPublico(env)).slugsAntigos["peca-a"]).toBe(r.id);
+
+  await salvaProduto(env, base({ id: r.id, nome: "Peça A", slug: "peca-a", status: "ativo" }));
+  const pub = await catalogoPublico(env);
+  expect(pub.slugsAntigos["peca-a"]).toBeUndefined();
+  expect(pub.slugsAntigos["peca-b"]).toBe(r.id);
 });
 
 // ── config da loja: o limiar de "Últimas unidades" ──────────────────────────

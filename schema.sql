@@ -39,6 +39,7 @@ CREATE TABLE IF NOT EXISTS compras (
   status        TEXT NOT NULL DEFAULT 'iniciado', -- iniciado|pendente|aprovado|recusado|cancelado
   mp_payment_id TEXT,
   consentiu     INTEGER NOT NULL DEFAULT 0,
+  estoque_baixado INTEGER NOT NULL DEFAULT 0, -- 1 = estoque já descontado (trava anti-duplo)
   ip            TEXT
 );
 

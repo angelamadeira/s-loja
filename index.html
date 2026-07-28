@@ -298,11 +298,16 @@
      SEO do admin). Sem banco, cai no nome, como era antes. */
   function pslug(id){var p=byId(id);return p?(p.slug||slugify(p.name)):id;}
   function rslug(id){var r=RECIPES.find(function(x){return x.id===id;});return r?slugify(r.name):id;}
+  /* endereços que JÁ foram deste produto (o admin guarda ao renomear) */
+  var SLUGS_ANTIGOS={};
   function pidBySlug(s){
     var p=PRODUCTS.find(function(x){return (x.slug||slugify(x.name))===s;});
-    /* endereço ANTIGO, derivado do nome: continua abrindo. Trocar o endereço no
-       admin não pode matar um link que já foi compartilhado. */
-    if(!p)p=PRODUCTS.find(function(x){return slugify(x.name)===s;});
+    if(p)return p.id;
+    /* endereço ANTIGO: continua abrindo. Trocar o nome no admin não pode matar
+       um link já compartilhado no Instagram ou indexado no Google. */
+    if(SLUGS_ANTIGOS[s]&&byId(SLUGS_ANTIGOS[s]))return SLUGS_ANTIGOS[s];
+    /* e o endereço derivado do nome, de antes de existir slug no banco */
+    p=PRODUCTS.find(function(x){return slugify(x.name)===s;});
     return p?p.id:null;
   }
   function ridBySlug(s){var r=RECIPES.find(function(x){return slugify(x.name)===s;});return r?r.id:null;}
@@ -2241,7 +2246,16 @@
        não bate pode ser simplesmente um produto renomeado no admin. Redirecionar
        agora mataria TODO link compartilhado de produto. Espera a resposta — o
        router roda de novo quando ela chega — e só então desiste. */
-    if(p.indexOf('/p/')===0){var _pi=pidBySlug(p.slice(3));v=_pi?productView(_pi):null;if(!v){if(!catalogoPronto)return;navigate('/produtos',true);return;}}
+    if(p.indexOf('/p/')===0){
+      var _sl=p.slice(3),_pi=pidBySlug(_sl);
+      v=_pi?productView(_pi):null;
+      if(!v){if(!catalogoPronto)return;navigate('/produtos',true);return;}
+      /* Chegou por um endereço ANTIGO: mostra o produto e troca a URL pelo atual,
+         sem criar entrada nova no histórico (o "voltar" continua honesto). É o
+         equivalente ao redirecionamento 301 que as plataformas fazem. */
+      var _atual=pslug(_pi);
+      if(_atual&&_atual!==_sl){try{history.replaceState(null,'','/p/'+_atual);}catch(_e){}}
+    }
     else if(p==='/produtos')v=produtosView();
     else if(p==='/prevenda'){if(PREVENDA){v=prevendaView();}else{navigate('/produtos',true);return;}}
     else if(p==='/exclusivo')v=exclusivoView();
@@ -2450,6 +2464,7 @@
     catalogoPronto=true;
     if(!d||!d.ok){router();render();return;} /* destrava um endereço em espera */
     if(d.config&&d.config.limiarUltimas)LIMIAR_ULTIMAS=d.config.limiarUltimas;
+    if(d.slugsAntigos)SLUGS_ANTIGOS=d.slugsAntigos;
     if(d.produtos&&aplicaCatalogo(d.produtos)){
       /* A sacola guarda o PRODUTO por referência e o preço da hora em que o item
          foi adicionado. Com preços novos, remonta do zero (o localStorage só tem

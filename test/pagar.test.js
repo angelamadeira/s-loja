@@ -65,7 +65,59 @@ test("grava itens com preco_unit efetivamente cobrado (registro financeiro)", as
   const j = await res.json();
   expect(res.status).toBe(200);
   const row = await env.DB.prepare("SELECT itens FROM compras WHERE ref=?").bind(j.ref).first();
-  expect(JSON.parse(row.itens)).toEqual([{ id: "tablete", tam: "M", qtd: 2, preco_unit: 12300 }]);
+  expect(JSON.parse(row.itens)[0]).toMatchObject({ id: "tablete", tam: "M", qtd: 2, preco_unit: 12300 });
+});
+
+// ── baixa de estoque na venda confirmada ────────────────────────────────────
+const estoqueDe = (tam) =>
+  env.DB.prepare("SELECT estoque FROM cat_variantes WHERE produto_id='tablete' AND combinacao LIKE ?")
+    .bind("%" + tam + "%")
+    .first()
+    .then((r) => r.estoque);
+
+test("compra aprovada desconta o estoque da variante vendida", async () => {
+  expect(await estoqueDe("Médio")).toBe(7);
+  const ctx = createExecutionContext();
+  const res = await worker.fetch(post({ itens: [{ id: "tablete", tam: "M", qtd: 2 }], metodo: "cartao", email: "a@b.com", cpf: "12345678909", endereco: { cep: "01310100" }, freteOpcao: "economico", consentiu: true }), env, ctx);
+  await waitOnExecutionContext(ctx);
+  expect((await res.json()).status).toBe("aprovado");
+  expect(await estoqueDe("Médio")).toBe(5);
+});
+
+test("a mesma compra NUNCA desconta duas vezes (o MP reenvia o webhook)", async () => {
+  const cid = "11111111-2222-3333-4444-555555555555";
+  const payload = { itens: [{ id: "tablete", tam: "M", qtd: 3 }], metodo: "cartao", email: "a@b.com", cpf: "12345678909", endereco: { cep: "01310100" }, freteOpcao: "economico", checkoutId: cid, consentiu: true };
+  const c1 = createExecutionContext();
+  await worker.fetch(post(payload), env, c1);
+  await waitOnExecutionContext(c1);
+  expect(await estoqueDe("Médio")).toBe(4);
+
+  // retry do mesmo checkout (duplo-clique) — não pode comer estoque de novo
+  const c2 = createExecutionContext();
+  await worker.fetch(post(payload), env, c2);
+  await waitOnExecutionContext(c2);
+  expect(await estoqueDe("Médio")).toBe(4);
+
+  const linha = await env.DB.prepare("SELECT estoque_baixado FROM compras WHERE id = ?").bind(cid).first();
+  expect(linha.estoque_baixado).toBe(1);
+});
+
+test("compra recusada não mexe no estoque", async () => {
+  criaPagamento.mockResolvedValueOnce({ id: 1, status: "rejected", statusDetail: "cc_rejected" });
+  const ctx = createExecutionContext();
+  await worker.fetch(post({ itens: [{ id: "tablete", tam: "M", qtd: 2 }], metodo: "cartao", email: "a@b.com", cpf: "12345678909", endereco: { cep: "01310100" }, freteOpcao: "economico", consentiu: true }), env, ctx);
+  await waitOnExecutionContext(ctx);
+  expect(await estoqueDe("Médio")).toBe(7);
+});
+
+test("não deixa comprar tamanho esgotado", async () => {
+  const ctx = createExecutionContext();
+  // tablete Grande está com estoque 0
+  const res = await worker.fetch(post({ itens: [{ id: "tablete", tam: "G", qtd: 1 }], metodo: "pix", email: "a@b.com", cpf: "12345678909", endereco: { cep: "01310100" }, freteOpcao: "economico", consentiu: true }), env, ctx);
+  await waitOnExecutionContext(ctx);
+  expect(res.status).toBe(400);
+  expect((await res.json()).erro).toBe("estoque");
+  expect(criaPagamento).not.toHaveBeenCalled(); // nem chegou a cobrar
 });
 
 test("parcelas do cliente são clampadas ao máximo permitido pro total", async () => {

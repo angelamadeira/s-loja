@@ -62,6 +62,16 @@ CREATE TABLE IF NOT EXISTS cat_produto_imagens (
   FOREIGN KEY (asset_id)   REFERENCES assets(id)
 );
 
+-- Endereços ANTIGOS do produto: renomear não pode matar link já compartilhado.
+-- (ver migra-slugs.sql — aqui fica a definição canônica)
+CREATE TABLE IF NOT EXISTS cat_slugs_antigos (
+  slug       TEXT PRIMARY KEY,
+  produto_id TEXT NOT NULL,
+  criado_em  TEXT NOT NULL,
+  FOREIGN KEY (produto_id) REFERENCES cat_produtos(id) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_cat_slugs_prod ON cat_slugs_antigos (produto_id);
+
 -- ── Variação GENÉRICA (controle total — não presa a "Tamanho") ───────────────
 -- Cada produto define 0, 1 ou 2 tipos de opção (nome livre: Cor, Tamanho, Sabor…),
 -- cada tipo com sua lista de valores. As combinações viram linhas em cat_variantes.

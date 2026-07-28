@@ -50,7 +50,10 @@ test("cupom inválido não desconta", async () => {
 
 test("linhas carrega o preco_unit cobrado por item (registro financeiro)", async () => {
   const r = await recomputaTotal(env, [{ id: "tablete", tam: "M", qtd: 2 }], OPTS);
-  expect(r.linhas).toEqual([{ id: "tablete", tam: "M", qtd: 2, preco_unit: 12300 }]);
+  expect(r.linhas).toHaveLength(1);
+  expect(r.linhas[0]).toMatchObject({ id: "tablete", tam: "M", qtd: 2, preco_unit: 12300 });
+  // var_id: o endereço exato do que foi vendido — é ele que a baixa de estoque usa
+  expect(typeof r.linhas[0].var_id).toBe("string");
 });
 
 test("item inexistente => erro (não confia no cliente)", async () => {
@@ -86,12 +89,34 @@ test("tamanho que o produto não tem => erro (não inventa preço)", async () =>
   expect((await recomputaTotal(env, [{ id: "tablete", tam: "P", qtd: 1 }], OPTS)).erro).toBe("item");
 });
 
+// ── estoque: não se vende o que não existe ──────────────────────────────────
+test("não vende mais do que tem em estoque", async () => {
+  // tablete Médio tem 7
+  expect((await recomputaTotal(env, [{ id: "tablete", tam: "M", qtd: 7 }], OPTS)).erro).toBeUndefined();
+  const r = await recomputaTotal(env, [{ id: "tablete", tam: "M", qtd: 8 }], OPTS);
+  expect(r.erro).toBe("estoque");
+  expect(r.disponivel).toBe(7);
+});
+
+test("tamanho esgotado não pode ser comprado", async () => {
+  // tablete Grande está com 0
+  expect((await recomputaTotal(env, [{ id: "tablete", tam: "G", qtd: 1 }], OPTS)).erro).toBe("estoque");
+});
+
+test("'continuar vendendo quando esgotar' libera a venda no zero", async () => {
+  await env.DB.prepare(
+    "UPDATE cat_variantes SET vender_sem_estoque = 1 WHERE produto_id = 'tablete' AND combinacao LIKE '%Grande%'"
+  ).run();
+  expect((await recomputaTotal(env, [{ id: "tablete", tam: "G", qtd: 3 }], OPTS)).erro).toBeUndefined();
+});
+
 test("qtd inválida (0, negativa, fracionária, acima do teto) => erro qtd", async () => {
   for (const q of [0, -2, 1.5, 100, 9999]) {
     expect((await recomputaTotal(env, [{ id: "tablete", tam: "M", qtd: q }], { ...OPTS, metodo: "pix" })).erro).toBe("qtd");
   }
-  // 99 (o teto por linha) ainda passa
-  expect((await recomputaTotal(env, [{ id: "tablete", tam: "M", qtd: 99 }], { ...OPTS, metodo: "pix" })).erro).toBeUndefined();
+  // 99 (o teto por linha) passa na regra de QUANTIDADE — mas agora esbarra no
+  // ESTOQUE (tablete M tem 7), que é outro erro, e é o certo.
+  expect((await recomputaTotal(env, [{ id: "tablete", tam: "M", qtd: 99 }], { ...OPTS, metodo: "pix" })).erro).toBe("estoque");
 });
 
 test("acima do teto de LINHAS (MAX_ITENS) => erro itens", async () => {

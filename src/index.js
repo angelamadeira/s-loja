@@ -7,7 +7,23 @@ import { EmailMessage } from "cloudflare:email";
 import { recomputaTotal, parcelasValidas } from "./precos.js";
 import { criaPagamento, consultaPagamento, consultaPagamentoFull } from "./mp.js";
 import { handleAdmin } from "./admin.js";
-import { serveMidia, catalogoPublico } from "./catalogo.js";
+import { serveMidia, catalogoPublico, baixaEstoque } from "./catalogo.js";
+
+// Baixa de estoque que NUNCA derruba a venda: o pagamento já foi confirmado
+// nesse ponto, então uma falha aqui é problema de inventário, não de cobrança.
+// Registra no log e segue — melhor um número de estoque errado (que ela corrige
+// no admin) do que um erro na cara de quem acabou de pagar.
+async function baixaSegura(env, compraId) {
+  try {
+    const r = await baixaEstoque(env, compraId);
+    const faltou = (r.baixados || []).filter((b) => b.faltou);
+    if (faltou.length) console.error("estoque: venda acima do disponível", r.ref, JSON.stringify(faltou));
+    return r;
+  } catch (e) {
+    console.error("baixa de estoque falhou", compraId, e);
+    return { ok: false };
+  }
+}
 
 const MAX_ARQUIVO = 10 * 1024 * 1024; // 10 MB por anexo
 const MAX_ANEXOS = 12;
@@ -292,6 +308,10 @@ async function handlePagar(request, env) {
       .bind(status, resultado.id != null ? String(resultado.id) : null, compraId)
       .run();
 
+    // Aprovou na hora (cartão): baixa o estoque agora. Pix normalmente cai como
+    // 'pendente' e a baixa acontece no webhook, quando o pagamento confirma.
+    if (status === "aprovado") await baixaSegura(env, compraId);
+
     return json({ ok: true, ref, status, pix: resultado.pix, t: await tokenPedido(ref, env) });
   } catch (e) {
     console.error("pagar falhou", e);
@@ -424,6 +444,15 @@ async function handleMpWebhook(request, env) {
       const upd = await env.DB.prepare("UPDATE compras SET status = ? WHERE mp_payment_id = ?")
         .bind(status, String(body.data.id))
         .run();
+      // Confirmou: desconta o estoque. A trava de idempotência vive na baixa
+      // (compras.estoque_baixado) — o MP reenvia o mesmo webhook até receber 200,
+      // então CONTAR COM reentrada é obrigatório aqui.
+      if (status === "aprovado") {
+        const alvo = await env.DB.prepare("SELECT id FROM compras WHERE mp_payment_id = ?")
+          .bind(String(body.data.id))
+          .first();
+        if (alvo) await baixaSegura(env, alvo.id);
+      }
       // Cura de órfão: se nenhuma linha casou pelo mp_payment_id, a compra pode ter
       // ficado 'iniciado' com mp_payment_id NULL (o /api/pagar cobrou mas morreu antes
       // do UPDATE). Casa pela external_reference (= id da compra) e backfilla o

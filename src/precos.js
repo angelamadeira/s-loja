@@ -30,8 +30,8 @@ export async function precosDoBanco(env, ids) {
   if (!unicos.length) return {};
   const marcas = unicos.map(() => "?").join(",");
   const { results } = await env.DB.prepare(
-    "SELECT v.produto_id, v.combinacao, v.preco, v.preco_promo FROM cat_variantes v " +
-      "JOIN cat_produtos p ON p.id = v.produto_id " +
+    "SELECT v.id, v.produto_id, v.combinacao, v.preco, v.preco_promo, v.estoque, v.vender_sem_estoque " +
+      "FROM cat_variantes v JOIN cat_produtos p ON p.id = v.produto_id " +
       "WHERE v.ativo = 1 AND p.status = 'ativo' AND v.produto_id IN (" + marcas + ")"
   )
     .bind(...unicos)
@@ -46,7 +46,12 @@ export async function precosDoBanco(env, ids) {
     }
     const tam = tamDaVariante(comb);
     if (!tam) continue;
-    (mapa[v.produto_id] = mapa[v.produto_id] || {})[tam] = precoDeVenda(v);
+    (mapa[v.produto_id] = mapa[v.produto_id] || {})[tam] = {
+      varId: v.id,
+      preco: precoDeVenda(v),
+      estoque: Number(v.estoque) || 0,
+      semEstoque: !!v.vender_sem_estoque,
+    };
   }
   return mapa;
 }
@@ -94,14 +99,21 @@ export async function recomputaTotal(env, itens, opts) {
   const linhas = [];
   for (const item of lista) {
     const { id, tam, qtd } = item || {};
-    const precoTam = precos[id] && precos[id][tam];
-    if (precoTam === undefined) return { erro: "item" };
+    const v = precos[id] && precos[id][tam];
+    if (v === undefined) return { erro: "item" };
+    const precoTam = v.preco;
     // teto por linha: peça autoral em tiragem limitada; 99 é folga de sobra e
     // fecha o buraco de inflar o total com uma qtd absurda (o MP acabaria
     // rejeitando por limite de valor, mas não devemos depender disso).
     if (!Number.isInteger(qtd) || qtd <= 0 || qtd > 99) return { erro: "qtd" };
+    // ESTOQUE: não se vende o que não existe. "Continuar vendendo quando
+    // esgotar", marcado no admin, é a exceção consciente dela — só aí passa
+    // com estoque insuficiente.
+    if (!v.semEstoque && qtd > v.estoque) return { erro: "estoque", id, tam, disponivel: v.estoque };
     subtotal += precoTam * qtd;
-    linhas.push({ id, tam, qtd, preco_unit: precoTam });
+    // var_id na linha: é o endereço exato do que foi vendido. Sem ele, a baixa
+    // de estoque teria de adivinhar a variante pelo nome do tamanho depois.
+    linhas.push({ id, tam, qtd, preco_unit: precoTam, var_id: v.varId });
   }
 
   // Frete: recomputado do CEP AQUI (nunca confia no cliente). Só há frete quando

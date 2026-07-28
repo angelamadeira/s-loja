@@ -22,6 +22,7 @@ import {
   subirMidia,
   leConfig,
   salvaConfig,
+  resumoAdmin,
 } from "./catalogo.js";
 
 // Quem pode entrar. Dono = somos.suzu; angelmadeira = recuperação. Ambos
@@ -215,6 +216,14 @@ export async function handleAdmin(request, env, url) {
       return json({ ok: false, erro: "servidor" }, 500);
     }
   }
+  if (p === "/api/admin/resumo" && m === "GET") {
+    try {
+      return json({ ok: true, resumo: await resumoAdmin(env) });
+    } catch (e) {
+      console.error("resumo", e);
+      return json({ ok: false, erro: "servidor" }, 500);
+    }
+  }
   if (p === "/api/admin/config" && m === "GET") {
     return json({ ok: true, config: await leConfig(env) });
   }
@@ -231,6 +240,7 @@ export async function handleAdmin(request, env, url) {
     }
   }
   if (p === "/admin/config") return html(paginaConfig());
+  if (p === "/admin/acesso") return html(paginaAcesso(sessao));
   if (p === "/admin/categorias") return html(paginaCategorias());
   if (p === "/admin/produtos") return html(paginaProdutos());
   if (p === "/admin/produto") return html(paginaProduto());
@@ -459,7 +469,89 @@ function html(markup) {
 // var(--token). O topo espelha o header do site (.brand/.seal/.word) e usa o
 // SELO REAL (/suzu-seal.svg, o mesmo símbolo do index.html) via <use>, herdando
 // a cor por currentColor. Botão primário = a classe .btn da loja.
-function base(inner, titulo) {
+// ── MAPA DO ADMIN ────────────────────────────────────────────────────────────
+// Anatomia copiada de Shopify e Nuvemshop: navegação PERSISTENTE à esquerda,
+// agrupada por assunto, sempre visível. O mapa inteiro fica exposto desde já —
+// inclusive o que ainda não existe, marcado "em breve". Um menu que cresce por
+// surpresa faz a pessoa reaprender a ferramenta a cada semana; vendo o mapa
+// completo ela entende o tamanho do território e sabe onde a coisa VAI estar.
+// Ordem dos grupos: a mesma das duas plataformas — o que dá dinheiro primeiro
+// (vendas), depois o que se vende (catálogo), quem compra, como se divulga, o
+// site, os números e, por último, a configuração.
+const MENU = [
+  { grupo: "", itens: [["/admin", "Início"]] },
+  {
+    grupo: "Vendas",
+    itens: [
+      ["/admin/pedidos", "Pedidos", "em breve"],
+      ["/admin/orcamentos", "Orçamentos", "em breve"],
+      ["/admin/abandonados", "Carrinhos abandonados", "em breve"],
+    ],
+  },
+  {
+    grupo: "Catálogo",
+    itens: [
+      ["/admin/produtos", "Produtos"],
+      ["/admin/categorias", "Categorias"],
+      ["/admin/estoque", "Estoque", "em breve"],
+      ["/admin/midia", "Mídia", "em breve"],
+    ],
+  },
+  { grupo: "Clientes", itens: [["/admin/clientes", "Clientes", "em breve"]] },
+  {
+    grupo: "Marketing",
+    itens: [
+      ["/admin/cupons", "Cupons", "em breve"],
+      ["/admin/promocoes", "Promoções", "em breve"],
+    ],
+  },
+  {
+    grupo: "Site",
+    itens: [
+      ["/admin/home", "Página inicial", "em breve"],
+      ["/admin/paginas", "Páginas", "em breve"],
+      ["/admin/receitas", "Receitas", "em breve"],
+    ],
+  },
+  { grupo: "Relatórios", itens: [["/admin/relatorios", "Relatórios", "em breve"]] },
+  {
+    grupo: "Configurações",
+    itens: [
+      ["/admin/config", "Da loja"],
+      ["/admin/acesso", "Acesso e aparelhos"],
+      ["/admin/envio", "Envio e frete", "em breve"],
+      ["/admin/pagamento", "Pagamento", "em breve"],
+    ],
+  },
+];
+
+function menuHtml(atual) {
+  return (
+    "<nav class=anav-lat aria-label='Seções do admin'>" +
+    MENU.map(function (sec) {
+      const itens = sec.itens
+        .map(function (it) {
+          const [href, rotulo, breve] = it;
+          const aqui = href === atual;
+          if (breve) {
+            return (
+              "<span class=anav-item aria-disabled=true>" + escapar(rotulo) +
+              "<i class=anav-breve>" + breve + "</i></span>"
+            );
+          }
+          return (
+            "<a class='anav-item" + (aqui ? " on" : "") + "' href='" + href + "'" +
+            (aqui ? " aria-current=page" : "") + ">" + escapar(rotulo) + "</a>"
+          );
+        })
+        .join("");
+      return (sec.grupo ? "<div class=anav-grupo>" + escapar(sec.grupo) + "</div>" : "") + itens;
+    }).join("") +
+    "</nav>"
+  );
+}
+
+function base(inner, titulo, atual) {
   return (
     "<!doctype html><html lang=pt-br><head><meta charset=utf-8>" +
     "<meta name=viewport content='width=device-width,initial-scale=1'>" +
@@ -474,9 +566,10 @@ function base(inner, titulo) {
         "<svg class=seal viewBox='0 0 633 633' aria-hidden=true><use href='/suzu-seal.svg#suzu-seal'/></svg>" +
         "<span class=word><span>Studio Suzu</span><b>formas autorais</b></span>" +
       "</a>" +
+      "<a class=alink href='/' target=_blank rel=noopener>Ver a loja ↗</a>" +
       "<span class=tag>Admin</span>" +
     "</div></header>" +
-    inner +
+    (atual === undefined ? inner : "<div class=ashell>" + menuHtml(atual) + "<div class=ashell-conteudo>" + inner + "</div></div>") +
     "<div class=afoot>Área restrita · acesso registrado</div>" +
     "</body></html>"
   );
@@ -508,29 +601,38 @@ function paginaLogin(msg) {
   );
 }
 
+// INÍCIO — o "Home" do Shopify / "Início" do Nuvemshop: números do negócio no
+// topo, tarefas pendentes logo abaixo, atalhos no fim. Os números são REAIS
+// (vêm de /api/admin/resumo); painel com número de enfeite é pior que nenhum.
 function paginaAdmin(sessao) {
   return base(
-    "<div class=awrap><div class=acard>" +
-      "<h1>Você está no Admin</h1>" +
-      "<p>Sessão segura ativa como <b>" + escapar(sessao.email) + "</b>.</p>" +
-      "<section class=asec>" +
-        "<h2 class=asec-title>Gerenciar</h2>" +
-        "<nav class=anav>" +
-          "<a href='/admin/produtos'>Produtos<span>catálogo, preços, estoque</span></a>" +
-          "<a href='/admin/categorias'>Categorias<span>organizar a vitrine</span></a>" +
-          "<a href='/admin/config'>Configurações<span>regras que valem para a loja toda</span></a>" +
-        "</nav>" +
-      "</section>" +
-      "<section class=asec id=pkbox>" +
-        "<h2 class=asec-title>Entrada por passkey</h2>" +
+    "<div class=apage id=inicio>" +
+      "<div class=apage-head><div><h1>Início</h1>" +
+      "<p class=apage-sub>" + escapar(sessao.email) + "</p></div>" +
+      "<a class=btn href='/admin/produto'>Novo produto</a></div>" +
+      "<div id=painel>Carregando…</div>" +
+    "</div>",
+    "Início",
+    "/admin"
+  ).replace("</body>", "<script src='/js/admin-inicio.js?v=" + assetsV() + "'></script></body>");
+}
+
+// ACESSO — passkeys e sair. Saiu do Início porque não é rotina de trabalho:
+// mexe-se nisso uma vez por aparelho (é onde as duas plataformas põem, em
+// Configurações → Usuários).
+function paginaAcesso(sessao) {
+  return base(
+    "<div class=apage>" +
+      "<div class=apage-head><div><h1>Acesso e aparelhos</h1>" +
+      "<p class=apage-sub>Sessão ativa como " + escapar(sessao.email) + "</p></div></div>" +
+      "<div class=acard-b id=pkbox>" +
+        "<h2 class=acard-b-title>Entrada por passkey</h2>" +
         "<div id=pklista class=apk-lista></div>" +
         "<button id=pkadd class='btn abtn-full'>Cadastrar este aparelho</button>" +
         "<p class=apk-nota>Vale para este endereço. Quando o admin for para o domínio final, cadastre novamente por lá.</p>" +
-      "</section>" +
+      "</div>" +
       "<div class=amsg id=msg hidden></div>" +
-      "<section class=asec>" +
-        "<button id=sair class='btn ghost abtn-full'>Sair</button>" +
-      "</section>" +
+      "<div class=aacoes><button id=sair class='btn ghost'>Sair</button></div>" +
       "<script src='/js/admin-passkey.js?v=" + assetsV() + "'></script>" +
       "<script>" +
       "var msg=document.getElementById('msg'),lista=document.getElementById('pklista'),add=document.getElementById('pkadd');" +
@@ -541,14 +643,15 @@ function paginaAdmin(sessao) {
       "add.addEventListener('click',function(){add.disabled=true;add.textContent='Confirmando…';SuzuPasskey.cadastrar().then(function(){add.disabled=false;add.textContent='Cadastrar este aparelho';aviso('Pronto! Agora você entra com Face ID ou digital.');carrega();}).catch(function(err){add.disabled=false;add.textContent='Cadastrar este aparelho';aviso(String(err.message)==='cancelado'?'Cadastro cancelado.':'Não deu para cadastrar agora.',true);});});" +
       "document.getElementById('sair').addEventListener('click',function(){fetch('/api/admin/logout',{method:'POST'}).then(function(){location.href='/admin';});});" +
       "</script>" +
-      "</div></div>",
-    "Admin"
+      "</div>",
+    "Acesso",
+    "/admin/acesso"
   );
 }
 
 // Casca larga (listas/formulários) — o conteúdo é montado por js/admin-catalogo.js
-function baseLargo(inner, titulo) {
-  return base("<main class='awrap awrap-wide'>" + inner + "</main>", titulo).replace(
+function baseLargo(inner, titulo, atual) {
+  return base(inner, titulo, atual).replace(
     "</body>",
     "<script src=/js/admin-catalogo.js></script></body>"
   );
@@ -563,7 +666,8 @@ function paginaProdutos() {
       "</div>" +
       "<div id=lista class=alista></div>" +
     "</div>",
-    "Produtos"
+    "Produtos",
+    "/admin/produtos"
   );
 }
 
@@ -574,7 +678,8 @@ function paginaCategorias() {
       "<a class=apage-sub-link href='/admin/produtos'>← Produtos</a></div></div>" +
       "<div id=cats>Carregando…</div>" +
     "</div>",
-    "Categorias"
+    "Categorias",
+    "/admin/categorias"
   );
 }
 
@@ -583,14 +688,15 @@ function paginaCategorias() {
 // frete, remetente e contato entram aqui conforme forem saindo do código.
 function paginaConfig() {
   return base(
-    "<main class='awrap awrap-wide'><div class=apage id=config>Carregando…</div></main>",
-    "Configurações"
+    "<div class=apage id=config>Carregando…</div>",
+    "Configurações",
+    "/admin/config"
   ).replace("</body>", "<script src='/js/admin-config.js?v=" + assetsV() + "'></script></body>");
 }
 
 function paginaProduto() {
   // formulário na anatomia do admin do Shopify — script próprio (js/admin-produto.js)
-  return base("<main class='awrap awrap-wide'><div class=apage id=form>Carregando…</div></main>", "Produto").replace(
+  return base("<div class=apage id=form>Carregando…</div>", "Produto", "/admin/produtos").replace(
     "</body>",
     "<script src='/js/admin-produto.js?v=" + assetsV() + "'></script></body>"
   );
