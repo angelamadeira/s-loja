@@ -126,6 +126,8 @@
   margin: 0 0 var(--space-5);
 }
 .amsg.err { background: var(--sango-wash); }
+/* aviso que aparece entre seções precisa de respiro em cima */
+.asec + .amsg { margin-top: var(--space-5); }
 
 /* ── separador "ou" entre passkey e link por e-mail ─────────────────────── */
 .asep {
@@ -146,14 +148,25 @@
   background: var(--line);
 }
 
-/* ── passkeys cadastradas ───────────────────────────────────────────────── */
-.apk-title {
+/* ── seções do card: agrupamento com respiro e divisor ──────────────────── */
+/* Cada bloco é uma seção separada por um fio — assim o rótulo pertence
+   visualmente ao seu grupo, em vez de flutuar solto no meio do texto. */
+.asec {
+  margin-top: var(--space-6);
+  /* zera o padding do `section` global do site (components.css: section{padding:var(--space-9) 0})
+     — no admin a seção é um bloco de card, não uma faixa de página */
+  padding: var(--space-6) 0 0;
+  border-top: 1px solid var(--line);
+}
+.asec-title {
   font-size: .68rem;
   letter-spacing: .12em;
   text-transform: uppercase;
   color: var(--text-muted);
-  margin-bottom: var(--space-3);
+  margin: 0 0 var(--space-4);
 }
+
+/* ── passkeys cadastradas ───────────────────────────────────────────────── */
 .apk-lista { margin-bottom: var(--space-4); }
 .apk-item {
   display: flex;
@@ -179,16 +192,18 @@
   border-radius: var(--r-xs);
 }
 .apk-rm:hover { color: var(--sango-deep); }
+/* estado vazio: discreto e junto do rótulo, sem cavar um vão */
 .apk-vazio {
   color: var(--text-muted);
   font-size: .88rem;
-  padding: var(--space-3) 0;
 }
-.apk-nota {
+/* nota de rodapé da seção: respiro em cima, discreta, não compete com o botão.
+   Seletor com .acard pra ganhar de `.acard p` (mesma especificidade não bastaria). */
+.acard .apk-nota {
   color: var(--text-muted);
   font-size: .76rem;
   line-height: 1.5;
-  margin: var(--space-3) 0 var(--space-5);
+  margin: var(--space-4) 0 0;
 }
 
 .afoot {

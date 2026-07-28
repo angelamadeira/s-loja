@@ -384,14 +384,16 @@ function paginaAdmin(sessao) {
     "<div class=awrap><div class=acard>" +
       "<h1>Você está no Admin</h1>" +
       "<p>Sessão segura ativa como <b>" + escapar(sessao.email) + "</b>. As telas de produtos, pedidos e configurações entram nos próximos passos.</p>" +
-      "<div id=pkbox>" +
-        "<div class=apk-title>Entrada por passkey</div>" +
+      "<section class=asec id=pkbox>" +
+        "<h2 class=asec-title>Entrada por passkey</h2>" +
         "<div id=pklista class=apk-lista></div>" +
         "<button id=pkadd class='btn abtn-full'>Cadastrar este aparelho</button>" +
-        "<p class=apk-nota>A passkey vale para este endereço. Ao publicarmos o admin no domínio final, cadastre novamente por lá.</p>" +
-      "</div>" +
+        "<p class=apk-nota>Vale para este endereço. Quando o admin for para o domínio final, cadastre novamente por lá.</p>" +
+      "</section>" +
       "<div class=amsg id=msg hidden></div>" +
-      "<button id=sair class='btn ghost abtn-full'>Sair</button>" +
+      "<section class=asec>" +
+        "<button id=sair class='btn ghost abtn-full'>Sair</button>" +
+      "</section>" +
       "<script src=/js/admin-passkey.js></script>" +
       "<script>" +
       "var msg=document.getElementById('msg'),lista=document.getElementById('pklista'),add=document.getElementById('pkadd');" +
