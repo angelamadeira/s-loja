@@ -212,6 +212,10 @@
     var arrastando = -1;
     function pintarGaleria() {
       gal.textContent = "";
+      // Vazio é convite, não buraco: diz o que entra aqui e para que serve.
+      if (!p.galeria.length) {
+        gal.appendChild(el("p", "ahint agal-vazio", "Nenhuma imagem ainda. A primeira que você enviar vira a capa na vitrine."));
+      }
       p.galeria.forEach(function (g, i) {
         var cel = el("div", "agal-item");
         cel.draggable = true;
@@ -372,6 +376,10 @@
 
     // ── Variações (opções com CHIPS + tabela de variantes)
     var cV = card("Variações");
+    // Diz o que a seção faz ANTES de pedir ação: sem isto, "+ Adicionar opção"
+    // é um link solto e não se sabe o que ele desencadeia.
+    var explicaVar = el("p", "ahint", "Se a peça sai em mais de um tamanho, cor ou sabor, cadastre aqui. Cada combinação ganha preço e estoque próprios.");
+    cV.appendChild(explicaVar);
     var opsWrap = el("div", "aops"); cV.appendChild(opsWrap);
     var addOp = el("button", "alink", "+ Adicionar opção como tamanho ou cor");
     addOp.type = "button";
@@ -381,6 +389,12 @@
       pintarOpcoes(); regenera(); marcaSujo();
     });
     cV.appendChild(addOp);
+    // Três cards SOMEM quando existem variações (padrão Shopify: o preço passa a
+    // morar na variante, pra não haver dois lugares dizendo o preço). Sumir sem
+    // explicar assusta — este aviso diz para onde eles foram.
+    var avisoMudou = el("p", "ahint aviso-mudou", "Preço, estoque e envio agora ficam em cada variação abaixo.");
+    avisoMudou.hidden = true;
+    cV.appendChild(avisoMudou);
     var tabWrap = el("div", "avtab"); cV.appendChild(tabWrap);
     main.appendChild(cV);
 
@@ -686,6 +700,7 @@
       // Shopify: com variantes, preço/estoque/envio saem do produto e vão pra tabela
       var temVar = p.variantes.length > 0;
       cP.hidden = temVar; cE.hidden = temVar; cS.hidden = temVar;
+      avisoMudou.hidden = !temVar;
       pintarTabela();
       atualizaVitrine(); // criar/remover variante muda o estoque total e o selo
     }
@@ -731,7 +746,12 @@
         }
         pintarImg();
         topo.appendChild(bImg);
-        topo.appendChild(el("span", "avlinha-nome", rotulo(v.combinacao || {})));
+        // IDENTIDADE da variante: o nome e a medida que a cliente lê logo abaixo
+        // dele na loja. A medida ficava perdida no meio dos números de frete —
+        // mas ela não é um dado de operação, é parte de como a peça se apresenta.
+        var ident = el("div", "avlinha-ident");
+        ident.appendChild(el("span", "avlinha-nome", rotulo(v.combinacao || {})));
+        topo.appendChild(ident);
         var lv = el("label", "acheck");
         var cv = document.createElement("input"); cv.type = "checkbox"; cv.checked = v.ativo !== false;
         cv.addEventListener("change", function () { v.ativo = cv.checked; });
@@ -739,14 +759,37 @@
         topo.appendChild(lv);
         linha.appendChild(topo);
         linha.appendChild(seletor);
-        var g = el("div", "agrid");
-        function add(rot, tipo, val, set, ph) {
-          var i = inp(tipo, val, ph); if (tipo === "text") i.inputMode = "decimal";
-          i.addEventListener("input", function () { set(i.value); });
-          g.appendChild(campo(rot, i));
+        // a medida ocupa a linha inteira, abaixo do cabeçalho: espremida ao lado
+        // do "À venda" ela colidia com a caixa em tela de celular
+        var iMed = inp("text", v.medida || "", "≈ 7 cm");
+        iMed.className = "avmedida";
+        iMed.addEventListener("input", function () { v.medida = iMed.value; });
+        var campoMed = el("label", "avmedida-campo");
+        campoMed.appendChild(el("span", null, "Medida na loja"));
+        campoMed.appendChild(iMed);
+        linha.appendChild(campoMed);
+        // ── os campos da variante, agrupados pelos MESMOS assuntos dos cards do
+        // produto: Preço · Estoque · Envio. Antes eram nove campos numa grade
+        // corrida, onde "Promocional" ficava do lado de "Larg. (cm)" — coisas
+        // que não têm nada a ver uma com a outra. Quem aprendeu a cadastrar uma
+        // peça única não precisa reaprender nada ao criar variações.
+        function grupo(titulo, dica) {
+          var d = el("div", "avgrupo");
+          d.appendChild(el("div", "avgrupo-tit", titulo));
+          if (dica) d.appendChild(el("p", "ahint avgrupo-dica", dica));
+          return d;
         }
-        // preço e promocional andam juntos: a etiqueta de % sai da conta entre os
-        // dois, então os dois campos atualizam o mesmo aviso.
+        function numero(rot, val, set) {
+          var i = inp("number", val);
+          i.addEventListener("input", function () { set(i.value); });
+          return campo(rot, i);
+        }
+
+        // ── ESSENCIAL, sempre à vista: preço, promocional e quantidade. São os
+        // três que mudam toda semana. O resto (código, embalagem, exceção de
+        // estoque) se mexe uma vez na vida e fica atrás de um "mais detalhes" —
+        // sem isso, cada variação ocupava 735px de rolagem e seis variações
+        // viravam quatro mil pixels de formulário.
         var etiqVar = el("small", "ahint aetiq");
         etiqVar.hidden = true;
         var iVp = inp("text", deCents(v.preco), "0,00"); iVp.inputMode = "decimal";
@@ -754,27 +797,42 @@
         function etiquetaVar() { mostraEtiqueta(etiqVar, v.preco, v.preco_promo); }
         iVp.addEventListener("input", function () { v.preco = paraCents(iVp.value); etiquetaVar(); });
         iVc.addEventListener("input", function () { v.preco_promo = iVc.value === "" ? null : paraCents(iVc.value); etiquetaVar(); });
-        g.appendChild(campo("Preço (R$)", iVp));
-        var campoVc = campo("Promocional (R$)", iVc);
-        campoVc.appendChild(etiqVar);
-        g.appendChild(campoVc);
+        var trio = el("div", "avtrio");
+        trio.appendChild(campo("Preço (R$)", iVp));
+        trio.appendChild(campo("Promocional (R$)", iVc));
+        trio.appendChild(numero("Quantidade", v.estoque, function (x) { v.estoque = Number(x) || 0; }));
+        linha.appendChild(trio);
+        linha.appendChild(etiqVar);
         etiquetaVar();
-        add("Estoque", "number", v.estoque, function (x) { v.estoque = Number(x) || 0; });
-        add("Peso (g)", "number", v.peso_g, function (x) { v.peso_g = Number(x) || 0; });
-        add("Compr. (cm)", "number", v.comp_cm, function (x) { v.comp_cm = Number(x) || 0; });
-        add("Larg. (cm)", "number", v.larg_cm, function (x) { v.larg_cm = Number(x) || 0; });
-        add("Alt. (cm)", "number", v.alt_cm, function (x) { v.alt_cm = Number(x) || 0; });
-        // SKU não é número — entra sem o inputMode decimal dos campos acima
+
+        // ── O RESTO, dobrado. Fica fechado por padrão e some do caminho, mas o
+        // rótulo diz exatamente o que tem dentro — dobra sem nome vira gaveta
+        // que ninguém abre.
+        var mais = document.createElement("details");
+        mais.className = "avmais";
+        var resumo = document.createElement("summary");
+        resumo.textContent = "Código, envio e exceção de estoque";
+        mais.appendChild(resumo);
+
+        var gEst = grupo("Estoque");
         var iS = inp("text", v.sku || "", "");
         iS.addEventListener("input", function () { v.sku = iS.value; });
-        g.appendChild(campo("SKU", iS, "Não precisa mexer."));
-        // Medida da PEÇA (o "≈ 7 cm" que aparece embaixo do nome na loja).
-        // Nada a ver com os campos de envio acima, que são da EMBALAGEM.
-        var iMed = inp("text", v.medida || "", "≈ 7 cm");
-        iMed.addEventListener("input", function () { v.medida = iMed.value; });
-        g.appendChild(campo("Medida da peça", iMed, "Aparece na loja, abaixo do nome."));
-        linha.appendChild(g);
-        linha.appendChild(caixa("Continuar vendendo quando esgotar", v.vender_sem_estoque, function (x) { v.vender_sem_estoque = x; }));
+        gEst.appendChild(campo("SKU", iS, "Apelido seu para achar a peça. Pode ficar vazio."));
+        gEst.appendChild(caixa("Continuar vendendo quando esgotar", v.vender_sem_estoque, function (x) { v.vender_sem_estoque = x; }));
+        mais.appendChild(gEst);
+
+        // ENVIO — a EMBALAGEM. A dica existe porque este bloco convive com a
+        // "Medida na loja" lá em cima, e confundir os dois gera frete errado.
+        var gEnv = grupo("Envio", "Medidas da embalagem fechada — é o que cota o frete e sai na etiqueta.");
+        var quadEnv = el("div", "agrid");
+        quadEnv.appendChild(numero("Peso (g)", v.peso_g, function (x) { v.peso_g = Number(x) || 0; }));
+        quadEnv.appendChild(numero("Compr. (cm)", v.comp_cm, function (x) { v.comp_cm = Number(x) || 0; }));
+        quadEnv.appendChild(numero("Larg. (cm)", v.larg_cm, function (x) { v.larg_cm = Number(x) || 0; }));
+        quadEnv.appendChild(numero("Alt. (cm)", v.alt_cm, function (x) { v.alt_cm = Number(x) || 0; }));
+        gEnv.appendChild(quadEnv);
+        mais.appendChild(gEnv);
+
+        linha.appendChild(mais);
         tabWrap.appendChild(linha);
       });
     }

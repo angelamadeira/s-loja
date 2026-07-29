@@ -900,3 +900,81 @@ a.akpi:hover { border-color: var(--line-strong); }
 a.apasso:hover { border-color: var(--line-strong); }
 .apasso b { font-weight: 500; font-size: .92rem; }
 .apasso span { font-size: .78rem; color: var(--text-muted); line-height: 1.5; }
+
+/* ── variante: campos agrupados por assunto, iguais aos cards do produto ──── */
+.avlinha-ident { min-width: 0; flex: 1; }
+/* medida = identidade da peça, não dado de operação: linha própria logo abaixo do
+   cabeçalho, à esquerda. Ao lado do "À venda" ela colidia com a caixa no celular. */
+.avmedida-campo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+.avmedida-campo span {
+  font-size: .6rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--label);
+  white-space: nowrap;
+}
+.afield .avmedida, .avmedida {
+  width: 6rem;
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--line);
+  border-radius: var(--r-xs);
+  background: var(--surface);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: .82rem;
+}
+.avgrupo { margin-top: var(--space-4); padding-top: var(--space-4); border-top: 1px solid var(--line-soft); }
+.avgrupo:first-of-type { margin-top: var(--space-3); }
+.avgrupo-tit {
+  font-size: .6rem;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--label);
+  margin-bottom: var(--space-3);
+}
+.avgrupo-dica { margin-top: calc(var(--space-2) * -1); margin-bottom: var(--space-3); }
+.avgrupo .afield:last-child { margin-bottom: 0; }
+
+/* aviso de que preço/estoque/envio mudaram de lugar */
+.aviso-mudou {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--r-sm);
+  background: var(--mizu-wash);
+  color: var(--text-secondary);
+  margin-bottom: var(--space-4);
+}
+
+/* estado vazio da galeria: ocupa a linha toda em vez de virar um buraco */
+.agal-vazio { grid-column: 1 / -1; margin: 0; }
+
+/* essencial da variante: preço, promocional e quantidade lado a lado.
+   A etiqueta de % fica FORA da grade (logo abaixo), senão ela estica só uma
+   coluna e a Quantidade desce sozinha, deixando um vão do lado do Preço. */
+.avtrio { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: var(--space-3); align-items: start; }
+.avtrio + .aetiq { display: block; margin: calc(var(--space-1) * -1) 0 var(--space-2); }
+@media (max-width: 560px) { .avtrio { grid-template-columns: 1fr 1fr; } }
+
+/* o resto da variante, dobrado */
+.avmais { margin-top: var(--space-2); }
+.avmais > summary {
+  list-style: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: .74rem;
+  letter-spacing: .06em;
+  color: var(--text-muted);
+  padding: var(--space-1) 0;
+}
+.avmais > summary::-webkit-details-marker { display: none; }
+.avmais > summary::before { content: "›"; display: inline-block; transition: transform .16s ease; }
+.avmais[open] > summary::before { transform: rotate(90deg); }
+.avmais > summary:hover { color: var(--text); }
+.avmais > summary:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; border-radius: var(--r-xs); }
+.avmais .avgrupo:first-of-type { margin-top: var(--space-2); }
