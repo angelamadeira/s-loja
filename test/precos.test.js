@@ -89,6 +89,60 @@ test("tamanho que o produto não tem => erro (não inventa preço)", async () =>
   expect((await recomputaTotal(env, [{ id: "tablete", tam: "P", qtd: 1 }], OPTS)).erro).toBe("item");
 });
 
+// ── variação genérica: comprar pelo ID DA VARIANTE ──────────────────────────
+const varIdDe = (prod, valor) =>
+  env.DB.prepare("SELECT id FROM cat_variantes WHERE produto_id = ? AND combinacao LIKE ?")
+    .bind(prod, "%" + valor + "%")
+    .first()
+    .then((r) => r && r.id);
+
+test("compra pelo id da variante cobra o preço dela", async () => {
+  const vid = await varIdDe("tablete", "Médio");
+  const r = await recomputaTotal(env, [{ id: "tablete", varId: vid, qtd: 1 }], OPTS);
+  expect(r.erro).toBeUndefined();
+  expect(r.subtotal).toBe(12300);
+  expect(r.linhas[0].var_id).toBe(vid);
+});
+
+test("id de variante de OUTRO produto é recusado", async () => {
+  const vid = await varIdDe("cubo", "Médio");
+  const r = await recomputaTotal(env, [{ id: "tablete", varId: vid, qtd: 1 }], OPTS);
+  expect(r.erro).toBe("item");
+});
+
+test("id de variante desligada não vende (não é salvo-conduto)", async () => {
+  const vid = await varIdDe("tablete", "Médio");
+  await env.DB.prepare("UPDATE cat_variantes SET ativo = 0 WHERE id = ?").bind(vid).run();
+  expect((await recomputaTotal(env, [{ id: "tablete", varId: vid, qtd: 1 }], OPTS)).erro).toBe("item");
+});
+
+test("tamanho digitado em CAIXA ALTA ou sem acento continua sendo o mesmo tamanho", async () => {
+  // ela digita o valor à mão no admin: "PEQUENO", "Pequeno" e "pequeno" são a
+  // MESMA coisa. Tratar como diferentes fazia a peça cair fora da grade.
+  await env.DB.prepare(
+    "INSERT INTO cat_produtos (id,slug,nome,status,preco,criado_em,atualizado_em) VALUES ('caixa','caixa','Caixa','ativo',8900,'x','x')"
+  ).run();
+  await env.DB.prepare(
+    "INSERT INTO cat_variantes (id,produto_id,combinacao,preco,estoque,ativo,ordem) VALUES ('cv1','caixa','{\"TAMANHO\":\"PEQUENO\"}',8900,3,1,0)"
+  ).run();
+  const r = await recomputaTotal(env, [{ id: "caixa", tam: "P", qtd: 1 }], OPTS);
+  expect(r.erro).toBeUndefined();
+  expect(r.subtotal).toBe(8900);
+});
+
+test("variante que não é de Tamanho (Cor) também se compra", async () => {
+  // produto novo, com opção Cor — o caso que a vitrine ignorava em silêncio
+  await env.DB.prepare(
+    "INSERT INTO cat_produtos (id,slug,nome,status,preco,criado_em,atualizado_em) VALUES ('laco','laco-rosa','Laço','ativo',5000,'x','x')"
+  ).run();
+  await env.DB.prepare(
+    "INSERT INTO cat_variantes (id,produto_id,combinacao,preco,estoque,ativo,ordem) VALUES ('lv1','laco','{\"Cor\":\"Rosa\"}',5000,4,1,0)"
+  ).run();
+  const r = await recomputaTotal(env, [{ id: "laco", varId: "lv1", qtd: 2 }], OPTS);
+  expect(r.erro).toBeUndefined();
+  expect(r.subtotal).toBe(10000);
+});
+
 // ── estoque: não se vende o que não existe ──────────────────────────────────
 test("não vende mais do que tem em estoque", async () => {
   // tablete Médio tem 7

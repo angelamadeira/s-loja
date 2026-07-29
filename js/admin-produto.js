@@ -679,7 +679,7 @@
       p.variantes = cs.map(function (c) {
         return antes[chave(c)] || {
           combinacao: c, preco: p.preco, preco_promo: null, estoque: 0, vender_sem_estoque: false,
-          sku: "", gtin: "", peso_g: p.peso_g, comp_cm: p.comp_cm, larg_cm: p.larg_cm, alt_cm: p.alt_cm,
+          sku: "", gtin: "", medida: "", peso_g: p.peso_g, comp_cm: p.comp_cm, larg_cm: p.larg_cm, alt_cm: p.alt_cm,
           imagem_asset: null, ativo: true,
         };
       });
@@ -768,6 +768,11 @@
         var iS = inp("text", v.sku || "", "");
         iS.addEventListener("input", function () { v.sku = iS.value; });
         g.appendChild(campo("SKU", iS, "Não precisa mexer."));
+        // Medida da PEÇA (o "≈ 7 cm" que aparece embaixo do nome na loja).
+        // Nada a ver com os campos de envio acima, que são da EMBALAGEM.
+        var iMed = inp("text", v.medida || "", "≈ 7 cm");
+        iMed.addEventListener("input", function () { v.medida = iMed.value; });
+        g.appendChild(campo("Medida da peça", iMed, "Aparece na loja, abaixo do nome."));
         linha.appendChild(g);
         linha.appendChild(caixa("Continuar vendendo quando esgotar", v.vender_sem_estoque, function (x) { v.vender_sem_estoque = x; }));
         tabWrap.appendChild(linha);
@@ -889,7 +894,7 @@
       var vs = (x.variantes || []).map(function (v) {
         return {
           id: v.id, combinacao: v.combinacao || {}, preco: v.preco, preco_promo: v.preco_promo,
-          estoque: v.estoque, vender_sem_estoque: !!v.vender_sem_estoque, sku: v.sku || "", gtin: v.gtin || "",
+          estoque: v.estoque, vender_sem_estoque: !!v.vender_sem_estoque, sku: v.sku || "", gtin: v.gtin || "", medida: v.medida || "",
           peso_g: v.peso_g, comp_cm: v.comp_cm, larg_cm: v.larg_cm, alt_cm: v.alt_cm,
           imagem_asset: v.imagem_asset || null, ativo: !!v.ativo,
         };

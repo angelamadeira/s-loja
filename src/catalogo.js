@@ -14,15 +14,22 @@ const MAX_NOME = 200;
 // A vitrine trabalha com códigos P/M/G; o banco guarda o VALOR que a fundadora
 // digitou na opção ("Pequeno"). Esta tabela é o único lugar que liga os dois —
 // e é usada tanto pra montar o catálogo público quanto pra cobrar (precos.js).
-export const TAM_CODIGO = { Pequeno: "P", Médio: "M", Medio: "M", Grande: "G" };
+export const TAM_CODIGO = { pequeno: "P", medio: "M", grande: "G" };
+
+// Normaliza pra comparar: sem acento, minúsculo, sem espaço sobrando. Ela digita
+// o valor à mão — "PEQUENO", "Médio", "medio" são a MESMA coisa, e tratar como
+// coisas diferentes fazia a peça cair fora da grade de tamanhos sem explicação.
+function chaveTam(s) {
+  return String(s == null ? "" : s).trim().normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+}
 
 // Devolve o código de tamanho da variante, ou null se ela não for "por tamanho"
-// (ex.: uma opção de Cor — a vitrine atual ainda não sabe desenhar isso).
+// (ex.: uma opção de Cor — aí a vitrine usa o rótulo da própria variante).
 export function tamDaVariante(combinacao) {
   const c = combinacao && typeof combinacao === "object" ? combinacao : {};
   for (const chave of Object.keys(c)) {
-    if (chave.trim().toLowerCase() !== "tamanho") continue;
-    const cod = TAM_CODIGO[String(c[chave]).trim()];
+    if (chaveTam(chave) !== "tamanho") continue;
+    const cod = TAM_CODIGO[chaveTam(c[chave])];
     if (cod) return cod;
   }
   return null;
@@ -86,13 +93,16 @@ export async function baixaEstoque(env, compraId) {
     const qtd = Math.max(0, Math.round(Number(it && it.qtd) || 0));
     if (!qtd) continue;
     // pelo id da variante quando existe; senão, pela combinação de tamanho
-    // (compras antigas, gravadas antes de a linha carregar var_id)
+    // (compras antigas, gravadas antes de a linha carregar var_id).
+    // O casamento passa por tamDaVariante em vez de montar um LIKE com o nome:
+    // ela digita o valor à mão, e "PEQUENO"/"Pequeno"/"pequeno" precisam achar a
+    // mesma variante — um LIKE literal erraria em duas delas.
     let varId = txt(it.var_id, 64);
     if (!varId && it.id && it.tam) {
-      const nome = Object.keys(TAM_CODIGO).find((k) => TAM_CODIGO[k] === it.tam);
-      const achou = await env.DB.prepare(
-        "SELECT id FROM cat_variantes WHERE produto_id = ? AND combinacao LIKE ?"
-      ).bind(String(it.id), '%"' + (nome || "") + '"%').first();
+      const cands = (await env.DB.prepare(
+        "SELECT id, combinacao FROM cat_variantes WHERE produto_id = ?"
+      ).bind(String(it.id)).all()).results || [];
+      const achou = cands.find((c) => tamDaVariante(jparse(c.combinacao, {})) === it.tam);
       varId = achou ? achou.id : "";
     }
     if (!varId) continue;
@@ -167,7 +177,7 @@ export async function catalogoPublico(env) {
   const ids = prods.map((p) => p.id);
   const marcas = ids.map(() => "?").join(",");
   const vars = (await env.DB.prepare(
-    "SELECT produto_id, combinacao, preco, preco_promo, estoque, vender_sem_estoque, imagem_asset " +
+    "SELECT id, produto_id, combinacao, medida, preco, preco_promo, estoque, vender_sem_estoque, imagem_asset " +
       "FROM cat_variantes WHERE ativo = 1 AND produto_id IN (" + marcas + ") ORDER BY ordem"
   ).bind(...ids).all()).results || [];
   const imgs = (await env.DB.prepare(
@@ -205,20 +215,27 @@ export async function catalogoPublico(env) {
         tt: links.tiktok || "",
         galeria: (iPorProd[p.id] || []).map((i) => ({ id: i.asset_id, tipo: i.tipo })),
         cats: (cPorProd[p.id] || []).map((c) => c.categoria_id),
-        vars: (vPorProd[p.id] || [])
-          .map((v) => {
-            const tam = tamDaVariante(jparse(v.combinacao, {}));
-            if (!tam) return null;
-            return {
-              tam,
-              cheio: v.preco,
-              promo: v.preco_promo,
-              estoque: v.estoque,
-              semEstoque: v.vender_sem_estoque ? 1 : 0,
-              img: v.imagem_asset || null,
-            };
-          })
-          .filter(Boolean),
+        // TODAS as variantes ativas — inclusive as que não são "por tamanho".
+        // Antes só as de Tamanho passavam, e um produto de Cor ou Sabor sumia da
+        // loja EM SILÊNCIO (a fundadora cadastrava e não entendia por que não
+        // aparecia). `tam` continua vindo quando existe, porque é ele que casa
+        // com o filtro de tamanho e com os endereços antigos da vitrine.
+        vars: (vPorProd[p.id] || []).map((v) => {
+          const comb = jparse(v.combinacao, {});
+          const vals = Object.keys(comb).map((k) => comb[k]).filter(Boolean);
+          return {
+            id: v.id,
+            tam: tamDaVariante(comb), // null quando a opção não é Tamanho
+            combinacao: comb,
+            rotulo: vals.length ? vals.join(" · ") : "Peça única",
+            medida: v.medida || "",
+            cheio: v.preco,
+            promo: v.preco_promo,
+            estoque: v.estoque,
+            semEstoque: v.vender_sem_estoque ? 1 : 0,
+            img: v.imagem_asset || null,
+          };
+        }),
       };
     }),
   };
@@ -240,7 +257,7 @@ export async function listaProdutos(env) {
 
   const marcas = produtos.map(() => "?").join(",");
   const vars = (await env.DB.prepare(
-    "SELECT produto_id, combinacao, sku, preco, preco_promo, estoque, vender_sem_estoque, ativo, imagem_asset " +
+    "SELECT produto_id, combinacao, sku, medida, preco, preco_promo, estoque, vender_sem_estoque, ativo, imagem_asset " +
       "FROM cat_variantes WHERE produto_id IN (" + marcas + ") ORDER BY ordem"
   ).bind(...produtos.map((p) => p.id)).all()).results || [];
   const capas = (await env.DB.prepare(
@@ -256,6 +273,7 @@ export async function listaProdutos(env) {
     const lista = (porProd[p.id] || []).map((v) => ({
       combinacao: jparse(v.combinacao, {}),
       sku: v.sku || "",
+      medida: v.medida || "",
       preco: v.preco,
       preco_promo: v.preco_promo,
       estoque: v.estoque,
@@ -370,7 +388,7 @@ export async function salvaProduto(env, body) {
     const vpreco = v.preco === null || v.preco === "" ? null : cents(v.preco);
     const vpromo = v.preco_promo === null || v.preco_promo === "" ? null : cents(v.preco_promo);
     await env.DB.prepare(
-      "INSERT INTO cat_variantes (id,produto_id,combinacao,sku,gtin,preco,preco_promo,estoque,vender_sem_estoque,peso_g,comp_cm,larg_cm,alt_cm,imagem_asset,ativo,ordem) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
+      "INSERT INTO cat_variantes (id,produto_id,combinacao,sku,gtin,medida,preco,preco_promo,estoque,vender_sem_estoque,peso_g,comp_cm,larg_cm,alt_cm,imagem_asset,ativo,ordem) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
     )
       .bind(
         txt(v.id, 64) || crypto.randomUUID(),
@@ -378,6 +396,7 @@ export async function salvaProduto(env, body) {
         JSON.stringify(v.combinacao && typeof v.combinacao === "object" ? v.combinacao : {}),
         txt(v.sku, 60) || null,
         txt(v.gtin, 60) || null,
+        txt(v.medida, 40) || null,
         vpreco,
         vpromo,
         int(v.estoque),
@@ -465,13 +484,13 @@ export async function duplicaProduto(env, id) {
   }
   for (const v of orig.variantes || []) {
     await env.DB.prepare(
-      "INSERT INTO cat_variantes (id,produto_id,combinacao,sku,gtin,preco,preco_promo,estoque,vender_sem_estoque,peso_g,comp_cm,larg_cm,alt_cm,imagem_asset,ativo,ordem) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
+      "INSERT INTO cat_variantes (id,produto_id,combinacao,sku,gtin,medida,preco,preco_promo,estoque,vender_sem_estoque,peso_g,comp_cm,larg_cm,alt_cm,imagem_asset,ativo,ordem) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
     )
       .bind(
         crypto.randomUUID(), novoId, JSON.stringify(v.combinacao || {}),
         // SKU e código de barras NÃO se copiam: são identificadores únicos —
         // duas peças com o mesmo código viram confusão de estoque.
-        null, null,
+        null, null, v.medida || null,
         v.preco, v.preco_promo, v.estoque, v.vender_sem_estoque ? 1 : 0,
         v.peso_g, v.comp_cm, v.larg_cm, v.alt_cm, v.imagem_asset, v.ativo ? 1 : 0, v.ordem || 0
       )

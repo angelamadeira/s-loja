@@ -92,6 +92,7 @@ CREATE TABLE IF NOT EXISTS cat_variantes (
   combinacao  TEXT NOT NULL DEFAULT '{}', -- JSON: {"Cor":"Rosa","Tamanho":"M"} (vazio p/ peça única)
   sku         TEXT,                       -- código interno (opcional)
   gtin        TEXT,                       -- código de barras EAN/UPC/GTIN (opcional)
+  medida      TEXT,                       -- tamanho da PEÇA mostrado na loja ("≈ 3 cm") — não é a embalagem
   preco       INTEGER,                    -- centavos (null = herda cat_produtos.preco)
   preco_promo INTEGER,                    -- centavos (null = herda / sem promoção)
   estoque     INTEGER NOT NULL DEFAULT 0, -- contagem; baixa no PAGAMENTO confirmado

@@ -25,6 +25,29 @@ function precoDeVenda(v) {
 
 // Busca no banco os preços das variantes dos produtos pedidos, já indexados por
 // {id do produto}{código do tamanho}. Uma consulta só, mesmo com vários itens.
+// Busca UMA variante pelo id — o caminho direto, que funciona para qualquer tipo
+// de opção (Cor, Sabor, Edição), não só Tamanho. Continua exigindo que a
+// variante e o produto estejam à venda: id de variante não é salvo-conduto.
+export async function varianteDoBanco(env, varId) {
+  const id = String(varId || "");
+  if (!id) return null;
+  const v = await env.DB.prepare(
+    "SELECT v.id, v.produto_id, v.preco, v.preco_promo, v.estoque, v.vender_sem_estoque " +
+      "FROM cat_variantes v JOIN cat_produtos p ON p.id = v.produto_id " +
+      "WHERE v.id = ? AND v.ativo = 1 AND p.status = 'ativo'"
+  )
+    .bind(id)
+    .first();
+  if (!v) return null;
+  return {
+    varId: v.id,
+    produtoId: v.produto_id,
+    preco: precoDeVenda(v),
+    estoque: Number(v.estoque) || 0,
+    semEstoque: !!v.vender_sem_estoque,
+  };
+}
+
 export async function precosDoBanco(env, ids) {
   const unicos = [...new Set((ids || []).map((s) => String(s || "")).filter(Boolean))];
   if (!unicos.length) return {};
@@ -98,9 +121,14 @@ export async function recomputaTotal(env, itens, opts) {
   let subtotal = 0;
   const linhas = [];
   for (const item of lista) {
-    const { id, tam, qtd } = item || {};
-    const v = precos[id] && precos[id][tam];
-    if (v === undefined) return { erro: "item" };
+    const { id, tam, qtd, varId } = item || {};
+    // Preferência pelo ID DA VARIANTE: é o endereço exato do que foi escolhido e
+    // vale para qualquer opção. O par (produto, tamanho) fica como caminho
+    // alternativo — sacolas salvas antes de existir varId ainda chegam assim.
+    const v = varId ? await varianteDoBanco(env, varId) : precos[id] && precos[id][tam];
+    if (!v) return { erro: "item" };
+    // varId de um produto ≠ do informado seria carrinho remontado à mão
+    if (varId && id && v.produtoId && v.produtoId !== id) return { erro: "item" };
     const precoTam = v.preco;
     // teto por linha: peça autoral em tiragem limitada; 99 é folga de sobra e
     // fecha o buraco de inflar o total com uma qtd absurda (o MP acabaria

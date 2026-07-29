@@ -266,12 +266,32 @@
       if(d.video)p.video='/midia/'+d.video;
       if(d.galeria&&d.galeria.length)p.media=d.galeria.map(function(g){return midiaDoAsset(g,d.nome);});
       if(d.capa)p.cover=midiaDoAsset({id:d.capa,tipo:'image/*'},d.nome);
-      /* V: preço e estoque por tamanho, em REAIS (o banco guarda centavos) */
-      p.V={};
-      d.vars.forEach(function(v){
-        p.V[v.tam]={cheio:(v.cheio||0)/100,promo:v.promo?v.promo/100:0,estoque:Number(v.estoque)||0,semEstoque:!!v.semEstoque};
+      /* V: preço e estoque POR VARIANTE, em REAIS (o banco guarda centavos).
+         A chave é o código de tamanho (P/M/G) quando a opção é Tamanho — assim o
+         filtro da vitrine e os endereços antigos continuam valendo — e um código
+         próprio (v1, v2…) quando é Cor, Sabor ou qualquer outra.
+         `id` é a variante de verdade: é ele que vai ao servidor cobrar e dar baixa. */
+      p.V={};var ordemV=[];
+      d.vars.forEach(function(v,i){
+        var chave=v.tam||('v'+(i+1));
+        p.V[chave]={
+          id:v.id,rotulo:v.rotulo||'',
+          dim:v.medida||((v.tam&&SIZES[v.tam])?SIZES[v.tam].dim:''),
+          cheio:(v.cheio||0)/100,promo:v.promo?v.promo/100:0,
+          estoque:Number(v.estoque)||0,semEstoque:!!v.semEstoque
+        };
+        ordemV.push(chave);
       });
-      p.sizes=['P','M','G'].filter(function(t){return p.V[t];});
+      /* nome da opção (vem das chaves da combinação): "Tamanho", "Cor", "Sabor" */
+      var nomesOpc=[];
+      d.vars.forEach(function(v){
+        Object.keys(v.combinacao||{}).forEach(function(k){if(nomesOpc.indexOf(k)<0)nomesOpc.push(k);});
+      });
+      p.opcao=nomesOpc.length===1?nomesOpc[0]:'';
+      /* só tamanhos: sai na ordem P→M→G. Qualquer outra opção: ordem cadastrada. */
+      p.sizes=ordemV.length&&ordemV.every(function(k){return 'PMG'.indexOf(k)>=0;})
+        ?['P','M','G'].filter(function(t){return p.V[t];})
+        :ordemV;
       p.out=p.sizes.filter(function(t){return p.V[t].estoque<=0&&!p.V[t].semEstoque;});
       p.left=p.sizes.reduce(function(n,t){return n+Math.max(0,p.V[t].estoque);},0);
       p.status=p.out.length===p.sizes.length?'soldout':'live';
@@ -317,6 +337,42 @@
      e é isso que garante que a vitrine e a fatura digam o mesmo número.
      A conta antiga (base + acréscimo do tamanho) só sobra como reserva, pra loja
      não quebrar se a rede falhar antes do catálogo chegar. */
+  /* ── RÓTULO DA VARIANTE ────────────────────────────────────────────────────
+     A loja nasceu assumindo que toda peça varia por TAMANHO (P/M/G, com a tabela
+     SIZES). Mas o admin deixa criar qualquer opção — Cor, Sabor, Edição. Estes
+     dois auxiliares são a ponte: quando a variante vem do banco, o rótulo é o
+     dela ("Rosa · Grande"); quando não, cai na tabela antiga. Toda a interface
+     passa por aqui, então nenhuma tela precisa saber qual dos dois mundos é. */
+  function varDe(p,s){return (p&&p.V&&p.V[s])||null;}
+  /* Rótulo da grade de escolha. Copiando o Shopify, quem manda é o NOME DA OPÇÃO
+     que ela cadastrou ("Cor", "Sabor") — assim não preciso adivinhar artigo em
+     português ("a cor" / "o sabor"), que é onde esse tipo de texto costuma errar.
+     Tamanho mantém a frase que a loja já usava. */
+  function rotuloEscolha(p){
+    var n=p&&p.opcao;
+    if(!n||/^tamanho$/i.test(n))return 'Escolha o tamanho';
+    return n;
+  }
+  /* Tamanho RECONHECIDO (P/M/G) usa o rótulo da loja — "Pequeno", não o
+     "PEQUENO" que ela digitou às pressas; a grafia do campo é incidental, e
+     misturar "PEQUENO" com "Médio" na mesma grade fica torto. Qualquer outra
+     opção (Cor, Sabor) usa exatamente o que ela escreveu, que é o nome real. */
+  function rotuloVar(p,s){
+    if(SIZES[s])return SIZES[s].name;
+    var v=varDe(p,s);
+    return (v&&v.rotulo)||s;
+  }
+  function dimVar(p,s){var v=varDe(p,s);if(v)return v.dim||'';return (SIZES[s]&&SIZES[s].dim)||'';}
+  /* "Pequeno ≈ 3 cm · Médio ≈ 7 cm" — medidas REAIS deste produto, para a ficha
+     técnica. Antes era uma frase fixa, igual para todas as peças, o que já era
+     mentira quando os moldes têm tamanhos diferentes. */
+  function medidasDoProduto(p){
+    if(!p||!p.sizes||!p.sizes.length)return '';
+    var ms=p.sizes.map(function(s){var d=dimVar(p,s);return d?rotuloVar(p,s)+' '+d:'';}).filter(Boolean);
+    return ms.length?'Medidas: '+ms.join(' · ')+'. ':'';
+  }
+  /* "Médio · ≈ 7 cm" quando há medida; só o rótulo quando não há (Cor, Sabor…) */
+  function rotuloDim(p,s){var d=dimVar(p,s);return rotuloVar(p,s)+(d?' · '+d:'');}
   var priceOf=function(p,s){var v=p.V&&p.V[s];return v?v.cheio:p.base+SIZES[s].add;};
   var priceOfNow=function(p,s){var v=p.V&&p.V[s];return v&&v.promo?v.promo:null;};
   var fromPrice=function(p){
@@ -349,7 +405,7 @@
   /* monta o link wa.me com a sacola preenchida (usado quando CHECKOUT_ON=false) */
   function waPedido(){
     var L=['Olá! Quero fazer um pedido na loja Studio Suzu:',''],tot=0;
-    Object.keys(cart).forEach(function(k){var it=cart[k],sz=SIZES[it.size]?SIZES[it.size].name:it.size;
+    Object.keys(cart).forEach(function(k){var it=cart[k],sz=rotuloVar(it.p,it.size);
       L.push('• '+it.qty+'× '+it.p.name+' ('+sz+')'+(it.presale?' [pré-venda]':'')+' — '+BRL(it.qty*it.price));
       tot+=it.qty*it.price;});
     L.push('','Subtotal: '+BRL(tot));
@@ -727,8 +783,8 @@
     var full=allOut(p), tint=TINTS[p.id]||'mizu', st=statusMeta(p);
     var def=full?(p.sizes.indexOf('M')>-1?'M':p.sizes[0]):firstAvail(p);
     var defOut=full||sizeOut(p,def);
-    var sizes=(!full && p.sizes.length>1)?'<div class="fcsizes">'+p.sizes.map(function(s){var o=sizeOut(p,s);return '<button type="button" class="fcsz'+(o?' out':'')+'" data-s="'+s+'" aria-pressed="'+(s===def)+'">'+SIZES[s].name+' · '+SIZES[s].dim+'</button>';}).join('')+'</div>':'';
-    var price=defOut?'<span class="fcprice so">Esgotado nesta tiragem</span>':'<span class="fcprice">'+wasPrice(p,priceOf(p,def))+BRL(priceNow(p,def))+offtag(p)+'<small>em até 6× · '+SIZES[def].name+'</small></span>';
+    var sizes=(!full && p.sizes.length>1)?'<div class="fcsizes">'+p.sizes.map(function(s){var o=sizeOut(p,s);return '<button type="button" class="fcsz'+(o?' out':'')+'" data-s="'+s+'" aria-pressed="'+(s===def)+'">'+rotuloDim(p,s)+'</button>';}).join('')+'</div>':'';
+    var price=defOut?'<span class="fcprice so">Esgotado nesta tiragem</span>':'<span class="fcprice">'+wasPrice(p,priceOf(p,def))+BRL(priceNow(p,def))+offtag(p)+'<small>em até 6× · '+rotuloVar(p,def)+'</small></span>';
     var btn='<button type="button" class="btn buybtn fcbtn">'+(defOut?'Avise-me quando voltar':'Adicionar à sacola')+'</button>';
     return '<div class="formacta buycard" data-id="'+p.id+'" data-size="'+def+'"><a class="fcimg" href="/p/'+pslug(p.id)+'" style="background:var(--'+tint+'-wash)">'+coverHTML(p)+'</a><div class="fctxt">'+(st.k!=='limited'?'<span class="pbadge '+st.k+'">'+st.label+'</span>':'')+'<a class="fcname" href="/p/'+pslug(p.id)+'"><b>'+p.name+'</b></a><p>'+p.use+' · silicone platinum</p>'+sizes+'</div><div class="fcbuy">'+price+btn+'</div></div>';
   }
@@ -777,7 +833,7 @@
       var p=byId(card.dataset.id); if(!p)return;
       var chips=[].slice.call(card.querySelectorAll('.fcsz')), pr=card.querySelector('.fcprice'), btn=card.querySelector('.buybtn');
       function refresh(s){card.dataset.size=s;var o=sizeOut(p,s);
-        if(pr){pr.className='fcprice'+(o?' so':'');pr.innerHTML=o?'Esgotado nesta tiragem':(wasPrice(p,priceOf(p,s))+BRL(priceNow(p,s))+offtag(p)+'<small>em até 6× · '+SIZES[s].name+'</small>');}
+        if(pr){pr.className='fcprice'+(o?' so':'');pr.innerHTML=o?'Esgotado nesta tiragem':(wasPrice(p,priceOf(p,s))+BRL(priceNow(p,s))+offtag(p)+'<small>em até 6× · '+rotuloVar(p,s)+'</small>');}
         if(btn&&btn.tagName==='BUTTON')btn.textContent=o?'Avise-me quando voltar':'Adicionar à sacola';}
       chips.forEach(function(b){b.onclick=function(){chips.forEach(function(x){x.setAttribute('aria-pressed',x===b);});refresh(b.dataset.s);};});
       if(btn)btn.onclick=function(){var s=card.dataset.size;
@@ -799,18 +855,18 @@
     var def=allOut(p)?(p.sizes.indexOf('M')>-1?'M':p.sizes[0]):firstAvail(p);
     var st=statusMeta(p);
     var tints={tablete:'mizu',coracao:'sakura',concha:'sango',cubo:'torinoko',esfera:'matcha',macaron:'fuji'},tint='var(--'+(tints[p.id]||'mizu')+'-wash)';
-    var szs=p.sizes.map(function(s){var z=SIZES[s];var o=sizeOut(p,s);return '<button class="sz'+(o?' out':'')+'" data-s="'+s+'" aria-pressed="'+(s===def)+'"><div class="t">'+z.name+'</div><div class="d">'+z.dim+'</div><div class="p">'+(o?'esgotado':BRL(priceNow(p,s)))+'</div></button>';}).join('');
+    var szs=p.sizes.map(function(s){var o=sizeOut(p,s);return '<button class="sz'+(o?' out':'')+'" data-s="'+s+'" aria-pressed="'+(s===def)+'"><div class="t">'+rotuloVar(p,s)+'</div><div class="d">'+dimVar(p,s)+'</div><div class="p">'+(o?'esgotado':BRL(priceNow(p,s)))+'</div></button>';}).join('');
     var pat=p.seigaiha?'<span class="pat">O relevo desta peça é o padrão seigaiha (ondas) — a assinatura gráfica que também percorre as nossas embalagens.</span> ':'';
     var buy;
     if(allOut(p)) buy='<div class="buyrow"><span class="price so">Esgotado nesta tiragem</span><button class="btn" id="notifyBtn">Avise-me quando voltar</button></div>';
-    else if(p.status==='presale'){var dep=Math.round(priceOf(p,def)*0.3); buy='<div class="buyrow"><span class="price" id="pdpPrice">'+BRL(dep)+'<small>sinal de reserva · '+SIZES[def].name+' de '+BRL(priceOf(p,def))+'</small></span><button class="btn addbtn" id="pdpAdd">Reservar com sinal</button></div><p class="prenote">O sinal garante a sua peça e a prioridade — e é descontado do valor final quando ela lança, em '+p.avail+'.</p>';}
-    else buy='<div class="buyrow"><span class="price" id="pdpPrice">'+wasPrice(p,priceOf(p,def))+BRL(priceNow(p,def))+offtag(p)+'<small>em até 6× · '+SIZES[def].name+'</small></span><button class="btn addbtn" id="pdpAdd">Adicionar à sacola</button></div>';
+    else if(p.status==='presale'){var dep=Math.round(priceOf(p,def)*0.3); buy='<div class="buyrow"><span class="price" id="pdpPrice">'+BRL(dep)+'<small>sinal de reserva · '+rotuloVar(p,def)+' de '+BRL(priceOf(p,def))+'</small></span><button class="btn addbtn" id="pdpAdd">Reservar com sinal</button></div><p class="prenote">O sinal garante a sua peça e a prioridade — e é descontado do valor final quando ela lança, em '+p.avail+'.</p>';}
+    else buy='<div class="buyrow"><span class="price" id="pdpPrice">'+wasPrice(p,priceOf(p,def))+BRL(priceNow(p,def))+offtag(p)+'<small>em até 6× · '+rotuloVar(p,def)+'</small></span><button class="btn addbtn" id="pdpAdd">Adicionar à sacola</button></div>';
     return backHome()+'<div class="pdp"><div class="media">'+mediaGallery(p)+'<button class="vidthumb reeltrigger" aria-label="Ver o vídeo desta peça"><span class="vtp" style="background:'+tint+'">'+mold(p)+'<span class="vtplay"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></span></span><span class="vtlabel">Ver o vídeo desse produto</span></button></div>'+
       '<div class="info"><span class="use">'+p.use+'</span><h1>'+p.name+'</h1>'+(st.k!=='limited'?'<span class="pbadge pdptag '+st.k+'">'+st.label+'</span>':'')+
       '<p class="lead">'+p.desc+'</p>'+
-      '<p class="szlabel">Escolha o tamanho</p><div class="szgrid" id="szgrid">'+szs+'</div>'+buy+shareRow(location.origin+location.pathname, p.name, {})+'<p class="pdptrust">Frete grátis acima de R$ 150 · Trocas em 7 dias · Enviamos pra todo o Brasil</p>'+pdpShipBlock(p)+
+      '<p class="szlabel">'+rotuloEscolha(p)+'</p><div class="szgrid" id="szgrid">'+szs+'</div>'+buy+shareRow(location.origin+location.pathname, p.name, {})+'<p class="pdptrust">Frete grátis acima de R$ 150 · Trocas em 7 dias · Enviamos pra todo o Brasil</p>'+pdpShipBlock(p)+
       '<div class="acc pdpacc"><details><summary>Entrega e trocas</summary><div class="ac">Frete grátis acima de R$ 150; o prazo aparece assim que você calcula o CEP. Peças de tiragem limitada podem ter espera. Trocas e devoluções em até 7 dias após o recebimento. Detalhes em <a href="/entrega">Entrega</a> e <a href="/trocas">Trocas &amp; devoluções</a>.</div></details><details><summary>Cuidados</summary><div class="ac">Lave à mão, com água morna e sabão neutro; seca ao natural. Vai do congelador (−40 °C) ao forno (230 °C) sem perder o desenho.</div></details>'+
-      '<details><summary>Ficha técnica</summary><div class="ac">Silicone platinum grau alimentício, atóxico e antiaderente. Medidas: Pequeno ≈ 3 cm · Médio ≈ 7 cm · Grande ≈ 12 cm. '+pat+'</div></details>'+
+      '<details><summary>Ficha técnica</summary><div class="ac">Silicone platinum grau alimentício, atóxico e antiaderente. '+medidasDoProduto(p)+pat+'</div></details>'+
       '</div>'+
       '</div></div>'+crossSell(p)+suggestionsHTML(p)+
       '<button class="igfab reeltrigger" id="reelFab" aria-label="Ver o vídeo desta peça"><span class="fabframe" style="background:'+tint+'">'+(p.video?'<video class="fabvid" src="'+p.video+'"'+(p.poster?' poster="'+p.poster+'"':'')+' muted loop autoplay playsinline></video>':mold(p))+'<span class="fabplay"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></span></span></button>'+
@@ -996,7 +1052,7 @@
       szgrid.querySelectorAll('.sz').forEach(function(b){b.onclick=function(){sel=b.dataset.s;szgrid.querySelectorAll('.sz').forEach(x=>x.setAttribute('aria-pressed','false'));b.setAttribute('aria-pressed','true');
         var o=sizeOut(p,sel),pp=document.getElementById('pdpPrice'),addb=document.getElementById('pdpAdd');
         if(o){if(pp){pp.className='price so';pp.innerHTML='Esgotado nesta tiragem';}if(addb)addb.textContent='Avise-me quando voltar';}
-        else{var pv=presale?Math.round(priceNow(p,sel)*0.3):priceNow(p,sel);if(pp){pp.className='price';pp.innerHTML=(presale?'':wasPrice(p,priceOf(p,sel)))+BRL(pv)+(presale?'':offtag(p))+'<small>'+(presale?'sinal · '+SIZES[sel].name+' de '+BRL(priceNow(p,sel)):'em até 6× · '+SIZES[sel].name)+'</small>';}if(addb)addb.textContent=presale?'Reservar com sinal':'Adicionar à sacola';}};});
+        else{var pv=presale?Math.round(priceNow(p,sel)*0.3):priceNow(p,sel);if(pp){pp.className='price';pp.innerHTML=(presale?'':wasPrice(p,priceOf(p,sel)))+BRL(pv)+(presale?'':offtag(p))+'<small>'+(presale?'sinal · '+rotuloVar(p,sel)+' de '+BRL(priceNow(p,sel)):'em até 6× · '+rotuloVar(p,sel))+'</small>';}if(addb)addb.textContent=presale?'Reservar com sinal':'Adicionar à sacola';}};});
       var add=document.getElementById('pdpAdd'); if(add)add.onclick=function(){if(sizeOut(p,sel)){notifyOpen(p.name);}else{addProduct(p.id,sel,presale);}};
       var nb=document.getElementById('notifyBtn'); if(nb)nb.onclick=function(){notifyOpen(p.name);};
     }
@@ -1463,7 +1519,14 @@
          100% em vez do sinal de 30% mostrado na sacola. Manter PREVENDA=false
          (~L232) até a F4-pré-venda implementar o sinal server-side — senão a
          primeira reserva cobra 3.3× a mais. */
-      var itens=sp.now.concat(sp.pre).map(function(it){return {id:it.p.id,tam:it.size,qtd:it.qty};});
+      /* varId = a variante EXATA escolhida. É o endereço sem ambiguidade do que
+         está sendo comprado — funciona para Cor/Sabor, onde `tam` não existe.
+         `id`+`tam` continuam indo junto: sacola salva antes desta versão ainda
+         não tem varId, e o servidor precisa saber resolver os dois jeitos. */
+      var itens=sp.now.concat(sp.pre).map(function(it){
+        var v=varDe(it.p,it.size);
+        return {id:it.p.id,tam:it.size,varId:(v&&v.id)||null,qtd:it.qty};
+      });
       var freteCents=sp.now.length===0?0:(CO.ship?(CO.ship.free?0:Math.round(CO.ship.price*100)):0);
       if(!coCheckoutId)coCheckoutId=uuidish();
       return {itens:itens,endereco:endereco,freteCents:freteCents,freteOpcao:(CO.ship&&/xpress/i.test(CO.ship.label))?'expresso':'economico',checkoutId:coCheckoutId};
@@ -2126,7 +2189,7 @@
       var end=order.endereco||{};
       var items=(order.itens||[]).map(function(it){
         var p=byId(it.id);
-        return {q:it.qtd,name:p?p.name:it.id,price:it.qtd*it.preco_unit/100,mold:p?mold(p):'',sub:SIZES[it.tam]?SIZES[it.tam].name:it.tam};
+        return {q:it.qtd,name:p?p.name:it.id,price:it.qtd*it.preco_unit/100,mold:p?mold(p):'',sub:p?rotuloVar(p,it.tam):it.tam};
       });
       return {
         order:order.ref||ref,
@@ -2362,7 +2425,7 @@
      Manter PREVENDA=false (~L232) até a F4-pré-venda implementar o sinal
      server-side — senão a primeira reserva cobra 3.3× a mais do que o
      mostrado aqui (30% virando 100%). */
-  function cartItem(p,size,presale){var full=priceNow(p,size),price=presale?Math.round(full*0.3):full;return {p:p,size:size,presale:!!presale,name:p.name+(presale?' — reserva':''),price:price,sub:presale?('Sinal de reserva · '+SIZES[size].name):(SIZES[size].name+' · '+SIZES[size].dim),qty:1};}
+  function cartItem(p,size,presale){var full=priceNow(p,size),price=presale?Math.round(full*0.3):full;return {p:p,size:size,presale:!!presale,name:p.name+(presale?' — reserva':''),price:price,sub:presale?('Sinal de reserva · '+rotuloVar(p,size)):rotuloDim(p,size),qty:1};}
   /* Persiste a sacola — assim um refresh no meio do checkout não perde os itens (bug do fluxo de pagamento). */
   function saveCart(){try{localStorage.setItem('suzu_cart',JSON.stringify(Object.keys(cart).map(function(k){var it=cart[k];return {id:it.p.id,size:it.size,presale:it.presale,qty:it.qty};})));}catch(e){}}
   function restoreCart(){try{JSON.parse(localStorage.getItem('suzu_cart')||'[]').forEach(function(o){var p=byId(o.id);if(!p||!o.qty)return;var it=cartItem(p,o.size,o.presale);it.qty=o.qty;cart[cartKey(o.id,o.size,o.presale)]=it;});}catch(e){}}
