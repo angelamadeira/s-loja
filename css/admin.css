@@ -1065,3 +1065,125 @@ a.apasso:hover { border-color: var(--line-strong); }
   transition: border-color .16s;
 }
 .aanexo:hover { border-color: var(--line-strong); }
+
+/* ── Estoque (Inventory do Shopify: produto agrupa, variante é a linha) ───── */
+.aestq { display: block; }
+.aestq-prod {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--line-soft);
+  margin-bottom: var(--space-2);
+}
+.aestq-nome { color: var(--text); text-decoration: none; font-weight: 500; }
+.aestq-nome:hover { text-decoration: underline; }
+.aestq-var {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-1) 0;
+}
+.aestq-rotulo { display: flex; align-items: center; gap: var(--space-2); font-size: .9rem; flex-wrap: wrap; }
+.aestq-sku { color: var(--text-muted); }
+.aestq-num { display: flex; align-items: center; gap: var(--space-2); }
+.aestq-num input {
+  width: 88px;
+  text-align: right;
+  font-family: var(--sans);
+  font-size: .9rem;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  padding: var(--space-1) var(--space-2);
+}
+.aestq-num input:focus-visible { outline: 2px solid var(--text); outline-offset: 1px; }
+.aestq-ok { font-size: .74rem; color: var(--success-text); }
+
+/* ── Relatórios: azulejos de número ───────────────────────────────────────── */
+.atiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: var(--space-3);
+  margin-bottom: var(--space-6);
+}
+.atile {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  background: var(--raised);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-lg);
+  padding: var(--space-4);
+}
+.atile-r { font-size: .74rem; letter-spacing: .08em; text-transform: uppercase; color: var(--text-muted); }
+.atile-v { font-size: 1.3rem; font-weight: 500; }
+.atile-n { font-size: .76rem; color: var(--text-tertiary); }
+
+/* ── Mídia: grade de miniaturas ───────────────────────────────────────────── */
+.amidia {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: var(--space-4);
+}
+.amidia-card {
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  background: var(--surface);
+}
+.amidia-thumb { position: relative; aspect-ratio: 1; background: var(--raised); }
+.amidia-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.amidia-play {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--white);
+  font-size: 1.4rem;
+  text-shadow: 0 1px 6px var(--backdrop-reel);
+}
+.amidia-info { display: flex; flex-direction: column; gap: var(--space-1); padding: var(--space-3); }
+.amidia-info b { font-size: .82rem; font-weight: 500; overflow-wrap: anywhere; }
+.amidia-info small { font-size: .74rem; color: var(--text-muted); }
+.amidia-uso { color: var(--text-tertiary); }
+.amidia-solto { color: var(--warning-text); }
+
+/* ── Acesso: e-mails permitidos + Sair no menu ────────────────────────────── */
+.aemform { display: flex; gap: var(--space-2); margin-top: var(--space-3); }
+.aemform input {
+  flex: 1;
+  font-family: var(--sans);
+  font-size: .9rem;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  padding: var(--space-2) var(--space-3);
+}
+.aemform input:focus-visible { outline: 2px solid var(--text); outline-offset: 1px; }
+.aem-dona {
+  font-style: normal;
+  font-size: .68rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  padding: var(--space-2xs) var(--space-2);
+}
+.anav-sair {
+  font-family: var(--sans);
+  font-size: inherit;
+  text-align: left;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  margin-top: var(--space-5);
+  border-top: 1px solid var(--line-soft);
+  padding-top: var(--space-3);
+  color: var(--text-muted);
+}
+.anav-sair:hover { color: var(--text); }

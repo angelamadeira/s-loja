@@ -73,26 +73,36 @@
     return d;
   }
 
-  // ── PEDIDOS (compras) — lista ─────────────────────────────────────────────
-  function telaPedidos(cont) {
-    var filtro = qs("filtro");
+  // ── PEDIDOS (compras) — lista; também veste "Carrinhos abandonados"
+  //    (status 'iniciado': checkout começado e não pago — no Shopify é uma
+  //    tela própria, então aqui também) ─────────────────────────────────────
+  function telaPedidos(cont, abandonados) {
+    var filtro = abandonados ? "iniciado" : qs("filtro");
     cont.textContent = "";
-    cabecalho(cont, "Pedidos", "Carregando…");
-    cont.appendChild(filtros(
-      [["", "Todos"], ["aprovado", "Pagos"], ["pendente", "Aguardando"], ["recusado", "Recusados"], ["cancelado", "Cancelados"], ["iniciado", "Iniciados"]],
-      filtro,
-      function (f) { location.href = "/admin/pedidos" + (f ? "?filtro=" + f : ""); }
-    ));
+    cabecalho(cont, abandonados ? "Carrinhos abandonados" : "Pedidos", "Carregando…");
+    if (!abandonados) {
+      cont.appendChild(filtros(
+        [["", "Todos"], ["aprovado", "Pagos"], ["pendente", "Aguardando"], ["recusado", "Recusados"], ["cancelado", "Cancelados"]],
+        filtro,
+        function (f) { location.href = "/admin/pedidos" + (f ? "?filtro=" + f : ""); }
+      ));
+    }
     var lista = el("div", "alista");
     cont.appendChild(lista);
     fetch("/api/admin/compras" + (filtro ? "?filtro=" + encodeURIComponent(filtro) : ""))
       .then(function (r) { return r.json(); })
       .then(function (d) {
         var compras = (d && d.compras) || [];
+        var coisa = abandonados ? "carrinho" : "pedido";
         cont.querySelector(".apage-sub").textContent =
-          compras.length === 0 ? "Nenhum pedido por aqui ainda." :
-          compras.length === 1 ? "1 pedido" : compras.length + " pedidos";
-        if (!compras.length) { lista.appendChild(vazio("Quando alguém comprar na loja, o pedido aparece aqui.")); return; }
+          compras.length === 0 ? "Nenhum " + coisa + " por aqui ainda." :
+          compras.length === 1 ? "1 " + coisa : compras.length + " " + coisa + "s";
+        if (!compras.length) {
+          lista.appendChild(vazio(abandonados
+            ? "Checkout começado e não pago aparece aqui — é a lista de quem quase comprou."
+            : "Quando alguém comprar na loja, o pedido aparece aqui."));
+          return;
+        }
         compras.forEach(function (c) {
           var a = el("a", "aitem avenda");
           a.href = "/admin/pedido?id=" + encodeURIComponent(c.id);
@@ -286,6 +296,7 @@
 
   var alvo;
   if ((alvo = document.getElementById("pedidos"))) telaPedidos(alvo);
+  else if ((alvo = document.getElementById("abandonados"))) telaPedidos(alvo, true);
   else if ((alvo = document.getElementById("pedido"))) telaPedido(alvo);
   else if ((alvo = document.getElementById("orcamentos"))) telaOrcamentos(alvo);
   else if ((alvo = document.getElementById("orcamento"))) telaOrcamento(alvo);

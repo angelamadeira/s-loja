@@ -531,8 +531,8 @@
 
     var cO = card("Organização");
     var catWrap = el("div", "acats"); cO.appendChild(catWrap);
-    var linkCat = el("a", "alink", "Gerenciar categorias →");
-    linkCat.href = "/admin/categorias";
+    var linkCat = el("a", "alink", "Gerenciar coleções →");
+    linkCat.href = "/admin/colecoes";
     cO.appendChild(linkCat);
     side.appendChild(cO);
     pintarCategorias();
@@ -839,7 +839,7 @@
 
     function pintarCategorias() {
       catWrap.textContent = "";
-      if (!categoriasTodas.length) { catWrap.appendChild(el("p", "ahint", "Nenhuma categoria criada.")); return; }
+      if (!categoriasTodas.length) { catWrap.appendChild(el("p", "ahint", "Nenhuma coleção criada.")); return; }
       var porPai = {};
       categoriasTodas.forEach(function (c) { (porPai[c.pai_id || ""] = porPai[c.pai_id || ""] || []).push(c); });
       (function nivel(pai, prof) {

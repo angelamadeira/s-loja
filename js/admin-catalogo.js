@@ -228,7 +228,7 @@
         var dir = el("div", "aitem-side");
         // mãe: aninha esta categoria dentro de outra
         var sel = document.createElement("select");
-        var op0 = document.createElement("option"); op0.value = ""; op0.textContent = "— categoria raiz —";
+        var op0 = document.createElement("option"); op0.value = ""; op0.textContent = "— coleção raiz —";
         sel.appendChild(op0);
         todas.forEach(function (o) {
           if (o.id === c.id) return;
@@ -241,7 +241,7 @@
         var rm = el("button", "apk-rm", "apagar");
         rm.type = "button";
         rm.addEventListener("click", function () {
-          if (confirm("Apagar a categoria “" + c.nome + "”? Os produtos não são apagados.")) apagar(c.id);
+          if (confirm("Apagar a coleção “" + c.nome + "”? Os produtos não são apagados.")) apagar(c.id);
         });
         dir.appendChild(rm);
         it.appendChild(dir);
@@ -253,12 +253,12 @@
     raiz.appendChild(lista);
 
     var nova = el("section", "asec");
-    nova.appendChild(el("h2", "asec-title", "Nova categoria"));
+    nova.appendChild(el("h2", "asec-title", "Nova coleção"));
     var i = document.createElement("input");
     i.type = "text"; i.placeholder = "Ex.: Coleção de Páscoa";
     var l = el("label", "afield"); l.appendChild(el("span", null, "Nome")); l.appendChild(i);
     nova.appendChild(l);
-    var b = el("button", "btn abtn-full", "Criar categoria");
+    var b = el("button", "btn abtn-full", "Criar coleção");
     b.type = "button";
     b.addEventListener("click", function () {
       if (!i.value.trim()) return;

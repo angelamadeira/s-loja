@@ -31,12 +31,35 @@ import {
   pegaOrcamento,
   mudaStatusOrcamento,
 } from "./vendas.js";
+import { listaEstoque, salvaEstoque, listaClientes, relatorios, listaMidia } from "./telas.js";
 
-// Quem pode entrar. Dono = somos.suzu; angelmadeira = recuperação. Ambos
-// autenticam na MESMA conta dona. (Entrega do link p/ angelmadeira depende de
-// verificar o endereço no Cloudflare Email Routing — ver AVISO em enviaLink.)
+// Quem pode entrar mora no BANCO (admin_emails_permitidos) e se gerencia em
+// /admin/acesso. A lista abaixo é só a SEMENTE (primeira criação da tabela) e
+// a rede de segurança: o DONO_EMAIL é irremovível — ninguém se tranca pra fora.
+// Todos autenticam na MESMA conta dona. (Entrega do link p/ e-mails novos
+// depende do Cloudflare Email Routing — ver AVISO em enviaLink.)
 const ADMIN_EMAILS = ["somos.suzu@gmail.com", "angelmadeira@gmail.com"];
 const DONO_EMAIL = "somos.suzu@gmail.com";
+
+// Cria a tabela na primeira vez e garante a semente — chamada barata, e evita
+// depender de migração manual no D1 remoto.
+async function garanteEmails(env) {
+  await env.DB.prepare(
+    "CREATE TABLE IF NOT EXISTS admin_emails_permitidos (email TEXT PRIMARY KEY, criado_em TEXT NOT NULL, adicionado_por TEXT)"
+  ).run();
+  for (const e of ADMIN_EMAILS) {
+    await env.DB.prepare("INSERT OR IGNORE INTO admin_emails_permitidos (email, criado_em, adicionado_por) VALUES (?, ?, 'semente')")
+      .bind(e, new Date().toISOString())
+      .run();
+  }
+}
+
+async function emailPermitido(env, email) {
+  if (!email) return false;
+  await garanteEmails(env);
+  const row = await env.DB.prepare("SELECT email FROM admin_emails_permitidos WHERE email = ?").bind(email).first();
+  return !!row;
+}
 
 const TOKEN_TTL_MS = 15 * 60 * 1000; // link mágico: 15 min
 const SESSAO_TTL_MS = 7 * 24 * 60 * 60 * 1000; // sessão: 7 dias
@@ -125,6 +148,59 @@ export async function handleAdmin(request, env, url) {
       return json({ ok: false, erro: "servidor" }, 500);
     }
   }
+  // ── quem pode entrar (lista viva de e-mails; dono é irremovível) ─────────
+  if (p === "/api/admin/emails" && m === "GET") {
+    try {
+      await garanteEmails(env);
+      const { results } = await env.DB.prepare(
+        "SELECT email, criado_em, adicionado_por FROM admin_emails_permitidos ORDER BY criado_em"
+      ).all();
+      return json({
+        ok: true,
+        emails: (results || []).map((r) => ({ email: r.email, dono: r.email === DONO_EMAIL, criado_em: r.criado_em })),
+      });
+    } catch (e) {
+      console.error("emails lista", e);
+      return json({ ok: false, erro: "servidor" }, 500);
+    }
+  }
+  if (p === "/api/admin/emails" && m === "POST") {
+    const ip = request.headers.get("CF-Connecting-IP") || "";
+    try {
+      const corpo = await request.json();
+      const email = String((corpo && corpo.email) || "").trim().toLowerCase();
+      // validação simples e suficiente: tem @ e ponto no domínio, sem espaço
+      if (!email || email.length > 200 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        return json({ ok: false, erro: "email" }, 400);
+      }
+      await garanteEmails(env);
+      await env.DB.prepare("INSERT OR IGNORE INTO admin_emails_permitidos (email, criado_em, adicionado_por) VALUES (?, ?, ?)")
+        .bind(email, new Date().toISOString(), sessao.email)
+        .run();
+      await auditoria(env, sessao.usuario_id, "acesso.email_add", email, null, ip);
+      return json({ ok: true });
+    } catch (e) {
+      console.error("emails add", e);
+      return json({ ok: false, erro: "servidor" }, 500);
+    }
+  }
+  if (p === "/api/admin/emails/remover" && m === "POST") {
+    const ip = request.headers.get("CF-Connecting-IP") || "";
+    try {
+      const corpo = await request.json();
+      const email = String((corpo && corpo.email) || "").trim().toLowerCase();
+      // a dona não sai da lista — é a garantia de nunca se trancar pra fora
+      if (email === DONO_EMAIL) return json({ ok: false, erro: "dono" }, 400);
+      await garanteEmails(env);
+      await env.DB.prepare("DELETE FROM admin_emails_permitidos WHERE email = ?").bind(email).run();
+      await auditoria(env, sessao.usuario_id, "acesso.email_remove", email, null, ip);
+      return json({ ok: true });
+    } catch (e) {
+      console.error("emails remove", e);
+      return json({ ok: false, erro: "servidor" }, 500);
+    }
+  }
+
   if (p === "/api/admin/passkey/lista" && m === "GET") {
     const r = await env.DB.prepare("SELECT id, apelido, criado_em, ultimo_uso FROM admin_passkeys WHERE usuario_id = ? ORDER BY criado_em DESC")
       .bind(sessao.usuario_id)
@@ -273,6 +349,52 @@ export async function handleAdmin(request, env, url) {
     }
   }
 
+  // ── Telas de apoio (Estoque, Clientes, Relatórios, Mídia) ────────────────
+  if (p === "/api/admin/estoque" && m === "GET") {
+    try {
+      return json({ ok: true, estoque: await listaEstoque(env) });
+    } catch (e) {
+      console.error("estoque lista", e);
+      return json({ ok: false, erro: "servidor" }, 500);
+    }
+  }
+  if (p === "/api/admin/estoque" && m === "POST") {
+    const ip = request.headers.get("CF-Connecting-IP") || "";
+    try {
+      const corpo = await request.json();
+      const r = await salvaEstoque(env, corpo && corpo.id, corpo && corpo.estoque);
+      if (r.ok) await auditoria(env, sessao.usuario_id, "estoque.ajuste", r.id, { produto: r.produto, de: r.de, para: r.para }, ip);
+      return json(r, r.ok ? 200 : r.erro === "nao_encontrado" ? 404 : 400);
+    } catch (e) {
+      console.error("estoque ajuste", e);
+      return json({ ok: false, erro: "servidor" }, 500);
+    }
+  }
+  if (p === "/api/admin/clientes" && m === "GET") {
+    try {
+      return json({ ok: true, clientes: await listaClientes(env) });
+    } catch (e) {
+      console.error("clientes lista", e);
+      return json({ ok: false, erro: "servidor" }, 500);
+    }
+  }
+  if (p === "/api/admin/relatorios" && m === "GET") {
+    try {
+      return json({ ok: true, relatorios: await relatorios(env) });
+    } catch (e) {
+      console.error("relatorios", e);
+      return json({ ok: false, erro: "servidor" }, 500);
+    }
+  }
+  if (p === "/api/admin/midia" && m === "GET") {
+    try {
+      return json({ ok: true, midia: await listaMidia(env) });
+    } catch (e) {
+      console.error("midia lista", e);
+      return json({ ok: false, erro: "servidor" }, 500);
+    }
+  }
+
   if (p === "/api/admin/resumo" && m === "GET") {
     try {
       return json({ ok: true, resumo: await resumoAdmin(env) });
@@ -296,13 +418,20 @@ export async function handleAdmin(request, env, url) {
       return json({ ok: false, erro: "servidor" }, 500);
     }
   }
+  if (p === "/admin/abandonados") return html(paginaAbandonados());
+  if (p === "/admin/estoque") return html(paginaEstoque());
+  if (p === "/admin/clientes") return html(paginaClientes());
+  if (p === "/admin/relatorios") return html(paginaRelatorios());
+  if (p === "/admin/midia") return html(paginaMidia());
   if (p === "/admin/pedidos") return html(paginaPedidos());
   if (p === "/admin/pedido") return html(paginaPedido());
   if (p === "/admin/orcamentos") return html(paginaOrcamentos());
   if (p === "/admin/orcamento") return html(paginaOrcamento());
   if (p === "/admin/config") return html(paginaConfig());
   if (p === "/admin/acesso") return html(paginaAcesso(sessao));
-  if (p === "/admin/categorias") return html(paginaCategorias());
+  // Coleções — nome do mercado (Shopify: "Collections"); "categorias" era o
+  // nome antigo e a rota velha segue viva (link salvo não pode morrer).
+  if (p === "/admin/colecoes" || p === "/admin/categorias") return html(paginaCategorias());
   if (p === "/admin/produtos") return html(paginaProdutos());
   if (p === "/admin/produto") return html(paginaProduto());
 
@@ -324,9 +453,10 @@ async function pedirLink(request, env, url) {
   }
   const ip = request.headers.get("CF-Connecting-IP") || "";
 
-  // Só manda link se o e-mail for autorizado — MAS responde sempre igual, pra
-  // não revelar quais e-mails existem (anti-enumeração).
-  if (ADMIN_EMAILS.includes(email)) {
+  // Só manda link se o e-mail for autorizado (lista do banco, gerida em
+  // /admin/acesso) — MAS responde sempre igual, pra não revelar quais
+  // e-mails existem (anti-enumeração).
+  if (await emailPermitido(env, email)) {
     try {
       const usuario = await garanteDono(env);
       const tokenCru = tokenAleatorio();
@@ -553,19 +683,19 @@ const MENU = [
     itens: [
       ["/admin/pedidos", "Pedidos"],
       ["/admin/orcamentos", "Orçamentos"],
-      ["/admin/abandonados", "Carrinhos abandonados", "em breve"],
+      ["/admin/abandonados", "Carrinhos abandonados"],
     ],
   },
   {
     grupo: "Catálogo",
     itens: [
       ["/admin/produtos", "Produtos"],
-      ["/admin/categorias", "Categorias"],
-      ["/admin/estoque", "Estoque", "em breve"],
-      ["/admin/midia", "Mídia", "em breve"],
+      ["/admin/colecoes", "Coleções"],
+      ["/admin/estoque", "Estoque"],
+      ["/admin/midia", "Mídia"],
     ],
   },
-  { grupo: "Clientes", itens: [["/admin/clientes", "Clientes", "em breve"]] },
+  { grupo: "Clientes", itens: [["/admin/clientes", "Clientes"]] },
   {
     grupo: "Marketing",
     itens: [
@@ -581,7 +711,7 @@ const MENU = [
       ["/admin/receitas", "Receitas", "em breve"],
     ],
   },
-  { grupo: "Relatórios", itens: [["/admin/relatorios", "Relatórios", "em breve"]] },
+  { grupo: "Relatórios", itens: [["/admin/relatorios", "Relatórios"]] },
   {
     grupo: "Configurações",
     itens: [
@@ -615,6 +745,9 @@ function menuHtml(atual) {
         .join("");
       return (sec.grupo ? "<div class=anav-grupo>" + escapar(sec.grupo) + "</div>" : "") + itens;
     }).join("") +
+    // Sair mora na navegação (pedido dela, 2026-08-15) — visível de qualquer
+    // tela, no rodapé do menu, como nas plataformas.
+    "<button class='anav-item anav-sair' id=navsair type=button>Sair</button>" +
     "</nav>"
   );
 }
@@ -639,6 +772,8 @@ function base(inner, titulo, atual) {
     "</div></header>" +
     (atual === undefined ? inner : "<div class=ashell>" + menuHtml(atual) + "<div class=ashell-conteudo>" + inner + "</div></div>") +
     "<div class=afoot>Área restrita · acesso registrado</div>" +
+    (atual === undefined ? "" :
+      "<script>var ns=document.getElementById('navsair');if(ns)ns.addEventListener('click',function(){fetch('/api/admin/logout',{method:'POST'}).then(function(){location.href='/admin';});});</script>") +
     "</body></html>"
   );
 }
@@ -699,17 +834,29 @@ function paginaAcesso(sessao) {
         "<button id=pkadd class='btn abtn-full'>Cadastrar este aparelho</button>" +
         "<p class=apk-nota>Vale para este endereço. Quando o admin for para o domínio final, cadastre novamente por lá.</p>" +
       "</div>" +
+      "<div class=acard-b id=embox>" +
+        "<h2 class=acard-b-title>Quem pode entrar</h2>" +
+        "<p class=apk-nota>Estes e-mails recebem o link de entrada. O da loja é fixo — não dá para se trancar pra fora.</p>" +
+        "<div id=emlista class=apk-lista></div>" +
+        "<form id=emform class=aemform>" +
+          "<input id=emnovo type=email placeholder='novo@email.com' aria-label='Novo e-mail com acesso'>" +
+          "<button type=submit class='btn ghost'>Adicionar</button>" +
+        "</form>" +
+      "</div>" +
       "<div class=amsg id=msg hidden></div>" +
-      "<div class=aacoes><button id=sair class='btn ghost'>Sair</button></div>" +
       "<script src='/js/admin-passkey.js?v=" + assetsV() + "'></script>" +
       "<script>" +
       "var msg=document.getElementById('msg'),lista=document.getElementById('pklista'),add=document.getElementById('pkadd');" +
       "function aviso(t,erro){msg.hidden=false;msg.className=erro?'amsg err':'amsg';msg.textContent=t;}" +
+      // e-mails com acesso — mesma regra de sempre: dado do banco via textContent
+      "var emlista=document.getElementById('emlista'),emform=document.getElementById('emform'),emnovo=document.getElementById('emnovo');" +
+      "function carregaEmails(){fetch('/api/admin/emails').then(function(r){return r.json();}).then(function(d){var es=(d&&d.emails)||[];emlista.textContent='';es.forEach(function(x){var it=document.createElement('div');it.className='apk-item';var n=document.createElement('span');n.textContent=x.email;it.appendChild(n);if(x.dono){var b=document.createElement('i');b.className='aem-dona';b.textContent='dona';it.appendChild(b);}else{var rm=document.createElement('button');rm.className='apk-rm';rm.type='button';rm.textContent='remover';rm.addEventListener('click',function(){if(!confirm('Remover o acesso de '+x.email+'?'))return;fetch('/api/admin/emails/remover',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({email:x.email})}).then(carregaEmails).then(function(){aviso('Acesso removido.');});});it.appendChild(rm);}emlista.appendChild(it);});});}" +
+      "carregaEmails();" +
+      "emform.addEventListener('submit',function(ev){ev.preventDefault();var v=emnovo.value.trim();if(!v)return;fetch('/api/admin/emails',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({email:v})}).then(function(r){return r.json();}).then(function(d){if(d&&d.ok){emnovo.value='';carregaEmails();aviso('E-mail adicionado.');}else{aviso(d&&d.erro==='email'?'Confira o e-mail — não parece válido.':'Não deu para adicionar.',true);}});});" +
       // monta a lista com DOM (textContent), nunca innerHTML — dado do banco não vira HTML
       "function carrega(){fetch('/api/admin/passkey/lista').then(function(r){return r.json();}).then(function(d){var ps=(d&&d.passkeys)||[];lista.textContent='';if(!ps.length){var v=document.createElement('div');v.className='apk-vazio';v.textContent='Nenhum aparelho cadastrado ainda.';lista.appendChild(v);return;}ps.forEach(function(p){var it=document.createElement('div');it.className='apk-item';var n=document.createElement('span');n.textContent=p.apelido||'Aparelho';var rm=document.createElement('button');rm.className='apk-rm';rm.type='button';rm.textContent='remover';rm.addEventListener('click',function(){fetch('/api/admin/passkey/remover',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({id:p.id})}).then(carrega).then(function(){aviso('Aparelho removido.');});});it.appendChild(n);it.appendChild(rm);lista.appendChild(it);});});}" +
       "if(window.SuzuPasskey&&SuzuPasskey.suportado()){carrega();}else{document.getElementById('pkbox').hidden=true;}" +
       "add.addEventListener('click',function(){add.disabled=true;add.textContent='Confirmando…';SuzuPasskey.cadastrar().then(function(){add.disabled=false;add.textContent='Cadastrar este aparelho';aviso('Pronto! Agora você entra com Face ID ou digital.');carrega();}).catch(function(err){add.disabled=false;add.textContent='Cadastrar este aparelho';aviso(String(err.message)==='cancelado'?'Cadastro cancelado.':'Não deu para cadastrar agora.',true);});});" +
-      "document.getElementById('sair').addEventListener('click',function(){fetch('/api/admin/logout',{method:'POST'}).then(function(){location.href='/admin';});});" +
       "</script>" +
       "</div>",
     "Acesso",
@@ -742,12 +889,12 @@ function paginaProdutos() {
 function paginaCategorias() {
   return baseLargo(
     "<div class=apage>" +
-      "<div class=apage-head><div><h1>Categorias</h1>" +
+      "<div class=apage-head><div><h1>Coleções</h1>" +
       "<a class=apage-sub-link href='/admin/produtos'>← Produtos</a></div></div>" +
       "<div id=cats>Carregando…</div>" +
     "</div>",
-    "Categorias",
-    "/admin/categorias"
+    "Coleções",
+    "/admin/colecoes"
   );
 }
 
@@ -774,6 +921,28 @@ function paginaVendasBase(idConteudo, titulo, atual) {
 }
 function paginaPedidos() {
   return paginaVendasBase("pedidos", "Pedidos", "/admin/pedidos");
+}
+function paginaAbandonados() {
+  return paginaVendasBase("abandonados", "Carrinhos abandonados", "/admin/abandonados");
+}
+// Telas de apoio — conteúdo em js/admin-telas.js (mesma regra: textContent)
+function paginaTelasBase(idConteudo, titulo, atual) {
+  return base("<div class=apage id=" + idConteudo + ">Carregando…</div>", titulo, atual).replace(
+    "</body>",
+    "<script src='/js/admin-telas.js?v=" + assetsV() + "'></script></body>"
+  );
+}
+function paginaEstoque() {
+  return paginaTelasBase("estoque", "Estoque", "/admin/estoque");
+}
+function paginaClientes() {
+  return paginaTelasBase("clientes", "Clientes", "/admin/clientes");
+}
+function paginaRelatorios() {
+  return paginaTelasBase("relatorios", "Relatórios", "/admin/relatorios");
+}
+function paginaMidia() {
+  return paginaTelasBase("midia", "Mídia", "/admin/midia");
 }
 function paginaPedido() {
   return paginaVendasBase("pedido", "Pedido", "/admin/pedidos");

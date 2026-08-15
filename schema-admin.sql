@@ -81,3 +81,11 @@ CREATE TABLE IF NOT EXISTS admin_auditoria (
 );
 CREATE INDEX IF NOT EXISTS idx_admin_audit_criado ON admin_auditoria (criado_em DESC);
 CREATE INDEX IF NOT EXISTS idx_admin_audit_acao   ON admin_auditoria (acao);
+
+-- Quem pode PEDIR o link de entrada (a lista viva; o código tem só a semente).
+-- O e-mail dono (somos.suzu) é irremovível — ninguém se tranca pra fora.
+CREATE TABLE IF NOT EXISTS admin_emails_permitidos (
+  email          TEXT PRIMARY KEY,   -- minúsculo, já validado
+  criado_em      TEXT NOT NULL,
+  adicionado_por TEXT                -- e-mail de quem cadastrou (auditoria amigável)
+);
