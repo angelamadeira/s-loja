@@ -29,6 +29,10 @@
   }
   function vazio(msg) { return el("div", "avazio", msg); }
   function falha(cont) { cont.appendChild(vazio("Não deu para carregar. Recarregue a página.")); }
+  function notaCorte(cont, qtd, limite) {
+    if (qtd >= limite) cont.appendChild(el("p", "apage-sub acorte", "Mostrando os " + limite + " mais recentes."));
+  }
+
 
   // ── ESTOQUE ───────────────────────────────────────────────────────────────
   function telaEstoque(cont) {
@@ -85,11 +89,17 @@
               fetch("/api/admin/estoque", {
                 method: "POST",
                 headers: { "content-type": "application/json" },
-                body: JSON.stringify({ id: v.id, estoque: n }),
+                // `de` = o valor que esta tela conhecia: o servidor só aplica
+                // se o banco ainda estiver nele (venda no meio => "mudou")
+                body: JSON.stringify({ id: v.id, estoque: n, de: v.estoque }),
               }).then(function (r) { return r.json(); }).then(function (rr) {
                 if (rr && rr.ok) {
                   v.estoque = rr.para;
                   avisa("salvo");
+                } else if (rr && rr.erro === "mudou") {
+                  v.estoque = rr.atual;
+                  inp.value = rr.atual;
+                  avisa("o estoque mudou (vendeu?) — agora é " + rr.atual, true);
                 } else {
                   inp.value = v.estoque;
                   avisa(rr && rr.erro === "estoque" ? "número inválido" : "não salvou — tente de novo", true);
@@ -139,6 +149,7 @@
           a.appendChild(dir);
           lista.appendChild(a);
         });
+        notaCorte(cont, cls.length, 500);
       })
       .catch(function () { falha(cont); });
   }
@@ -244,6 +255,7 @@
           card.appendChild(info);
           grade.appendChild(card);
         });
+        notaCorte(cont, mds.length, 500);
       })
       .catch(function () { falha(cont); });
   }

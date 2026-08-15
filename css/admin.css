@@ -1197,3 +1197,7 @@ a.apasso:hover { border-color: var(--line-strong); }
 /* Validação com endereço: o erro aparece NO campo, não só no toast */
 .aestq-err { color: var(--error-text); }
 .ainput-err { border-color: var(--error-text) !important; }
+
+/* nota de corte das listas + anexo sem link */
+.acorte { margin-top: var(--space-4); text-align: center; }
+.aanexo-off { color: var(--text-muted); border-style: dashed; }

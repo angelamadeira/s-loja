@@ -27,7 +27,11 @@ export async function listaEstoque(env) {
 }
 
 // Só o número muda aqui — preço/medida continuam no formulário do produto.
-export async function salvaEstoque(env, id, estoque) {
+// `de` é o valor que A TELA conhecia: o UPDATE só aplica se o banco ainda
+// estiver nele. Se uma VENDA baixou o estoque no meio do caminho, salvar o
+// número absoluto engoliria a baixa (peça vendida "voltaria a existir") —
+// em vez disso devolvemos erro "mudou" com o valor atual, e a tela explica.
+export async function salvaEstoque(env, id, estoque, de) {
   const n = Number(estoque);
   if (!Number.isInteger(n) || n < 0 || n > 100000) return { ok: false, erro: "estoque" };
   const alvo = String(id || "");
@@ -35,7 +39,19 @@ export async function salvaEstoque(env, id, estoque) {
     "SELECT v.id, v.estoque, p.nome FROM cat_variantes v JOIN cat_produtos p ON p.id = v.produto_id WHERE v.id = ?"
   ).bind(alvo).first();
   if (!linha) return { ok: false, erro: "nao_encontrado" };
-  await env.DB.prepare("UPDATE cat_variantes SET estoque = ? WHERE id = ?").bind(n, alvo).run();
+  const esperado = Number(de);
+  if (Number.isInteger(esperado)) {
+    const r = await env.DB.prepare("UPDATE cat_variantes SET estoque = ? WHERE id = ? AND estoque = ?")
+      .bind(n, alvo, esperado)
+      .run();
+    if (!r.meta || !r.meta.changes) {
+      const atual = await env.DB.prepare("SELECT estoque FROM cat_variantes WHERE id = ?").bind(alvo).first();
+      return { ok: false, erro: "mudou", atual: Number(atual && atual.estoque) || 0 };
+    }
+  } else {
+    // sem `de` (chamador antigo): comportamento absoluto de antes
+    await env.DB.prepare("UPDATE cat_variantes SET estoque = ? WHERE id = ?").bind(n, alvo).run();
+  }
   return { ok: true, id: alvo, de: Number(linha.estoque) || 0, para: n, produto: linha.nome };
 }
 
@@ -44,9 +60,11 @@ export async function salvaEstoque(env, id, estoque) {
 // resto (CPF, endereço, itens) mora no detalhe do PEDIDO, que já é auditável.
 
 export async function listaClientes(env) {
+  // LOWER: compras antigas guardaram o e-mail como o cliente digitou —
+  // "Ana@..." e "ana@..." são a mesma pessoa (as novas já entram minúsculas)
   const { results } = await env.DB.prepare(
-    "SELECT contato_email, COUNT(*) AS n_pedidos, SUM(total) AS total_gasto, MAX(criado_em) AS ultima " +
-      "FROM compras WHERE status = 'aprovado' GROUP BY contato_email ORDER BY ultima DESC LIMIT 500"
+    "SELECT LOWER(contato_email) AS contato_email, COUNT(*) AS n_pedidos, SUM(total) AS total_gasto, MAX(criado_em) AS ultima " +
+      "FROM compras WHERE status = 'aprovado' GROUP BY LOWER(contato_email) ORDER BY ultima DESC LIMIT 500"
   ).all();
   return (results || []).map((r) => ({
     contato_email: r.contato_email,

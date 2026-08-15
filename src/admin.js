@@ -362,7 +362,7 @@ export async function handleAdmin(request, env, url) {
     const ip = request.headers.get("CF-Connecting-IP") || "";
     try {
       const corpo = await request.json();
-      const r = await salvaEstoque(env, corpo && corpo.id, corpo && corpo.estoque);
+      const r = await salvaEstoque(env, corpo && corpo.id, corpo && corpo.estoque, corpo && corpo.de);
       if (r.ok) await auditoria(env, sessao.usuario_id, "estoque.ajuste", r.id, { produto: r.produto, de: r.de, para: r.para }, ip);
       return json(r, r.ok ? 200 : r.erro === "nao_encontrado" ? 404 : 400);
     } catch (e) {

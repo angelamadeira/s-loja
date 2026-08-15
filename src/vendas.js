@@ -140,12 +140,16 @@ export async function pegaOrcamento(env, id) {
   const comLink = [];
   for (const a of anexos) {
     if (!a || !a.key) continue;
-    comLink.push({
-      name: a.name,
-      size: a.size,
-      type: a.type,
-      url: "/api/anexo?k=" + encodeURIComponent(a.key) + "&t=" + (await assina(a.key, env.TURNSTILE_SECRET)),
-    });
+    // um anexo sem assinatura possível (ex.: segredo ausente num ambiente
+    // novo) NÃO derruba o orçamento inteiro — sai com url nula e a tela
+    // mostra "link indisponível"; briefing e contato continuam acessíveis
+    let url = null;
+    try {
+      url = "/api/anexo?k=" + encodeURIComponent(a.key) + "&t=" + (await assina(a.key, env.TURNSTILE_SECRET));
+    } catch (e) {
+      console.error("anexo sem assinatura", p.ref);
+    }
+    comLink.push({ name: a.name, size: a.size, type: a.type, url });
   }
   return {
     id: p.id,

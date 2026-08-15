@@ -229,7 +229,9 @@ async function handlePagar(request, env) {
     const itens = Array.isArray(body.itens) ? body.itens : [];
     const metodo = str(body.metodo);
     const cupom = str(body.cupom);
-    const email = str(body.email);
+    // minúsculo SEMPRE: "Ana@Gmail.com" e "ana@gmail.com" são a mesma pessoa —
+    // sem isso, o agregado de Clientes do admin contaria duas
+    const email = str(body.email).toLowerCase();
     const whats = str(body.whats);
     const cpf = str(body.cpf).replace(/\D/g, "");
     const endereco = body.endereco || null;

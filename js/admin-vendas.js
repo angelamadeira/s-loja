@@ -66,6 +66,10 @@
     return head;
   }
   function vazio(msg) { return el("div", "avazio", msg); }
+  function notaCorte(cont, qtd, limite) {
+    if (qtd >= limite) cont.appendChild(el("p", "apage-sub acorte", "Mostrando os " + limite + " mais recentes."));
+  }
+
   function linhaDado(rotulo, valor) {
     var d = el("div", "adado");
     d.appendChild(el("span", "adado-r", rotulo));
@@ -120,6 +124,7 @@
           a.appendChild(dir);
           lista.appendChild(a);
         });
+        notaCorte(cont, compras.length, 200);
       })
       .catch(function () { lista.appendChild(vazio("Não deu para carregar. Recarregue a página.")); });
   }
@@ -219,6 +224,7 @@
           a.appendChild(dir);
           lista.appendChild(a);
         });
+        notaCorte(cont, orcs.length, 200);
       })
       .catch(function () { lista.appendChild(vazio("Não deu para carregar. Recarregue a página.")); });
   }
@@ -272,11 +278,16 @@
         if (o.anexos && o.anexos.length) {
           var ax = el("div", "aanexos");
           o.anexos.forEach(function (a) {
-            var l = el("a", "aanexo", a.name || "anexo");
-            l.href = a.url; // link já assinado pelo servidor (HMAC)
-            l.target = "_blank";
-            l.rel = "noopener";
-            ax.appendChild(l);
+            if (a.url) {
+              var l = el("a", "aanexo", a.name || "anexo");
+              l.href = a.url; // link já assinado pelo servidor (HMAC)
+              l.target = "_blank";
+              l.rel = "noopener";
+              ax.appendChild(l);
+            } else {
+              // servidor não conseguiu assinar — o resto da tela segue vivo
+              ax.appendChild(el("span", "aanexo aanexo-off", (a.name || "anexo") + " — link indisponível"));
+            }
           });
           ped.appendChild(ax);
         }

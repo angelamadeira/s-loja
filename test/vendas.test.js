@@ -26,7 +26,8 @@ beforeEach(async () => {
     for (const stmt of statements) await env.DB.prepare(stmt).run();
   }
   // o D1 de teste sobrevive entre os casos — cada teste começa do zero
-  for (const t of ["compras", "pedidos", "admin_sessoes", "admin_usuarios", "admin_auditoria"]) {
+  // (filhas antes das mães: auditoria/sessões referenciam usuários)
+  for (const t of ["compras", "pedidos", "admin_auditoria", "admin_sessoes", "admin_usuarios"]) {
     await env.DB.prepare("DELETE FROM " + t).run();
   }
 });
@@ -183,4 +184,16 @@ test("mudar status marca respondido_em na primeira resposta e audita sem PII", a
     body: JSON.stringify({ id, status: "invalido" }),
   });
   expect(res2.status).toBe(400);
+});
+
+test("um anexo sem assinatura NÃO derruba o orçamento (url nula, resto vivo)", async () => {
+  const cookie = await abreSessao();
+  const id = await seedOrcamento();
+  env.TURNSTILE_SECRET = ""; // ambiente sem o segredo: assinar é impossível
+
+  const det = await chama("/api/admin/orcamento?id=" + id, { headers: { cookie } });
+  const j = await det.json();
+  expect(j.ok).toBe(true); // a tela abre
+  expect(j.orcamento.brief).toContain("sakura"); // briefing acessível
+  expect(j.orcamento.anexos[0].url).toBeNull(); // só o link ficou indisponível
 });

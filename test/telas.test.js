@@ -235,3 +235,44 @@ test("coleções: aninhar em ciclo agora é ERRO dito, não correção silencios
   const linha = await env.DB.prepare("SELECT pai_id FROM cat_categorias WHERE id = 'c1'").first();
   expect(linha.pai_id).toBeNull();
 });
+
+// ── casos limite da interface (2026-08-15) ──────────────────────────────────
+
+test("estoque: venda no meio do caminho não é engolida (erro 'mudou')", async () => {
+  const cookie = await abreSessao();
+  await seedCatalogo(); // v1 com estoque 7
+
+  // a tela conhecia 7; uma venda baixou pra 6 por fora
+  await env.DB.prepare("UPDATE cat_variantes SET estoque = 6 WHERE id = 'v1'").run();
+
+  const res = await chama("/api/admin/estoque", {
+    method: "POST",
+    headers: { cookie, "content-type": "application/json" },
+    body: JSON.stringify({ id: "v1", estoque: 9, de: 7 }),
+  });
+  const j = await res.json();
+  expect(j).toMatchObject({ ok: false, erro: "mudou", atual: 6 });
+  // e o banco ficou intocado — a baixa da venda sobreviveu
+  const linha = await env.DB.prepare("SELECT estoque FROM cat_variantes WHERE id = 'v1'").first();
+  expect(linha.estoque).toBe(6);
+
+  // com o `de` certo, aplica
+  const ok = await chama("/api/admin/estoque", {
+    method: "POST",
+    headers: { cookie, "content-type": "application/json" },
+    body: JSON.stringify({ id: "v1", estoque: 9, de: 6 }),
+  });
+  expect((await ok.json()).ok).toBe(true);
+});
+
+test("clientes: 'Ana@X.com' e 'ana@x.com' são UMA pessoa", async () => {
+  const cookie = await abreSessao();
+  await seedVenda("Ana@X.com", 10000, []);
+  await seedVenda("ana@x.com", 5000, []);
+
+  const j = await (await chama("/api/admin/clientes", { headers: { cookie } })).json();
+  const anas = j.clientes.filter((c) => c.contato_email === "ana@x.com");
+  expect(anas.length).toBe(1);
+  expect(anas[0].n_pedidos).toBe(2);
+  expect(anas[0].total_gasto).toBe(15000);
+});
