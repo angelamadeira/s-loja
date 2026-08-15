@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Studio Suzu · em construção</title>
+<meta name="description" content="Studio Suzu — moldes autorais para confeitaria. Estamos preparando a loja. Em breve.">
+<meta name="robots" content="noindex,nofollow">
+<link rel="stylesheet" href="/css/tokens.css">
+<style>
+  /* Página-cortina "em construção" — 100% design system (só var(--token)).
+     Servida pelo Worker no domínio de produção enquanto a loja evolui em
+     staging (ver src/index.js). Anatomia irmã do /links: autônoma, calma. */
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{margin:0;min-height:100svh;display:flex;align-items:center;justify-content:center;background:var(--surface);color:var(--text);font-family:var(--sans);-webkit-font-smoothing:antialiased;padding:var(--space-8) var(--space-5)}
+  .wrap{max-width:440px;text-align:center}
+  .seal{width:72px;height:72px;color:var(--logo-ink);margin:0 auto var(--space-5);display:block}
+  .name{font-size:24px;font-weight:500;letter-spacing:.3em;margin:0 0 var(--space-2);color:var(--text)}
+  .sub{font-size:11px;letter-spacing:.34em;text-transform:uppercase;color:var(--text-tertiary);margin:0 0 var(--space-7)}
+  .rule{width:56px;height:1px;background:var(--line-strong);border:0;margin:0 auto var(--space-7)}
+  .tag{display:inline-block;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--text-muted);border:1px solid var(--line);border-radius:var(--r-pill);padding:var(--space-2) var(--space-5);margin:0 0 var(--space-5)}
+  .lead{font-family:var(--serif);font-style:italic;font-size:22px;line-height:1.45;font-weight:400;color:var(--text-secondary);margin:0 0 var(--space-4)}
+  .txt{font-size:15px;line-height:1.6;color:var(--text-tertiary);margin:0 0 var(--space-7)}
+  .cta{display:inline-flex;align-items:center;gap:var(--space-2);background:var(--ink);color:var(--white);text-decoration:none;font-size:13px;letter-spacing:.14em;text-transform:uppercase;font-weight:500;border-radius:var(--r-pill);padding:var(--space-4) var(--space-7);transition:opacity .2s,transform .2s}
+  .cta:hover{opacity:.88;transform:translateY(-1px)}
+  .cta svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .socials{display:flex;justify-content:center;gap:var(--space-3);margin:var(--space-7) 0 0}
+  .soc{width:44px;height:44px;border-radius:var(--r-pill);border:1px solid var(--line);display:grid;place-items:center;color:var(--stone);transition:color .2s,border-color .2s,transform .2s}
+  .soc:hover{color:var(--ink);border-color:var(--line-strong);transform:translateY(-1px)}
+  .soc svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .foot{margin-top:var(--space-8);font-size:13px;color:var(--text-tertiary);letter-spacing:.04em}
+  .foot a{color:var(--text-tertiary);text-decoration:none}
+  .foot a:hover{color:var(--stone)}
+</style>
+</head>
+<body>
+  <main class="wrap">
+    <svg class="seal" viewBox="0 0 633 633" aria-hidden="true"><use href="/suzu-seal.svg#suzu-seal"/></svg>
+    <h1 class="name">STUDIO SUZU</h1>
+    <p class="sub">formas autorais</p>
+    <hr class="rule">
+    <span class="tag">Em construção</span>
+    <p class="lead">Estamos preparando cada detalhe com o cuidado de sempre.</p>
+    <p class="txt">A loja volta em breve. Enquanto isso, fale com a gente — atendimento direto pelo WhatsApp.</p>
+    <a class="cta" target="_blank" rel="noopener" href="https://wa.me/5511977167137?text=Ol%C3%A1%21%20Vim%20pelo%20Studio%20Suzu%20e%20queria%20saber%20mais%20%F0%9F%8C%B8">
+      <svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5Z"/></svg>
+      <span>Chamar no WhatsApp</span>
+    </a>
+    <div class="socials">
+      <a class="soc" href="https://www.instagram.com/somos.suzu/" target="_blank" rel="noopener" aria-label="Instagram"><svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg></a>
+      <a class="soc" href="https://www.tiktok.com/@somos.suzu" target="_blank" rel="noopener" aria-label="TikTok"><svg viewBox="0 0 24 24" style="fill:currentColor;stroke:none"><path d="M12.53 2h3.12c.17 1.53.83 2.87 1.94 3.66.86.61 1.9.97 3.01 1.03v3.17a8.1 8.1 0 0 1-4.42-1.4v6.34a6.06 6.06 0 1 1-6.06-6.06c.32 0 .63.03.94.08v3.28a2.78 2.78 0 1 0 1.93 2.65V2z"/></svg></a>
+    </div>
+    <footer class="foot"><a href="/links">@somos.suzu</a> · studiosuzu.com.br</footer>
+  </main>
+</body>
+</html>

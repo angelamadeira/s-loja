@@ -87,6 +87,30 @@ export default {
     if (url.pathname === "/admin" || url.pathname.startsWith("/admin/") || url.pathname.startsWith("/api/admin/")) {
       return handleAdmin(request, env, url);
     }
+    // EM CONSTRUÇÃO — cortina no domínio de produção enquanto a loja evolui
+    // em staging. Mesmo mecanismo por hostname da trava do /api/pagar: a
+    // prévia (s-loja-preview) continua servindo o site completo. Só páginas
+    // são cobertas; assets (css/svg/fontes), robots/sitemap e as APIs passam.
+    // /links fica NO AR — é o bio-link do Instagram/TikTok.
+    // Reabrir a loja = remover este bloco. `?construcao=1` força a cortina em
+    // qualquer ambiente (é como se testa na prévia, onde o hostname não casa).
+    {
+      const emProd = /(^|\.)studiosuzu\.com\.br$/i.test(url.hostname);
+      const forcada = url.searchParams.has("construcao");
+      const ehPagina = /\.html$/i.test(url.pathname) || !/\.[a-z0-9]{2,5}$/i.test(url.pathname);
+      const ehLinks = url.pathname === "/links" || url.pathname === "/links.html";
+      if ((emProd || forcada) && ehPagina && !ehLinks) {
+        const asset = await env.ASSETS.fetch(new Request(new URL("/construcao.html", url), { headers: request.headers }));
+        return new Response(asset.body, {
+          status: 200,
+          headers: {
+            "content-type": "text/html; charset=utf-8",
+            "cache-control": "no-cache, must-revalidate",
+            "x-robots-tag": "noindex",
+          },
+        });
+      }
+    }
     // qualquer outra coisa → a loja (assets).
     // Cache "sempre revalida" (no-cache) em HTML/CSS/JS: o Cloudflare guarda mas
     // consulta a origem a cada request → 304 (REVALIDATED) quando não mudou
