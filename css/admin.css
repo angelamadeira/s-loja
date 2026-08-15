@@ -1187,3 +1187,9 @@ a.apasso:hover { border-color: var(--line-strong); }
   color: var(--text-muted);
 }
 .anav-sair:hover { color: var(--text); }
+
+/* Acesso: cards empilhados respiram ("ficou muito grudado" — ajuste dela) */
+.acard-b + .acard-b,
+.acard-b + .amsg,
+.acard-b + .aacoes { margin-top: var(--space-5); }
+.acard-b .apk-nota { margin: 0 0 var(--space-4); }
