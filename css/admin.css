@@ -978,3 +978,90 @@ a.apasso:hover { border-color: var(--line-strong); }
 .avmais > summary:hover { color: var(--text); }
 .avmais > summary:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; border-radius: var(--r-xs); }
 .avmais .avgrupo:first-of-type { margin-top: var(--space-2); }
+
+/* ── Vendas (Pedidos e Orçamentos) ──────────────────────────────────────────
+   Anatomia do "Orders" do Shopify: filtros por status, lista, detalhe em
+   seções. Cores de situação = os tokens semânticos de feedback do DS. */
+.afiltros {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-5);
+}
+.afiltro {
+  font-family: var(--sans);
+  font-size: .8rem;
+  color: var(--text-muted);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  padding: var(--space-1) var(--space-4);
+  cursor: pointer;
+  transition: color .16s, border-color .16s;
+}
+.afiltro:hover { color: var(--text); border-color: var(--line-strong); }
+.afiltro.on { color: var(--surface); background: var(--ink); border-color: var(--ink); }
+.afiltro:disabled { cursor: default; }
+.afiltro:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+
+.avenda { text-decoration: none; color: var(--text); }
+.abadge {
+  font-size: .72rem;
+  letter-spacing: .05em;
+  border-radius: var(--r-pill);
+  padding: var(--space-1) var(--space-3);
+  white-space: nowrap;
+}
+.abadge-ok { background: var(--success-surface); color: var(--success-text); }
+.abadge-espera { background: var(--warning-surface); color: var(--warning-text); }
+.abadge-ruim { background: var(--error-surface); color: var(--error-text); }
+.abadge-neutro { background: var(--raised); color: var(--text-muted); border: 1px solid var(--line); }
+
+.avazio {
+  color: var(--text-muted);
+  font-size: .9rem;
+  border: 1px dashed var(--line);
+  border-radius: var(--r-lg);
+  padding: var(--space-6);
+  text-align: center;
+}
+.avenda-item {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--line-soft);
+  font-size: .9rem;
+}
+.avenda-totais { margin-top: var(--space-3); }
+.adado {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-1) 0;
+  font-size: .88rem;
+}
+.adado-r { color: var(--text-muted); }
+.adado-v { text-align: right; overflow-wrap: anywhere; }
+.adado-total { border-top: 1px solid var(--line); margin-top: var(--space-2); padding-top: var(--space-2); font-weight: 500; }
+.abrief {
+  white-space: pre-wrap;
+  font-size: .92rem;
+  line-height: 1.55;
+  background: var(--raised);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-md);
+  padding: var(--space-4);
+  margin: 0 0 var(--space-3);
+}
+.aanexos { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.aanexo {
+  font-size: .82rem;
+  color: var(--text);
+  text-decoration: none;
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  padding: var(--space-1) var(--space-4);
+  transition: border-color .16s;
+}
+.aanexo:hover { border-color: var(--line-strong); }

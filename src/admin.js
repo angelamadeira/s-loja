@@ -24,6 +24,13 @@ import {
   salvaConfig,
   resumoAdmin,
 } from "./catalogo.js";
+import {
+  listaCompras,
+  pegaCompra,
+  listaOrcamentos,
+  pegaOrcamento,
+  mudaStatusOrcamento,
+} from "./vendas.js";
 
 // Quem pode entrar. Dono = somos.suzu; angelmadeira = recuperação. Ambos
 // autenticam na MESMA conta dona. (Entrega do link p/ angelmadeira depende de
@@ -216,6 +223,56 @@ export async function handleAdmin(request, env, url) {
       return json({ ok: false, erro: "servidor" }, 500);
     }
   }
+  // ── Vendas (dado de CLIENTE aqui — lista mínima, detalhe por UUID,
+  //    nada de PII em log; ver src/vendas.js) ──────────────────────────────
+  if (p === "/api/admin/compras" && m === "GET") {
+    try {
+      return json({ ok: true, compras: await listaCompras(env, url.searchParams.get("filtro")) });
+    } catch (e) {
+      console.error("compras lista", e);
+      return json({ ok: false, erro: "servidor" }, 500);
+    }
+  }
+  if (p === "/api/admin/compra" && m === "GET") {
+    try {
+      const c = await pegaCompra(env, url.searchParams.get("id"));
+      return c ? json({ ok: true, compra: c }) : json({ ok: false, erro: "nao_encontrado" }, 404);
+    } catch (e) {
+      console.error("compra detalhe", url.searchParams.get("id"), e);
+      return json({ ok: false, erro: "servidor" }, 500);
+    }
+  }
+  if (p === "/api/admin/orcamentos" && m === "GET") {
+    try {
+      return json({ ok: true, orcamentos: await listaOrcamentos(env, url.searchParams.get("filtro")) });
+    } catch (e) {
+      console.error("orcamentos lista", e);
+      return json({ ok: false, erro: "servidor" }, 500);
+    }
+  }
+  if (p === "/api/admin/orcamento" && m === "GET") {
+    try {
+      const o = await pegaOrcamento(env, url.searchParams.get("id"));
+      return o ? json({ ok: true, orcamento: o }) : json({ ok: false, erro: "nao_encontrado" }, 404);
+    } catch (e) {
+      console.error("orcamento detalhe", url.searchParams.get("id"), e);
+      return json({ ok: false, erro: "servidor" }, 500);
+    }
+  }
+  if (p === "/api/admin/orcamento/status" && m === "POST") {
+    const ip = request.headers.get("CF-Connecting-IP") || "";
+    try {
+      const corpo = await request.json();
+      const r = await mudaStatusOrcamento(env, corpo && corpo.id, corpo && corpo.status);
+      // auditoria SEM PII: ref + transição bastam pra reconstruir a história
+      if (r.ok) await auditoria(env, sessao.usuario_id, "orcamento.status", r.ref, { de: r.de, para: r.para }, ip);
+      return json(r, r.ok ? 200 : r.erro === "nao_encontrado" ? 404 : 400);
+    } catch (e) {
+      console.error("orcamento status", e);
+      return json({ ok: false, erro: "servidor" }, 500);
+    }
+  }
+
   if (p === "/api/admin/resumo" && m === "GET") {
     try {
       return json({ ok: true, resumo: await resumoAdmin(env) });
@@ -239,6 +296,10 @@ export async function handleAdmin(request, env, url) {
       return json({ ok: false, erro: "servidor" }, 500);
     }
   }
+  if (p === "/admin/pedidos") return html(paginaPedidos());
+  if (p === "/admin/pedido") return html(paginaPedido());
+  if (p === "/admin/orcamentos") return html(paginaOrcamentos());
+  if (p === "/admin/orcamento") return html(paginaOrcamento());
   if (p === "/admin/config") return html(paginaConfig());
   if (p === "/admin/acesso") return html(paginaAcesso(sessao));
   if (p === "/admin/categorias") return html(paginaCategorias());
@@ -454,7 +515,14 @@ function dobra(s, n) {
 function json(obj, status) {
   return new Response(JSON.stringify(obj), {
     status: status || 200,
-    headers: { "content-type": "application/json; charset=utf-8", "X-Robots-Tag": "noindex" },
+    headers: {
+      "content-type": "application/json; charset=utf-8",
+      "X-Robots-Tag": "noindex",
+      // no-store em TODA resposta de API do admin: com Vendas no ar, várias
+      // carregam dado de cliente — nenhum cache (borda ou navegador) deve
+      // guardar isso, nem por um segundo.
+      "Cache-Control": "no-store",
+    },
   });
 }
 function html(markup) {
@@ -483,8 +551,8 @@ const MENU = [
   {
     grupo: "Vendas",
     itens: [
-      ["/admin/pedidos", "Pedidos", "em breve"],
-      ["/admin/orcamentos", "Orçamentos", "em breve"],
+      ["/admin/pedidos", "Pedidos"],
+      ["/admin/orcamentos", "Orçamentos"],
       ["/admin/abandonados", "Carrinhos abandonados", "em breve"],
     ],
   },
@@ -692,6 +760,29 @@ function paginaConfig() {
     "Configurações",
     "/admin/config"
   ).replace("</body>", "<script src='/js/admin-config.js?v=" + assetsV() + "'></script></body>");
+}
+
+// VENDAS — anatomia da lista de pedidos do Shopify ("Orders") e do Nuvemshop
+// ("Vendas"): filtros por status em cima, linhas com nº / data / cliente /
+// total / situação; a linha abre o detalhe. Conteúdo montado por
+// js/admin-vendas.js — DOM via textContent, nunca innerHTML com dado do banco.
+function paginaVendasBase(idConteudo, titulo, atual) {
+  return base("<div class=apage id=" + idConteudo + ">Carregando…</div>", titulo, atual).replace(
+    "</body>",
+    "<script src='/js/admin-vendas.js?v=" + assetsV() + "'></script></body>"
+  );
+}
+function paginaPedidos() {
+  return paginaVendasBase("pedidos", "Pedidos", "/admin/pedidos");
+}
+function paginaPedido() {
+  return paginaVendasBase("pedido", "Pedido", "/admin/pedidos");
+}
+function paginaOrcamentos() {
+  return paginaVendasBase("orcamentos", "Orçamentos", "/admin/orcamentos");
+}
+function paginaOrcamento() {
+  return paginaVendasBase("orcamento", "Orçamento", "/admin/orcamentos");
 }
 
 function paginaProduto() {
