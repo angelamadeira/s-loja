@@ -1193,3 +1193,7 @@ a.apasso:hover { border-color: var(--line-strong); }
 .acard-b + .amsg,
 .acard-b + .aacoes { margin-top: var(--space-5); }
 .acard-b .apk-nota { margin: 0 0 var(--space-4); }
+
+/* Validação com endereço: o erro aparece NO campo, não só no toast */
+.aestq-err { color: var(--error-text); }
+.ainput-err { border-color: var(--error-text) !important; }

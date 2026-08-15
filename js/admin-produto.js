@@ -163,6 +163,15 @@
     var cB = card();
     var iNome = inp("text", p.nome, "Tablete Ursinho");
     cB.appendChild(campo("Nome", iNome));
+    // Nome é o ÚNICO obrigatório do produto — o erro mora no próprio campo
+    var erroNome = el("small", "ahint ahint-err", "O produto precisa de um nome.");
+    erroNome.hidden = true;
+    iNome.parentNode.appendChild(erroNome);
+    function marcaNome(liga) {
+      erroNome.hidden = !liga;
+      iNome.classList.toggle("ainput-err", !!liga);
+    }
+    iNome.addEventListener("input", function () { if (iNome.value.trim()) marcaNome(false); });
     var iLeg = inp("text", p.legenda, "Tablete · 12 gomos");
     cB.appendChild(campo("Legenda curta", iLeg, "A linha miúda acima do nome, no card da vitrine. Pode ficar vazia."));
     var iDesc = document.createElement("textarea");
@@ -918,7 +927,13 @@
             slugTocado = true; // já existe endereço salvo: não seguir mais o nome
             pintarSeo();
             if (!p.id) { p.id = d.id; history.replaceState(null, "", "/admin/produto?id=" + encodeURIComponent(d.id)); }
-          } else aviso(d && d.erro === "promo_maior" ? "O preço promocional precisa ser MENOR que o preço cheio." : d && d.erro === "nome" ? "Dê um nome ao produto." : "Não deu para salvar.", true);
+          } else if (d && d.erro === "nome") {
+            // o erro aponta pro CAMPO, não só pro toast: marca, foca e rola até lá
+            aviso("Dê um nome ao produto.", true);
+            marcaNome(true);
+            iNome.focus();
+            iNome.scrollIntoView({ block: "center", behavior: "smooth" });
+          } else aviso(d && d.erro === "promo_maior" ? "O preço promocional precisa ser MENOR que o preço cheio." : "Não deu para salvar.", true);
         })
         .catch(function () {
           salvar.disabled = false; salvar.textContent = "Salvar";

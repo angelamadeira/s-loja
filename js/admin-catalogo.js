@@ -194,7 +194,28 @@
 
   function salvar(cat) {
     return fetch("/api/admin/categoria", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(cat) })
-      .then(function (r) { return r.json(); }).then(carrega);
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        if (d && !d.ok) {
+          avisoCat(d.erro === "ciclo"
+            ? "Não dá para aninhar assim — a coleção ficaria dentro dela mesma."
+            : d.erro === "nome" ? "Dê um nome à coleção." : "Não deu para salvar.");
+        }
+        return carrega(); // recarrega sempre: em erro, desfaz a escolha na tela
+      });
+  }
+  // aviso da tela de coleções — criado na hora, some sozinho
+  function avisoCat(t) {
+    var m = document.getElementById("catmsg");
+    if (!m) {
+      m = el("div", "amsg err");
+      m.id = "catmsg";
+      raiz.parentNode.insertBefore(m, raiz);
+    }
+    m.textContent = t;
+    m.hidden = false;
+    clearTimeout(avisoCat._t);
+    avisoCat._t = setTimeout(function () { m.hidden = true; }, 4000);
   }
   function apagar(id) {
     return fetch("/api/admin/categoria/apagar", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ id: id }) })

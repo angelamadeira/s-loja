@@ -523,10 +523,11 @@ export async function salvaCategoria(env, body) {
   const nome = txt(body.nome, 120);
   if (!nome) return { ok: false, erro: "nome" };
   const id = txt(body.id, 64) || crypto.randomUUID();
-  let pai = txt(body.pai_id, 64) || null;
-  if (pai === id) pai = null; // não pode ser mãe de si mesma
-  // evita ciclo (A dentro de B dentro de A)
-  if (pai && (await ehDescendente(env, pai, id))) pai = null;
+  const pai = txt(body.pai_id, 64) || null;
+  // ciclo é ERRO dito em voz alta, não correção silenciosa (pedido dela,
+  // 2026-08-15): quem tentou aninhar precisa saber que não aninhou.
+  if (pai === id) return { ok: false, erro: "ciclo" }; // mãe de si mesma
+  if (pai && (await ehDescendente(env, pai, id))) return { ok: false, erro: "ciclo" };
   const existente = await env.DB.prepare("SELECT id FROM cat_categorias WHERE id = ?").bind(id).first();
   const slug = await slugUnicoCat(env, txt(body.slug, 120) || slugify(nome), id);
   if (existente) {

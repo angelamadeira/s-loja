@@ -8,21 +8,24 @@ import worker from "../src/index.js";
 import schemaSql from "../schema.sql?raw";
 import schemaAdminSql from "../schema-admin.sql?raw";
 import schemaCatalogoSql from "../schema-catalogo.sql?raw";
+import schemaCategoriasSql from "../schema-categorias.sql?raw";
 
 beforeEach(async () => {
-  for (const sql of [schemaSql, schemaAdminSql, schemaCatalogoSql]) {
+  for (const sql of [schemaSql, schemaAdminSql, schemaCatalogoSql, schemaCategoriasSql]) {
     const statements = sql
       .replace(/--.*$/gm, "")
       .split(";")
       .map((s) => s.trim())
-      .filter(Boolean);
+      // só a ESTRUTURA: schema-categorias.sql traz sementes de produção
+      // (vínculos com produtos reais) que não existem no banco de teste
+      .filter((s) => /^CREATE /i.test(s));
     for (const stmt of statements) await env.DB.prepare(stmt).run();
   }
   // filhas antes das mães — as FKs mandam na ordem
   for (const t of [
     "compras", "pedidos",
     "admin_auditoria", "admin_sessoes", "admin_passkeys", "admin_login_tokens", "admin_usuarios",
-    "cat_produto_imagens", "cat_slugs_antigos", "cat_variantes", "cat_produtos", "assets",
+    "cat_produto_imagens", "cat_slugs_antigos", "cat_produto_categorias", "cat_categorias", "cat_variantes", "cat_produtos", "assets",
   ]) {
     await env.DB.prepare("DELETE FROM " + t).run();
   }
@@ -210,4 +213,25 @@ test("emails: lista traz a semente, adiciona/remove, e a dona é irremovível", 
   expect((await tira.json()).ok).toBe(true);
   const fim = await (await chama("/api/admin/emails", { headers: { cookie } })).json();
   expect(fim.emails.map((e) => e.email)).not.toContain("ajudante@example.com");
+});
+
+test("coleções: aninhar em ciclo agora é ERRO dito, não correção silenciosa", async () => {
+  const cookie = await abreSessao();
+  const post = (corpo) => chama("/api/admin/categoria", {
+    method: "POST",
+    headers: { cookie, "content-type": "application/json" },
+    body: JSON.stringify(corpo),
+  });
+  await post({ id: "c1", nome: "Bombons" });
+  await post({ id: "c2", nome: "Esferas", pai_id: "c1" });
+
+  const proprio = await (await post({ id: "c1", nome: "Bombons", pai_id: "c1" })).json();
+  expect(proprio).toMatchObject({ ok: false, erro: "ciclo" });
+
+  const ciclo = await (await post({ id: "c1", nome: "Bombons", pai_id: "c2" })).json();
+  expect(ciclo).toMatchObject({ ok: false, erro: "ciclo" });
+
+  // e o banco ficou como estava (c1 continua raiz)
+  const linha = await env.DB.prepare("SELECT pai_id FROM cat_categorias WHERE id = 'c1'").first();
+  expect(linha.pai_id).toBeNull();
 });

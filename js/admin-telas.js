@@ -69,9 +69,19 @@
             inp.value = v.estoque;
             inp.setAttribute("aria-label", "Estoque de " + v.produto + " " + v.rotulo);
             var ok = el("span", "aestq-ok", "");
+            // o aviso diz o PORQUÊ: número inválido ≠ conexão que caiu
+            function avisa(t, erro) {
+              ok.textContent = t;
+              ok.className = erro ? "aestq-ok aestq-err" : "aestq-ok";
+              setTimeout(function () { ok.textContent = ""; }, erro ? 3200 : 1600);
+            }
             inp.addEventListener("change", function () {
               var n = parseInt(inp.value, 10);
-              if (!(n >= 0)) { inp.value = v.estoque; return; }
+              if (!(n >= 0)) {
+                inp.value = v.estoque;
+                avisa("só número, 0 ou mais", true);
+                return;
+              }
               fetch("/api/admin/estoque", {
                 method: "POST",
                 headers: { "content-type": "application/json" },
@@ -79,14 +89,15 @@
               }).then(function (r) { return r.json(); }).then(function (rr) {
                 if (rr && rr.ok) {
                   v.estoque = rr.para;
-                  ok.textContent = "salvo";
-                  setTimeout(function () { ok.textContent = ""; }, 1600);
+                  avisa("salvo");
                 } else {
                   inp.value = v.estoque;
-                  ok.textContent = "não salvou";
-                  setTimeout(function () { ok.textContent = ""; }, 2500);
+                  avisa(rr && rr.erro === "estoque" ? "número inválido" : "não salvou — tente de novo", true);
                 }
-              }).catch(function () { inp.value = v.estoque; });
+              }).catch(function () {
+                inp.value = v.estoque;
+                avisa("sem conexão — tente de novo", true);
+              });
             });
             dir.appendChild(ok);
             dir.appendChild(inp);
