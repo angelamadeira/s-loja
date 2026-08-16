@@ -22,12 +22,13 @@ beforeEach(async () => {
 
 async function seedCompra(ref, status, opts) {
   opts = opts || {};
+  const id = opts.id || crypto.randomUUID();
   await env.DB.prepare(
     "INSERT INTO compras (id, ref, criado_em, itens, subtotal, frete, desconto, total, metodo, parcelas, contato_email, contato_whats, cpf, endereco, status, mp_payment_id, consentiu) " +
       "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
   )
     .bind(
-      crypto.randomUUID(),
+      id,
       ref,
       new Date().toISOString(),
       opts.itens || "[]",
@@ -46,6 +47,7 @@ async function seedCompra(ref, status, opts) {
       1
     )
     .run();
+  return id;
 }
 
 const get = (qs) => new Request("https://x/api/compra" + qs);
@@ -147,8 +149,8 @@ test("compra aprovada em pix não consulta o MP (não precisa mais de QR)", asyn
 test("compra pendente em pix que o MP já aprovou: persiste 'aprovado' e devolve order", async () => {
   consultaPagamentoFull.mockResolvedValueOnce({ id: 42, status: "approved" }); // sem QR: já aprovou
   const itens = JSON.stringify([{ id: "tablete", tam: "M", qtd: 1, preco_unit: 12300 }]);
-  await seedCompra("SUZU-PIX9", "pendente", { metodo: "pix", mpId: "42", itens });
-  const t = await tokenPedido("SUZU-PIX9", env);
+  const idPix9 = await seedCompra("SUZU-PIX9", "pendente", { metodo: "pix", mpId: "42", itens });
+  const t = await tokenPedido(idPix9, env);
   const ctx = createExecutionContext();
   const res = await worker.fetch(get("?ref=SUZU-PIX9&t=" + encodeURIComponent(t)), env, ctx);
   await waitOnExecutionContext(ctx);
@@ -178,7 +180,7 @@ test("falha do MP ao reconsultar não derruba o endpoint — devolve só o statu
 test("compra aprovada em pix inclui order com itens/total e NÃO expõe cpf nem mp_payment_id", async () => {
   const itens = JSON.stringify([{ id: "tablete", tam: "M", qtd: 2, preco_unit: 12300 }]);
   const endereco = JSON.stringify({ rua: "Rua das Flores", numero: "10", complemento: "", bairro: "Centro", cidade: "São Paulo", cep: "01000-000" });
-  await seedCompra("SUZU-OK0001", "aprovado", {
+  const idOk = await seedCompra("SUZU-OK0001", "aprovado", {
     metodo: "pix",
     mpId: "555",
     itens,
@@ -186,7 +188,7 @@ test("compra aprovada em pix inclui order com itens/total e NÃO expõe cpf nem 
     frete: 1500,
     whats: "11999999999",
   });
-  const t = await tokenPedido("SUZU-OK0001", env);
+  const t = await tokenPedido(idOk, env);
   const ctx = createExecutionContext();
   const res = await worker.fetch(get("?ref=SUZU-OK0001&t=" + encodeURIComponent(t)), env, ctx);
   await waitOnExecutionContext(ctx);
@@ -228,4 +230,36 @@ test("aprovada com token ERRADO => também não expõe o order", async () => {
   const j = await res.json();
   expect(j.status).toBe("aprovado");
   expect(j.order).toBeUndefined();
+});
+
+// ── Achado A (auditoria 2026-08-15): oráculo de token / IDOR de PII ─────────
+// O token é ligado ao ID (UUID imprevisível), não ao ref (6 hex controláveis).
+// Pedir o token de um ref alheio NÃO destrava a PII da vítima.
+test("IDOR: token derivado de ref alheio NÃO libera o pedido da vítima", async () => {
+  // vítima: pedido aprovado com endereço
+  const idVitima = await seedCompra("SUZU-VITIMA", "aprovado", {
+    metodo: "pix", mpId: "v1",
+    endereco: JSON.stringify({ rua: "Rua Secreta", numero: "42", cep: "01000-000" }),
+  });
+  // o atacante forja um checkoutId cujo ref colide com o da vítima e insere a
+  // própria linha (mais nova). Ele consegue tokenPedido(idAtacante), não o da vítima.
+  const idAtacante = "5502a1b2-c3d4-4e5f-8a9b-0c1d2e3f4a5b";
+  await seedCompra("SUZU-VITIMA", "aprovado", { id: idAtacante, metodo: "pix", mpId: "a1" });
+
+  const tAtacante = await tokenPedido(idAtacante, env);
+  const ctx = createExecutionContext();
+  const res = await worker.fetch(get("?ref=SUZU-VITIMA&t=" + encodeURIComponent(tAtacante)), env, ctx);
+  await waitOnExecutionContext(ctx);
+  const j = await res.json();
+  // o token do atacante só casa com a LINHA DELE — nunca com a da vítima
+  if (j.order) {
+    expect(j.order.endereco).not.toMatchObject({ rua: "Rua Secreta" });
+  }
+  // e o token da vítima (ligado ao id dela) casaria — prova de que o esquema funciona
+  const tVitima = await tokenPedido(idVitima, env);
+  const c2 = createExecutionContext();
+  const r2 = await worker.fetch(get("?ref=SUZU-VITIMA&t=" + encodeURIComponent(tVitima)), env, c2);
+  await waitOnExecutionContext(c2);
+  const j2 = await r2.json();
+  expect(j2.order.endereco.rua).toBe("Rua Secreta");
 });

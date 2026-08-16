@@ -1157,6 +1157,7 @@
   function wireCheckout(){
     var cof=document.getElementById('coForm'); if(!cof)return;
     function emailErr(msg){var b=document.getElementById('coEmailErr'),em=document.getElementById('coEmail');if(b){b.textContent=msg||'';b.classList.toggle('show',!!msg);}if(em){em.classList.toggle('bad',!!msg);em.setAttribute('aria-invalid',msg?'true':'false');em.style.borderColor=msg?'var(--error-text)':'';}}
+    function emailOk(v){return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(String(v||'').trim());}
     function emailMsg(em){return !em.value.trim()?'Precisamos do seu e-mail pra enviar a confirmação.':'Confere o seu e-mail? Parece que falta algo.';}
     (function(){var em=document.getElementById('coEmail');if(em)em.addEventListener('input',function(){if(em.classList.contains('bad'))emailErr('');});})();
     CO.ship=null;CO.pay=null;CO.parc=1;CO.coupon=null;CO.cpf='';/* nenhuma forma pré-selecionada: desconto Pix só entra ao escolher Pix */
@@ -1254,7 +1255,11 @@
     /* máscara do WhatsApp: (11) 90000-0000 — e digitar limpa o erro */
     var wMask=document.getElementById('coWhats');
     if(wMask)wMask.oninput=function(){
-      var d=this.value.replace(/\D/g,'').slice(0,11);
+      var d=this.value.replace(/\D/g,'');
+      /* colou com +55 (13/12 díg começando por 55)? tira o país antes de formatar,
+         senão "55" viraria o DDD e o número sairia corrompido */
+      if(d.length>11&&d.slice(0,2)==='55')d=d.slice(2);
+      d=d.slice(0,11);
       this.value=d.length>6?'('+d.slice(0,2)+') '+d.slice(2,d.length>10?7:6)+'-'+d.slice(d.length>10?7:6):d.length>2?'('+d.slice(0,2)+') '+d.slice(2):d;
       var er=document.getElementById('coWhatsErr');if(er)er.textContent='';
     };
@@ -1372,7 +1377,7 @@
       /* silent=true: só devolve o booleano, sem mostrar erro/focar (usado por
          reachable() a cada refreshNav pra decidir o que dá pra abrir). */
       function validStep(n,silent){
-        if(n===1){var em=document.getElementById('coEmail');if(!em.value||em.value.indexOf('@')<1){if(!silent){emailErr(emailMsg(em));em.focus();}return false;}if(!silent)emailErr('');
+        if(n===1){var em=document.getElementById('coEmail');if(!emailOk(em&&em.value)){if(!silent){emailErr(emailMsg(em));em.focus();}return false;}if(!silent)emailErr('');
           var w=document.getElementById('coWhats'),wd=w?w.value.replace(/\D/g,''):'';var wErr=document.getElementById('coWhatsErr');
           if(wd&&(wd.length<10||wd.length>11||wd.charAt(0)==='0')){if(!silent){if(wErr)wErr.textContent='Confira o número — DDD + celular, ex. (11) 91234-5678.';w.focus();}return false;}
           if(wErr&&!silent)wErr.textContent='';
@@ -1540,7 +1545,7 @@
     function uuidish(){if(window.crypto&&crypto.randomUUID)return crypto.randomUUID();var h='';for(var i=0;i<36;i++){h+=(i===8||i===13||i===18||i===23)?'-':Math.floor(Math.random()*16).toString(16);}return h;}
     function buildBaseCtx(){
       var email=document.getElementById('coEmail');
-      if(!email||!email.value||email.value.indexOf('@')<1){emailErr(emailMsg(email));if(email)email.focus();return null;}
+      if(!emailOk(email&&email.value)){emailErr(emailMsg(email));if(email)email.focus();return null;}
       emailErr('');
       var sp=cartSplit();
       if(sp.now.length&&!CO.ship){var hint=document.getElementById('cepHint');if(hint){hint.textContent='Calcule o frete para continuar.';hint.className='cephint err';}return null;}
@@ -2521,7 +2526,11 @@
     var _fs=document.getElementById('freeShipSlot');if(_fs)_fs.innerHTML=freeShipHtml(s.subNow,hasNow);
     syncDrawerCep(s,q);
     var box=document.getElementById('items'),keys=Object.keys(cart);
-    if(!keys.length){box.innerHTML='<p class="empty"><span class="sig">Sua sacola está vazia.</span>Escolha uma peça pra começar a sua coleção.</p>';return;}
+    if(!keys.length){box.innerHTML='<p class="empty"><span class="sig">Sua sacola está vazia.</span>Escolha uma peça pra começar a sua coleção.</p>';
+      /* esvaziou a sacola DENTRO do checkout: tira a pessoa de lá (senão o
+         resumo/acordeão ficam presos num carrinho que não existe mais) */
+      if(location.pathname==='/checkout'){location.href='/produtos';}
+      return;}
     /* de/por no item: quando tem desconto (saleP), risca o preço cheio (.wasp) +
        preço com desconto + selo −X% (.offtag) — mesmos componentes da PDP. Item
        de reserva não entra (o preço é o sinal de 30%, não comparável ao cheio). */

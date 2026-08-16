@@ -295,7 +295,7 @@ async function handlePagar(request, env) {
     // existe) e devolve o mesmo resultado sem cobrar de novo; (b) mesmo se dois
     // requests correrem juntos, o MP com a mesma chave devolve o MESMO pagamento
     // (não cobra 2×). Sem checkoutId (cliente antigo) cai no uuid aleatório = hoje.
-    const compraId = /^[0-9a-f-]{36}$/i.test(str(body.checkoutId)) ? str(body.checkoutId) : crypto.randomUUID();
+    const compraId = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(str(body.checkoutId)) ? str(body.checkoutId).toLowerCase() : crypto.randomUUID();
     const ref = gerarRef(compraId);
     try {
       await env.DB.prepare(
@@ -307,7 +307,7 @@ async function handlePagar(request, env) {
     } catch (e) {
       // Provável violação de PK = retry do MESMO checkout. Se a 1ª tentativa já
       // avançou (status != 'iniciado'), devolve o mesmo resultado — não cobra de novo.
-      const existente = await env.DB.prepare("SELECT ref, status, metodo, mp_payment_id FROM compras WHERE id = ?").bind(compraId).first();
+      const existente = await env.DB.prepare("SELECT id, ref, status, metodo, mp_payment_id FROM compras WHERE id = ?").bind(compraId).first();
       if (!existente) {
         // INSERT falhou por outro motivo (não é a compra duplicada) — não cobra às cegas.
         console.error("insert compra falhou", e);
@@ -318,7 +318,7 @@ async function handlePagar(request, env) {
         if (existente.status === "pendente" && existente.metodo === "pix" && existente.mp_payment_id) {
           try { const full = await consultaPagamentoFull(env, existente.mp_payment_id); if (full && full.pix) pix = full.pix; } catch (_) { /* MP fora do ar: devolve sem pix, o polling tenta de novo */ }
         }
-        return json({ ok: true, ref: existente.ref, status: existente.status, pix, t: await tokenPedido(existente.ref, env) });
+        return json({ ok: true, ref: existente.ref, status: existente.status, pix, t: existente.status === "recusado" ? undefined : await tokenPedido(existente.id, env) });
       }
       // status 'iniciado' (1ª tentativa ainda em voo): segue e chama o MP com a MESMA
       // idempotencyKey — o MP devolve o mesmo pagamento (não cobra 2×) e o UPDATE converge.
@@ -363,7 +363,7 @@ async function handlePagar(request, env) {
     // 'pendente' e a baixa acontece no webhook, quando o pagamento confirma.
     if (status === "aprovado") await baixaSegura(env, compraId);
 
-    return json({ ok: true, ref, status, pix: resultado.pix, t: await tokenPedido(ref, env) });
+    return json({ ok: true, ref, status, pix: resultado.pix, t: status === "recusado" ? undefined : await tokenPedido(compraId, env) });
   } catch (e) {
     console.error("pagar falhou", e);
     return json({ ok: false, erro: "servidor" }, 500);
@@ -391,13 +391,26 @@ async function handlePagar(request, env) {
 async function handleCompra(url, env) {
   const ref = str(url.searchParams.get("ref"));
   if (!ref) return json({ status: "nao_encontrado" });
-  const row = await env.DB.prepare(
+  const tokParam = str(url.searchParams.get("t"));
+  // Pode haver mais de uma linha com o mesmo ref (ref = 6 hex, colidível — e um
+  // atacante pode ter inserido uma linha de colisão de propósito). O token é
+  // ligado ao ID: se veio token, buscamos a linha cujo HMAC(id) casa com ele —
+  // assim o token de um pedido NUNCA destrava outro. Sem token, cai na mais
+  // recente só pra devolver status/pix (nada de PII).
+  const { results } = await env.DB.prepare(
     "SELECT id, ref, status, metodo, mp_payment_id, itens, total, frete, desconto, parcelas, endereco, contato_email, contato_whats, criado_em " +
-      "FROM compras WHERE ref = ?"
+      "FROM compras WHERE ref = ? ORDER BY criado_em DESC LIMIT 20"
   )
     .bind(ref)
-    .first();
-  if (!row) return json({ status: "nao_encontrado" });
+    .all();
+  const linhas = results || [];
+  if (!linhas.length) return json({ status: "nao_encontrado" });
+  let row = linhas[0];
+  if (tokParam) {
+    for (const l of linhas) {
+      if (tokParam === (await tokenPedido(l.id, env))) { row = l; break; }
+    }
+  }
 
   const resposta = { status: row.status };
   if (row.status === "pendente" && row.metodo === "pix") {
@@ -432,7 +445,7 @@ async function handleCompra(url, env) {
   // PII do pedido (order) só sai com o token assinado válido (?t=) — o `ref` curto
   // sozinho nunca libera endereço/e-mail/telefone (senão daria pra varrer e coletar).
   // Sem token válido devolve só o status (o polling do /pix segue funcionando).
-  const tokOk = row.status === "aprovado" && str(url.searchParams.get("t")) === (await tokenPedido(row.ref, env));
+  const tokOk = row.status === "aprovado" && tokParam && tokParam === (await tokenPedido(row.id, env));
   if (tokOk) {
     // nunca inclui cpf nem mp_payment_id aqui — só o que o recap precisa mostrar.
     resposta.order = {
@@ -661,11 +674,14 @@ async function assina(dado, secret) {
 // (?t=), então a aba retornável do cliente funciona sem pedir nada; um estranho
 // que só tenha o código curto não vê os dados. Exportado pra os testes calcularem
 // o token esperado (só a função; a secret nunca sai do worker).
-export async function tokenPedido(ref, env) {
+export async function tokenPedido(id, env) {
+  // Token ligado ao ID (UUID de 122 bits, imprevisível), NÃO ao ref (6 hex que o
+  // cliente controla via checkoutId). Sem isso, /api/pagar viraria um oráculo:
+  // devolveria o token de QUALQUER ref, destravando a PII do pedido alheio.
   // TURNSTILE_SECRET está SEMPRE setado em prod (os links de anexo dependem dele).
   // O fallback só serve pra dev/teste sem o segredo — uma chave HMAC vazia estoura
   // no crypto.subtle.importKey. Prod nunca cai no fallback.
-  return assina(String(ref), (env && env.TURNSTILE_SECRET) || "suzu-token-dev");
+  return assina("pedido:" + String(id), (env && env.TURNSTILE_SECRET) || "suzu-token-dev");
 }
 
 function str(v) {

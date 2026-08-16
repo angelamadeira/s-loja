@@ -85,7 +85,7 @@ test("compra aprovada desconta o estoque da variante vendida", async () => {
 });
 
 test("a mesma compra NUNCA desconta duas vezes (o MP reenvia o webhook)", async () => {
-  const cid = "11111111-2222-3333-4444-555555555555";
+  const cid = "11111111-2222-4333-8444-555555555555";
   const payload = { itens: [{ id: "tablete", tam: "M", qtd: 3 }], metodo: "cartao", email: "a@b.com", cpf: "12345678909", endereco: { cep: "01310100" }, freteOpcao: "economico", checkoutId: cid, consentiu: true };
   const c1 = createExecutionContext();
   await worker.fetch(post(payload), env, c1);
@@ -132,7 +132,7 @@ test("parcelas do cliente são clampadas ao máximo permitido pro total", async 
 });
 
 test("idempotência: mesmo checkoutId não cobra 2× — o retry devolve a mesma compra", async () => {
-  const cid = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee";
+  const cid = "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee";
   const payload = { itens: [{ id: "tablete", tam: "M", qtd: 1 }], metodo: "pix", email: "a@b.com", cpf: "12345678909", endereco: { cep: "01310100" }, freteOpcao: "economico", checkoutId: cid, consentiu: true };
 
   const ctx1 = createExecutionContext();
@@ -238,4 +238,18 @@ test("Pix pendente: mapeia in_process => pendente e repassa o QR", async () => {
   const row = await env.DB.prepare("SELECT status, mp_payment_id FROM compras WHERE ref=?").bind(j.ref).first();
   expect(row.status).toBe("pendente");
   expect(row.mp_payment_id).toBe("1001");
+});
+
+// ── Achado B (auditoria 2026-08-15): sobrevenda por linhas duplicadas ───────
+test("mesma variante em várias linhas não fura o estoque (soma agregada)", async () => {
+  // tablete/M tem estoque 7 no seed; duas linhas de 4 somam 8 > 7 => recusa
+  const ctx = createExecutionContext();
+  const res = await worker.fetch(post({
+    itens: [{ id: "tablete", tam: "M", qtd: 4 }, { id: "tablete", tam: "M", qtd: 4 }],
+    metodo: "pix", email: "a@b.com", cpf: "12345678909", endereco: { cep: "01310100" }, freteOpcao: "economico", consentiu: true,
+  }), env, ctx);
+  await waitOnExecutionContext(ctx);
+  expect(res.status).toBe(400);
+  expect((await res.json()).erro).toBe("estoque");
+  expect(criaPagamento).not.toHaveBeenCalled();
 });

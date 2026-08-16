@@ -120,6 +120,11 @@ export async function recomputaTotal(env, itens, opts) {
 
   let subtotal = 0;
   const linhas = [];
+  // Estoque é validado por VARIANTE agregada, não por linha: mandar a mesma
+  // variante em várias linhas (2×3 com estoque 3) passaria em cada linha
+  // isolada e venderia 6 de uma peça que só tem 3. Somamos a qtd por variante
+  // e comparamos o total contra o estoque uma vez só.
+  const usadoPorVar = {};
   for (const item of lista) {
     const { id, tam, qtd, varId } = item || {};
     // Preferência pelo ID DA VARIANTE: é o endereço exato do que foi escolhido e
@@ -136,8 +141,12 @@ export async function recomputaTotal(env, itens, opts) {
     if (!Number.isInteger(qtd) || qtd <= 0 || qtd > 99) return { erro: "qtd" };
     // ESTOQUE: não se vende o que não existe. "Continuar vendendo quando
     // esgotar", marcado no admin, é a exceção consciente dela — só aí passa
-    // com estoque insuficiente.
-    if (!v.semEstoque && qtd > v.estoque) return { erro: "estoque", id, tam, disponivel: v.estoque };
+    // com estoque insuficiente. Confere o ACUMULADO desta variante no carrinho.
+    if (!v.semEstoque) {
+      const jaUsado = usadoPorVar[v.varId] || 0;
+      if (jaUsado + qtd > v.estoque) return { erro: "estoque", id, tam, disponivel: v.estoque };
+      usadoPorVar[v.varId] = jaUsado + qtd;
+    }
     subtotal += precoTam * qtd;
     // var_id na linha: é o endereço exato do que foi vendido. Sem ele, a baixa
     // de estoque teria de adivinhar a variante pelo nome do tamanho depois.
