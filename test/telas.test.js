@@ -276,3 +276,32 @@ test("clientes: 'Ana@X.com' e 'ana@x.com' são UMA pessoa", async () => {
   expect(anas[0].n_pedidos).toBe(2);
   expect(anas[0].total_gasto).toBe(15000);
 });
+
+test("cliente detalhe: chave opaca (uuid — e-mail NUNCA na URL); sem sessão => 401", async () => {
+  const semSessao = await chama("/api/admin/cliente?c=x");
+  expect(semSessao.status).toBe(401);
+
+  const cookie = await abreSessao();
+  // duas compras do mesmo e-mail (uma com whats+endereço, uma sem)
+  const id1 = crypto.randomUUID();
+  await env.DB.prepare(
+    "INSERT INTO compras (id, ref, criado_em, itens, subtotal, frete, desconto, total, metodo, parcelas, contato_email, contato_whats, cpf, endereco, status, consentiu) " +
+      "VALUES (?, 'SUZU-C1', '2026-08-10T10:00:00Z', '[]', 10000, 0, 0, 10000, 'pix', 1, 'ze@x.com', '5511988887777', '39053344705', ?, 'aprovado', 1)"
+  ).bind(id1, JSON.stringify({ cidade: "São Paulo", uf: "SP", cep: "01001-000" })).run();
+  await env.DB.prepare(
+    "INSERT INTO compras (id, ref, criado_em, itens, subtotal, frete, desconto, total, metodo, parcelas, contato_email, status, consentiu) " +
+      "VALUES (?, 'SUZU-C2', '2026-08-12T10:00:00Z', '[]', 5000, 0, 0, 5000, 'pix', 1, 'ZE@x.com', 'pendente', 1)"
+  ).bind(crypto.randomUUID()).run();
+
+  // a lista entrega a chave (uuid), e é por ela que o detalhe abre
+  const lst = await (await chama("/api/admin/clientes", { headers: { cookie } })).json();
+  const ze = lst.clientes.find((x) => x.contato_email === "ze@x.com");
+  expect(ze.chave).toBeTruthy();
+  const j = await (await chama("/api/admin/cliente?c=" + ze.chave, { headers: { cookie } })).json();
+  expect(j.cliente.whats).toBe("5511988887777");
+  expect(j.cliente.cpf).toBe("39053344705");
+  expect(j.cliente.enderecos[0].cidade).toBe("São Paulo");
+  expect(j.cliente.n_pedidos).toBe(1); // só a aprovada conta no total
+  expect(j.cliente.total_gasto).toBe(10000);
+  expect(j.cliente.pedidos.length).toBe(2); // histórico mostra as duas
+});

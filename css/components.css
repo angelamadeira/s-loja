@@ -1197,3 +1197,23 @@ body.nodock{padding-bottom:0}
 .bdots i:nth-child(3){--bdot-d:.32s}
 @keyframes bdotpulse{0%,80%,100%{opacity:.28}40%{opacity:1}}
 @media(prefers-reduced-motion:reduce){.bdots i{animation:none;opacity:.5}}
+
+/* ── Barra de anúncio (F2 — ligada no admin > Página inicial) ─────────────── */
+.avisobar{
+  display:block;
+  background:var(--ink);
+  color:var(--white);
+  text-align:center;
+  text-decoration:none;
+  font-size:.78rem;
+  letter-spacing:.08em;
+  padding:var(--space-2) var(--space-4);
+}
+a.avisobar:hover{opacity:.9}
+
+/* feedback do frete recalculado (troca de CEP no checkout) */
+.cephint.ok{color:var(--success-text)}
+.shippulse{animation:shippulse var(--dur-slow) ease}
+@keyframes shippulse{0%{background:var(--warm)}100%{background:transparent}}
+.note .avisolink{color:inherit;text-decoration:none}
+.note .avisolink:hover{text-decoration:underline}

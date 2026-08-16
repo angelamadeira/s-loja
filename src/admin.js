@@ -31,7 +31,8 @@ import {
   pegaOrcamento,
   mudaStatusOrcamento,
 } from "./vendas.js";
-import { listaEstoque, salvaEstoque, listaClientes, relatorios, listaMidia } from "./telas.js";
+import { listaEstoque, salvaEstoque, listaClientes, pegaCliente, relatorios, listaMidia } from "./telas.js";
+import { listaPaginasAdmin, salvaPagina, despublicaPagina } from "./paginas.js";
 
 // Quem pode entrar mora no BANCO (admin_emails_permitidos) e se gerencia em
 // /admin/acesso. A lista abaixo é só a SEMENTE (primeira criação da tabela) e
@@ -378,6 +379,15 @@ export async function handleAdmin(request, env, url) {
       return json({ ok: false, erro: "servidor" }, 500);
     }
   }
+  if (p === "/api/admin/cliente" && m === "GET") {
+    try {
+      const c = await pegaCliente(env, url.searchParams.get("c"));
+      return c ? json({ ok: true, cliente: c }) : json({ ok: false, erro: "nao_encontrado" }, 404);
+    } catch (e) {
+      console.error("cliente detalhe", e);
+      return json({ ok: false, erro: "servidor" }, 500);
+    }
+  }
   if (p === "/api/admin/relatorios" && m === "GET") {
     try {
       return json({ ok: true, relatorios: await relatorios(env) });
@@ -391,6 +401,40 @@ export async function handleAdmin(request, env, url) {
       return json({ ok: true, midia: await listaMidia(env) });
     } catch (e) {
       console.error("midia lista", e);
+      return json({ ok: false, erro: "servidor" }, 500);
+    }
+  }
+
+  // ── Site (F2): páginas de conteúdo editáveis ─────────────────────────────
+  if (p === "/api/admin/paginas" && m === "GET") {
+    try {
+      return json({ ok: true, paginas: await listaPaginasAdmin(env) });
+    } catch (e) {
+      console.error("paginas admin", e);
+      return json({ ok: false, erro: "servidor" }, 500);
+    }
+  }
+  if (p === "/api/admin/pagina" && m === "POST") {
+    const ip = request.headers.get("CF-Connecting-IP") || "";
+    try {
+      const corpo = await request.json();
+      const r = await salvaPagina(env, corpo);
+      if (r.ok) await auditoria(env, sessao.usuario_id, "pagina.salva", r.slug, { publicado: r.publicado }, ip);
+      return json(r, r.ok ? 200 : 400);
+    } catch (e) {
+      console.error("pagina salva", e);
+      return json({ ok: false, erro: "servidor" }, 500);
+    }
+  }
+  if (p === "/api/admin/pagina/despublicar" && m === "POST") {
+    const ip = request.headers.get("CF-Connecting-IP") || "";
+    try {
+      const corpo = await request.json();
+      const r = await despublicaPagina(env, corpo && corpo.slug);
+      if (r.ok) await auditoria(env, sessao.usuario_id, "pagina.despublicada", r.slug, null, ip);
+      return json(r, r.ok ? 200 : 400);
+    } catch (e) {
+      console.error("pagina despublica", e);
       return json({ ok: false, erro: "servidor" }, 500);
     }
   }
@@ -418,9 +462,13 @@ export async function handleAdmin(request, env, url) {
       return json({ ok: false, erro: "servidor" }, 500);
     }
   }
+  if (p === "/admin/home") return html(paginaHome());
+  if (p === "/admin/paginas") return html(paginaPaginas());
+  if (p === "/admin/pagina") return html(paginaPaginaEditor());
   if (p === "/admin/abandonados") return html(paginaAbandonados());
   if (p === "/admin/estoque") return html(paginaEstoque());
   if (p === "/admin/clientes") return html(paginaClientes());
+  if (p === "/admin/cliente") return html(paginaCliente());
   if (p === "/admin/relatorios") return html(paginaRelatorios());
   if (p === "/admin/midia") return html(paginaMidia());
   if (p === "/admin/pedidos") return html(paginaPedidos());
@@ -706,8 +754,8 @@ const MENU = [
   {
     grupo: "Site",
     itens: [
-      ["/admin/home", "Página inicial", "em breve"],
-      ["/admin/paginas", "Páginas", "em breve"],
+      ["/admin/home", "Página inicial"],
+      ["/admin/paginas", "Páginas"],
       ["/admin/receitas", "Receitas", "em breve"],
     ],
   },
@@ -932,11 +980,31 @@ function paginaTelasBase(idConteudo, titulo, atual) {
     "<script src='/js/admin-telas.js?v=" + assetsV() + "'></script></body>"
   );
 }
+// Site (F2) — conteúdo em js/admin-site.js (mesma regra: textContent)
+function paginaSiteBase(idConteudo, titulo, atual) {
+  return base("<div class=apage id=" + idConteudo + ">Carregando…</div>", titulo, atual).replace(
+    "</body>",
+    "<script src='/js/admin-site.js?v=" + assetsV() + "'></script></body>"
+  );
+}
+function paginaHome() {
+  return paginaSiteBase("home", "Página inicial", "/admin/home");
+}
+function paginaPaginas() {
+  return paginaSiteBase("paginas", "Páginas", "/admin/paginas");
+}
+function paginaPaginaEditor() {
+  return paginaSiteBase("pagina", "Página", "/admin/paginas");
+}
+
 function paginaEstoque() {
   return paginaTelasBase("estoque", "Estoque", "/admin/estoque");
 }
 function paginaClientes() {
   return paginaTelasBase("clientes", "Clientes", "/admin/clientes");
+}
+function paginaCliente() {
+  return paginaTelasBase("cliente", "Cliente", "/admin/clientes");
 }
 function paginaRelatorios() {
   return paginaTelasBase("relatorios", "Relatórios", "/admin/relatorios");

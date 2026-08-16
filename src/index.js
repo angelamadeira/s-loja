@@ -8,6 +8,7 @@ import { recomputaTotal, parcelasValidas } from "./precos.js";
 import { criaPagamento, consultaPagamento, consultaPagamentoFull } from "./mp.js";
 import { handleAdmin } from "./admin.js";
 import { serveMidia, catalogoPublico, baixaEstoque } from "./catalogo.js";
+import { paginasPublicadas } from "./paginas.js";
 
 // Baixa de estoque que NUNCA derruba a venda: o pagamento já foi confirmado
 // nesse ponto, então uma falha aqui é problema de inventário, não de cobrança.
@@ -75,6 +76,24 @@ export default {
         console.error("catalogo publico", e);
         // A loja tem o catálogo do código como reserva — devolver erro aqui só
         // faz ela continuar mostrando o que já mostrava, sem página quebrada.
+        return json({ ok: false, erro: "servidor" }, 500);
+      }
+    }
+    // Páginas de conteúdo PUBLICADAS (Termos/Trocas/Entrega/Privacidade
+    // editadas no admin). A vitrine escapa tudo ao montar — aqui vai texto cru.
+    if (url.pathname === "/api/paginas") {
+      if (request.method !== "GET") return json({ ok: false, error: "metodo" }, 405);
+      try {
+        const paginas = await paginasPublicadas(env);
+        return new Response(JSON.stringify({ ok: true, paginas }), {
+          headers: {
+            "content-type": "application/json; charset=utf-8",
+            "cache-control": "public, max-age=30", // mesmo prazo do catálogo
+          },
+        });
+      } catch (e) {
+        console.error("paginas publicas", e);
+        // sem resposta, a vitrine fica no texto do código — nada quebra
         return json({ ok: false, erro: "servidor" }, 500);
       }
     }
@@ -232,7 +251,13 @@ async function handlePagar(request, env) {
     // minúsculo SEMPRE: "Ana@Gmail.com" e "ana@gmail.com" são a mesma pessoa —
     // sem isso, o agregado de Clientes do admin contaria duas
     const email = str(body.email).toLowerCase();
-    const whats = str(body.whats);
+    // WhatsApp: opcional, mas se veio tem de ser telefone de verdade (o campo
+    // aceitava qualquer coisa — ela mesma digitou errado e passou). Guardamos
+    // só os dígitos: é o formato que o wa.me e a busca entendem.
+    const whats = str(body.whats).replace(/\D/g, "");
+    if (str(body.whats) && (whats.length < 10 || whats.length > 13 || whats.startsWith("0"))) {
+      return json({ ok: false, erro: "whats" }, 400);
+    }
     const cpf = str(body.cpf).replace(/\D/g, "");
     const endereco = body.endereco || null;
     // frete recomputado no servidor (em recomputaTotal) a partir do CEP do

@@ -39,7 +39,11 @@ export function tamDaVariante(combinacao) {
 // Regras que valem pra loja inteira e não pertencem a nenhum produto.
 // O PADRÃO é o comportamento que a loja JÁ TINHA (limiar 8) — mudar o padrão
 // aqui mudaria a vitrine de todo mundo sem ninguém pedir.
-const CONFIG_PADRAO = { limiar_ultimas_unidades: 8 };
+const CONFIG_PADRAO = {
+  limiar_ultimas_unidades: 8,
+  // barra de anúncio da vitrine (F2): desligada até ela ligar no admin
+  aviso: { ligado: false, texto: "", link: "" },
+};
 
 export async function leConfig(env) {
   const linha = await env.DB.prepare("SELECT data FROM cat_config WHERE id = 'loja'").first();
@@ -53,10 +57,20 @@ export async function salvaConfig(env, body) {
   // Limiar de "Últimas unidades": inteiro de 1 a 99. Zero não faz sentido (o
   // selo de 0 é "Esgotado", não "Últimas unidades").
   const limiar = Math.round(Number(b.limiar_ultimas_unidades));
+  // Barra de anúncio: texto curto, link só https ou caminho do próprio site
+  // (nada de javascript: — a vitrine também escapa, mas a porta fecha AQUI).
+  let aviso = atual.aviso || CONFIG_PADRAO.aviso;
+  if (b.aviso && typeof b.aviso === "object") {
+    const texto = String(b.aviso.texto == null ? "" : b.aviso.texto).trim().slice(0, 140);
+    let link = String(b.aviso.link == null ? "" : b.aviso.link).trim().slice(0, 300);
+    if (link && !/^https:\/\//i.test(link) && !link.startsWith("/")) link = "";
+    aviso = { ligado: b.aviso.ligado === true && texto.length > 0, texto, link };
+  }
   const nova = {
     ...atual,
     limiar_ultimas_unidades:
       Number.isFinite(limiar) && limiar >= 1 && limiar <= 99 ? limiar : atual.limiar_ultimas_unidades,
+    aviso,
   };
   await env.DB.prepare(
     "INSERT INTO cat_config (id, data, atualizado_em) VALUES ('loja', ?, ?) " +
@@ -172,7 +186,7 @@ export async function catalogoPublico(env) {
   ).all()).results || [];
   // A config vai junto mesmo sem produtos: é ela que diz à vitrine a partir de
   // quantas peças o selo vira "Últimas unidades".
-  if (!prods.length) return { produtos: [], config: { limiarUltimas: config.limiar_ultimas_unidades } };
+  if (!prods.length) return { produtos: [], config: { limiarUltimas: config.limiar_ultimas_unidades, aviso: config.aviso } };
 
   const ids = prods.map((p) => p.id);
   const marcas = ids.map(() => "?").join(",");
@@ -199,7 +213,7 @@ export async function catalogoPublico(env) {
   const cPorProd = porProduto(cats);
 
   return {
-    config: { limiarUltimas: config.limiar_ultimas_unidades },
+    config: { limiarUltimas: config.limiar_ultimas_unidades, aviso: config.aviso },
     slugsAntigos: antigos.reduce((m, a) => ((m[a.slug] = a.produto_id), m), {}),
     produtos: prods.map((p) => {
       const links = jparse(p.video_links, {});

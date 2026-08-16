@@ -1201,3 +1201,30 @@ a.apasso:hover { border-color: var(--line-strong); }
 /* nota de corte das listas + anexo sem link */
 .acorte { margin-top: var(--space-4); text-align: center; }
 .aanexo-off { color: var(--text-muted); border-style: dashed; }
+
+/* ── Site (F2): editor de páginas + página inicial ────────────────────────── */
+.apag-corpo {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 320px;
+  resize: vertical;
+  font-family: var(--sans);
+  font-size: .92rem;
+  line-height: 1.6;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  padding: var(--space-4);
+}
+.apag-corpo:focus-visible { outline: 2px solid var(--text); outline-offset: 1px; }
+.apag-acoes { display: flex; gap: var(--space-3); flex-wrap: wrap; margin-top: var(--space-5); }
+.apag-toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+  cursor: pointer;
+  font-size: .92rem;
+}
+.acli-end { font-size: .9rem; color: var(--text); margin: 0 0 var(--space-2); }

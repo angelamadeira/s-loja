@@ -62,16 +62,77 @@ export async function salvaEstoque(env, id, estoque, de) {
 export async function listaClientes(env) {
   // LOWER: compras antigas guardaram o e-mail como o cliente digitou —
   // "Ana@..." e "ana@..." são a mesma pessoa (as novas já entram minúsculas)
+  // `chave` = uuid da compra mais recente do cliente: é como o detalhe é
+  // aberto SEM pôr o e-mail na URL (regra do projeto: PII fora de URL/log).
   const { results } = await env.DB.prepare(
-    "SELECT LOWER(contato_email) AS contato_email, COUNT(*) AS n_pedidos, SUM(total) AS total_gasto, MAX(criado_em) AS ultima " +
+    "SELECT LOWER(contato_email) AS contato_email, COUNT(*) AS n_pedidos, SUM(total) AS total_gasto, MAX(criado_em) AS ultima, " +
+      "(SELECT id FROM compras x WHERE LOWER(x.contato_email) = LOWER(compras.contato_email) ORDER BY x.criado_em DESC LIMIT 1) AS chave " +
       "FROM compras WHERE status = 'aprovado' GROUP BY LOWER(contato_email) ORDER BY ultima DESC LIMIT 500"
   ).all();
   return (results || []).map((r) => ({
     contato_email: r.contato_email,
+    chave: r.chave,
     n_pedidos: Number(r.n_pedidos) || 0,
     total_gasto: Number(r.total_gasto) || 0,
     ultima: r.ultima,
   }));
+}
+
+// Detalhe de UM cliente (por e-mail): todas as infos + histórico de compras.
+// É PII completa — só existe nesta rota, atrás da sessão (como o detalhe do
+// pedido). A lista de Clientes segue mínima; aqui é onde o dado mora.
+export async function pegaCliente(env, chave) {
+  // a chave é o UUID de UMA compra do cliente — o e-mail sai do banco, nunca
+  // da URL (PII fora de URL/log)
+  const c = await env.DB.prepare("SELECT contato_email FROM compras WHERE id = ?").bind(String(chave || "")).first();
+  if (!c) return null;
+  const e = String(c.contato_email || "").trim().toLowerCase();
+  if (!e) return null;
+  const { results } = await env.DB.prepare(
+    "SELECT id, ref, criado_em, total, status, metodo, parcelas, contato_whats, cpf, endereco, itens " +
+      "FROM compras WHERE LOWER(contato_email) = ? ORDER BY criado_em DESC LIMIT 200"
+  ).bind(e).all();
+  const rows = results || [];
+  if (!rows.length) return null;
+
+  // contato mais recente que exista (whats/cpf podem faltar em alguns pedidos)
+  let whats = null, cpf = null;
+  const enderecos = [];
+  const vistos = new Set();
+  for (const r of rows) {
+    if (!whats && r.contato_whats) whats = r.contato_whats;
+    if (!cpf && r.cpf) cpf = r.cpf;
+    if (r.endereco) {
+      const chave = r.endereco;
+      if (!vistos.has(chave)) {
+        vistos.add(chave);
+        try { enderecos.push(JSON.parse(r.endereco)); } catch (_) { /* ignora endereço corrompido */ }
+      }
+    }
+  }
+  const aprovadas = rows.filter((r) => r.status === "aprovado");
+  const totalGasto = aprovadas.reduce((s, r) => s + (Number(r.total) || 0), 0);
+
+  return {
+    email: e,
+    whats,
+    cpf,
+    enderecos,
+    n_pedidos: aprovadas.length,
+    total_gasto: totalGasto,
+    primeira: rows.length ? rows[rows.length - 1].criado_em : null,
+    ultima: rows.length ? rows[0].criado_em : null,
+    pedidos: rows.map((r) => ({
+      id: r.id,
+      ref: r.ref,
+      criado_em: r.criado_em,
+      total: r.total,
+      status: r.status,
+      metodo: r.metodo,
+      parcelas: r.parcelas,
+      qtd_itens: (() => { try { return JSON.parse(r.itens || "[]").length; } catch (_) { return 0; } })(),
+    })),
+  };
 }
 
 // ── RELATÓRIOS — números do NOSSO banco (visitas virão da Cloudflare depois) ─

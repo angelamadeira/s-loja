@@ -136,7 +136,7 @@
         if (!cls.length) { lista.appendChild(vazio("A primeira venda aprovada cria o primeiro cliente.")); return; }
         cls.forEach(function (c) {
           var a = el("a", "aitem avenda");
-          a.href = "/admin/pedidos?filtro=aprovado";
+          a.href = "/admin/cliente?c=" + encodeURIComponent(c.chave); // uuid, não o e-mail (PII fora de URL)
           var esq = el("div");
           esq.appendChild(el("div", "aitem-nome", c.contato_email));
           var meta = el("div", "aitem-meta");
@@ -152,6 +152,80 @@
         notaCorte(cont, cls.length, 500);
       })
       .catch(function () { falha(cont); });
+  }
+
+  // ── CLIENTE — detalhe (todas as infos + histórico) ────────────────────────
+  function telaCliente(cont) {
+    var chave = qs("c");
+    cont.textContent = "";
+    if (!chave) { location.href = "/admin/clientes"; return; }
+    fetch("/api/admin/cliente?c=" + encodeURIComponent(chave))
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        if (!d || !d.ok) { cont.appendChild(vazio("Cliente não encontrado.")); return; }
+        var c = d.cliente;
+        var head = el("div", "apage-head");
+        var box = el("div");
+        var volta = el("a", "apage-sub-link", "← Clientes"); volta.href = "/admin/clientes";
+        box.appendChild(volta);
+        box.appendChild(el("h1", null, c.email));
+        box.appendChild(el("p", "apage-sub",
+          (c.n_pedidos === 1 ? "1 compra" : c.n_pedidos + " compras") + " · " + reais(c.total_gasto) + " no total"));
+        head.appendChild(box);
+        cont.appendChild(head);
+
+        // contato — PII completa (pedido dela: telefone etc. no cliente)
+        var con = el("div", "asec");
+        con.appendChild(el("div", "asec-title", "Contato"));
+        con.appendChild(dado("E-mail", c.email));
+        con.appendChild(dado("WhatsApp", c.whats));
+        con.appendChild(dado("CPF", c.cpf));
+        con.appendChild(dado("Cliente desde", dataBr(c.primeira)));
+        cont.appendChild(con);
+
+        if (c.enderecos && c.enderecos.length) {
+          var end = el("div", "asec");
+          end.appendChild(el("div", "asec-title", c.enderecos.length === 1 ? "Endereço" : "Endereços"));
+          c.enderecos.forEach(function (e) {
+            var linha = [e.logradouro || e.rua, e.numero, e.complemento, e.bairro, e.cidade, e.uf, e.cep]
+              .filter(Boolean).join(", ");
+            end.appendChild(el("p", "acli-end", linha || "—"));
+          });
+          cont.appendChild(end);
+        }
+
+        // histórico — cada pedido clicável
+        var hist = el("div", "asec");
+        hist.appendChild(el("div", "asec-title", "Pedidos"));
+        var lista = el("div", "alista");
+        c.pedidos.forEach(function (p) {
+          var a = el("a", "aitem avenda");
+          a.href = "/admin/pedido?id=" + encodeURIComponent(p.id);
+          var esq = el("div");
+          esq.appendChild(el("div", "aitem-nome", p.ref));
+          var meta = el("div", "aitem-meta");
+          meta.appendChild(el("span", null, dataBr(p.criado_em)));
+          meta.appendChild(el("span", null, p.qtd_itens === 1 ? "1 item" : p.qtd_itens + " itens"));
+          esq.appendChild(meta);
+          var dir = el("div", "aitem-side");
+          dir.appendChild(el("b", null, reais(p.total)));
+          var st = ST_CLI[p.status] || [p.status, "neutro"];
+          dir.appendChild(el("span", "abadge abadge-" + st[1], st[0]));
+          a.appendChild(esq);
+          a.appendChild(dir);
+          lista.appendChild(a);
+        });
+        hist.appendChild(lista);
+        cont.appendChild(hist);
+      })
+      .catch(function () { falha(cont); });
+  }
+  var ST_CLI = { aprovado: ["Pago", "ok"], pendente: ["Aguardando", "espera"], recusado: ["Recusado", "ruim"], cancelado: ["Cancelado", "neutro"], iniciado: ["Iniciado", "neutro"] };
+  function dado(rotulo, valor) {
+    var d = el("div", "adado");
+    d.appendChild(el("span", "adado-r", rotulo));
+    d.appendChild(el("span", "adado-v", valor == null || valor === "" ? "—" : String(valor)));
+    return d;
   }
 
   // ── RELATÓRIOS ────────────────────────────────────────────────────────────
@@ -263,6 +337,7 @@
   var alvo;
   if ((alvo = document.getElementById("estoque"))) telaEstoque(alvo);
   else if ((alvo = document.getElementById("clientes"))) telaClientes(alvo);
+  else if ((alvo = document.getElementById("cliente"))) telaCliente(alvo);
   else if ((alvo = document.getElementById("relatorios"))) telaRelatorios(alvo);
   else if ((alvo = document.getElementById("midia"))) telaMidia(alvo);
 })();

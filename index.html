@@ -983,7 +983,34 @@
       +'<p class="atfaq">Prefere se virar sozinha? Dúvidas comuns (tamanhos, entrega, trocas, cuidados) têm resposta na hora no nosso <a href="/faq">FAQ</a>.</p>'
       +'</div>';
   }
+  /* Páginas editadas no admin (F2). PAGINAS chega de /api/paginas; enquanto
+     não chega (ou a página não foi publicada), vale o texto do código.
+     SEGURANÇA: o corpo é TEXTO — esc() escapa TUDO antes das convenções
+     (### título, - lista, **negrito**, autolink). Nada do banco vira HTML cru. */
+  var PAGINAS=null;
+  function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+  function inlineFmt(t){
+    var e=esc(t);
+    e=e.replace(/\*\*([^*]+)\*\*/g,'<b>$1</b>');
+    e=e.replace(/\bhttps:\/\/[^\s<]+/g,function(u){return '<a href="'+u+'" target="_blank" rel="noopener">'+u+'</a>';});
+    e=e.replace(/([a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,})/gi,function(m){return '<a href="mailto:'+m+'">'+m+'</a>';});
+    return e;
+  }
+  function corpoHtml(txt){
+    var out=[],lista=null;
+    function fecha(){if(lista){out.push('<ul>'+lista.join('')+'</ul>');lista=null;}}
+    String(txt||'').split(/\r?\n/).forEach(function(ln){
+      var t=ln.trim();
+      if(!t){fecha();return;}
+      if(t.indexOf('### ')===0){fecha();out.push('<h3>'+inlineFmt(t.slice(4))+'</h3>');return;}
+      if(t.indexOf('- ')===0){(lista=lista||[]).push('<li>'+inlineFmt(t.slice(2))+'</li>');return;}
+      fecha();out.push('<p>'+inlineFmt(t)+'</p>');
+    });
+    fecha();return out.join('');
+  }
   function politicaView(slug){
+    var pg=PAGINAS&&PAGINAS[slug];
+    if(pg){return backHome()+'<div class="listing legaldoc"><h1>'+esc(pg.titulo)+'</h1><div class="prose">'+corpoHtml(pg.corpo)+'</div></div>';}
     var p=POLICIES[slug];if(!p)return '';
     return backHome()+'<div class="listing legaldoc"><h1>'+p[1]+'</h1><div class="prose">'+p[2]+'</div></div>';
   }
@@ -1224,6 +1251,13 @@
       coupBtn.onclick=applyCoup;coupIn.onkeydown=function(e){if(e.key==='Enter'){e.preventDefault();applyCoup();}};}
     var cep=document.getElementById('coCep');
     if(cep)cep.oninput=function(){var d=this.value.replace(/\D/g,'').slice(0,8);this.value=d.length>5?d.slice(0,5)+'-'+d.slice(5):d;};
+    /* máscara do WhatsApp: (11) 90000-0000 — e digitar limpa o erro */
+    var wMask=document.getElementById('coWhats');
+    if(wMask)wMask.oninput=function(){
+      var d=this.value.replace(/\D/g,'').slice(0,11);
+      this.value=d.length>6?'('+d.slice(0,2)+') '+d.slice(2,d.length>10?7:6)+'-'+d.slice(d.length>10?7:6):d.length>2?'('+d.slice(0,2)+') '+d.slice(2):d;
+      var er=document.getElementById('coWhatsErr');if(er)er.textContent='';
+    };
     var cepBtn=document.getElementById('cepBtn');
     /* ViaCEP (Fase 4a-UX): preenche rua/bairro/cidade a partir do CEP — o frete
        continua sendo a ESTIMATIVA de shipQuote() (região pelo 1º dígito), ViaCEP
@@ -1298,6 +1332,7 @@
     coRecalc=function(){var _d=(SHIP.cep||'').replace(/\D/g,'');if(_d.length===8)renderShip();renderCoSummary();syncCardBrickAmount();};
     function runCoCep(){
       var hint=document.getElementById('cepHint');
+      var cepAntes=(SHIP.cep||'').replace(/\D/g,'');
       if(!shipQuote(cep.value,cartSplit().subNow)){hint.textContent='Digite um CEP válido (8 dígitos).';hint.className='cephint err';return;}
       saveCep(cep.value);cep.value=SHIP.cep;
       hint.textContent='';hint.className='cephint';
@@ -1305,6 +1340,14 @@
       renderShip();
       renderCoSummary();syncCardBrickAmount();
       viaCepFillAddr(SHIP.cep);
+      /* trocou de CEP => dizer que o frete foi refeito (pedido dela: a troca
+         era silenciosa e parecia que nada tinha acontecido) + piscar as opções */
+      var cepAgora=(SHIP.cep||'').replace(/\D/g,'');
+      if(cepAntes&&cepAntes!==cepAgora){
+        hint.textContent='Frete atualizado para o CEP '+SHIP.cep+'.';hint.className='cephint ok';
+        var so=document.getElementById('shipOpts');
+        if(so){so.classList.remove('shippulse');void so.offsetWidth;so.classList.add('shippulse');}
+      }
     }
     var addrEdit=document.getElementById('coAddrEdit');
     if(addrEdit)addrEdit.onclick=function(){unlockCepAddr();var r=document.getElementById('coRua');if(r)r.focus();};
@@ -1329,7 +1372,11 @@
       /* silent=true: só devolve o booleano, sem mostrar erro/focar (usado por
          reachable() a cada refreshNav pra decidir o que dá pra abrir). */
       function validStep(n,silent){
-        if(n===1){var em=document.getElementById('coEmail');if(!em.value||em.value.indexOf('@')<1){if(!silent){emailErr(emailMsg(em));em.focus();}return false;}if(!silent)emailErr('');CO.email=em.value.trim();return true;}
+        if(n===1){var em=document.getElementById('coEmail');if(!em.value||em.value.indexOf('@')<1){if(!silent){emailErr(emailMsg(em));em.focus();}return false;}if(!silent)emailErr('');
+          var w=document.getElementById('coWhats'),wd=w?w.value.replace(/\D/g,''):'';var wErr=document.getElementById('coWhatsErr');
+          if(wd&&(wd.length<10||wd.length>11||wd.charAt(0)==='0')){if(!silent){if(wErr)wErr.textContent='Confira o número — DDD + celular, ex. (11) 91234-5678.';w.focus();}return false;}
+          if(wErr&&!silent)wErr.textContent='';
+          CO.email=em.value.trim();return true;}
         if(n===2){var sp=cartSplit();
           if(sp.now.length){
             if(!CO.ship){if(!silent){var h=document.getElementById('cepHint');if(h){h.textContent='Calcule o frete para continuar.';h.className='cephint err';}var c=document.getElementById('coCep');if(c)c.focus();}return false;}
@@ -1998,7 +2045,7 @@
       +'<form class="coform coacc" id="coForm" novalidate>'
       +'<section class="costep open" data-step="1" id="cstep1">'+stepHead(1,'Contato')+'<div class="costep-body">'
       +'<label class="cofield"><span>E-mail</span><input type="email" id="coEmail" placeholder="voce@email.com" autocomplete="email" aria-describedby="coEmailErr"><small class="fielderr" id="coEmailErr" data-err></small></label>'
-      +'<label class="cofield"><span>WhatsApp <em class="opt">opcional</em></span><input type="tel" id="coWhats" placeholder="(11) 90000-0000" autocomplete="tel"></label>'
+      +'<label class="cofield"><span>WhatsApp <em class="opt">opcional</em></span><div class="fieldwrap"><input type="tel" id="coWhats" placeholder="(11) 90000-0000" autocomplete="tel" inputmode="numeric" maxlength="15" aria-describedby="coWhatsErr"></div><small class="fielderr" id="coWhatsErr" data-err></small></label>'
       +'<label class="check co-check"><input type="checkbox" id="coNews"> Quero receber avisos de lançamentos e pré-vendas.</label>'
       +'<p class="coguest">Compra como convidado — sem precisar criar conta. Avisamos cada etapa por e-mail; se você deixar o WhatsApp, falamos por lá também.</p>'
       +'<div class="costep-cta"><button type="button" class="btn conext" data-next="1">Continuar</button></div></div></section>'
@@ -2523,10 +2570,44 @@
   /* CATÁLOGO DO BANCO. Desenha primeiro com o preset (instantâneo) e corrige
      quando a resposta chega — assim a página nunca fica em branco esperando a
      rede, e se a rede falhar a loja continua de pé com o que está no código. */
+  /* Barra de anúncio (admin > Página inicial): SUBSTITUI o texto da faixa
+     marrom (.note) que o site já tem — duas faixas empilhadas seria ruído.
+     textContent — nunca HTML. */
+  function montaAvisoBar(av){
+    if(!av||!av.ligado||!av.texto)return;
+    var ehLink=av.link&&(/^https:\/\//i.test(av.link)||String(av.link).charAt(0)==='/');
+    var note=document.querySelector('.note');
+    if(note){
+      note.textContent='';
+      if(ehLink){
+        var a=document.createElement('a');
+        a.className='avisolink';
+        a.href=av.link;
+        a.textContent=av.texto;
+        if(/^https:/i.test(av.link)){a.target='_blank';a.rel='noopener';}
+        note.appendChild(a);
+      }else{
+        note.textContent=av.texto;
+      }
+      return;
+    }
+    /* sem .note (layout futuro?): cria a barra própria em vez de sumir */
+    if(document.querySelector('.avisobar'))return;
+    var bar=document.createElement(ehLink?'a':'div');
+    bar.className='avisobar';
+    bar.textContent=av.texto;
+    if(ehLink){bar.href=av.link;if(/^https:/i.test(av.link)){bar.target='_blank';bar.rel='noopener';}}
+    document.body.insertBefore(bar,document.body.firstChild);
+  }
+  /* Páginas editadas no admin — se a pessoa já está numa delas, repinta. */
+  fetch('/api/paginas').then(function(r){return r.json();}).then(function(d){
+    if(d&&d.ok&&d.paginas){PAGINAS=d.paginas;if(/^\/(termos|trocas|entrega|privacidade)$/.test(location.pathname))render();}
+  }).catch(function(){});
   fetch('/api/catalogo').then(function(r){return r.json();}).then(function(d){
     catalogoPronto=true;
     if(!d||!d.ok){router();render();return;} /* destrava um endereço em espera */
     if(d.config&&d.config.limiarUltimas)LIMIAR_ULTIMAS=d.config.limiarUltimas;
+    if(d.config&&d.config.aviso)montaAvisoBar(d.config.aviso);
     if(d.slugsAntigos)SLUGS_ANTIGOS=d.slugsAntigos;
     if(d.produtos&&aplicaCatalogo(d.produtos)){
       /* A sacola guarda o PRODUTO por referência e o preço da hora em que o item
